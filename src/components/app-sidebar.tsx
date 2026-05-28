@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   BarChart3,
   SlidersHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import {
   Sidebar,
