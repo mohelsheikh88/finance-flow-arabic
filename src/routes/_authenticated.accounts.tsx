@@ -330,13 +330,18 @@ function AccountsPage() {
             </div>
             <div>
               <Label>{t("accounts.type")} *</Label>
-              <Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v as AccType })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select value={form.account_type_id} onValueChange={(v) => setForm({ ...form, account_type_id: v })}>
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
-                  {TYPES.map((typ) => <SelectItem key={typ} value={typ}>{t(`accounts.${typ}`)}</SelectItem>)}
+                  {(accountTypes as any[]).filter((tp) => tp.is_active).map((tp: any) => (
+                    <SelectItem key={tp.id} value={tp.id}>
+                      {tp.code} — {localized(tp, "name")} ({t(`accounts.${tp.classification}`)})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div>
               <Label>{t("common.nameAr")} *</Label>
               <Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} maxLength={255} />
