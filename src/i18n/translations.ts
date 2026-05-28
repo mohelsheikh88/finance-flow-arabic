@@ -325,6 +325,15 @@ export const translations = {
       payable: "مستحق السداد للهيئة",
       refundable: "مستحق الاسترداد",
     },
+    fiscalPositions: {
+      title: "المواقع الضريبية",
+      subtitle: "تنظيم أوضاع الضريبة للسعودي وغير السعودي وفقاً لإشتراطات الزكاة",
+      isSaudi: "سعودي",
+      nonSaudi: "غير سعودي",
+      vatApplicable: "القيمة المضافة",
+      zakatApplicable: "الزكاة",
+      incomeTaxApplicable: "ضريبة الدخل",
+    },
     customers: {
       title: "العملاء",
       totalReceivable: "إجمالي المستحقات",
