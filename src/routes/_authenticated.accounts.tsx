@@ -84,7 +84,7 @@ const empty: FormState = {
 };
 
 
-function AccountsPage() {
+function ChartOfAccountsPanel() {
   const { t } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
