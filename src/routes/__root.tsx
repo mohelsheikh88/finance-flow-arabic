@@ -95,40 +95,8 @@ function AuthSync() {
   return null;
 }
 
-function RealtimeSync() {
-  const queryClient = useQueryClient();
-  useEffect(() => {
-    const channel = supabase
-      .channel("global-db-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public" },
-        (payload) => {
-          const table = payload.table;
-          const event = payload.eventType; // INSERT | UPDATE | DELETE
-          if (!table) return;
-
-          // Invalidate only queries scoped to this table (any sub-key)
-          queryClient.invalidateQueries({ queryKey: [table] });
-
-          // Event-specific channel (e.g. ["invoices", "INSERT"]) for queries
-          // that subscribe narrowly to one operation type.
-          queryClient.invalidateQueries({ queryKey: [table, event] });
-
-          // For UPDATE/DELETE, also invalidate the specific record key
-          // ["<table>", "<id>"] if present in the payload.
-          const rec: any = (payload as any).new ?? (payload as any).old;
-          const recordId = rec?.id;
-          if (recordId && (event === "UPDATE" || event === "DELETE")) {
-            queryClient.invalidateQueries({ queryKey: [table, recordId] });
-          }
-        }
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [queryClient]);
-  return null;
-}
+// RealtimeSync replaced by ScopedRealtime — subscribes only to tables
+// the user is allowed to read, scoped to active branch/company.
 
 function ConflictSubscriber() {
   useConflictRealtimeSubscriber();
