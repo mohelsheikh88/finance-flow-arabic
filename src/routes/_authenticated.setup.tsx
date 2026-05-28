@@ -52,7 +52,7 @@ function SetupPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">{t("setup.title")}</h1>
+        <h1 className="page-title">{t("setup.title")}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t("setup.subtitle")}</p>
       </div>
 

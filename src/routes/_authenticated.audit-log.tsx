@@ -80,7 +80,7 @@ function AuditLogPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">سجل التدقيق والمراقبة</h1>
+          <h1 className="page-title">سجل التدقيق والمراقبة</h1>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw className={`h-4 w-4 me-1 ${isFetching ? "animate-spin" : ""}`} /> تحديث

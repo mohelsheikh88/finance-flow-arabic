@@ -93,7 +93,7 @@ function NewJEPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("je.new")}</h1>
+        <h1 className="page-title">{t("je.new")}</h1>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={balanced ? "bg-success/15 text-success border-success/30" : "bg-warning/15 text-warning border-warning/30"}>
             {balanced ? t("je.balanced") : t("je.unbalanced")}

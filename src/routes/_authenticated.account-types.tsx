@@ -249,7 +249,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
             <Button variant="ghost" size="sm" asChild>
               <Link to="/accounts"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.title")}</Link>
             </Button>
-            <h1 className="text-2xl font-bold">{t("accounts.accountTypesTitle")}</h1>
+            <h1 className="page-title">{t("accounts.accountTypesTitle")}</h1>
           </div>
         </div>
       )}

@@ -29,7 +29,7 @@ function JEListPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("je.title")}</h1>
+        <h1 className="page-title">{t("je.title")}</h1>
         <Button asChild><Link to="/journal-entries/new"><Plus className="h-4 w-4 me-1" />{t("je.new")}</Link></Button>
       </div>
       <Card>

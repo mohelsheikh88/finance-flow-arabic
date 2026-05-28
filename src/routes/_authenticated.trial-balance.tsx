@@ -31,7 +31,7 @@ function TBPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("tb.title")}</h1>
+        <h1 className="page-title">{t("tb.title")}</h1>
         <div className="flex items-end gap-2">
           <div><Label className="text-xs">{t("tb.asOf")}</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 w-44" /></div>
         </div>

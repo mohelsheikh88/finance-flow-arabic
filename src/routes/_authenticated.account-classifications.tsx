@@ -277,7 +277,7 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
   if (embedded) return content;
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">{t("accounts.classificationMappingTitle")}</h1>
+      <h1 className="page-title">{t("accounts.classificationMappingTitle")}</h1>
       {content}
     </div>
   );
