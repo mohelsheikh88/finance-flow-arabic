@@ -44,6 +44,7 @@ function AccountsPage() {
           <TabsTrigger value="coa">{t("accounts.title")}</TabsTrigger>
           <TabsTrigger value="types">{t("accounts.accountTypesNav")}</TabsTrigger>
           <TabsTrigger value="classifications">{t("accounts.coreClassifications")}</TabsTrigger>
+          <TabsTrigger value="buckets">{t("accounts.accountingBucket")}</TabsTrigger>
           <TabsTrigger value="mapping">{t("accounts.classificationMapping")}</TabsTrigger>
           <TabsTrigger value="cost-centers">{t("nav.costCenters")}</TabsTrigger>
 
@@ -57,6 +58,9 @@ function AccountsPage() {
         <TabsContent value="classifications" className="mt-4">
           <ClassificationsPage embedded />
         </TabsContent>
+        <TabsContent value="buckets" className="mt-4">
+          <AccountingBucketsPanel />
+        </TabsContent>
         <TabsContent value="mapping" className="mt-4">
           <AccountClassificationsPage embedded />
         </TabsContent>
@@ -65,6 +69,7 @@ function AccountsPage() {
         </TabsContent>
 
       </Tabs>
+
     </div>
   );
 }
