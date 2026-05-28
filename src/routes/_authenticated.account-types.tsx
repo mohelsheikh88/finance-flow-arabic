@@ -21,7 +21,7 @@ import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account-types")({
-  component: AccountTypesPage,
+  component: () => <AccountTypesPage />,
 });
 
 const CLASSIFICATIONS = ["asset", "liability", "equity", "income", "expense"] as const;
@@ -72,7 +72,7 @@ function useStatementLabel() {
 }
 
 
-function AccountTypesPage() {
+export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useI18n();
   const localized = useLocalized();
   const statementLabel = useStatementLabel();
@@ -144,40 +144,47 @@ function AccountTypesPage() {
   const canSave = form.code && form.name_ar && form.name_en && form.classification && !!companyId;
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/accounts"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.title")}</Link>
-          </Button>
-          <h1 className="text-2xl font-bold">{t("accounts.accountTypesTitle")}</h1>
+    <div className={embedded ? "space-y-4" : "p-6 space-y-4"}>
+      {!embedded && (
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/accounts"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.title")}</Link>
+            </Button>
+            <h1 className="text-2xl font-bold">{t("accounts.accountTypesTitle")}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/classifications">{t("accounts.manageClassifications")}</Link>
+            </Button>
+            <Button onClick={openNew} disabled={!companyId}>
+              <Plus className="h-4 w-4 me-1" />{t("common.new")}
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link to="/classifications">{t("accounts.manageClassifications")}</Link>
-          </Button>
+      )}
+
+      {embedded && (
+        <div className="flex items-center justify-end">
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
           </Button>
         </div>
-      </div>
-
-
-
+      )}
 
       <Card>
         <table className="w-full text-xs">
           <thead className="bg-muted/50">
             <tr>
+              <th className="text-start p-3 font-medium">{t("common.code")}</th>
+              <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.classification")}</th>
-
-              <th className="text-start p-3 font-medium">البيان</th>
-              <th className="text-start p-3 font-medium">التصنيف الأساسي</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
+
           <tbody>
             {(types as any[]).map((r) => (
               <tr key={r.id} className="border-t hover:bg-muted/30">

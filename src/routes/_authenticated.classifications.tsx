@@ -25,7 +25,7 @@ import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classifications")({
-  component: ClassificationsPage,
+  component: () => <ClassificationsPage />,
 });
 
 const BUCKETS = ["asset", "liability", "equity", "income", "expense"] as const;
@@ -73,7 +73,7 @@ function useLabels() {
 }
 
 
-function ClassificationsPage() {
+export function ClassificationsPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useI18n();
   const localized = useLocalized();
   const { statement: statementLabel, normalBalance: normalBalanceLabel } = useLabels();
@@ -149,34 +149,43 @@ function ClassificationsPage() {
   const canSave = form.code && form.name_ar && form.name_en && !!companyId;
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.backToAccountTypes")}</Link>
+    <div className={embedded ? "space-y-4" : "p-6 space-y-4"}>
+      {!embedded && (
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.backToAccountTypes")}</Link>
+            </Button>
+            <h1 className="text-2xl font-bold">{t("accounts.classificationsTitle")}</h1>
+          </div>
+          <Button onClick={openNew} disabled={!companyId}>
+            <Plus className="h-4 w-4 me-1" />{t("common.new")}
           </Button>
-          <h1 className="text-2xl font-bold">{t("accounts.classificationsTitle")}</h1>
-
         </div>
-        <Button onClick={openNew} disabled={!companyId}>
-          <Plus className="h-4 w-4 me-1" />{t("common.new")}
-        </Button>
-      </div>
+      )}
+
+      {embedded && (
+        <div className="flex items-center justify-end">
+          <Button onClick={openNew} disabled={!companyId}>
+            <Plus className="h-4 w-4 me-1" />{t("common.new")}
+          </Button>
+        </div>
+      )}
 
       <Card>
         <table className="w-full text-xs">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
+              <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
-
-              <th className="text-start p-3 font-medium">المجموعة المحاسبية</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
+
           <tbody>
             {(rows as any[]).map((r) => (
               <tr key={r.id} className="border-t hover:bg-muted/30">

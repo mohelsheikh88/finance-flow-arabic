@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -15,17 +15,46 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Download, Upload, Settings2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { AccountTypesPage } from "./_authenticated.account-types";
+import { ClassificationsPage } from "./_authenticated.classifications";
 
 export const Route = createFileRoute("/_authenticated/accounts")({
   component: AccountsPage,
 });
+
+function AccountsPage() {
+  const { t } = useI18n();
+  return (
+    <div className="p-6 space-y-4">
+      <h1 className="text-2xl font-bold">{t("accounts.title")}</h1>
+      <Tabs defaultValue="coa" className="w-full">
+        <TabsList>
+          <TabsTrigger value="coa">{t("accounts.title")}</TabsTrigger>
+          <TabsTrigger value="types">{t("accounts.accountTypesNav")}</TabsTrigger>
+          <TabsTrigger value="classifications">{t("accounts.coreClassifications")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="coa" className="mt-4">
+          <ChartOfAccountsPanel />
+        </TabsContent>
+        <TabsContent value="types" className="mt-4">
+          <AccountTypesPage embedded />
+        </TabsContent>
+        <TabsContent value="classifications" className="mt-4">
+          <ClassificationsPage embedded />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
 
 type FormState = {
   id?: string;
@@ -55,7 +84,7 @@ const empty: FormState = {
 };
 
 
-function AccountsPage() {
+function ChartOfAccountsPanel() {
   const { t } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
@@ -233,24 +262,18 @@ function AccountsPage() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">{t("accounts.title")}</h1>
-        <div className="flex items-center gap-2">
-          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
-          <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-            <Download className="h-4 w-4 me-1" />Export
-          </Button>
-          <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
-            <Upload className="h-4 w-4 me-1" />Import
-          </Button>
-          <Button variant="outline" asChild disabled={!companyId}>
-            <Link to="/account-types"><Settings2 className="h-4 w-4 me-1" />{t("accounts.manageTypes") ?? "إدارة الأنواع"}</Link>
-          </Button>
-          <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
-            <Plus className="h-4 w-4 me-1" />{t("common.new")}
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-end gap-2">
+        <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+        <Button variant="outline" onClick={handleExport} disabled={!companyId}>
+          <Download className="h-4 w-4 me-1" />Export
+        </Button>
+        <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
+          <Upload className="h-4 w-4 me-1" />Import
+        </Button>
+        <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
+          <Plus className="h-4 w-4 me-1" />{t("common.new")}
+        </Button>
       </div>
 
 
