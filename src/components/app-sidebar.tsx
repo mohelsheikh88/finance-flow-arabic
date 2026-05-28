@@ -24,6 +24,10 @@ import {
   BarChart3,
   SlidersHorizontal,
   ChevronDown,
+  ChevronDown,
+  Pin,
+  PinOff,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -35,15 +39,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
 import { BrandLogo, BrandMark } from "@/components/brand-logo";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
 
+type AppSidebarProps = {
+  pinned?: boolean;
+  onTogglePin?: () => void;
+};
 
-
-export function AppSidebar() {
+export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {}) {
+  const { t, locale } = useI18n();
+  const { signOut } = useAuth();
+  const { state } = useSidebar();
   const { t, locale } = useI18n();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
