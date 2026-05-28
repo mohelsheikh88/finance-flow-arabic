@@ -229,6 +229,20 @@ function AccountsPage() {
         </div>
       </div>
 
+      {importResult && (
+        <Card className="p-3 text-xs flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <span>Created: <b className="text-success">{importResult.created}</b></span>
+            <span>Updated: <b className="text-info">{importResult.updated}</b></span>
+            <span>Errors: <b className={importResult.errors.length ? "text-destructive" : ""}>{importResult.errors.length}</b></span>
+            {importResult.errors.slice(0, 3).map((e, i) => (
+              <span key={i} className="text-destructive">[{e.code}] {e.error}</span>
+            ))}
+            {importResult.errors.length > 3 && <span className="text-muted-foreground">+{importResult.errors.length - 3}…</span>}
+          </div>
+          <Button size="sm" variant="ghost" onClick={() => setImportResult(null)}>×</Button>
+        </Card>
+      )}
 
       <Card>
         <table className="w-full text-xs">
