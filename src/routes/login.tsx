@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { BrandMark } from "@/components/brand-logo";
+
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
