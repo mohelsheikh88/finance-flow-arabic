@@ -172,8 +172,8 @@ function AssetsPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => postDepMut.mutate()} disabled={postDepMut.isPending || !companyId}>
-            <PlayCircle className="h-4 w-4 me-1" />{t("assets.postDueDep") ?? "Post Due Depreciation"}
             <PlayCircle className="h-4 w-4 me-1" />{t("assets.postDueDep")}
+          </Button>
 
 
           <Dialog open={catOpen} onOpenChange={setCatOpen}>
