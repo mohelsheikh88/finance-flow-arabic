@@ -64,12 +64,14 @@ const bucketColors: Record<string, string> = {
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
-function statementLabel(s: Statement) {
-  return s === "balance_sheet" ? "الميزانية العمومية" : "قائمة الدخل";
+function useLabels() {
+  const { t } = useI18n();
+  return {
+    statement: (s: Statement) => s === "balance_sheet" ? t("accounts.balanceSheet") : t("accounts.incomeStatement"),
+    normalBalance: (n: NormalBalance) => n === "debit" ? t("accounts.debit") : t("accounts.credit"),
+  };
 }
-function normalBalanceLabel(n: NormalBalance) {
-  return n === "debit" ? "مدين" : "دائن";
-}
+
 
 function ClassificationsPage() {
   const { t } = useI18n();
