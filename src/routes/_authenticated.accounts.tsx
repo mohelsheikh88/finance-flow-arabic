@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -21,7 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Download, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Download, Upload, ChevronDown, ChevronRight, FolderTree, FileText } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { AccountTypesPage } from "./_authenticated.account-types";
@@ -401,67 +401,16 @@ function ChartOfAccountsPanel() {
         </div>
       </div>
 
-      <Card>
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">{t("common.name")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.type")}</th>
-              <th className="text-center p-3 font-medium">{t("accounts.isGroup")}</th>
-              <th className="text-center p-3 font-medium">{t("common.status")}</th>
-              <th className="text-end p-3 font-medium">{t("common.actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(filteredAccounts as any[]).map((a) => {
-              const depth = (a.code.match(/^\d+/)?.[0]?.length ?? 1) - 1;
-              return (
-                <tr key={a.id} className="border-t hover:bg-muted/30">
-                  <td className="p-3 font-mono" style={{ paddingInlineStart: `${12 + depth * 16}px` }}>{a.code}</td>
-                  <td className="p-3 font-medium">{localized(a, "name")}</td>
-                  <td className="p-3 text-muted-foreground text-xs">
-                    {(() => {
-                      const at = typeById.get(a.account_type_id);
-                      const cls = at?.classification ?? a.account_type;
-                      return t(`accounts.${statementOf(cls)}`);
-                    })()}
-                  </td>
-                  <td className="p-3">
-                    {(() => {
-                      const at = typeById.get(a.account_type_id);
-                      const cls = at?.classification ?? a.account_type;
-                      return (
-                        <Badge variant="outline" className={typeColors[cls]}>
-                          {at ? localized(at, "name") : t(`accounts.${cls}`)}
-                        </Badge>
-                      );
-                    })()}
-                  </td>
+      <ChartOfAccountsTree
+        accounts={filteredAccounts as any[]}
+        accountTypes={accountTypes as any[]}
+        classifications={classifications as any[]}
+        typeColors={typeColors}
+        statementOf={statementOf}
+        onEdit={openEdit}
+        onDelete={setToDelete}
+      />
 
-                  <td className="p-3 text-center">{a.is_group ? "✓" : ""}</td>
-                  <td className="p-3 text-center">{a.is_active ? t("common.active") : t("common.inactive")}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-1 justify-end">
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(a)} aria-label={t("common.edit")}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setToDelete(a)} aria-label={t("common.delete")}
-                        className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {filteredAccounts.length === 0 && (
-              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
@@ -556,6 +505,373 @@ function ChartOfAccountsPanel() {
     </div>
   );
 }
+
+type TreeNode = {
+  id: string;
+  kind: "bucket" | "classification" | "account_type" | "account";
+  code: string;
+  name: string;
+  depth: number;
+  data?: any;
+  children: TreeNode[];
+};
+
+function ChartOfAccountsTree({
+  accounts,
+  accountTypes,
+  classifications,
+  typeColors,
+  statementOf,
+  onEdit,
+  onDelete,
+}: {
+  accounts: any[];
+  accountTypes: any[];
+  classifications: any[];
+  typeColors: Record<string, string>;
+  statementOf: (cls: string) => string;
+  onEdit: (a: any) => void;
+  onDelete: (a: any) => void;
+}) {
+  const { t } = useI18n();
+  const localized = useLocalized();
+
+  const tree = useMemo<TreeNode[]>(() => {
+    const accountsByType = new Map<string, any[]>();
+    accounts.forEach((a) => {
+      if (!a.account_type_id) return;
+      if (!accountsByType.has(a.account_type_id)) accountsByType.set(a.account_type_id, []);
+      accountsByType.get(a.account_type_id)!.push(a);
+    });
+
+    const buildAccountSubtree = (typeAccs: any[]): TreeNode[] => {
+      const nodes = new Map<string, TreeNode>();
+      typeAccs.forEach((a) =>
+        nodes.set(a.id, {
+          id: `acc:${a.id}`,
+          kind: "account",
+          code: a.code,
+          name: localized(a, "name"),
+          depth: 0,
+          data: a,
+          children: [],
+        }),
+      );
+      const roots: TreeNode[] = [];
+      typeAccs.forEach((a) => {
+        const n = nodes.get(a.id)!;
+        if (a.parent_id && nodes.has(a.parent_id)) {
+          nodes.get(a.parent_id)!.children.push(n);
+        } else {
+          roots.push(n);
+        }
+      });
+      const sortRec = (arr: TreeNode[]) => {
+        arr.sort((x, y) => String(x.code).localeCompare(String(y.code)));
+        arr.forEach((c) => sortRec(c.children));
+      };
+      sortRec(roots);
+      return roots;
+    };
+
+    const usedTypeIds = new Set(accounts.map((a) => a.account_type_id).filter(Boolean));
+    const typesUsed = accountTypes.filter((tp) => usedTypeIds.has(tp.id));
+
+    const typesByCls = new Map<string, any[]>();
+    typesUsed.forEach((tp) => {
+      const cid = tp.classification_id ?? "__none";
+      if (!typesByCls.has(cid)) typesByCls.set(cid, []);
+      typesByCls.get(cid)!.push(tp);
+    });
+
+    const usedClsIds = new Set(typesUsed.map((tp) => tp.classification_id).filter(Boolean));
+    const clsUsed = classifications.filter((c) => usedClsIds.has(c.id));
+    const clsByBucket = new Map<string, any[]>();
+    clsUsed.forEach((c) => {
+      if (!clsByBucket.has(c.bucket)) clsByBucket.set(c.bucket, []);
+      clsByBucket.get(c.bucket)!.push(c);
+    });
+
+    const sortByOrder = (a: any, b: any) =>
+      (a.sort_order ?? 0) - (b.sort_order ?? 0) || String(a.code).localeCompare(String(b.code));
+
+    const BUCKET_ORDER = ["asset", "liability", "equity", "income", "expense"] as const;
+    const roots: TreeNode[] = [];
+
+    BUCKET_ORDER.forEach((b) => {
+      const cArr = (clsByBucket.get(b) ?? []).slice().sort(sortByOrder);
+      if (cArr.length === 0) return;
+      const bucketNode: TreeNode = {
+        id: `b:${b}`,
+        kind: "bucket",
+        code: b.toUpperCase(),
+        name: t(`accounts.${b}`),
+        depth: 0,
+        data: { bucket: b },
+        children: [],
+      };
+      cArr.forEach((c) => {
+        const tArr = (typesByCls.get(c.id) ?? []).slice().sort(sortByOrder);
+        if (tArr.length === 0) return;
+        const clsNode: TreeNode = {
+          id: `c:${c.id}`,
+          kind: "classification",
+          code: c.code,
+          name: localized(c, "name"),
+          depth: 1,
+          data: c,
+          children: [],
+        };
+        tArr.forEach((tp) => {
+          const typeAccs = accountsByType.get(tp.id) ?? [];
+          if (typeAccs.length === 0) return;
+          const typeNode: TreeNode = {
+            id: `t:${tp.id}`,
+            kind: "account_type",
+            code: tp.code,
+            name: localized(tp, "name"),
+            depth: 2,
+            data: tp,
+            children: [],
+          };
+          const accRoots = buildAccountSubtree(typeAccs);
+          const setDepth = (n: TreeNode, d: number) => {
+            n.depth = d;
+            n.children.forEach((cc) => setDepth(cc, d + 1));
+          };
+          accRoots.forEach((r) => setDepth(r, 3));
+          typeNode.children = accRoots;
+          clsNode.children.push(typeNode);
+        });
+        if (clsNode.children.length) bucketNode.children.push(clsNode);
+      });
+      if (bucketNode.children.length) roots.push(bucketNode);
+    });
+
+    return roots;
+  }, [accounts, accountTypes, classifications, localized, t]);
+
+  const allExpandableIds = useMemo(() => {
+    const ids: string[] = [];
+    const walk = (n: TreeNode) => {
+      if (n.children.length) {
+        ids.push(n.id);
+        n.children.forEach(walk);
+      }
+    };
+    tree.forEach(walk);
+    return ids;
+  }, [tree]);
+
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const didInit = useRef(false);
+  useEffect(() => {
+    if (!didInit.current && allExpandableIds.length > 0) {
+      setExpanded(new Set(allExpandableIds));
+      didInit.current = true;
+    }
+  }, [allExpandableIds]);
+
+  const toggle = (id: string) =>
+    setExpanded((s) => {
+      const next = new Set(s);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  const expandAll = () => setExpanded(new Set(allExpandableIds));
+  const collapseAll = () => setExpanded(new Set());
+
+  const visible = useMemo(() => {
+    const out: TreeNode[] = [];
+    const walk = (n: TreeNode) => {
+      out.push(n);
+      if (expanded.has(n.id)) n.children.forEach(walk);
+    };
+    tree.forEach(walk);
+    return out;
+  }, [tree, expanded]);
+
+  const kindBadge = (n: TreeNode) => {
+    if (n.kind === "bucket") return t("accounts.accountingBucket");
+    if (n.kind === "classification") return t("accounts.coreClassification") || "Core Classification";
+    if (n.kind === "account_type") return t("accounts.accountTypesNav");
+    return n.data?.is_group ? (t("common.group") || "Group") : (t("common.leaf") || "Leaf");
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-end gap-2">
+        <Button variant="outline" size="sm" onClick={expandAll}>
+          {t("common.expandAll") || "Expand all"}
+        </Button>
+        <Button variant="outline" size="sm" onClick={collapseAll}>
+          {t("common.collapseAll") || "Collapse all"}
+        </Button>
+      </div>
+      <Card>
+        <table className="w-full text-xs">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="text-start p-3 font-medium">{t("common.code")} / {t("common.name")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.type")}</th>
+              <th className="text-center p-3 font-medium">{t("common.type") || "Type"}</th>
+              <th className="text-center p-3 font-medium">{t("common.status")}</th>
+              <th className="text-end p-3 font-medium">{t("common.actions")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((n) => {
+              const hasChildren = n.children.length > 0;
+              const isOpen = expanded.has(n.id);
+              const isAccount = n.kind === "account";
+              const bucketKey =
+                n.kind === "bucket"
+                  ? (n.data?.bucket as string)
+                  : n.kind === "classification"
+                    ? n.data?.bucket
+                    : n.kind === "account_type"
+                      ? n.data?.classification
+                      : undefined;
+              const rowBg =
+                n.kind === "bucket"
+                  ? "border-t bg-muted/60 hover:bg-muted/70"
+                  : n.kind === "classification"
+                    ? "border-t bg-muted/30 hover:bg-muted/50"
+                    : n.kind === "account_type"
+                      ? "border-t bg-muted/10 hover:bg-muted/30"
+                      : "border-t hover:bg-muted/30";
+              return (
+                <tr key={n.id} className={rowBg}>
+                  <td className="p-3">
+                    <div className="flex items-stretch">
+                      {Array.from({ length: n.depth }).map((_, i) => (
+                        <span
+                          key={i}
+                          className="inline-block w-5 border-s border-dashed border-border/60"
+                          aria-hidden
+                        />
+                      ))}
+                      <div className="flex items-center gap-1 ps-1">
+                        {n.depth > 0 && (
+                          <span
+                            className="inline-block w-3 border-t border-dashed border-border/60 -ms-1"
+                            aria-hidden
+                          />
+                        )}
+                        {hasChildren ? (
+                          <button
+                            onClick={() => toggle(n.id)}
+                            className="p-0.5 hover:bg-muted rounded"
+                          >
+                            {isOpen ? (
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            ) : (
+                              <ChevronRight className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        ) : (
+                          <span className="w-4 inline-block" />
+                        )}
+                        {!isAccount || n.data?.is_group ? (
+                          <FolderTree
+                            className={
+                              n.kind === "bucket"
+                                ? "h-4 w-4 text-primary"
+                                : "h-3.5 w-3.5 text-primary"
+                            }
+                          />
+                        ) : (
+                          <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                        <span
+                          className={
+                            n.kind === "bucket"
+                              ? "font-mono font-bold"
+                              : n.kind === "classification"
+                                ? "font-mono font-semibold"
+                                : "font-mono"
+                          }
+                        >
+                          {n.code}
+                        </span>
+                        <span className="mx-1 text-muted-foreground">—</span>
+                        <span
+                          className={
+                            n.kind === "bucket"
+                              ? "font-bold"
+                              : n.kind === "classification" || n.kind === "account_type"
+                                ? "font-semibold"
+                                : n.data?.is_group
+                                  ? "font-semibold"
+                                  : ""
+                          }
+                        >
+                          {n.name}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-3 text-muted-foreground">
+                    {bucketKey ? t(`accounts.${statementOf(bucketKey)}`) : "—"}
+                  </td>
+                  <td className="p-3">
+                    {bucketKey ? (
+                      <Badge variant="outline" className={typeColors[bucketKey]}>
+                        {t(`accounts.${bucketKey}`)}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="p-3 text-center">
+                    <Badge variant="outline">{kindBadge(n)}</Badge>
+                  </td>
+                  <td className="p-3 text-center">
+                    {isAccount ? (n.data?.is_active ? t("common.active") : t("common.inactive")) : "—"}
+                  </td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-1 justify-end">
+                      {isAccount && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onEdit(n.data)}
+                            aria-label={t("common.edit")}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onDelete(n.data)}
+                            aria-label={t("common.delete")}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {visible.length === 0 && (
+              <tr>
+                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                  {t("common.noData")}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </Card>
+    </>
+  );
+}
+
 
 const BUCKETS = ["asset", "liability", "equity", "income", "expense"] as const;
 const bucketColors: Record<string, string> = {
