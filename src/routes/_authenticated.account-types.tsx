@@ -280,7 +280,16 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   ))}
                 </SelectContent>
               </Select>
+              {form.classification_id && (
+                <div className="mt-1 text-xs text-muted-foreground flex items-center gap-2">
+                  <span>Bucket:</span>
+                  <Badge variant="outline" className={clsColors[form.classification]}>
+                    {t(`accounts.${form.classification}`)}
+                  </Badge>
+                </div>
+              )}
             </div>
+
 
 
             <div>
