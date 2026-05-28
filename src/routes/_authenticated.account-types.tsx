@@ -116,21 +116,62 @@ type Row = {
   notes: string | null;
   sort_order?: number;
 };
-type Node = Row & { depth: number; children: Node[] };
+type ClsRow = {
+  id: string;
+  code: string;
+  name_ar: string;
+  name_en: string;
+  bucket: Cls;
+  is_active: boolean;
+  sort_order?: number;
+};
+type Node = Row & {
+  depth: number;
+  children: Node[];
+  isClassification?: boolean;
+};
 
-function buildTree(rows: Row[]): Node[] {
+// Build a tree where each active Classification becomes a synthetic read-only
+// grand-parent (Node), and account_types attach below by classification_id.
+function buildTree(rows: Row[], classifications: ClsRow[]): Node[] {
   const map = new Map<string, Node>();
   rows.forEach((r) => map.set(r.id, { ...r, depth: 0, children: [] }));
-  const roots: Node[] = [];
+
+  // Synthetic classification roots
+  const clsNodes = new Map<string, Node>();
+  classifications
+    .filter((c) => c.is_active)
+    .forEach((c) => {
+      const n: Node = {
+        id: `cls:${c.id}`,
+        code: c.code,
+        name_ar: c.name_ar,
+        name_en: c.name_en,
+        classification: c.bucket,
+        classification_id: c.id,
+        parent_id: null,
+        is_group: true,
+        is_active: true,
+        notes: null,
+        sort_order: c.sort_order ?? 0,
+        depth: 0,
+        children: [],
+        isClassification: true,
+      };
+      clsNodes.set(c.id, n);
+    });
+
+  const orphanRoots: Node[] = [];
   map.forEach((n) => {
     if (n.parent_id && map.has(n.parent_id)) {
-      const p = map.get(n.parent_id)!;
-      n.depth = p.depth + 1;
-      p.children.push(n);
+      map.get(n.parent_id)!.children.push(n);
+    } else if (n.classification_id && clsNodes.has(n.classification_id)) {
+      clsNodes.get(n.classification_id)!.children.push(n);
     } else {
-      roots.push(n);
+      orphanRoots.push(n);
     }
   });
+
   const cmp = (a: Node, b: Node) =>
     (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code);
   const fixDepth = (n: Node, d: number) => {
@@ -138,8 +179,9 @@ function buildTree(rows: Row[]): Node[] {
     n.children.sort(cmp);
     n.children.forEach((c) => fixDepth(c, d + 1));
   };
-  roots.sort(cmp);
 
+  const roots = [...clsNodes.values(), ...orphanRoots];
+  roots.sort(cmp);
   roots.forEach((r) => fixDepth(r, 0));
   return roots;
 }
@@ -153,6 +195,7 @@ function flatten(nodes: Node[], expanded: Set<string>): Node[] {
   nodes.forEach(walk);
   return out;
 }
+
 
 export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useI18n();
