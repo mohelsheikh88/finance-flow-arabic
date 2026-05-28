@@ -47,15 +47,42 @@ export function AppSidebar() {
       ],
     },
     {
-      label: t("nav.accounting"),
+      label: t("nav.accountsReceivable"),
       items: [
-        { url: "/customers", icon: Users, title: t("nav.customers") },
-        { url: "/partners", icon: Users, title: t("nav.partners") },
-        { url: "/invoices/customer", icon: FileText, title: t("nav.customerInvoices") },
-        { url: "/invoices/vendor", icon: Receipt, title: t("nav.vendorBills") },
-        { url: "/payments", icon: Wallet, title: t("nav.payments") },
-        { url: "/banks", icon: Landmark, title: t("nav.banks") },
+        { url: "/invoices/customer", icon: FileText, title: t("ar.invoices") },
+        { url: "/credit-memos", icon: Receipt, title: t("ar.creditMemo") },
+        { url: "/receipts", icon: Wallet, title: t("ar.receipts") },
+        { url: "/customers", icon: Users, title: t("ar.customers") },
+      ],
+    },
+    {
+      label: t("nav.accountsPayable"),
+      items: [
+        { url: "/invoices/vendor", icon: Receipt, title: t("ap.bills") },
+        { url: "/debit-memos", icon: FileText, title: t("ap.debitMemo") },
+        { url: "/payments", icon: Wallet, title: t("ap.payments") },
+        { url: "/vendors", icon: Users, title: t("ap.vendors") },
+      ],
+    },
+    {
+      label: t("nav.banksGroup"),
+      items: [
+        { url: "/banks", icon: Landmark, title: t("banksGroup.accounts") },
+        { url: "/receipts", icon: Wallet, title: t("banksGroup.receipts") },
+        { url: "/payments", icon: Wallet, title: t("banksGroup.payments") },
+        { url: "/bank-expenses", icon: Coins, title: t("banksGroup.expenses") },
+        { url: "/bank-reconciliations", icon: Calculator, title: t("banksGroup.reconciliations") },
+      ],
+    },
+    {
+      label: t("nav.fixedAssets"),
+      items: [
         { url: "/assets", icon: Briefcase, title: t("nav.assets") },
+      ],
+    },
+    {
+      label: t("nav.loansGroup"),
+      items: [
         { url: "/loans", icon: CreditCard, title: t("nav.loans") },
       ],
     },
