@@ -93,7 +93,6 @@ export const translations = {
       bankAccounts: "الحسابات البنكية",
       paymentMethods: "وسائل الدفع",
       finance: "المالية",
-      finance: "المالية",
       configuration: "الإعدادات",
       accountsReceivable: "الذمم المدينة",
       accountsPayable: "الذمم الدائنة",
