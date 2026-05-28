@@ -127,7 +127,7 @@ export function AppSidebar() {
 
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-1">
-          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-sidebar-primary to-success flex items-center justify-center text-sidebar-primary-foreground text-sm font-bold shrink-0">
+          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white text-sm font-bold shrink-0">
             FE
           </div>
           {!collapsed && (
