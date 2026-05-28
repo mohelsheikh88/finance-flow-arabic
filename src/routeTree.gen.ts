@@ -33,6 +33,7 @@ import { Route as AuthenticatedCurrenciesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCreditMemosRouteImport } from './routes/_authenticated.credit-memos'
 import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenticated.cost-centers'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated.companies'
+import { Route as AuthenticatedClassificationsRouteImport } from './routes/_authenticated.classifications'
 import { Route as AuthenticatedBanksRouteImport } from './routes/_authenticated.banks'
 import { Route as AuthenticatedBankReconciliationsRouteImport } from './routes/_authenticated.bank-reconciliations'
 import { Route as AuthenticatedBankExpensesRouteImport } from './routes/_authenticated.bank-expenses'
@@ -175,6 +176,12 @@ const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
   path: '/companies',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedClassificationsRoute =
+  AuthenticatedClassificationsRouteImport.update({
+    id: '/classifications',
+    path: '/classifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedBanksRoute = AuthenticatedBanksRouteImport.update({
   id: '/banks',
   path: '/banks',
@@ -283,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
+  '/classifications': typeof AuthenticatedClassificationsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
@@ -325,6 +333,7 @@ export interface FileRoutesByTo {
   '/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
+  '/classifications': typeof AuthenticatedClassificationsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
@@ -369,6 +378,7 @@ export interface FileRoutesById {
   '/_authenticated/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/_authenticated/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/_authenticated/banks': typeof AuthenticatedBanksRoute
+  '/_authenticated/classifications': typeof AuthenticatedClassificationsRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/cost-centers': typeof AuthenticatedCostCentersRoute
   '/_authenticated/credit-memos': typeof AuthenticatedCreditMemosRoute
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/bank-expenses'
     | '/bank-reconciliations'
     | '/banks'
+    | '/classifications'
     | '/companies'
     | '/cost-centers'
     | '/credit-memos'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/bank-expenses'
     | '/bank-reconciliations'
     | '/banks'
+    | '/classifications'
     | '/companies'
     | '/cost-centers'
     | '/credit-memos'
@@ -498,6 +510,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bank-expenses'
     | '/_authenticated/bank-reconciliations'
     | '/_authenticated/banks'
+    | '/_authenticated/classifications'
     | '/_authenticated/companies'
     | '/_authenticated/cost-centers'
     | '/_authenticated/credit-memos'
@@ -707,6 +720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompaniesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/classifications': {
+      id: '/_authenticated/classifications'
+      path: '/classifications'
+      fullPath: '/classifications'
+      preLoaderRoute: typeof AuthenticatedClassificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/banks': {
       id: '/_authenticated/banks'
       path: '/banks'
@@ -838,6 +858,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBankExpensesRoute: typeof AuthenticatedBankExpensesRoute
   AuthenticatedBankReconciliationsRoute: typeof AuthenticatedBankReconciliationsRoute
   AuthenticatedBanksRoute: typeof AuthenticatedBanksRoute
+  AuthenticatedClassificationsRoute: typeof AuthenticatedClassificationsRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCostCentersRoute: typeof AuthenticatedCostCentersRoute
   AuthenticatedCreditMemosRoute: typeof AuthenticatedCreditMemosRoute
@@ -878,6 +899,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBankExpensesRoute: AuthenticatedBankExpensesRoute,
   AuthenticatedBankReconciliationsRoute: AuthenticatedBankReconciliationsRoute,
   AuthenticatedBanksRoute: AuthenticatedBanksRoute,
+  AuthenticatedClassificationsRoute: AuthenticatedClassificationsRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCostCentersRoute: AuthenticatedCostCentersRoute,
   AuthenticatedCreditMemosRoute: AuthenticatedCreditMemosRoute,

@@ -146,10 +146,15 @@ function AccountTypesPage() {
           </Button>
           <h1 className="text-2xl font-bold">إدارة أنواع الحسابات</h1>
         </div>
-        <Button onClick={openNew} disabled={!companyId}>
-          <Plus className="h-4 w-4 me-1" />{t("common.new")}
-        </Button>
-      </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/classifications">إدارة التصنيفات الأساسية</Link>
+          </Button>
+          <Button onClick={openNew} disabled={!companyId}>
+            <Plus className="h-4 w-4 me-1" />{t("common.new")}
+          </Button>
+        </div>
+
 
       <Card>
         <table className="w-full text-xs">
