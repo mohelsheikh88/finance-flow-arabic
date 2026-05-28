@@ -92,10 +92,12 @@ export const moveAccountType = createServerFn({ method: "POST" })
 export const reorderAccountTypes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; orderedIds: string[] }) =>
-    z.object({
-      companyId: z.string().uuid(),
-      orderedIds: z.array(z.string().uuid()).min(1).max(2000),
-    }).parse(i)
+    z
+      .object({
+        companyId: z.string().uuid(),
+        orderedIds: z.array(z.string().uuid()).min(1).max(2000),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
@@ -118,11 +120,17 @@ export const reorderAccountTypes = createServerFn({ method: "POST" })
     }
     // First pass: bump to negative temp to avoid uniqueness conflicts (none here, but safe).
     for (let i = 0; i < data.orderedIds.length; i++) {
-      const u = await sb.from("account_types").update({ sort_order: -(i + 1) }).eq("id", data.orderedIds[i]);
+      const u = await sb
+        .from("account_types")
+        .update({ sort_order: -(i + 1) })
+        .eq("id", data.orderedIds[i]);
       if (u.error) throw new Error(u.error.message);
     }
     for (let i = 0; i < data.orderedIds.length; i++) {
-      const u = await sb.from("account_types").update({ sort_order: (i + 1) * 10 }).eq("id", data.orderedIds[i]);
+      const u = await sb
+        .from("account_types")
+        .update({ sort_order: (i + 1) * 10 })
+        .eq("id", data.orderedIds[i]);
       if (u.error) throw new Error(u.error.message);
     }
     return { ok: true };
