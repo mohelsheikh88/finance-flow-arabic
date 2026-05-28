@@ -454,3 +454,58 @@ table td, table th {
   border-radius: 6px;
 }
 
+/* ===== Mobile / small-screen sidebar polish ===== */
+@media (max-width: 767px) {
+  /* Wider, more breathing room on mobile sheet */
+  [data-mobile="true"][data-sidebar="sidebar"] {
+    width: 86vw !important;
+    max-width: 320px;
+  }
+
+  /* Bigger touch targets */
+  [data-sidebar="menu-button"] {
+    min-height: 44px;
+    font-size: 14.5px;
+    padding-inline: 0.75rem;
+  }
+
+  /* Disable the -2px hover slide on mobile (can clip near sheet edge) */
+  [data-sidebar="menu-button"]:hover {
+    transform: none;
+  }
+
+  /* Larger icons + tighter group label */
+  [data-sidebar="menu-button"] svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Slightly larger grandparent label on mobile */
+  .sidebar-grandparent > [data-sidebar="group-label"] {
+    font-size: 14.5px;
+    padding-block: 0.75rem;
+  }
+
+  /* Tweaked active glow — softer to avoid bleed in narrow sheet */
+  [data-sidebar="menu-button"][data-active="true"]::before {
+    width: 3px;
+    box-shadow:
+      0 0 8px hsl(327 95% 65% / 0.9),
+      0 0 16px hsl(327 95% 60% / 0.55);
+  }
+  [data-sidebar="menu-button"][data-active="true"]::after {
+    display: none;
+  }
+
+  /* Topbar trigger pop */
+  [data-sidebar="trigger"] {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+/* Smooth sheet transition */
+[data-sidebar="sidebar"][data-mobile="true"] {
+  transition: transform .28s ease;
+}
+
