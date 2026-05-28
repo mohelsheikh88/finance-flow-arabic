@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   Lock,
   History,
+  ChevronDown,
+  GitBranch,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,8 +34,10 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
 import { BrandLogo, BrandMark } from "@/components/brand-logo";
+
 
 
 export function AppSidebar() {
@@ -145,25 +149,71 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {groups.map((g) => (
-          <SidebarGroup key={g.label}>
-            {!collapsed && <SidebarGroupLabel className="text-base font-bold py-2 text-sidebar-primary">{g.label}</SidebarGroupLabel>}
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {g.items.map((item) => (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span className="truncate">{item.title}</span>}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+        {groups.map((g) => {
+          const groupActive = g.items.some((it) => isActive(it.url));
+          if (collapsed) {
+            return (
+              <SidebarGroup key={g.label}>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {g.items.map((item) => (
+                      <SidebarMenuItem key={item.url}>
+                        <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                          <Link to={item.url} className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4 shrink-0" />
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            );
+          }
+          return (
+            <Collapsible
+              key={g.label}
+              defaultOpen={groupActive}
+              className="group/collapsible"
+            >
+              <SidebarGroup>
+                <SidebarGroupLabel asChild>
+                  <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 py-2 text-base font-bold text-sidebar-primary hover:text-sidebar-primary/80 transition-colors">
+                    <span className="truncate">{g.label}</span>
+                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                  </CollapsibleTrigger>
+                </SidebarGroupLabel>
+                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                  <SidebarGroupContent>
+                    <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
+                      <SidebarMenu>
+                        {g.items.map((item) => (
+                          <SidebarMenuItem key={item.url} className="relative">
+                            <span
+                              aria-hidden
+                              className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-px w-2.5 bg-sidebar-border/60 start-[-12px]"
+                            />
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive(item.url)}
+                              tooltip={item.title}
+                              className="gap-2"
+                            >
+                              <Link to={item.url} className="flex items-center gap-2">
+                                <GitBranch className="h-4 w-4 shrink-0 text-sidebar-foreground/60 rtl:-scale-x-100" />
+                                <span className="truncate">{item.title}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </div>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          );
+        })}
       </SidebarContent>
     </Sidebar>
   );
