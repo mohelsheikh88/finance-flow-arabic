@@ -120,6 +120,7 @@ export function AppSidebar() {
         { url: "/users", icon: Users, title: t("nav.users") },
         { url: "/audit-log", icon: History, title: "سجل التدقيق" },
         { url: "/settings", icon: Settings, title: t("nav.generalSettings") },
+      ],
     },
   ];
 
