@@ -34,7 +34,7 @@ import {
 import { useI18n } from "@/i18n";
 
 export function AppSidebar() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
