@@ -15,17 +15,46 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Download, Upload, Settings2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { AccountTypesPage } from "./_authenticated.account-types";
+import { ClassificationsPage } from "./_authenticated.classifications";
 
 export const Route = createFileRoute("/_authenticated/accounts")({
   component: AccountsPage,
 });
+
+function AccountsPage() {
+  const { t } = useI18n();
+  return (
+    <div className="p-6 space-y-4">
+      <h1 className="text-2xl font-bold">{t("accounts.title")}</h1>
+      <Tabs defaultValue="coa" className="w-full">
+        <TabsList>
+          <TabsTrigger value="coa">{t("accounts.title")}</TabsTrigger>
+          <TabsTrigger value="types">{t("accounts.accountTypesNav")}</TabsTrigger>
+          <TabsTrigger value="classifications">{t("accounts.coreClassifications")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="coa" className="mt-4">
+          <ChartOfAccountsPanel />
+        </TabsContent>
+        <TabsContent value="types" className="mt-4">
+          <AccountTypesPage embedded />
+        </TabsContent>
+        <TabsContent value="classifications" className="mt-4">
+          <ClassificationsPage embedded />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
 
 type FormState = {
   id?: string;
