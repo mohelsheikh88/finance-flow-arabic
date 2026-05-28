@@ -288,7 +288,10 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
 
   const activeClassifications = (classifications as any[]).filter((c) => c.is_active);
 
-  const tree = useMemo(() => buildTree(types as Row[]), [types]);
+  const tree = useMemo(
+    () => buildTree(types as Row[], classifications as ClsRow[]),
+    [types, classifications],
+  );
 
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const toggle = (id: string) =>
