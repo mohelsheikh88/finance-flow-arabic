@@ -75,6 +75,7 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
 
   const [search, setSearch] = useState("");
   const [filterCls, setFilterCls] = useState<string>("__all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkTypeId, setBulkTypeId] = useState<string>("");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
