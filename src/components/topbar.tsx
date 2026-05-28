@@ -66,6 +66,7 @@ export function Topbar() {
 
   const initials = (user?.email ?? "U").slice(0, 2).toUpperCase();
 
+  return (
     <header className="relative h-12 border-b bg-card flex items-center px-3 gap-2 shrink-0">
       {ctxFetching && (
         <div className="absolute left-0 right-0 top-0 h-0.5 overflow-hidden">
@@ -80,8 +81,6 @@ export function Topbar() {
           <span>{locale === "ar" ? "يتم تحديث البيانات…" : "Updating data…"}</span>
         </div>
       )}
-
-      <SidebarTrigger />
 
       <div className="flex items-center gap-2 ms-2">
         {(ctx?.companies?.length ?? 0) > 0 && (
