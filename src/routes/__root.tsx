@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ConflictTrackerProvider, useConflictRealtimeSubscriber } from "@/lib/conflict-tracker";
 import { OfflineQueueProvider } from "@/lib/offline-queue";
+import { ScopedRealtime } from "@/lib/scoped-realtime";
 import { toast } from "sonner";
 
 function NotFoundComponent() {
