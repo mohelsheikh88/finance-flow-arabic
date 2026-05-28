@@ -30,9 +30,9 @@ function AuthenticatedLayout() {
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="min-h-screen flex w-full bg-muted/30" dir={dir}>
+      <div className="min-h-screen flex w-full bg-app-surface" dir={dir}>
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 relative z-10">
           <Topbar />
           <main className="flex-1 overflow-auto">
             <Outlet />
