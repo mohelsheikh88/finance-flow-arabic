@@ -194,7 +194,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
     },
   ];
 
-  ];
+
 
   return (
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
