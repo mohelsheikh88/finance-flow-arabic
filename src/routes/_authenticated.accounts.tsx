@@ -401,67 +401,16 @@ function ChartOfAccountsPanel() {
         </div>
       </div>
 
-      <Card>
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">{t("common.name")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.type")}</th>
-              <th className="text-center p-3 font-medium">{t("accounts.isGroup")}</th>
-              <th className="text-center p-3 font-medium">{t("common.status")}</th>
-              <th className="text-end p-3 font-medium">{t("common.actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(filteredAccounts as any[]).map((a) => {
-              const depth = (a.code.match(/^\d+/)?.[0]?.length ?? 1) - 1;
-              return (
-                <tr key={a.id} className="border-t hover:bg-muted/30">
-                  <td className="p-3 font-mono" style={{ paddingInlineStart: `${12 + depth * 16}px` }}>{a.code}</td>
-                  <td className="p-3 font-medium">{localized(a, "name")}</td>
-                  <td className="p-3 text-muted-foreground text-xs">
-                    {(() => {
-                      const at = typeById.get(a.account_type_id);
-                      const cls = at?.classification ?? a.account_type;
-                      return t(`accounts.${statementOf(cls)}`);
-                    })()}
-                  </td>
-                  <td className="p-3">
-                    {(() => {
-                      const at = typeById.get(a.account_type_id);
-                      const cls = at?.classification ?? a.account_type;
-                      return (
-                        <Badge variant="outline" className={typeColors[cls]}>
-                          {at ? localized(at, "name") : t(`accounts.${cls}`)}
-                        </Badge>
-                      );
-                    })()}
-                  </td>
+      <ChartOfAccountsTree
+        accounts={filteredAccounts as any[]}
+        accountTypes={accountTypes as any[]}
+        classifications={classifications as any[]}
+        typeColors={typeColors}
+        statementOf={statementOf}
+        onEdit={openEdit}
+        onDelete={setToDelete}
+      />
 
-                  <td className="p-3 text-center">{a.is_group ? "✓" : ""}</td>
-                  <td className="p-3 text-center">{a.is_active ? t("common.active") : t("common.inactive")}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-1 justify-end">
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(a)} aria-label={t("common.edit")}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setToDelete(a)} aria-label={t("common.delete")}
-                        className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {filteredAccounts.length === 0 && (
-              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
