@@ -168,13 +168,17 @@ export function AppSidebar() {
 
       <SidebarContent>
         {groups.map((g) => {
-          const groupActive = g.items.some((it) => isActive(it.url));
+          const groupActive = g.items?.some((it) => isActive(it.url)) || g.subgroups?.some((sg) => sg.items.some((it) => isActive(it.url)));
           if (collapsed) {
+            const allItems = [
+              ...(g.items || []),
+              ...(g.subgroups?.flatMap((sg) => sg.items) || []),
+            ];
             return (
               <SidebarGroup key={g.label}>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {g.items.map((item) => (
+                    {allItems.map((item) => (
                       <SidebarMenuItem key={item.url}>
                         <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                           <Link to={item.url} className="flex items-center gap-2">
