@@ -20,10 +20,11 @@ import { Languages, LogOut, User } from "lucide-react";
 import { useI18n, useLocalized } from "@/i18n";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useIsFetching } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getUserContext } from "@/lib/api/context.functions";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { OfflineIndicator } from "@/components/offline-indicator";
 
 export function Topbar() {
@@ -39,6 +40,8 @@ export function Topbar() {
     queryFn: () => fetchCtx(),
     enabled: !!user,
   });
+
+  const ctxFetching = useIsFetching({ queryKey: ["user-context"] }) > 0;
 
   // Auto-select first company/branch
   useEffect(() => {
@@ -64,8 +67,20 @@ export function Topbar() {
   const initials = (user?.email ?? "U").slice(0, 2).toUpperCase();
 
   return (
-    <header className="h-12 border-b bg-card flex items-center px-3 gap-2 shrink-0">
+    <header className="relative h-12 border-b bg-card flex items-center px-3 gap-2 shrink-0">
+      {ctxFetching && (
+        <div className="absolute left-0 right-0 top-0 h-0.5 overflow-hidden">
+          <div className="h-full w-1/3 bg-primary animate-[loading-bar_1.2s_ease-in-out_infinite]" />
+        </div>
+      )}
       <SidebarTrigger />
+
+      {ctxFetching && (
+        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>{locale === "ar" ? "يتم تحديث البيانات…" : "Updating data…"}</span>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 ms-2">
         {(ctx?.companies?.length ?? 0) > 0 && (
