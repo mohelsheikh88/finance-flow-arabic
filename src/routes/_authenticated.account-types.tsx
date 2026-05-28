@@ -334,6 +334,15 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   <td className="p-3 text-center">{n.is_active ? t("common.active") : t("common.inactive")}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
+                      <Button size="sm" variant="ghost" onClick={() => moveMut.mutate({ id: n.id, direction: "up" })}
+                        disabled={moveMut.isPending} aria-label="move up">
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => moveMut.mutate({ id: n.id, direction: "down" })}
+                        disabled={moveMut.isPending} aria-label="move down">
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
+
                       {n.is_group && (
                         <Button size="sm" variant="ghost" onClick={() => openNew(n, false)} aria-label="add child">
                           <Plus className="h-3.5 w-3.5" />
