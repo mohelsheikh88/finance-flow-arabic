@@ -128,9 +128,37 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
 
   const moveMut = useMutation({
     mutationFn: (v: { id: string; direction: "up" | "down" }) => move({ data: v }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["account_types"] }),
-    onError: (e: Error) => toast.error(e.message),
+    onMutate: async (v) => {
+      await qc.cancelQueries({ queryKey: ["account_types", companyId] });
+      const prev = qc.getQueryData<Row[]>(["account_types", companyId]);
+      if (!prev) return { prev };
+      const cur = prev.find((r) => r.id === v.id);
+      if (!cur) return { prev };
+      const siblings = prev
+        .filter((r) => r.classification === cur.classification && (r.parent_id ?? null) === (cur.parent_id ?? null))
+        .slice()
+        .sort((a, b) => ((a.sort_order ?? 0) - (b.sort_order ?? 0)) || a.code.localeCompare(b.code));
+      const idx = siblings.findIndex((r) => r.id === cur.id);
+      const swapIdx = v.direction === "up" ? idx - 1 : idx + 1;
+      if (idx < 0 || swapIdx < 0 || swapIdx >= siblings.length) return { prev };
+      const a = siblings[idx], b = siblings[swapIdx];
+      const aOrder = a.sort_order ?? 0;
+      const bOrder = b.sort_order ?? 0;
+      const next = prev.map((r) => {
+        if (r.id === a.id) return { ...r, sort_order: bOrder };
+        if (r.id === b.id) return { ...r, sort_order: aOrder };
+        return r;
+      });
+      qc.setQueryData(["account_types", companyId], next);
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["account_types", companyId], ctx.prev);
+      toast.error(e.message);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["account_types", companyId] }),
   });
+
 
 
   const { data: types = [] } = useQuery({
