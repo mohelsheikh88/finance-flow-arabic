@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertNotLocked } from "./lock-dates.functions";
 
 export const listAccounts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -108,7 +109,10 @@ export const createJournalEntry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => CreateJESchema.parse(i))
   .handler(async ({ data, context }) => {
-    const totalDebit = data.lines.reduce((s, l) => s + l.debit, 0);
+  .handler(async ({ data, context }) => {
+    await assertNotLocked(context.supabase, data.company_id, data.branch_id, data.entry_date);
+
+
     const totalCredit = data.lines.reduce((s, l) => s + l.credit, 0);
     if (Math.abs(totalDebit - totalCredit) > 0.001) {
       throw new Error(`Entry not balanced: D=${totalDebit} C=${totalCredit}`);

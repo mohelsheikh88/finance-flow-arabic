@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { maybeRequestApproval } from "./approvals.functions";
+import { assertNotLocked } from "./lock-dates.functions";
 
 const CreatePaymentSchema = z.object({
   company_id: z.string().uuid(),
@@ -59,6 +60,9 @@ export const createPayment = createServerFn({ method: "POST" })
   .inputValidator((i) => CreatePaymentSchema.parse(i))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    await assertNotLocked(supabase, data.company_id, data.branch_id, data.payment_date);
+
 
     // Resolve journal: bank journal linked to bank_account, else any bank/cash journal
     let journalId = data.journal_id;
