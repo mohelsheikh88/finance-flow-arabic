@@ -12,34 +12,39 @@ import { render } from "@testing-library/react";
 import React from "react";
 
 // ---- Capture postgres_changes handlers from the mocked Supabase client ----
+// ---- Capture postgres_changes handlers from the mocked Supabase client ----
 type Handler = (payload: any) => void;
-const handlers: Record<string, Handler[]> = {};
-const subscribeMock = vi.fn();
-const removeChannelMock = vi.fn();
+
+const mocks = vi.hoisted(() => ({
+  handlers: {} as Record<string, Handler[]>,
+  subscribeMock: vi.fn(),
+  removeChannelMock: vi.fn(),
+  routerInvalidate: vi.fn(),
+}));
 
 vi.mock("@/integrations/supabase/client", () => {
   const channel = () => {
     const api: any = {
       on: (_event: string, opts: { table: string }, cb: Handler) => {
-        (handlers[opts.table] ??= []).push(cb);
+        (mocks.handlers[opts.table] ??= []).push(cb);
         return api;
       },
-      subscribe: subscribeMock,
+      subscribe: mocks.subscribeMock,
     };
     return api;
   };
   return {
     supabase: {
       channel,
-      removeChannel: removeChannelMock,
+      removeChannel: mocks.removeChannelMock,
     },
   };
 });
 
-// Router mock — invalidate() is a no-op spy
-const routerInvalidate = vi.fn();
-vi.mock("@tanstack/react-router", async () => {
-  return {
+vi.mock("@tanstack/react-router", () => ({
+  useRouter: () => ({ invalidate: mocks.routerInvalidate }),
+}));
+
     useRouter: () => ({ invalidate: routerInvalidate }),
   };
 });
