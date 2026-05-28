@@ -160,6 +160,11 @@ function AccountsPage() {
     expense: "bg-destructive/10 text-destructive border-destructive/30",
   };
 
+  const statementOf = (classification: string) => {
+    const bs = ["asset", "liability", "equity"];
+    return bs.includes(classification) ? "balanceSheet" : "incomeStatement";
+  };
+
 
   const importFn = useServerFn(importAccounts);
   const fileRef = useRef<HTMLInputElement>(null);
