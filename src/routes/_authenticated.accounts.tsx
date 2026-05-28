@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { AccountTypesPage } from "./_authenticated.account-types";
 import { ClassificationsPage } from "./_authenticated.classifications";
+import { AccountClassificationsPage } from "./_authenticated.account-classifications";
 
 export const Route = createFileRoute("/_authenticated/accounts")({
   component: AccountsPage,
@@ -40,6 +41,7 @@ function AccountsPage() {
           <TabsTrigger value="coa">{t("accounts.title")}</TabsTrigger>
           <TabsTrigger value="types">{t("accounts.accountTypesNav")}</TabsTrigger>
           <TabsTrigger value="classifications">{t("accounts.coreClassifications")}</TabsTrigger>
+          <TabsTrigger value="mapping">{t("accounts.classificationMapping")}</TabsTrigger>
         </TabsList>
         <TabsContent value="coa" className="mt-4">
           <ChartOfAccountsPanel />
@@ -50,7 +52,14 @@ function AccountsPage() {
         <TabsContent value="classifications" className="mt-4">
           <ClassificationsPage embedded />
         </TabsContent>
+        <TabsContent value="mapping" className="mt-4">
+          <AccountClassificationsPage embedded />
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
     </div>
   );
 }
