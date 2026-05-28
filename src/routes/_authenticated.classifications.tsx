@@ -369,8 +369,17 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                 </tr>
               </thead>
               <tbody>
-                {(filteredRows as any[]).map((r) => (
-                  <SortableRow key={r.id} id={r.id} disabled={hasFilters} className="border-t hover:bg-muted/30">
+                {(filteredRows as any[]).map((r, i) => (
+                  <SortableRow
+                    key={r.id}
+                    id={r.id}
+                    disabled={hasFilters}
+                    className="border-t hover:bg-muted/30"
+                    onMoveUp={() => moveByOne(r.id, -1)}
+                    onMoveDown={() => moveByOne(r.id, 1)}
+                    canMoveUp={!hasFilters && i > 0}
+                    canMoveDown={!hasFilters && i < filteredRows.length - 1}
+                  >
                     {({ handle }) => (
                       <>
                         <td className="p-3 align-middle">{handle}</td>
