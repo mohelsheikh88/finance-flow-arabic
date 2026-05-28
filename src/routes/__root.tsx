@@ -130,11 +130,13 @@ function RootComponent() {
         <AuthProvider>
           <BranchProvider>
             <ConflictTrackerProvider>
-              <AuthSync />
-              <RealtimeSync />
-              <ConflictSubscriber />
-              <Outlet />
-              <Toaster richColors position="top-center" />
+              <OfflineQueueProvider>
+                <AuthSync />
+                <RealtimeSync />
+                <ConflictSubscriber />
+                <Outlet />
+                <Toaster richColors position="top-center" />
+              </OfflineQueueProvider>
             </ConflictTrackerProvider>
           </BranchProvider>
         </AuthProvider>
