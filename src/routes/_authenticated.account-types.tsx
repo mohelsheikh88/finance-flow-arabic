@@ -148,17 +148,35 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
     const prev = qc.getQueryData<Row[]>(["account_types", companyId]);
     if (!prev) return;
     const a = prev.find((r) => r.id === active.id);
-    const b = prev.find((r) => r.id === over.id);
-    if (!a || !b) return;
-    if (a.classification !== b.classification || (a.parent_id ?? null) !== (b.parent_id ?? null)) {
-      return;
-    }
+    if (!a) return;
+
     const siblings = prev
       .filter((r) => r.classification === a.classification && (r.parent_id ?? null) === (a.parent_id ?? null))
       .slice()
       .sort((x, y) => ((x.sort_order ?? 0) - (y.sort_order ?? 0)) || x.code.localeCompare(y.code));
+    if (siblings.length < 2) return;
+
     const fromIdx = siblings.findIndex((r) => r.id === active.id);
-    const toIdx = siblings.findIndex((r) => r.id === over.id);
+
+    // Find target sibling: if `over` is a sibling, use it directly.
+    // Otherwise, walk the visible list from `over` toward `active` to find the nearest sibling.
+    const sibIds = new Set(siblings.map((s) => s.id));
+    let toIdx = siblings.findIndex((r) => r.id === over.id);
+    if (toIdx === -1) {
+      const visIds = visible.map((n) => n.id);
+      const overVis = visIds.indexOf(String(over.id));
+      const activeVis = visIds.indexOf(String(active.id));
+      if (overVis === -1 || activeVis === -1) return;
+      const step = overVis < activeVis ? 1 : -1; // walk back toward active
+      let found: string | null = null;
+      for (let i = overVis; i !== activeVis; i += step) {
+        if (sibIds.has(visIds[i])) { found = visIds[i]; break; }
+      }
+      if (!found) return;
+      toIdx = siblings.findIndex((r) => r.id === found);
+    }
+    if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+
     const reordered = arrayMove(siblings, fromIdx, toIdx);
 
     // Optimistic: rewrite sort_order for the affected siblings.
