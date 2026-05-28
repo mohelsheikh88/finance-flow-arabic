@@ -74,7 +74,7 @@ export const createInvoice = createServerFn({ method: "POST" })
       const { data: j } = await supabase
         .from("journals")
         .select("id, sequence_prefix, sequence_next")
-        .eq("company_id", data.company_id)
+      const wantedType = data.invoice_type === "customer" ? "sales" : "purchase";
         .eq("journal_type", wantedType)
         .eq("is_active", true)
         .limit(1)
