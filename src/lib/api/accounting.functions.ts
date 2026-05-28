@@ -87,7 +87,7 @@ export const moveAccountType = createServerFn({ method: "POST" })
     return { ok: true, moved: true };
   });
 
-  });
+
 
 
 const AccountTypeUpsertSchema = z.object({
