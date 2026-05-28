@@ -22,18 +22,20 @@ function FixedAssetsDashboard() {
   const fetchAssets = useServerFn(listAssets);
   const fetchCategories = useServerFn(listCategories);
 
-  const { data: assets = [] } = useQuery({
+  const { data: assetsResp } = useQuery({
     queryKey: ["fa-assets", companyId],
     queryFn: () => fetchAssets({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: catsResp } = useQuery({
     queryKey: ["fa-categories", companyId],
     queryFn: () => fetchCategories({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
 
+  const assets: any[] = (assetsResp as any)?.assets ?? [];
+  const categories: any[] = (catsResp as any)?.categories ?? [];
   const totals = (assets as any[]).reduce(
     (acc, a) => {
       acc.cost += Number(a.acquisition_cost) || 0;
