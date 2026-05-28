@@ -45,7 +45,6 @@ import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated.assets'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated.approvals'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated.accounts'
-import { Route as AuthenticatedAccountTypesRouteImport } from './routes/_authenticated.account-types'
 import { Route as AuthenticatedAccountClassificationsRouteImport } from './routes/_authenticated.account-classifications'
 import { Route as AuthenticatedJournalEntriesIndexRouteImport } from './routes/_authenticated.journal-entries.index'
 import { Route as AuthenticatedReportsVatRouteImport } from './routes/_authenticated.reports.vat'
@@ -250,12 +249,6 @@ const AuthenticatedAccountsRoute = AuthenticatedAccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAccountTypesRoute =
-  AuthenticatedAccountTypesRouteImport.update({
-    id: '/account-types',
-    path: '/account-types',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedAccountClassificationsRoute =
   AuthenticatedAccountClassificationsRouteImport.update({
     id: '/account-classifications',
@@ -350,7 +343,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/account-classifications': typeof AuthenticatedAccountClassificationsRoute
-  '/account-types': typeof AuthenticatedAccountTypesRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/assets': typeof AuthenticatedAssetsRoute
@@ -403,7 +395,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/account-classifications': typeof AuthenticatedAccountClassificationsRoute
-  '/account-types': typeof AuthenticatedAccountTypesRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/assets': typeof AuthenticatedAssetsRoute
@@ -458,7 +449,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/account-classifications': typeof AuthenticatedAccountClassificationsRoute
-  '/_authenticated/account-types': typeof AuthenticatedAccountTypesRoute
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
@@ -513,7 +503,6 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/account-classifications'
-    | '/account-types'
     | '/accounts'
     | '/approvals'
     | '/assets'
@@ -566,7 +555,6 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/account-classifications'
-    | '/account-types'
     | '/accounts'
     | '/approvals'
     | '/assets'
@@ -620,7 +608,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/account-classifications'
-    | '/_authenticated/account-types'
     | '/_authenticated/accounts'
     | '/_authenticated/approvals'
     | '/_authenticated/assets'
@@ -931,13 +918,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/account-types': {
-      id: '/_authenticated/account-types'
-      path: '/account-types'
-      fullPath: '/account-types'
-      preLoaderRoute: typeof AuthenticatedAccountTypesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/account-classifications': {
       id: '/_authenticated/account-classifications'
       path: '/account-classifications'
@@ -1048,7 +1028,6 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountClassificationsRoute: typeof AuthenticatedAccountClassificationsRoute
-  AuthenticatedAccountTypesRoute: typeof AuthenticatedAccountTypesRoute
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
@@ -1100,7 +1079,6 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountClassificationsRoute:
     AuthenticatedAccountClassificationsRoute,
-  AuthenticatedAccountTypesRoute: AuthenticatedAccountTypesRoute,
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
@@ -1164,3 +1142,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
