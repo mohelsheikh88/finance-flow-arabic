@@ -334,6 +334,26 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                 <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-1 justify-end">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => move(r, -1)}
+                      disabled={hasFilters || swapMut.isPending || (rows as any[]).findIndex((x) => x.id === r.id) === 0}
+                      aria-label="Move up"
+                      title={hasFilters ? t("common.clear") : undefined}
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => move(r, 1)}
+                      disabled={hasFilters || swapMut.isPending || (rows as any[]).findIndex((x) => x.id === r.id) === (rows as any[]).length - 1}
+                      aria-label="Move down"
+                      title={hasFilters ? t("common.clear") : undefined}
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => openEdit(r)} aria-label={t("common.edit")}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
@@ -344,6 +364,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                     </Button>
                   </div>
                 </td>
+
               </tr>
             ))}
             {filteredRows.length === 0 && (
