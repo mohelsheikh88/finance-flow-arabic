@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAccountTypes, upsertAccountType, deleteAccountType, listClassifications } from "@/lib/api/accounting.functions";
+import { listAccountTypes, upsertAccountType, deleteAccountType, listClassifications, moveAccountType } from "@/lib/api/accounting.functions";
+
 
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -18,7 +19,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, ChevronRight, ChevronDown, FolderTree, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, ChevronRight, ChevronDown, FolderTree, FileText, ArrowUp, ArrowDown } from "lucide-react";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account-types")({
