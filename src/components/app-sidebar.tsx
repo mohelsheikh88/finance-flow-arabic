@@ -52,6 +52,7 @@ export function AppSidebar() {
         { url: "/partners", icon: Users, title: t("nav.partners") },
         { url: "/invoices/customer", icon: FileText, title: t("nav.customerInvoices") },
         { url: "/invoices/vendor", icon: Receipt, title: t("nav.vendorBills") },
+        { url: "/payments", icon: Wallet, title: t("nav.payments") },
         { url: "/banks", icon: Landmark, title: t("nav.banks") },
         { url: "/assets", icon: Briefcase, title: t("nav.assets") },
         { url: "/loans", icon: CreditCard, title: t("nav.loans") },
