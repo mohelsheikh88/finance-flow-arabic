@@ -551,55 +551,67 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                         <>
                           <td className="p-3 align-middle">{isCls ? null : handle}</td>
                           <td className="p-3">
-                            <div
-                              className="flex items-center gap-1"
-                              style={{ paddingInlineStart: n.depth * 18 }}
-                            >
-                              {hasChildren ? (
-                                <button
-                                  onClick={() => toggle(n.id)}
-                                  className="p-0.5 hover:bg-muted rounded"
-                                >
-                                  {isOpen ? (
-                                    <ChevronDown className="h-3.5 w-3.5" />
-                                  ) : (
-                                    <ChevronRight className="h-3.5 w-3.5" />
-                                  )}
-                                </button>
-                              ) : (
-                                <span className="w-4 inline-block" />
-                              )}
-                              {isCls || n.is_group ? (
-                                <FolderTree
+                            <div className="flex items-stretch">
+                              {Array.from({ length: n.depth }).map((_, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-block w-5 border-s border-dashed border-border/60"
+                                  aria-hidden
+                                />
+                              ))}
+                              <div className="flex items-center gap-1 ps-1">
+                                {n.depth > 0 && (
+                                  <span
+                                    className="inline-block w-3 border-t border-dashed border-border/60 -ms-1"
+                                    aria-hidden
+                                  />
+                                )}
+                                {hasChildren ? (
+                                  <button
+                                    onClick={() => toggle(n.id)}
+                                    className="p-0.5 hover:bg-muted rounded"
+                                  >
+                                    {isOpen ? (
+                                      <ChevronDown className="h-3.5 w-3.5" />
+                                    ) : (
+                                      <ChevronRight className="h-3.5 w-3.5" />
+                                    )}
+                                  </button>
+                                ) : (
+                                  <span className="w-4 inline-block" />
+                                )}
+                                {isCls || n.is_group ? (
+                                  <FolderTree
+                                    className={
+                                      isCls
+                                        ? "h-4 w-4 text-primary"
+                                        : "h-3.5 w-3.5 text-primary"
+                                    }
+                                  />
+                                ) : (
+                                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                                )}
+                                <span className={isCls ? "font-mono font-semibold" : "font-mono"}>
+                                  {n.code}
+                                </span>
+                                <span className="mx-1 text-muted-foreground">—</span>
+                                <span
                                   className={
                                     isCls
-                                      ? "h-4 w-4 text-primary"
-                                      : "h-3.5 w-3.5 text-primary"
+                                      ? "font-bold"
+                                      : n.is_group
+                                        ? "font-semibold"
+                                        : ""
                                   }
-                                />
-                              ) : (
-                                <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                              )}
-                              <span className={isCls ? "font-mono font-semibold" : "font-mono"}>
-                                {n.code}
-                              </span>
-                              <span className="mx-1 text-muted-foreground">—</span>
-                              <span
-                                className={
-                                  isCls
-                                    ? "font-bold"
-                                    : n.is_group
-                                      ? "font-semibold"
-                                      : ""
-                                }
-                              >
-                                {localized(n, "name")}
-                              </span>
-                              {isCls && (
-                                <Badge variant="secondary" className="ms-2 text-[10px]">
-                                  {t("accounts.coreClassification") || "Core Classification"}
-                                </Badge>
-                              )}
+                                >
+                                  {localized(n, "name")}
+                                </span>
+                                {isCls && (
+                                  <Badge variant="secondary" className="ms-2 text-[10px]">
+                                    {t("accounts.coreClassification") || "Core Classification"}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td className="p-3">
