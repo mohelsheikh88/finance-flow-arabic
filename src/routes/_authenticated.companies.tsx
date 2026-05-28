@@ -117,15 +117,70 @@ function Page() {
     setCoOpen(true);
   };
 
+  // Helper: apply optimistic upsert to a query list
+  const optimisticUpsert = <T extends { id: string }>(
+    key: readonly unknown[],
+    row: T
+  ) => {
+    const prev = qc.getQueryData<T[]>(key as any);
+    qc.setQueryData<T[]>(key as any, (old) => {
+      const list = old ?? [];
+      const idx = list.findIndex((x) => x.id === row.id);
+      if (idx >= 0) {
+        const next = list.slice();
+        next[idx] = { ...list[idx], ...row };
+        return next;
+      }
+      return [...list, row];
+    });
+    return prev;
+  };
+
   const coMut = useMutation({
     mutationFn: async () => {
       const { id, ...payload } = coForm;
       if (id) return updateCompanyFn({ data: { id, ...payload } });
       return createCompanyFn({ data: payload });
     },
-    onSuccess: (_data, _vars, _ctx) => {
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: ["companies"] });
+      await qc.cancelQueries({ queryKey: ["user-context"] });
+      const tempId = coForm.id ?? `optimistic-${crypto.randomUUID()}`;
+      const optimisticRow: any = {
+        id: tempId,
+        is_active: true,
+        ...coForm,
+        __optimistic: true,
+      };
+      const prevCompanies = optimisticUpsert(["companies"], optimisticRow);
+      const prevCtx = qc.getQueryData<any>(["user-context"]);
+      if (prevCtx) {
+        qc.setQueryData(["user-context"], {
+          ...prevCtx,
+          companies: (() => {
+            const list = prevCtx.companies ?? [];
+            const idx = list.findIndex((x: any) => x.id === optimisticRow.id);
+            if (idx >= 0) {
+              const next = list.slice();
+              next[idx] = { ...list[idx], ...optimisticRow };
+              return next;
+            }
+            return [...list, optimisticRow];
+          })(),
+        });
+      }
+      setCoOpen(false);
+      return { prevCompanies, prevCtx, tempId };
+    },
+    onSuccess: (data: any, _vars, ctx) => {
+      // Replace optimistic row with server row
+      if (ctx?.tempId && data?.id && ctx.tempId !== data.id) {
+        qc.setQueryData<any[]>(["companies"], (old) =>
+          (old ?? []).map((x) => (x.id === ctx.tempId ? data : x))
+        );
+      }
       const isNew = !coForm.id;
-      const name = coForm.name_ar || coForm.name_en || coForm.code;
+      const name = data?.name_ar || data?.name_en || coForm.name_ar || coForm.code;
       toast.success(
         isNew ? `تم إنشاء الشركة "${name}" بنجاح` : `تم تحديث الشركة "${name}" بنجاح`,
         {
@@ -134,11 +189,18 @@ function Page() {
             : "السبب: تعديل بيانات شركة — تم تحديث القوائم المنسدلة (Topbar/Sidebar) تلقائيًا.",
         }
       );
+    },
+    onError: (e: Error, _vars, ctx) => {
+      // Roll back optimistic state
+      if (ctx?.prevCompanies !== undefined)
+        qc.setQueryData(["companies"], ctx.prevCompanies);
+      if (ctx?.prevCtx !== undefined) qc.setQueryData(["user-context"], ctx.prevCtx);
+      toast.error(e.message);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["companies"] });
       qc.invalidateQueries({ queryKey: ["user-context"] });
-      setCoOpen(false);
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
 
@@ -170,9 +232,43 @@ function Page() {
       if (id) return updateBranchFn({ data: { id, ...payload } });
       return createBranchFn({ data: payload });
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: ["branches"] });
+      await qc.cancelQueries({ queryKey: ["user-context"] });
+      const tempId = brForm.id ?? `optimistic-${crypto.randomUUID()}`;
+      const optimisticRow: any = {
+        id: tempId,
+        ...brForm,
+        __optimistic: true,
+      };
+      const prevBranches = optimisticUpsert(["branches", "all"], optimisticRow);
+      const prevCtx = qc.getQueryData<any>(["user-context"]);
+      if (prevCtx) {
+        qc.setQueryData(["user-context"], {
+          ...prevCtx,
+          branches: (() => {
+            const list = prevCtx.branches ?? [];
+            const idx = list.findIndex((x: any) => x.id === optimisticRow.id);
+            if (idx >= 0) {
+              const next = list.slice();
+              next[idx] = { ...list[idx], ...optimisticRow };
+              return next;
+            }
+            return [...list, optimisticRow];
+          })(),
+        });
+      }
+      setBrOpen(false);
+      return { prevBranches, prevCtx, tempId };
+    },
+    onSuccess: (data: any, _vars, ctx) => {
+      if (ctx?.tempId && data?.id && ctx.tempId !== data.id) {
+        qc.setQueryData<any[]>(["branches", "all"], (old) =>
+          (old ?? []).map((x) => (x.id === ctx.tempId ? data : x))
+        );
+      }
       const isNew = !brForm.id;
-      const name = brForm.name_ar || brForm.name_en || brForm.code;
+      const name = data?.name_ar || data?.name_en || brForm.name_ar || brForm.code;
       toast.success(
         isNew ? `تم إنشاء الفرع "${name}" بنجاح` : `تم تحديث الفرع "${name}" بنجاح`,
         {
@@ -181,12 +277,19 @@ function Page() {
             : "السبب: تعديل بيانات فرع — تم تحديث منتقي الفروع في الـ Topbar والقوائم تلقائيًا.",
         }
       );
+    },
+    onError: (e: Error, _vars, ctx) => {
+      if (ctx?.prevBranches !== undefined)
+        qc.setQueryData(["branches", "all"], ctx.prevBranches);
+      if (ctx?.prevCtx !== undefined) qc.setQueryData(["user-context"], ctx.prevCtx);
+      toast.error(e.message);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["branches"] });
       qc.invalidateQueries({ queryKey: ["user-context"] });
-      setBrOpen(false);
     },
-    onError: (e: Error) => toast.error(e.message),
   });
+
 
   const branchesByCompany = useMemo(() => {
     const m: Record<string, Branch[]> = {};
