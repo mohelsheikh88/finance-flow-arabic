@@ -369,9 +369,9 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                   <th className="w-8 p-3"></th>
                   <th className="text-start p-3 font-medium">{t("common.code")}</th>
                   <th className="text-start p-3 font-medium">{t("common.name")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
                   <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
                   <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
-                  <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
                   <th className="text-center p-3 font-medium">{t("common.status")}</th>
                   <th className="text-end p-3 font-medium">{t("common.actions")}</th>
                 </tr>
