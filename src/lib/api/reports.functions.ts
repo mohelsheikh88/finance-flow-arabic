@@ -255,7 +255,7 @@ export const getIncomeStatement = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; dateFrom: string; dateTo: string }) => i)
   .handler(async ({ data, context }) => {
-    const rows = await getAccountBalances(context.supabase, data.companyId, data.dateFrom, data.dateTo);
+    const { rows, classifications } = await getAccountBalances(context.supabase, data.companyId, data.dateFrom, data.dateTo);
 
     const isRows = rows.filter((r) => r.statement === "income_statement");
     const income = isRows.filter((r) => r.bucket === "income");
@@ -269,8 +269,8 @@ export const getIncomeStatement = createServerFn({ method: "GET" })
       dateTo: data.dateTo,
       income,
       expenses,
-      incomeGroups: groupByClassification(isRows, ["income"]),
-      expenseGroups: groupByClassification(isRows, ["expense"]),
+      incomeGroups: groupByClassification(isRows, ["income"], classifications),
+      expenseGroups: groupByClassification(isRows, ["expense"], classifications),
       totals: {
         income: totalIncome,
         expenses: totalExpenses,
@@ -278,3 +278,4 @@ export const getIncomeStatement = createServerFn({ method: "GET" })
       },
     };
   });
+
