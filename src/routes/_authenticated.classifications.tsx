@@ -6,6 +6,7 @@ import {
   listClassifications,
   upsertClassification,
   deleteClassification,
+  swapClassificationOrder,
 } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -21,8 +22,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
+
 
 
 export const Route = createFileRoute("/_authenticated/classifications")({
