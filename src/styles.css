@@ -63,66 +63,69 @@
 
 :root {
   --radius: 0.5rem;
-  /* STC purple family */
-  --primary: oklch(0.34 0.13 305);          /* #4F2D7F deep purple */
-  --primary-deep: oklch(0.28 0.14 305);
-  --primary-light: oklch(0.55 0.20 305);    /* #8B5CF6 */
-  --primary-foreground: oklch(0.98 0 0);
+  /* Al Hayat — Finance Navy + Gold (inspired by global finance identities) */
+  --primary: oklch(0.28 0.09 260);          /* #0E2A55 navy */
+  --primary-deep: oklch(0.22 0.08 260);     /* #0A1B38 deep navy */
+  --primary-light: oklch(0.45 0.13 255);    /* royal blue accent */
+  --primary-foreground: oklch(0.99 0 0);
 
-  --background: oklch(0.97 0.008 255);
+  /* Gold accent for emphasis (CTA highlights, badges) */
+  --accent: oklch(0.94 0.04 85);
+  --accent-foreground: oklch(0.32 0.08 75);
+
+  --background: oklch(0.985 0.003 250);
   --foreground: oklch(0.18 0.02 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.01 285);
+  --card-foreground: oklch(0.16 0.015 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.01 285);
+  --popover-foreground: oklch(0.16 0.015 260);
 
-  --secondary: oklch(0.96 0.005 285);
-  --secondary-foreground: oklch(0.28 0.14 305);
-  --muted: oklch(0.96 0.005 285);
-  --muted-foreground: oklch(0.48 0.02 285);
-  --accent: oklch(0.94 0.03 305);
-  --accent-foreground: oklch(0.28 0.14 305);
+  --secondary: oklch(0.96 0.006 255);
+  --secondary-foreground: oklch(0.22 0.08 260);
+  --muted: oklch(0.96 0.006 255);
+  --muted-foreground: oklch(0.48 0.02 260);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.62 0.17 152);
+  --success: oklch(0.58 0.15 155);
   --success-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.75 0.16 75);
-  --warning-foreground: oklch(0.18 0.04 75);
-  --info: oklch(0.60 0.15 240);
+  --warning: oklch(0.78 0.14 80);            /* gold-tinted */
+  --warning-foreground: oklch(0.20 0.05 80);
+  --info: oklch(0.55 0.14 240);
   --info-foreground: oklch(0.98 0 0);
 
-  --border: oklch(0.91 0.005 285);
-  --input: oklch(0.91 0.005 285);
-  --ring: oklch(0.55 0.20 305);
+  --border: oklch(0.91 0.006 255);
+  --input: oklch(0.91 0.006 255);
+  --ring: oklch(0.45 0.13 255);
 
-  /* Sidebar: STC deep purple brand */
-  --sidebar: oklch(0.22 0.10 305);
-  --sidebar-foreground: oklch(0.95 0.01 305);
-  --sidebar-primary: oklch(0.65 0.22 305);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.30 0.13 305);
-  --sidebar-accent-foreground: oklch(0.98 0.01 305);
-  --sidebar-border: oklch(0.32 0.10 305);
-  --sidebar-ring: oklch(0.65 0.22 305);
+  /* Sidebar — deep navy with gold-touched primary highlight */
+  --sidebar: oklch(0.20 0.07 260);
+  --sidebar-foreground: oklch(0.95 0.01 260);
+  --sidebar-primary: oklch(0.78 0.12 82);    /* gold for active state */
+  --sidebar-primary-foreground: oklch(0.18 0.05 80);
+  --sidebar-accent: oklch(0.27 0.08 260);
+  --sidebar-accent-foreground: oklch(0.98 0.005 260);
+  --sidebar-border: oklch(0.30 0.06 260);
+  --sidebar-ring: oklch(0.78 0.12 82);
 }
 
 .dark {
-  --background: oklch(0.13 0.01 285);
-  --foreground: oklch(0.96 0.005 285);
-  --card: oklch(0.18 0.015 285);
-  --card-foreground: oklch(0.96 0.005 285);
-  --popover: oklch(0.18 0.015 285);
-  --popover-foreground: oklch(0.96 0.005 285);
-  --secondary: oklch(0.24 0.02 285);
-  --secondary-foreground: oklch(0.96 0.005 285);
-  --muted: oklch(0.22 0.015 285);
-  --muted-foreground: oklch(0.65 0.01 285);
-  --accent: oklch(0.28 0.05 305);
-  --accent-foreground: oklch(0.96 0.005 285);
-  --border: oklch(0.28 0.01 285);
-  --input: oklch(0.28 0.01 285);
+  --background: oklch(0.14 0.02 260);
+  --foreground: oklch(0.96 0.005 255);
+  --card: oklch(0.19 0.025 260);
+  --card-foreground: oklch(0.96 0.005 255);
+  --popover: oklch(0.19 0.025 260);
+  --popover-foreground: oklch(0.96 0.005 255);
+  --secondary: oklch(0.24 0.025 260);
+  --secondary-foreground: oklch(0.96 0.005 255);
+  --muted: oklch(0.22 0.02 260);
+  --muted-foreground: oklch(0.66 0.012 260);
+  --accent: oklch(0.30 0.06 80);
+  --accent-foreground: oklch(0.96 0.02 85);
+  --border: oklch(0.28 0.015 260);
+  --input: oklch(0.28 0.015 260);
 }
+
 
 @layer base {
   * {
@@ -157,15 +160,15 @@
 .scroll-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 .scroll-thin::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); }
 
-/* STC-inspired professional 4K background — deep purple brand with motion */
+/* Al Hayat — professional finance surface (navy + gold accents) */
 .bg-app-surface {
-  background-color: oklch(0.97 0.01 305);
+  background-color: oklch(0.98 0.005 255);
   background-image:
-    radial-gradient(ellipse 1200px 700px at 8% -10%, oklch(0.34 0.13 305 / 0.22), transparent 60%),
-    radial-gradient(ellipse 1000px 600px at 100% 10%, oklch(0.55 0.20 305 / 0.20), transparent 55%),
-    radial-gradient(ellipse 1100px 700px at 50% 110%, oklch(0.45 0.18 320 / 0.18), transparent 60%),
+    radial-gradient(ellipse 1200px 700px at 8% -10%, oklch(0.28 0.09 260 / 0.18), transparent 60%),
+    radial-gradient(ellipse 1000px 600px at 100% 10%, oklch(0.45 0.13 255 / 0.14), transparent 55%),
+    radial-gradient(ellipse 1100px 700px at 50% 110%, oklch(0.78 0.12 82 / 0.10), transparent 60%),
     radial-gradient(circle at 30% 50%, oklch(1 0 0 / 0.55), transparent 55%),
-    linear-gradient(135deg, oklch(0.98 0.005 305) 0%, oklch(0.95 0.018 310) 50%, oklch(0.96 0.02 295) 100%);
+    linear-gradient(135deg, oklch(0.99 0.003 255) 0%, oklch(0.96 0.01 250) 50%, oklch(0.97 0.012 245) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -175,9 +178,9 @@
   inset: -20%;
   pointer-events: none;
   background:
-    radial-gradient(circle 400px at 20% 30%, oklch(0.55 0.20 305 / 0.18), transparent 60%),
-    radial-gradient(circle 500px at 80% 70%, oklch(0.34 0.13 305 / 0.18), transparent 60%),
-    radial-gradient(circle 350px at 60% 20%, oklch(0.65 0.18 290 / 0.14), transparent 60%);
+    radial-gradient(circle 400px at 20% 30%, oklch(0.45 0.13 255 / 0.14), transparent 60%),
+    radial-gradient(circle 500px at 80% 70%, oklch(0.28 0.09 260 / 0.14), transparent 60%),
+    radial-gradient(circle 350px at 60% 20%, oklch(0.78 0.12 82 / 0.10), transparent 60%);
   filter: blur(40px);
   animation: stc-float 18s ease-in-out infinite alternate;
 }
@@ -187,18 +190,13 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, oklch(0.34 0.13 305 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.34 0.13 305 / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.28 0.09 260 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.28 0.09 260 / 0.05) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
 }
 
-@keyframes stc-float {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  50%  { transform: translate3d(2%, -1%, 0) scale(1.05); }
-  100% { transform: translate3d(-2%, 1%, 0) scale(1.08); }
-}
 
 @keyframes loading-bar {
   0%   { transform: translateX(-100%); }
