@@ -41,6 +41,7 @@ const AccountTypeUpsertSchema = z.object({
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   classification: z.enum(ACCOUNT_TYPES),
+  classification_id: z.string().uuid().nullable().optional(),
   is_active: z.boolean().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
@@ -55,6 +56,7 @@ export const upsertAccountType = createServerFn({ method: "POST" })
       name_ar: data.name_ar,
       name_en: data.name_en,
       classification: data.classification,
+      classification_id: data.classification_id ?? null,
       is_active: data.is_active ?? true,
       notes: data.notes ?? null,
     };
@@ -68,6 +70,8 @@ export const upsertAccountType = createServerFn({ method: "POST" })
       .from("account_types").insert(payload).select().single();
     if (error) throw new Error(error.message);
     return row;
+  });
+
   });
 
 export const deleteAccountType = createServerFn({ method: "POST" })
