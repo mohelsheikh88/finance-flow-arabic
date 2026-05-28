@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Topbar } from "@/components/topbar";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { useI18n } from "@/i18n";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
