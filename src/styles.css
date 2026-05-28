@@ -63,50 +63,50 @@
 
 :root {
   --radius: 0.5rem;
-  /* Al Hayat — Finance Navy + Gold (inspired by global finance identities) */
-  --primary: oklch(0.28 0.09 260);          /* #0E2A55 navy */
-  --primary-deep: oklch(0.22 0.08 260);     /* #0A1B38 deep navy */
-  --primary-light: oklch(0.45 0.13 255);    /* royal blue accent */
-  --primary-foreground: oklch(0.99 0 0);
+  /* Premium Deep Purple + Magenta theme (matches sidebar) */
+  --primary: oklch(0.34 0.16 295);           /* deep purple */
+  --primary-deep: oklch(0.22 0.13 295);      /* deeper purple */
+  --primary-light: oklch(0.60 0.24 315);     /* purple-violet glow */
+  --primary-foreground: oklch(0.99 0.005 320);
 
-  /* Gold accent for emphasis (CTA highlights, badges) */
-  --accent: oklch(0.94 0.04 85);
-  --accent-foreground: oklch(0.32 0.08 75);
+  /* Magenta accent for emphasis (CTAs, highlights, badges) */
+  --accent: oklch(0.62 0.27 0);              /* vivid magenta */
+  --accent-foreground: oklch(0.99 0 0);
 
-  --background: oklch(0.985 0.003 250);
-  --foreground: oklch(0.18 0.02 260);
+  --background: oklch(0.985 0.006 310);
+  --foreground: oklch(0.18 0.04 295);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.015 260);
+  --card-foreground: oklch(0.18 0.04 295);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.015 260);
+  --popover-foreground: oklch(0.18 0.04 295);
 
-  --secondary: oklch(0.96 0.006 255);
-  --secondary-foreground: oklch(0.22 0.08 260);
-  --muted: oklch(0.96 0.006 255);
-  --muted-foreground: oklch(0.48 0.02 260);
+  --secondary: oklch(0.965 0.012 310);
+  --secondary-foreground: oklch(0.28 0.12 295);
+  --muted: oklch(0.965 0.012 310);
+  --muted-foreground: oklch(0.48 0.04 295);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.98 0 0);
   --success: oklch(0.58 0.15 155);
   --success-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.78 0.14 80);            /* gold-tinted */
+  --warning: oklch(0.78 0.14 80);
   --warning-foreground: oklch(0.20 0.05 80);
-  --info: oklch(0.55 0.14 240);
+  --info: oklch(0.55 0.18 295);
   --info-foreground: oklch(0.98 0 0);
 
-  --border: oklch(0.91 0.006 255);
-  --input: oklch(0.91 0.006 255);
-  --ring: oklch(0.45 0.13 255);
+  --border: oklch(0.91 0.012 310);
+  --input: oklch(0.91 0.012 310);
+  --ring: oklch(0.60 0.24 315);
 
-  /* Sidebar — deep navy with gold-touched primary highlight */
-  --sidebar: oklch(0.20 0.07 260);
-  --sidebar-foreground: oklch(0.95 0.01 260);
-  --sidebar-primary: oklch(0.78 0.12 82);    /* gold for active state */
-  --sidebar-primary-foreground: oklch(0.18 0.05 80);
-  --sidebar-accent: oklch(0.27 0.08 260);
-  --sidebar-accent-foreground: oklch(0.98 0.005 260);
-  --sidebar-border: oklch(0.30 0.06 260);
-  --sidebar-ring: oklch(0.78 0.12 82);
+  /* Sidebar — deep purple with magenta highlight */
+  --sidebar: hsl(263 55% 14%);
+  --sidebar-foreground: hsl(280 25% 94%);
+  --sidebar-primary: hsl(327 92% 58%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(263 50% 22%);
+  --sidebar-accent-foreground: hsl(280 30% 97%);
+  --sidebar-border: hsl(263 40% 26%);
+  --sidebar-ring: hsl(327 92% 58%);
 }
 
 .dark {
@@ -176,8 +176,9 @@
   bottom: 12%;
   width: 4px;
   border-radius: 4px;
-  background: linear-gradient(180deg, oklch(0.78 0.12 82) 0%, oklch(0.28 0.09 260) 100%);
-  box-shadow: 0 0 0 1px oklch(0.78 0.12 82 / 0.25);
+  background: linear-gradient(180deg, hsl(327 95% 60%) 0%, hsl(263 55% 32%) 100%);
+  box-shadow: 0 0 0 1px hsl(327 92% 60% / 0.3), 0 0 16px hsl(327 95% 60% / 0.4);
+}
 }
 .page-subtitle {
   margin-top: 0.25rem;
@@ -210,15 +211,15 @@
 .scroll-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 .scroll-thin::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); }
 
-/* Al Hayat — professional finance surface (navy + gold accents) */
+/* Premium purple/magenta app surface */
 .bg-app-surface {
-  background-color: oklch(0.98 0.005 255);
+  background-color: oklch(0.985 0.008 310);
   background-image:
-    radial-gradient(ellipse 1200px 700px at 8% -10%, oklch(0.28 0.09 260 / 0.18), transparent 60%),
-    radial-gradient(ellipse 1000px 600px at 100% 10%, oklch(0.45 0.13 255 / 0.14), transparent 55%),
-    radial-gradient(ellipse 1100px 700px at 50% 110%, oklch(0.78 0.12 82 / 0.10), transparent 60%),
+    radial-gradient(ellipse 1200px 700px at 8% -10%, hsl(327 92% 55% / 0.12), transparent 60%),
+    radial-gradient(ellipse 1000px 600px at 100% 10%, hsl(263 55% 32% / 0.14), transparent 55%),
+    radial-gradient(ellipse 1100px 700px at 50% 110%, hsl(285 80% 50% / 0.10), transparent 60%),
     radial-gradient(circle at 30% 50%, oklch(1 0 0 / 0.55), transparent 55%),
-    linear-gradient(135deg, oklch(0.99 0.003 255) 0%, oklch(0.96 0.01 250) 50%, oklch(0.97 0.012 245) 100%);
+    linear-gradient(135deg, oklch(0.99 0.005 310) 0%, oklch(0.965 0.012 305) 50%, oklch(0.97 0.014 315) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -228,9 +229,9 @@
   inset: -20%;
   pointer-events: none;
   background:
-    radial-gradient(circle 400px at 20% 30%, oklch(0.45 0.13 255 / 0.14), transparent 60%),
-    radial-gradient(circle 500px at 80% 70%, oklch(0.28 0.09 260 / 0.14), transparent 60%),
-    radial-gradient(circle 350px at 60% 20%, oklch(0.78 0.12 82 / 0.10), transparent 60%);
+    radial-gradient(circle 400px at 20% 30%, hsl(327 92% 55% / 0.14), transparent 60%),
+    radial-gradient(circle 500px at 80% 70%, hsl(263 55% 32% / 0.14), transparent 60%),
+    radial-gradient(circle 350px at 60% 20%, hsl(285 80% 50% / 0.10), transparent 60%);
   filter: blur(40px);
   animation: stc-float 18s ease-in-out infinite alternate;
 }
@@ -240,12 +241,53 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, oklch(0.28 0.09 260 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.28 0.09 260 / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, hsl(263 55% 32% / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(263 55% 32% / 0.05) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
 }
+
+@keyframes stc-float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(2%, -1%) scale(1.04); }
+}
+
+/* Card & Table polish — subtle purple tint that ties to the sidebar */
+.card, [data-slot="card"] {
+  border-color: hsl(263 30% 88%);
+  box-shadow:
+    0 1px 0 hsl(263 40% 95%),
+    0 8px 24px -16px hsl(263 55% 32% / 0.18);
+}
+.card:hover, [data-slot="card"]:hover {
+  box-shadow:
+    0 1px 0 hsl(263 40% 95%),
+    0 14px 32px -14px hsl(263 55% 32% / 0.28),
+    0 0 0 1px hsl(327 92% 60% / 0.18);
+}
+
+table thead {
+  background: linear-gradient(180deg, hsl(263 40% 97%), hsl(263 40% 94%));
+}
+table thead th {
+  color: hsl(263 45% 28%);
+  font-weight: 700;
+  border-bottom: 1px solid hsl(263 30% 86%) !important;
+}
+table tbody tr {
+  transition: background-color .15s ease;
+}
+table tbody tr:hover {
+  background-color: hsl(327 90% 96% / 0.55);
+}
+table tbody tr:nth-child(even) {
+  background-color: hsl(263 40% 99%);
+}
+table td, table th {
+  border-color: hsl(263 25% 92%);
+}
+
 
 
 @keyframes loading-bar {
