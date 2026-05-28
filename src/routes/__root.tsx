@@ -123,6 +123,7 @@ function RootComponent() {
         <AuthProvider>
           <BranchProvider>
             <AuthSync />
+            <RealtimeSync />
             <Outlet />
             <Toaster richColors position="top-center" />
           </BranchProvider>
