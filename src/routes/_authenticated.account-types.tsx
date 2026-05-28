@@ -297,24 +297,34 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
     [types, classifications],
   );
 
+  const allExpandableIds = useMemo(() => {
+    const ids: string[] = [];
+    const walk = (n: Node) => {
+      if (n.children.length) {
+        ids.push(n.id);
+        n.children.forEach(walk);
+      }
+    };
+    tree.forEach(walk);
+    return ids;
+  }, [tree]);
+
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const didInitExpand = useRef(false);
+  useEffect(() => {
+    if (!didInitExpand.current && allExpandableIds.length > 0) {
+      setExpanded(new Set(allExpandableIds));
+      didInitExpand.current = true;
+    }
+  }, [allExpandableIds]);
+
   const toggle = (id: string) =>
     setExpanded((s) => {
       const next = new Set(s);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  const expandAll = () => {
-    const all = new Set<string>();
-    const walk = (n: Node) => {
-      if (n.children.length) {
-        all.add(n.id);
-        n.children.forEach(walk);
-      }
-    };
-    tree.forEach(walk);
-    setExpanded(all);
-  };
+  const expandAll = () => setExpanded(new Set(allExpandableIds));
   const collapseAll = () => setExpanded(new Set());
 
   const visible = useMemo(() => flatten(tree, expanded), [tree, expanded]);
