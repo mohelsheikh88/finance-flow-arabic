@@ -248,7 +248,7 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
           <AlertDialogHeader>
             <AlertDialogTitle>{t("accounts.confirmBulkChangeTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("accounts.confirmBulkChangeMessage", { count: selected.size })}
+              {selected.size + " " + t("accounts.confirmBulkChangeMessage")}
               <br />
               <span className="font-semibold text-foreground mt-2 block">
                 {bulkTypeId ? localized(typeById.get(bulkTypeId)?.name_ar, typeById.get(bulkTypeId)?.name_en) : ""}
