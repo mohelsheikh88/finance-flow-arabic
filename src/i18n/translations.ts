@@ -488,6 +488,20 @@ export const translations = {
       reconciliations: "Bank Reconciliations",
       accounts: "Bank Accounts",
     },
+    paymentMethods: {
+      new: "New Payment Method",
+      type: "Type",
+      bank: "Bank Account",
+      inbound: "For Receipts",
+      outbound: "For Payments",
+      types: {
+        cash: "Cash",
+        bank_transfer: "Bank Transfer",
+        check: "Cheque",
+        card: "Card",
+        other: "Other",
+      },
+    },
     dashboard: {
       title: "Accounting Dashboard",
       subtitle: "Comprehensive view of company financial position",
