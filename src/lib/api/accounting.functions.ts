@@ -711,3 +711,90 @@ export const getDashboardKpis = createServerFn({ method: "GET" })
       recentEntries: recentEntries.data ?? [],
     };
   });
+
+// ---------------- Cost Centers ----------------
+
+export const listCostCenters = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => i)
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("cost_centers")
+      .select("*")
+      .eq("company_id", data.companyId)
+      .order("code");
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const CostCenterUpsertSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
+  name_ar: z.string().trim().min(1).max(255),
+  name_en: z.string().trim().min(1).max(255),
+  parent_id: z.string().uuid().nullable().optional(),
+  is_group: z.boolean().optional(),
+  is_active: z.boolean().optional(),
+});
+
+export const upsertCostCenter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: z.infer<typeof CostCenterUpsertSchema>) => CostCenterUpsertSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    if (data.parent_id) {
+      if (data.id && data.parent_id === data.id) {
+        throw new Error("Cost center cannot be its own parent | لا يمكن أن يكون مركز التكلفة أبًا لنفسه");
+      }
+      const { data: parent, error: pErr } = await context.supabase
+        .from("cost_centers").select("id, company_id, is_group").eq("id", data.parent_id).maybeSingle();
+      if (pErr) throw new Error(pErr.message);
+      if (!parent) throw new Error("Parent not found | الأب غير موجود");
+      if (parent.company_id !== data.company_id) {
+        throw new Error("Parent belongs to another company | الأب يخص شركة أخرى");
+      }
+      if (!parent.is_group) {
+        throw new Error("Parent must be a group | يجب أن يكون الأب مجموعة");
+      }
+    }
+
+    const payload: any = {
+      company_id: data.company_id,
+      code: data.code,
+      name_ar: data.name_ar,
+      name_en: data.name_en,
+      parent_id: data.parent_id ?? null,
+      is_group: data.is_group ?? false,
+      is_active: data.is_active ?? true,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("cost_centers").update(payload).eq("id", data.id).select().single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("cost_centers").insert(payload).select().single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteCostCenter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { count: childCount } = await context.supabase
+      .from("cost_centers").select("id", { count: "exact", head: true }).eq("parent_id", data.id);
+    if ((childCount ?? 0) > 0) {
+      throw new Error("Cost center has children | يحتوي على عناصر تابعة");
+    }
+    const { count: usedCount } = await context.supabase
+      .from("journal_entry_lines").select("id", { count: "exact", head: true }).eq("cost_center_id", data.id);
+    if ((usedCount ?? 0) > 0) {
+      throw new Error("Cost center is used in journal entries | مستخدم في قيود محاسبية");
+    }
+    const { error } = await context.supabase.from("cost_centers").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
