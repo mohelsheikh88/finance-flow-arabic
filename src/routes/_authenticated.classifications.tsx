@@ -13,6 +13,7 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-ki
 import { SortableRow } from "@/components/sortable-row";
 
 import { useBranch } from "@/lib/branch-context";
+import { useAccountingBuckets } from "@/lib/use-buckets";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -86,6 +87,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
   const { statement: statementLabel, normalBalance: normalBalanceLabel } = useLabels();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+  const { buckets: bucketRows, bucketName } = useAccountingBuckets(companyId ?? undefined);
 
 
   const list = useServerFn(listClassifications);
@@ -320,8 +322,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("common.all")}</SelectItem>
-              {BUCKETS.map((b) => (
-                <SelectItem key={b} value={b}>{t(`accounts.${b}`)}</SelectItem>
+              {(bucketRows.length ? bucketRows.map((b) => b.code) : (BUCKETS as readonly string[])).map((b) => (
+                <SelectItem key={b} value={b}>{bucketName(b, t(`accounts.${b}`))}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -395,7 +397,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                         <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
                         <td className="p-3">
                           <Badge variant="outline" className={bucketColors[r.bucket]}>
-                            {t(`accounts.${r.bucket}`)}
+                            {bucketName(r.bucket, t(`accounts.${r.bucket}`))}
                           </Badge>
                         </td>
                         <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
@@ -442,8 +444,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
               <Select value={form.bucket} onValueChange={(v) => setForm({ ...form, bucket: v as Bucket })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {BUCKETS.map((c) => (
-                    <SelectItem key={c} value={c}>{t(`accounts.${c}`)}</SelectItem>
+                  {(bucketRows.length ? bucketRows.map((b) => b.code) : (BUCKETS as readonly string[])).map((c) => (
+                    <SelectItem key={c} value={c}>{bucketName(c, t(`accounts.${c}`))}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

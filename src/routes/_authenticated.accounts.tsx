@@ -8,6 +8,7 @@ import {
 } from "@/lib/api/accounting.functions";
 
 import { useBranch } from "@/lib/branch-context";
+import { useAccountingBuckets } from "@/lib/use-buckets";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -536,6 +537,9 @@ function ChartOfAccountsTree({
 }) {
   const { t } = useI18n();
   const localized = useLocalized();
+  const { companyId } = useBranch();
+  const { byCode: bucketByCode, bucketName, bucketOrder } = useAccountingBuckets(companyId ?? undefined);
+
 
   const tree = useMemo<TreeNode[]>(() => {
     const accountsByType = new Map<string, any[]>();
@@ -596,19 +600,22 @@ function ChartOfAccountsTree({
     const sortByOrder = (a: any, b: any) =>
       (a.sort_order ?? 0) - (b.sort_order ?? 0) || String(a.code).localeCompare(String(b.code));
 
-    const BUCKET_ORDER = ["asset", "liability", "equity", "income", "expense"] as const;
+    const bucketKeys = Array.from(clsByBucket.keys()).sort(
+      (a, b) => bucketOrder(a) - bucketOrder(b) || String(a).localeCompare(String(b)),
+    );
     const roots: TreeNode[] = [];
 
-    BUCKET_ORDER.forEach((b) => {
+    bucketKeys.forEach((b) => {
       const cArr = (clsByBucket.get(b) ?? []).slice().sort(sortByOrder);
       if (cArr.length === 0) return;
+      const bucketRec = bucketByCode.get(b);
       const bucketNode: TreeNode = {
         id: `b:${b}`,
         kind: "bucket",
-        code: b.toUpperCase(),
-        name: t(`accounts.${b}`),
+        code: (bucketRec?.code ?? b).toUpperCase(),
+        name: bucketName(b, t(`accounts.${b}`)),
         depth: 0,
-        data: { bucket: b },
+        data: { bucket: b, bucketRec },
         children: [],
       };
       cArr.forEach((c) => {
@@ -650,7 +657,7 @@ function ChartOfAccountsTree({
     });
 
     return roots;
-  }, [accounts, accountTypes, classifications, localized, t]);
+  }, [accounts, accountTypes, classifications, localized, t, bucketByCode, bucketName, bucketOrder]);
 
   const allExpandableIds = useMemo(() => {
     const ids: string[] = [];
@@ -814,12 +821,22 @@ function ChartOfAccountsTree({
                     </div>
                   </td>
                   <td className="p-3 text-muted-foreground">
-                    {bucketKey ? t(`accounts.${statementOf(bucketKey)}`) : "—"}
+                    {bucketKey
+                      ? t(
+                          `accounts.${
+                            bucketByCode.get(bucketKey)?.statement === "income_statement"
+                              ? "incomeStatement"
+                              : bucketByCode.get(bucketKey)?.statement === "balance_sheet"
+                                ? "balanceSheet"
+                                : statementOf(bucketKey)
+                          }`,
+                        )
+                      : "—"}
                   </td>
                   <td className="p-3">
                     {bucketKey ? (
                       <Badge variant="outline" className={typeColors[bucketKey]}>
-                        {t(`accounts.${bucketKey}`)}
+                        {bucketName(bucketKey, t(`accounts.${bucketKey}`))}
                       </Badge>
                     ) : (
                       <span className="text-muted-foreground">—</span>
@@ -971,6 +988,9 @@ function AccountingBucketsPanel() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounting_buckets"] });
+      qc.invalidateQueries({ queryKey: ["classifications"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
+      qc.invalidateQueries({ queryKey: ["accounts"] });
       setOpen(false);
       setForm(emptyBForm);
     },
@@ -982,6 +1002,9 @@ function AccountingBucketsPanel() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounting_buckets"] });
+      qc.invalidateQueries({ queryKey: ["classifications"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
+      qc.invalidateQueries({ queryKey: ["accounts"] });
       setToDelete(null);
     },
     onError: (e: Error) => toast.error(e.message),

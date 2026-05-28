@@ -21,6 +21,7 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-ki
 import { SortableRow } from "@/components/sortable-row";
 
 import { useBranch } from "@/lib/branch-context";
+import { useAccountingBuckets } from "@/lib/use-buckets";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -204,6 +205,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const localized = useLocalized();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+  const { bucketName } = useAccountingBuckets(companyId ?? undefined);
 
   const list = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccountType);
@@ -627,7 +629,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                           </td>
                           <td className="p-3">
                             <Badge variant="outline" className={clsColors[n.classification]}>
-                              {t(`accounts.${n.classification}`)}
+                              {bucketName(n.classification, t(`accounts.${n.classification}`))}
                             </Badge>
                           </td>
                           <td className="p-3 text-center">
@@ -771,7 +773,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                 <div className="mt-1 text-xs text-muted-foreground flex items-center gap-2">
                   <span>Bucket:</span>
                   <Badge variant="outline" className={clsColors[form.classification]}>
-                    {t(`accounts.${form.classification}`)}
+                    {bucketName(form.classification, t(`accounts.${form.classification}`))}
                   </Badge>
                 </div>
               )}
