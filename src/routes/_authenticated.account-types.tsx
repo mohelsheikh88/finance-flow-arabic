@@ -27,13 +27,13 @@ export const Route = createFileRoute("/_authenticated/account-types")({
 
 const CLASSIFICATIONS = ["asset", "liability", "equity", "income", "expense"] as const;
 type Cls = (typeof CLASSIFICATIONS)[number];
-
 type FormState = {
   id?: string;
   code: string;
   name_ar: string;
   name_en: string;
   classification: Cls;
+  classification_id: string | null;
   is_active: boolean;
   notes: string;
 };
@@ -43,8 +43,11 @@ const empty: FormState = {
   name_ar: "",
   name_en: "",
   classification: "asset",
+  classification_id: null,
   is_active: true,
   notes: "",
+};
+
 };
 
 const clsColors: Record<string, string> = {
