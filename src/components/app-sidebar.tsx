@@ -49,24 +49,24 @@ export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + "/");
 
-  const groups = [
+  type NavItem = { url: string; icon: any; title: string };
+  type NavGroup = { label: string; icon: any; items?: NavItem[]; subgroups?: { label: string; icon: any; items: NavItem[] }[] };
+  const groups: NavGroup[] = [
     {
       label: t("nav.dashboard"),
       icon: LayoutDashboard,
       items: [
         { url: "/dashboard", icon: LayoutDashboard, title: t("nav.mainDashboard") },
       ],
-      subgroups: [
-        {
-          label: t("nav.reports"),
-          icon: BarChart3,
-          items: [
-            { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
-            { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
-            { url: "/reports/aging", icon: FileText, title: t("nav.aging") },
-            { url: "/reports/vat", icon: Receipt, title: t("nav.vatReport") },
-          ],
-        },
+    },
+    {
+      label: t("nav.reports"),
+      icon: BarChart3,
+      items: [
+        { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
+        { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
+        { url: "/reports/aging", icon: FileText, title: t("nav.aging") },
+        { url: "/reports/vat", icon: Receipt, title: t("nav.vatReport") },
       ],
     },
     {
