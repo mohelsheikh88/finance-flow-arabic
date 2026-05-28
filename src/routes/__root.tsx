@@ -114,7 +114,7 @@ function RootComponent() {
             <ConflictTrackerProvider>
               <OfflineQueueProvider>
                 <AuthSync />
-                <RealtimeSync />
+                <ScopedRealtime />
                 <ConflictSubscriber />
                 <Outlet />
                 <Toaster richColors position="top-center" />
