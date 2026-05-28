@@ -1141,12 +1141,22 @@ function AccountingBucketsPanel() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>{t("common.code")} *</Label>
-              <Input
+              <Select
                 value={form.code}
-                onChange={(e) => setForm({ ...form, code: e.target.value })}
-                maxLength={50}
-                placeholder="asset"
-              />
+                onValueChange={(v) => setForm({ ...form, code: v })}
+                disabled={!!form.id}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.code")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {BUCKETS.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>{t("common.nameAr")} *</Label>
