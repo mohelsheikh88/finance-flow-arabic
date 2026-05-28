@@ -2,7 +2,7 @@ export const translations = {
   ar: {
     common: {
       appName: "نظام الحياة المالي",
-      appShort: "Al Hayat ERP",
+      appShort: "Financial ERP",
       loading: "جاري التحميل...",
       save: "حفظ",
       cancel: "إلغاء",
