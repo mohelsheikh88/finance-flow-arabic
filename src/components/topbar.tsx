@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getUserContext } from "@/lib/api/context.functions";
 import { useEffect } from "react";
+import { OfflineIndicator } from "@/components/offline-indicator";
 
 export function Topbar() {
   const { t, locale, setLocale } = useI18n();
@@ -99,7 +100,10 @@ export function Topbar() {
 
       <div className="flex-1" />
 
+      <OfflineIndicator />
+
       <Button variant="ghost" size="sm" onClick={() => setLocale(locale === "ar" ? "en" : "ar")} className="gap-1">
+
         <Languages className="h-4 w-4" />
         <span className="text-xs">{locale === "ar" ? "EN" : "ع"}</span>
       </Button>
