@@ -87,6 +87,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
   const list = useServerFn(listClassifications);
   const upsert = useServerFn(upsertClassification);
   const remove = useServerFn(deleteClassification);
+  const swapOrder = useServerFn(swapClassificationOrder);
+
 
   const { data: rows = [] } = useQuery({
     queryKey: ["classifications", companyId],
