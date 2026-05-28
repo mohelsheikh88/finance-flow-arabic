@@ -33,6 +33,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useI18n } from "@/i18n";
+import { BrandLogo, BrandMark } from "@/components/brand-logo";
+
 
 export function AppSidebar() {
   const { t, locale } = useI18n();
