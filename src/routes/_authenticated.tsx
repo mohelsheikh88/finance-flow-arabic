@@ -77,6 +77,7 @@ function AuthenticatedLayout() {
       "nav.chartOfAccounts", "nav.journalTypes", "nav.currencies", "nav.taxesTypes",
       "nav.fiscalPeriods", "nav.paymentMethods", "nav.lockDates", "approvals.title",
       "nav.companiesBranches", "nav.users",
+      "common.willBeBuiltLater",
     ];
     const entries = [
       ...grandparents.map((k) => ({ text: t(k), size: 17, weight: 800, indent: 0 })),
