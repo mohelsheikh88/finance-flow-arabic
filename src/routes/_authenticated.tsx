@@ -30,7 +30,7 @@ function measureLabelWidth(
   }
   // icon (20) + gap (10) + side padding (32) + safety (20)
   const total = Math.ceil(max + 20 + 10 + 32 + 20);
-  return Math.max(260, Math.min(560, total));
+  return Math.max(280, Math.min(720, total));
 }
 
 
