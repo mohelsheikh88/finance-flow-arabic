@@ -4,8 +4,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listLockDates, createLockDate, deleteLockDate } from "@/lib/api/lock-dates.functions";
 import { useBranch } from "@/lib/branch-context";
+import { useBranch } from "@/lib/branch-context";
+import { supabase } from "@/integrations/supabase/client";
 import { useI18n, useLocalized } from "@/i18n";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/lock-dates")({
 function Page() {
   const { t } = useI18n();
   const localized = useLocalized();
-  const { companyId, branches } = useBranch();
+  const { companyId } = useBranch();
   const qc = useQueryClient();
 
   const list = useServerFn(listLockDates);
@@ -35,8 +36,19 @@ function Page() {
     queryFn: () => list({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
-
-  const companyBranches = (branches ?? []).filter((b: any) => b.company_id === companyId);
+  const { data: companyBranches = [] } = useQuery({
+    queryKey: ["branches", companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("branches")
+        .select("id, code, name_ar, name_en")
+        .eq("company_id", companyId!)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!companyId,
+  });
 
   const [open, setOpen] = useState(false);
   const empty = { branch_id: "__all__", lock_date: "", notes: "" };
