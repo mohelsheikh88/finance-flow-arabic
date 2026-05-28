@@ -42,6 +42,7 @@ function TBPage() {
             <tr>
               <th className="text-start p-3">{t("common.code")}</th>
               <th className="text-start p-3">{t("tb.account")}</th>
+              <th className="text-start p-3">{t("accounts.classification")}</th>
               <th className="text-end p-3 font-mono">{t("tb.periodDebit")}</th>
               <th className="text-end p-3 font-mono">{t("tb.periodCredit")}</th>
               <th className="text-end p-3 font-mono">{t("tb.closingBalance")}</th>
@@ -50,21 +51,25 @@ function TBPage() {
           <tbody>
             {rows.map((r: any) => {
               const bal = r.debit - r.credit;
+              const clsName = r.classification_id
+                ? localized({ name_ar: r.classification_name_ar, name_en: r.classification_name_en }, "name")
+                : t(`accounts.${r.bucket ?? r.type}`);
               return (
                 <tr key={r.id} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono">{r.code}</td>
                   <td className="p-3 font-medium">{localized(r, "name")}</td>
+                  <td className="p-3 text-muted-foreground">{clsName}</td>
                   <td className="p-3 text-end font-mono">{fmt(r.debit)}</td>
                   <td className="p-3 text-end font-mono">{fmt(r.credit)}</td>
                   <td className={`p-3 text-end font-mono ${bal < 0 ? "text-destructive" : ""}`}>{fmt(bal)}</td>
                 </tr>
               );
             })}
-            {rows.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
           <tfoot className="bg-muted/50 border-t-2 font-bold">
             <tr>
-              <td colSpan={2} className="p-3 text-end">{t("tb.totals")}</td>
+              <td colSpan={3} className="p-3 text-end">{t("tb.totals")}</td>
               <td className="p-3 text-end font-mono">{fmt(totals.d)}</td>
               <td className="p-3 text-end font-mono">{fmt(totals.c)}</td>
               <td className="p-3 text-end font-mono">{fmt(totals.d - totals.c)}</td>
@@ -74,4 +79,5 @@ function TBPage() {
       </Card>
     </div>
   );
+
 }
