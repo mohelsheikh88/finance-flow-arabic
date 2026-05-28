@@ -315,9 +315,8 @@ export async function postDueDepreciationCore(
       // Update asset rollup
       const newAccum = Number(row.accumulated_depreciation);
       const newBook = Number(row.book_value);
-      const isFinal = newBook <= Number(asset.acquisition_cost) - Number(asset.acquisition_cost) + 0.01
-        ? false : false; // computed below
       await supabase
+
         .from("fixed_assets")
         .update({
           accumulated_depreciation: newAccum,
