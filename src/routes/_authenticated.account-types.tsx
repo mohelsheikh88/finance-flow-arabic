@@ -54,6 +54,20 @@ const clsColors: Record<string, string> = {
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
+function statementLabel(classification: Cls) {
+  switch (classification) {
+    case "asset":
+    case "liability":
+    case "equity":
+      return "الميزانية العمومية";
+    case "income":
+    case "expense":
+      return "قائمة الدخل";
+    default:
+      return "";
+  }
+}
+
 function AccountTypesPage() {
   const { t } = useI18n();
   const localized = useLocalized();
