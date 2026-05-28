@@ -733,6 +733,8 @@ export const translations = {
       debit: "Debit",
       credit: "Credit",
       accountTypeSingular: "Account Type",
+      coreClassification: "Core Classification",
+      grandParent: "Grand Parent",
       classificationSingular: "Classification",
       typeInUse: "This type is used by accounts and cannot be deleted",
       classificationInUse: "This classification is linked to account types and cannot be deleted",
