@@ -261,9 +261,8 @@ function ClassificationsPage() {
                   <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
                 </SelectContent>
               </Select>
-
-              </Select>
             </div>
+
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               <Label>{t("common.active")}</Label>
