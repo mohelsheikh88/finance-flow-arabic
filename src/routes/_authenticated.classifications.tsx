@@ -195,72 +195,89 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           </Button>
         </div>
       )}
-      <div className="flex flex-wrap items-end gap-2">
-        <div className="relative flex-1 min-w-[180px]">
-          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("common.search")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="ps-9"
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">{t("common.search")}</Label>
+          <div className="relative">
+            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t("common.search")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="ps-9"
+            />
+          </div>
         </div>
-        <Select value={filterStatement} onValueChange={(v) => setFilterStatement(v as Statement | "all")}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder={t("accounts.statement")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("common.all")}</SelectItem>
-            <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
-            <SelectItem value="income_statement">{t("accounts.incomeStatement")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filterNormalBalance} onValueChange={(v) => setFilterNormalBalance(v as NormalBalance | "all")}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder={t("accounts.normalBalance")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("common.all")}</SelectItem>
-            <SelectItem value="debit">{t("accounts.debit")}</SelectItem>
-            <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filterBucket} onValueChange={(v) => setFilterBucket(v as Bucket | "all")}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder={t("accounts.accountingBucket")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("common.all")}</SelectItem>
-            {BUCKETS.map((b) => (
-              <SelectItem key={b} value={b}>{t(`accounts.${b}`)}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "active" | "inactive")}>
-          <SelectTrigger className="w-[130px]">
-            <SelectValue placeholder={t("common.status")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("common.all")}</SelectItem>
-            <SelectItem value="active">{t("common.active")}</SelectItem>
-            <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSearch("");
-            setFilterStatement("all");
-            setFilterNormalBalance("all");
-            setFilterBucket("all");
-            setFilterStatus("all");
-          }}
-          className="text-muted-foreground"
-        >
-          <FilterX className="h-4 w-4 me-1" />
-          {t("common.clear")}
-        </Button>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">{t("accounts.statement")}</Label>
+          <Select value={filterStatement} onValueChange={(v) => setFilterStatement(v as Statement | "all")}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("accounts.statement")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
+              <SelectItem value="income_statement">{t("accounts.incomeStatement")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">{t("accounts.normalBalance")}</Label>
+          <Select value={filterNormalBalance} onValueChange={(v) => setFilterNormalBalance(v as NormalBalance | "all")}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("accounts.normalBalance")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              <SelectItem value="debit">{t("accounts.debit")}</SelectItem>
+              <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">{t("accounts.accountingBucket")}</Label>
+          <Select value={filterBucket} onValueChange={(v) => setFilterBucket(v as Bucket | "all")}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("accounts.accountingBucket")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              {BUCKETS.map((b) => (
+                <SelectItem key={b} value={b}>{t(`accounts.${b}`)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">{t("common.status")}</Label>
+          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "active" | "inactive")}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("common.status")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              <SelectItem value="active">{t("common.active")}</SelectItem>
+              <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSearch("");
+              setFilterStatement("all");
+              setFilterNormalBalance("all");
+              setFilterBucket("all");
+              setFilterStatus("all");
+            }}
+            className="text-muted-foreground w-full"
+          >
+            <FilterX className="h-4 w-4 me-1" />
+            {t("common.clear")}
+          </Button>
+        </div>
       </div>
 
       <Card>
