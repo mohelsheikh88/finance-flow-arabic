@@ -6,6 +6,7 @@ import { Topbar } from "@/components/topbar";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useI18n } from "@/i18n";
 import { Loader2 } from "lucide-react";
+import { DailyUpdateGate } from "@/components/daily-update-gate";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -29,16 +30,19 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <SidebarProvider defaultOpen>
-      <div className="min-h-screen flex w-full bg-app-surface" dir={dir}>
-        <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0 relative z-10">
-          <Topbar />
-          <main className="flex-1 overflow-auto">
-            <Outlet />
-          </main>
+    <DailyUpdateGate>
+      <SidebarProvider defaultOpen>
+        <div className="min-h-screen flex w-full bg-app-surface" dir={dir}>
+          <AppSidebar />
+          <div className="flex-1 flex flex-col min-w-0 relative z-10">
+            <Topbar />
+            <main className="flex-1 overflow-auto">
+              <Outlet />
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </DailyUpdateGate>
   );
 }
+
