@@ -163,6 +163,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["classifications"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
       setOpen(false);
       setForm(empty);
     },
@@ -174,6 +175,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["classifications"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
       setToDelete(null);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -185,8 +187,12 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       if (ctx?.prev) qc.setQueryData(["classifications", companyId], ctx.prev);
       toast.error(e.message);
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["classifications", companyId] }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["classifications", companyId] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
+    },
   });
+
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
