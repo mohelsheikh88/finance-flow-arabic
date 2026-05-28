@@ -147,27 +147,6 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
           ],
         },
         {
-          label: t("nav.purchaseProcurement"),
-          icon: ShoppingBag,
-          items: [
-            { url: "/purchase", icon: ShoppingBag, title: t("common.willBeBuiltLater") },
-          ],
-        },
-        {
-          label: t("nav.inventoryManagement"),
-          icon: Package,
-          items: [
-            { url: "/inventory", icon: Package, title: t("common.willBeBuiltLater") },
-          ],
-        },
-        {
-          label: t("nav.humanResources"),
-          icon: UsersRound,
-          items: [
-            { url: "/hr", icon: UsersRound, title: t("common.willBeBuiltLater") },
-          ],
-        },
-        {
           label: t("nav.configuration"),
           icon: SlidersHorizontal,
           items: [
@@ -185,6 +164,27 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       ],
     },
     {
+      label: t("nav.purchaseProcurement"),
+      icon: ShoppingBag,
+      items: [
+        { url: "/purchase", icon: ShoppingBag, title: t("common.willBeBuiltLater") },
+      ],
+    },
+    {
+      label: t("nav.inventoryManagement"),
+      icon: Package,
+      items: [
+        { url: "/inventory", icon: Package, title: t("common.willBeBuiltLater") },
+      ],
+    },
+    {
+      label: t("nav.humanResources"),
+      icon: UsersRound,
+      items: [
+        { url: "/hr", icon: UsersRound, title: t("common.willBeBuiltLater") },
+      ],
+    },
+    {
       label: t("nav.generalSetting"),
       icon: Settings,
       items: [
@@ -193,6 +193,8 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       ],
     },
   ];
+
+
 
   return (
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
