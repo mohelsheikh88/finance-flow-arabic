@@ -45,9 +45,7 @@ vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: mocks.routerInvalidate }),
 }));
 
-    useRouter: () => ({ invalidate: routerInvalidate }),
-  };
-});
+
 
 // Import AFTER mocks so the hook resolves to mocked modules
 import { useScopedRealtime } from "@/lib/scoped-realtime";
