@@ -215,9 +215,8 @@ export const getBalanceSheet = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; asOfDate: string }) => i)
   .handler(async ({ data, context }) => {
-    const rows = await getAccountBalances(context.supabase, data.companyId, null, data.asOfDate);
+    const { rows, classifications } = await getAccountBalances(context.supabase, data.companyId, null, data.asOfDate);
 
-    // Drive grouping from the classification.statement field.
     const bsRows = rows.filter((r) => r.statement === "balance_sheet");
     const isRows = rows.filter((r) => r.statement === "income_statement");
 
@@ -238,9 +237,9 @@ export const getBalanceSheet = createServerFn({ method: "GET" })
       assets,
       liabilities,
       equity,
-      assetGroups: groupByClassification(bsRows, ["asset"]),
-      liabilityGroups: groupByClassification(bsRows, ["liability"]),
-      equityGroups: groupByClassification(bsRows, ["equity"]),
+      assetGroups: groupByClassification(bsRows, ["asset"], classifications),
+      liabilityGroups: groupByClassification(bsRows, ["liability"], classifications),
+      equityGroups: groupByClassification(bsRows, ["equity"], classifications),
       totals: {
         assets: totalAssets,
         liabilities: totalLiabilities,
@@ -250,6 +249,7 @@ export const getBalanceSheet = createServerFn({ method: "GET" })
       },
     };
   });
+
 
 export const getIncomeStatement = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
