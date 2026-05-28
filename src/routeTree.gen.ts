@@ -17,6 +17,7 @@ import { Route as AuthenticatedTrialBalanceRouteImport } from './routes/_authent
 import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.taxes'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
@@ -76,6 +77,11 @@ const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPartnersRoute = AuthenticatedPartnersRouteImport.update({
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
   '/partners': typeof AuthenticatedPartnersRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
   '/partners': typeof AuthenticatedPartnersRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
@@ -263,6 +271,7 @@ export interface FileRoutesById {
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/taxes': typeof AuthenticatedTaxesRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/journals'
     | '/loans'
     | '/partners'
+    | '/payments'
     | '/settings'
     | '/setup'
     | '/taxes'
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/journals'
     | '/loans'
     | '/partners'
+    | '/payments'
     | '/settings'
     | '/setup'
     | '/taxes'
@@ -353,6 +364,7 @@ export interface FileRouteTypes {
     | '/_authenticated/journals'
     | '/_authenticated/loans'
     | '/_authenticated/partners'
+    | '/_authenticated/payments'
     | '/_authenticated/settings'
     | '/_authenticated/setup'
     | '/_authenticated/taxes'
@@ -430,6 +442,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/partners': {
@@ -588,6 +607,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedTaxesRoute: typeof AuthenticatedTaxesRoute
@@ -616,6 +636,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedTaxesRoute: AuthenticatedTaxesRoute,
