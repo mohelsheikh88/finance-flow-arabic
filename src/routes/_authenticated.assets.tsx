@@ -171,6 +171,10 @@ function AssetsPage() {
           <h1 className="text-xl font-bold">{t("assets.title")}</h1>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => postDepMut.mutate()} disabled={postDepMut.isPending || !companyId}>
+            <PlayCircle className="h-4 w-4 me-1" />{t("assets.postDueDep") ?? "Post Due Depreciation"}
+          </Button>
+
           <Dialog open={catOpen} onOpenChange={setCatOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm"><Plus className="h-4 w-4 me-1" />{t("assets.newCategory")}</Button>
