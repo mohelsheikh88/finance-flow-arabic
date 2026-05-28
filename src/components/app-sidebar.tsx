@@ -92,7 +92,6 @@ export function AppSidebar() {
       items: [
         { url: "/journal-entries", icon: BookOpen, title: t("nav.journalEntries") },
         { url: "/trial-balance", icon: Calculator, title: t("nav.trialBalance") },
-        { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
       ],
     },
     {
@@ -116,6 +115,7 @@ export function AppSidebar() {
         { url: "/fiscal-periods", icon: CalendarRange, title: t("nav.fiscalPeriods") },
         { url: "/payment-methods", icon: CreditCard, title: t("nav.paymentMethods") },
         { url: "/lock-dates", icon: Lock, title: t("nav.lockDates") },
+        { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
         { url: "/users", icon: Users, title: t("nav.users") },
         { url: "/settings", icon: Settings, title: t("nav.generalSettings") },
       ],
