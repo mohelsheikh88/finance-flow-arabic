@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   Lock,
   History,
-  ChevronDown,
   GitBranch,
 } from "lucide-react";
 import {
