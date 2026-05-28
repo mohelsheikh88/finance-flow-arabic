@@ -51,6 +51,11 @@ import { Route as AuthenticatedReportsAgingRouteImport } from './routes/_authent
 import { Route as AuthenticatedJournalEntriesNewRouteImport } from './routes/_authenticated.journal-entries.new'
 import { Route as AuthenticatedInvoicesVendorRouteImport } from './routes/_authenticated.invoices.vendor'
 import { Route as AuthenticatedInvoicesCustomerRouteImport } from './routes/_authenticated.invoices.customer'
+import { Route as AuthenticatedDashboardsLoansRouteImport } from './routes/_authenticated.dashboards.loans'
+import { Route as AuthenticatedDashboardsFixedAssetsRouteImport } from './routes/_authenticated.dashboards.fixed-assets'
+import { Route as AuthenticatedDashboardsBanksRouteImport } from './routes/_authenticated.dashboards.banks'
+import { Route as AuthenticatedDashboardsArRouteImport } from './routes/_authenticated.dashboards.ar'
+import { Route as AuthenticatedDashboardsApRouteImport } from './routes/_authenticated.dashboards.ap'
 import { Route as ApiPublicHooksPostDepreciationRouteImport } from './routes/api/public/hooks/post-depreciation'
 
 const LoginRoute = LoginRouteImport.update({
@@ -279,6 +284,36 @@ const AuthenticatedInvoicesCustomerRoute =
     path: '/invoices/customer',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDashboardsLoansRoute =
+  AuthenticatedDashboardsLoansRouteImport.update({
+    id: '/dashboards/loans',
+    path: '/dashboards/loans',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardsFixedAssetsRoute =
+  AuthenticatedDashboardsFixedAssetsRouteImport.update({
+    id: '/dashboards/fixed-assets',
+    path: '/dashboards/fixed-assets',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardsBanksRoute =
+  AuthenticatedDashboardsBanksRouteImport.update({
+    id: '/dashboards/banks',
+    path: '/dashboards/banks',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardsArRoute =
+  AuthenticatedDashboardsArRouteImport.update({
+    id: '/dashboards/ar',
+    path: '/dashboards/ar',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardsApRoute =
+  AuthenticatedDashboardsApRouteImport.update({
+    id: '/dashboards/ap',
+    path: '/dashboards/ap',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ApiPublicHooksPostDepreciationRoute =
   ApiPublicHooksPostDepreciationRouteImport.update({
     id: '/api/public/hooks/post-depreciation',
@@ -320,6 +355,11 @@ export interface FileRoutesByFullPath {
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/users': typeof AuthenticatedUsersRoute
   '/vendors': typeof AuthenticatedVendorsRoute
+  '/dashboards/ap': typeof AuthenticatedDashboardsApRoute
+  '/dashboards/ar': typeof AuthenticatedDashboardsArRoute
+  '/dashboards/banks': typeof AuthenticatedDashboardsBanksRoute
+  '/dashboards/fixed-assets': typeof AuthenticatedDashboardsFixedAssetsRoute
+  '/dashboards/loans': typeof AuthenticatedDashboardsLoansRoute
   '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
@@ -364,6 +404,11 @@ export interface FileRoutesByTo {
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/users': typeof AuthenticatedUsersRoute
   '/vendors': typeof AuthenticatedVendorsRoute
+  '/dashboards/ap': typeof AuthenticatedDashboardsApRoute
+  '/dashboards/ar': typeof AuthenticatedDashboardsArRoute
+  '/dashboards/banks': typeof AuthenticatedDashboardsBanksRoute
+  '/dashboards/fixed-assets': typeof AuthenticatedDashboardsFixedAssetsRoute
+  '/dashboards/loans': typeof AuthenticatedDashboardsLoansRoute
   '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
@@ -410,6 +455,11 @@ export interface FileRoutesById {
   '/_authenticated/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/vendors': typeof AuthenticatedVendorsRoute
+  '/_authenticated/dashboards/ap': typeof AuthenticatedDashboardsApRoute
+  '/_authenticated/dashboards/ar': typeof AuthenticatedDashboardsArRoute
+  '/_authenticated/dashboards/banks': typeof AuthenticatedDashboardsBanksRoute
+  '/_authenticated/dashboards/fixed-assets': typeof AuthenticatedDashboardsFixedAssetsRoute
+  '/_authenticated/dashboards/loans': typeof AuthenticatedDashboardsLoansRoute
   '/_authenticated/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/_authenticated/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/_authenticated/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
@@ -456,6 +506,11 @@ export interface FileRouteTypes {
     | '/trial-balance'
     | '/users'
     | '/vendors'
+    | '/dashboards/ap'
+    | '/dashboards/ar'
+    | '/dashboards/banks'
+    | '/dashboards/fixed-assets'
+    | '/dashboards/loans'
     | '/invoices/customer'
     | '/invoices/vendor'
     | '/journal-entries/new'
@@ -500,6 +555,11 @@ export interface FileRouteTypes {
     | '/trial-balance'
     | '/users'
     | '/vendors'
+    | '/dashboards/ap'
+    | '/dashboards/ar'
+    | '/dashboards/banks'
+    | '/dashboards/fixed-assets'
+    | '/dashboards/loans'
     | '/invoices/customer'
     | '/invoices/vendor'
     | '/journal-entries/new'
@@ -545,6 +605,11 @@ export interface FileRouteTypes {
     | '/_authenticated/trial-balance'
     | '/_authenticated/users'
     | '/_authenticated/vendors'
+    | '/_authenticated/dashboards/ap'
+    | '/_authenticated/dashboards/ar'
+    | '/_authenticated/dashboards/banks'
+    | '/_authenticated/dashboards/fixed-assets'
+    | '/_authenticated/dashboards/loans'
     | '/_authenticated/invoices/customer'
     | '/_authenticated/invoices/vendor'
     | '/_authenticated/journal-entries/new'
@@ -859,6 +924,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoicesCustomerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/dashboards/loans': {
+      id: '/_authenticated/dashboards/loans'
+      path: '/dashboards/loans'
+      fullPath: '/dashboards/loans'
+      preLoaderRoute: typeof AuthenticatedDashboardsLoansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboards/fixed-assets': {
+      id: '/_authenticated/dashboards/fixed-assets'
+      path: '/dashboards/fixed-assets'
+      fullPath: '/dashboards/fixed-assets'
+      preLoaderRoute: typeof AuthenticatedDashboardsFixedAssetsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboards/banks': {
+      id: '/_authenticated/dashboards/banks'
+      path: '/dashboards/banks'
+      fullPath: '/dashboards/banks'
+      preLoaderRoute: typeof AuthenticatedDashboardsBanksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboards/ar': {
+      id: '/_authenticated/dashboards/ar'
+      path: '/dashboards/ar'
+      fullPath: '/dashboards/ar'
+      preLoaderRoute: typeof AuthenticatedDashboardsArRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboards/ap': {
+      id: '/_authenticated/dashboards/ap'
+      path: '/dashboards/ap'
+      fullPath: '/dashboards/ap'
+      preLoaderRoute: typeof AuthenticatedDashboardsApRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/public/hooks/post-depreciation': {
       id: '/api/public/hooks/post-depreciation'
       path: '/api/public/hooks/post-depreciation'
@@ -901,6 +1001,11 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTrialBalanceRoute: typeof AuthenticatedTrialBalanceRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedVendorsRoute: typeof AuthenticatedVendorsRoute
+  AuthenticatedDashboardsApRoute: typeof AuthenticatedDashboardsApRoute
+  AuthenticatedDashboardsArRoute: typeof AuthenticatedDashboardsArRoute
+  AuthenticatedDashboardsBanksRoute: typeof AuthenticatedDashboardsBanksRoute
+  AuthenticatedDashboardsFixedAssetsRoute: typeof AuthenticatedDashboardsFixedAssetsRoute
+  AuthenticatedDashboardsLoansRoute: typeof AuthenticatedDashboardsLoansRoute
   AuthenticatedInvoicesCustomerRoute: typeof AuthenticatedInvoicesCustomerRoute
   AuthenticatedInvoicesVendorRoute: typeof AuthenticatedInvoicesVendorRoute
   AuthenticatedJournalEntriesNewRoute: typeof AuthenticatedJournalEntriesNewRoute
@@ -944,6 +1049,12 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTrialBalanceRoute: AuthenticatedTrialBalanceRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedVendorsRoute: AuthenticatedVendorsRoute,
+  AuthenticatedDashboardsApRoute: AuthenticatedDashboardsApRoute,
+  AuthenticatedDashboardsArRoute: AuthenticatedDashboardsArRoute,
+  AuthenticatedDashboardsBanksRoute: AuthenticatedDashboardsBanksRoute,
+  AuthenticatedDashboardsFixedAssetsRoute:
+    AuthenticatedDashboardsFixedAssetsRoute,
+  AuthenticatedDashboardsLoansRoute: AuthenticatedDashboardsLoansRoute,
   AuthenticatedInvoicesCustomerRoute: AuthenticatedInvoicesCustomerRoute,
   AuthenticatedInvoicesVendorRoute: AuthenticatedInvoicesVendorRoute,
   AuthenticatedJournalEntriesNewRoute: AuthenticatedJournalEntriesNewRoute,
