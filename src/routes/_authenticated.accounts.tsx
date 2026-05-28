@@ -154,9 +154,9 @@ function ChartOfAccountsPanel() {
       }
       if (filterClassification !== "all") {
         const at = typeById.get(a.account_type_id);
-        const cls = at?.classification ?? a.account_type;
-        if (cls !== filterClassification) return false;
+        if ((at?.classification_id ?? null) !== filterClassification) return false;
       }
+
       if (filterIsGroup !== "all") {
         const isGroup = filterIsGroup === "group";
         if (a.is_group !== isGroup) return false;
