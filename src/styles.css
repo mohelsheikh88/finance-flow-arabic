@@ -280,21 +280,39 @@
 }
 
 [data-sidebar="group-label"] {
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: hsl(300 50% 92% / 0.7) !important;
-  padding-inline-start: 0.75rem;
-  margin-top: 0.25rem;
+  height: auto !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(300 30% 96% / 0.92) !important;
+  padding-inline-start: 0.5rem;
+  margin-top: 0.125rem;
+  letter-spacing: 0;
+  text-transform: none;
 }
-[data-sidebar="group-label"]::after {
+/* Grandparent (top-level group) label — larger, uppercase, with magenta underline */
+.sidebar-grandparent > [data-sidebar="group-label"] {
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: hsl(300 60% 98%) !important;
+  padding-block: 0.625rem;
+}
+.sidebar-grandparent > [data-sidebar="group-label"]::after {
   content: "";
   display: block;
   height: 1px;
-  margin-top: 6px;
-  background: linear-gradient(90deg, hsl(327 92% 60% / 0.45), transparent);
+  margin-top: 8px;
+  background: linear-gradient(90deg, hsl(327 92% 60% / 0.6), hsl(285 80% 50% / 0.2) 60%, transparent);
 }
+/* Parent (subgroup) label — medium emphasis */
+.sidebar-parent > [data-sidebar="group-label"] {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: hsl(300 40% 96% / 0.88) !important;
+  padding-block: 0.5rem;
+}
+
 
 [data-sidebar="menu-button"] {
   position: relative;
