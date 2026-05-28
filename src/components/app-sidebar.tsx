@@ -194,7 +194,6 @@ export function AppSidebar() {
                     <span className="truncate">{g.label}</span>
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
-                </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                   <SidebarGroupContent>
                     <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
