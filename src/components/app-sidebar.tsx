@@ -16,6 +16,7 @@ import {
   CalendarRange,
   Wallet,
   TrendingUp,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -63,6 +64,7 @@ export function AppSidebar() {
       items: [
         { url: "/journal-entries", icon: BookOpen, title: t("nav.journalEntries") },
         { url: "/trial-balance", icon: Calculator, title: t("nav.trialBalance") },
+        { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
       ],
     },
     {
