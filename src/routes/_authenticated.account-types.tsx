@@ -128,40 +128,48 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const upsert = useServerFn(upsertAccountType);
   const remove = useServerFn(deleteAccountType);
   const listCls = useServerFn(listClassifications);
-  const move = useServerFn(moveAccountType);
+  const reorder = useServerFn(reorderAccountTypes);
 
-  const moveMut = useMutation({
-    mutationFn: (v: { id: string; direction: "up" | "down" }) => move({ data: v }),
-    onMutate: async (v) => {
-      await qc.cancelQueries({ queryKey: ["account_types", companyId] });
-      const prev = qc.getQueryData<Row[]>(["account_types", companyId]);
-      if (!prev) return { prev };
-      const cur = prev.find((r) => r.id === v.id);
-      if (!cur) return { prev };
-      const siblings = prev
-        .filter((r) => r.classification === cur.classification && (r.parent_id ?? null) === (cur.parent_id ?? null))
-        .slice()
-        .sort((a, b) => ((a.sort_order ?? 0) - (b.sort_order ?? 0)) || a.code.localeCompare(b.code));
-      const idx = siblings.findIndex((r) => r.id === cur.id);
-      const swapIdx = v.direction === "up" ? idx - 1 : idx + 1;
-      if (idx < 0 || swapIdx < 0 || swapIdx >= siblings.length) return { prev };
-      const a = siblings[idx], b = siblings[swapIdx];
-      const aOrder = a.sort_order ?? 0;
-      const bOrder = b.sort_order ?? 0;
-      const next = prev.map((r) => {
-        if (r.id === a.id) return { ...r, sort_order: bOrder };
-        if (r.id === b.id) return { ...r, sort_order: aOrder };
-        return r;
-      });
-      qc.setQueryData(["account_types", companyId], next);
-      return { prev };
-    },
-    onError: (e: Error, _v, ctx) => {
+  const reorderMut = useMutation({
+    mutationFn: (v: { orderedIds: string[] }) =>
+      reorder({ data: { companyId: companyId!, orderedIds: v.orderedIds } }),
+    onError: (e: Error, _v, ctx: any) => {
       if (ctx?.prev) qc.setQueryData(["account_types", companyId], ctx.prev);
       toast.error(e.message);
     },
     onSettled: () => qc.invalidateQueries({ queryKey: ["account_types", companyId] }),
   });
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const prev = qc.getQueryData<Row[]>(["account_types", companyId]);
+    if (!prev) return;
+    const a = prev.find((r) => r.id === active.id);
+    const b = prev.find((r) => r.id === over.id);
+    if (!a || !b) return;
+    if (a.classification !== b.classification || (a.parent_id ?? null) !== (b.parent_id ?? null)) {
+      toast.error("Items must stay within the same group | يجب البقاء داخل نفس المجموعة");
+      return;
+    }
+    const siblings = prev
+      .filter((r) => r.classification === a.classification && (r.parent_id ?? null) === (a.parent_id ?? null))
+      .slice()
+      .sort((x, y) => ((x.sort_order ?? 0) - (y.sort_order ?? 0)) || x.code.localeCompare(y.code));
+    const fromIdx = siblings.findIndex((r) => r.id === active.id);
+    const toIdx = siblings.findIndex((r) => r.id === over.id);
+    const reordered = arrayMove(siblings, fromIdx, toIdx);
+
+    // Optimistic: rewrite sort_order for the affected siblings.
+    const orderMap = new Map(reordered.map((r, i) => [r.id, (i + 1) * 10]));
+    const next = prev.map((r) => (orderMap.has(r.id) ? { ...r, sort_order: orderMap.get(r.id)! } : r));
+    qc.setQueryData(["account_types", companyId], next);
+
+    reorderMut.mutate({ orderedIds: reordered.map((r) => r.id) });
+  };
+
 
 
 
