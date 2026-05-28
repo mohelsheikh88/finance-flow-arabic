@@ -25,7 +25,7 @@ import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/classifications")({
-  component: ClassificationsPage,
+  component: () => <ClassificationsPage />,
 });
 
 const BUCKETS = ["asset", "liability", "equity", "income", "expense"] as const;
