@@ -19,23 +19,47 @@ function fmt(n: number) {
   return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function Section({ title, rows, total, localized }: { title: string; rows: any[]; total: number; localized: (o: any, p: string) => string }) {
+type Group = {
+  classification_id: string | null;
+  code: string | null;
+  name_ar: string | null;
+  name_en: string | null;
+  bucket: string;
+  accounts: any[];
+  total: number;
+};
+
+function GroupedSection({ groups, total, localized, fallback }: { groups: Group[]; total: number; localized: (o: any, p: string) => string; fallback: string }) {
   return (
     <div>
-      <div className="bg-muted/30 px-3 py-2 border-t border-b font-semibold text-sm flex justify-between">
-        <span>{title}</span>
+      {groups.map((g) => {
+        const title = g.classification_id
+          ? localized({ name_ar: g.name_ar, name_en: g.name_en }, "name")
+          : fallback;
+        return (
+          <div key={g.classification_id ?? `__${g.bucket}`}>
+            <div className="bg-muted/30 px-3 py-2 border-t border-b font-semibold text-sm flex justify-between">
+              <span>{title}</span>
+              <span className="font-mono">{fmt(g.total)}</span>
+            </div>
+            {g.accounts.map((r) => (
+              <div key={r.id} className="flex justify-between px-6 py-1.5 text-xs border-b border-muted/30">
+                <span><span className="font-mono text-muted-foreground me-2">{r.code}</span>{localized(r, "name")}</span>
+                <span className="font-mono">{fmt(r.balance)}</span>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+      {groups.length === 0 && <div className="px-6 py-2 text-xs text-muted-foreground">—</div>}
+      <div className="bg-primary/10 px-3 py-2 border-t font-bold flex justify-between">
+        <span>{fallback}</span>
         <span className="font-mono">{fmt(total)}</span>
       </div>
-      {rows.map((r) => (
-        <div key={r.id} className="flex justify-between px-6 py-1.5 text-xs border-b border-muted/30">
-          <span><span className="font-mono text-muted-foreground me-2">{r.code}</span>{localized(r, "name")}</span>
-          <span className="font-mono">{fmt(r.balance)}</span>
-        </div>
-      ))}
-      {rows.length === 0 && <div className="px-6 py-2 text-xs text-muted-foreground">—</div>}
     </div>
   );
 }
+
 
 function BalanceSheetPage() {
   const { t } = useI18n();
