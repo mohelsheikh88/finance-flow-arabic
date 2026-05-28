@@ -97,8 +97,10 @@ export const listClassifications = createServerFn({ method: "GET" })
       .from("classifications" as any)
       .select("*")
       .eq("company_id", data.companyId)
+      .order("sort_order", { ascending: true })
       .order("statement")
       .order("code");
+
     if (error) throw new Error(error.message);
     return (rows ?? []) as any[];
   });
