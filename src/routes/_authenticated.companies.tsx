@@ -126,9 +126,10 @@ function Page() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["companies"] });
+      qc.invalidateQueries({ queryKey: ["user-context"] });
       setCoOpen(false);
     },
-    onError: (e: Error) => toast.error(e.message),
+
   });
 
   // Branch dialog
@@ -162,8 +163,10 @@ function Page() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["branches"] });
+      qc.invalidateQueries({ queryKey: ["user-context"] });
       setBrOpen(false);
     },
+
     onError: (e: Error) => toast.error(e.message),
   });
 

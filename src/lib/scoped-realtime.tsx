@@ -46,7 +46,7 @@ const TABLES: Record<string, TableConfig> = {
   cost_centers: { scope: { kind: "company" }, roles: FINANCE },
   approval_workflows: { scope: { kind: "company" }, roles: FINANCE_MGR },
   lock_dates: { scope: { kind: "company" }, roles: FINANCE_MGR },
-  companies: { scope: { kind: "company" } },
+  companies: { scope: { kind: "shared" } },
 
   // Branch-scoped transactions
   invoices: { scope: { kind: "branch" }, roles: FINANCE },
@@ -54,7 +54,9 @@ const TABLES: Record<string, TableConfig> = {
   journal_entries: { scope: { kind: "branch" }, roles: FINANCE },
   fixed_assets: { scope: { kind: "branch" }, roles: FINANCE },
   approval_requests: { scope: { kind: "branch" } },
-  branches: { scope: { kind: "branch" } },
+  // branches table has `id` + `company_id` — never `branch_id`. RLS scopes it.
+  branches: { scope: { kind: "shared" } },
+
 
   // Children — listen globally but key invalidation by table only
   invoice_lines: { scope: { kind: "child", parentTable: "invoices" }, roles: FINANCE },
@@ -155,6 +157,17 @@ export function useScopedRealtime(opts: {
           if (cfg?.scope.kind === "child") {
             queryClient.invalidateQueries({ queryKey: [cfg.scope.parentTable] });
           }
+          // Tables that feed the user-context cache (sidebar/topbar dropdowns)
+          if (
+            table === "branches" ||
+            table === "companies" ||
+            table === "user_branch_access" ||
+            table === "user_roles" ||
+            table === "profiles"
+          ) {
+            queryClient.invalidateQueries({ queryKey: ["user-context"] });
+          }
+
           // Refresh active route loaders (cheap; router-side dedup applies)
           router.invalidate();
         }
