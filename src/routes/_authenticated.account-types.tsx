@@ -72,7 +72,7 @@ function useStatementLabel() {
 }
 
 
-function AccountTypesPage() {
+export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useI18n();
   const localized = useLocalized();
   const statementLabel = useStatementLabel();
