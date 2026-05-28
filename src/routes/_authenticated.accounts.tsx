@@ -537,6 +537,9 @@ function ChartOfAccountsTree({
 }) {
   const { t } = useI18n();
   const localized = useLocalized();
+  const { companyId } = useBranch();
+  const { byCode: bucketByCode, bucketName, bucketOrder } = useAccountingBuckets(companyId);
+
 
   const tree = useMemo<TreeNode[]>(() => {
     const accountsByType = new Map<string, any[]>();
