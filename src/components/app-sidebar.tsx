@@ -325,6 +325,20 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
           );
         })}
       </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border/60 p-2">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => signOut()}
+          className="w-full justify-start gap-2.5 h-10 rounded-md text-sidebar-foreground/80 hover:text-white hover:bg-gradient-to-r hover:from-[hsl(327,80%,40%)]/40 hover:to-[hsl(263,60%,26%)]/40"
+          aria-label="Logout"
+          title="Logout"
+        >
+          <LogOut className="h-[17px] w-[17px] shrink-0" />
+          {!collapsed && <span className="truncate text-[13.5px] font-medium">{t("auth.signOut") || "Logout"}</span>}
+        </Button>
+      </SidebarFooter>
     </Sidebar>
   );
 }
