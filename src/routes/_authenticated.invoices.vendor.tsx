@@ -130,7 +130,7 @@ function VendorBillsPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("nav.vendorBills")}</h1>
+          <h1 className="page-title">{t("nav.vendorBills")}</h1>
           <p className="text-sm text-muted-foreground">{invoices.length}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>

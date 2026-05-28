@@ -57,7 +57,7 @@ export function QuickActions({
 export function SectionDashboardHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+      <h1 className="page-title">{title}</h1>
       {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
     </div>
   );

@@ -80,7 +80,7 @@ function BalanceSheetPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Scale className="h-6 w-6 text-primary" /> {t("nav.balanceSheet")}</h1>
+          <h1 className="page-title"><Scale className="h-6 w-6 text-primary" /> {t("nav.balanceSheet")}</h1>
           <p className="text-sm text-muted-foreground">{t("reports.bsSubtitle")}</p>
         </div>
       </div>

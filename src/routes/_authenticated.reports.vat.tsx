@@ -49,7 +49,7 @@ function VatPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="page-title">
             <FileText className="h-6 w-6 text-primary" /> {t("vat.title")}
           </h1>
           <p className="text-sm text-muted-foreground">{t("vat.subtitle")}</p>

@@ -205,7 +205,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
             <Button variant="ghost" size="sm" asChild>
               <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.backToAccountTypes")}</Link>
             </Button>
-            <h1 className="text-2xl font-bold">{t("accounts.classificationsTitle")}</h1>
+            <h1 className="page-title">{t("accounts.classificationsTitle")}</h1>
           </div>
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}

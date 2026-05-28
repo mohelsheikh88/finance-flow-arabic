@@ -60,7 +60,7 @@ function PartnersPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("partners.title")}</h1>
+        <h1 className="page-title">{t("partners.title")}</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
