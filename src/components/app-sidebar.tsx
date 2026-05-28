@@ -127,8 +127,8 @@ export function AppSidebar() {
 
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-1">
-          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white text-sm font-bold shrink-0">
-            AH
+          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-sidebar-primary to-success flex items-center justify-center text-sidebar-primary-foreground text-sm font-bold shrink-0">
+            FE
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
@@ -140,7 +140,7 @@ export function AppSidebar() {
       <SidebarContent>
         {groups.map((g) => (
           <SidebarGroup key={g.label}>
-            {!collapsed && <SidebarGroupLabel className="text-base font-bold py-2 text-primary-light">{g.label}</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel className="text-base font-bold py-2 text-sidebar-primary">{g.label}</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {g.items.map((item) => (
