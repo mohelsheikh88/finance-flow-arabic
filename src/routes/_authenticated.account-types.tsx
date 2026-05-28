@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAccountTypes, upsertAccountType, deleteAccountType } from "@/lib/api/accounting.functions";
+import { listAccountTypes, upsertAccountType, deleteAccountType, listClassifications } from "@/lib/api/accounting.functions";
+
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -26,13 +27,13 @@ export const Route = createFileRoute("/_authenticated/account-types")({
 
 const CLASSIFICATIONS = ["asset", "liability", "equity", "income", "expense"] as const;
 type Cls = (typeof CLASSIFICATIONS)[number];
-
 type FormState = {
   id?: string;
   code: string;
   name_ar: string;
   name_en: string;
   classification: Cls;
+  classification_id: string | null;
   is_active: boolean;
   notes: string;
 };
@@ -42,9 +43,12 @@ const empty: FormState = {
   name_ar: "",
   name_en: "",
   classification: "asset",
+  classification_id: null,
   is_active: true,
   notes: "",
 };
+
+
 
 const clsColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
@@ -83,12 +87,21 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const list = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccountType);
   const remove = useServerFn(deleteAccountType);
+  const listCls = useServerFn(listClassifications);
 
   const { data: types = [] } = useQuery({
     queryKey: ["account_types", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+
+  const { data: classifications = [] } = useQuery({
+    queryKey: ["classifications", companyId],
+    queryFn: () => listCls({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+  const activeClassifications = (classifications as any[]).filter((c) => c.is_active);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
@@ -102,6 +115,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
       name_ar: r.name_ar ?? "",
       name_en: r.name_en ?? "",
       classification: r.classification,
+      classification_id: r.classification_id ?? null,
       is_active: !!r.is_active,
       notes: r.notes ?? "",
     });
@@ -109,19 +123,24 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   };
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      upsert({
+    mutationFn: () => {
+      const selected = (classifications as any[]).find((c) => c.id === form.classification_id);
+      const cls = (selected?.bucket as Cls) ?? form.classification;
+      return upsert({
         data: {
           id: form.id,
           company_id: companyId!,
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          classification: form.classification,
+          classification: cls,
+          classification_id: form.classification_id,
           is_active: form.is_active,
           notes: form.notes.trim() || null,
         },
-      }),
+      });
+    },
+
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["account_types"] });
@@ -141,7 +160,8 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const canSave = form.code && form.name_ar && form.name_en && form.classification && !!companyId;
+  const canSave = form.code && form.name_ar && form.name_en && form.classification_id && !!companyId;
+
 
   return (
     <div className={embedded ? "space-y-4" : "p-6 space-y-4"}>
@@ -231,16 +251,22 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
             </div>
             <div>
               <Label>{t("accounts.classification")} *</Label>
-              <Select value={form.classification} onValueChange={(v) => setForm({ ...form, classification: v as Cls })}>
-
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select value={form.classification_id ?? ""} onValueChange={(v) => {
+                const sel = activeClassifications.find((c: any) => c.id === v);
+                setForm({ ...form, classification_id: v, classification: (sel?.bucket as Cls) ?? form.classification });
+              }}>
+                <SelectTrigger><SelectValue placeholder={t("common.select") || "—"} /></SelectTrigger>
                 <SelectContent>
-                  {CLASSIFICATIONS.map((c) => (
-                    <SelectItem key={c} value={c}>{t(`accounts.${c}`)}</SelectItem>
+                  {activeClassifications.map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code} — {localized(c, "name")}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
+
             <div>
               <Label>{t("common.nameAr")} *</Label>
               <Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} maxLength={255} />
