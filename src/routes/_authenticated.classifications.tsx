@@ -153,9 +153,10 @@ function ClassificationsPage() {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />أنواع الحسابات</Link>
+            <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.backToAccountTypes")}</Link>
           </Button>
-          <h1 className="text-2xl font-bold">إدارة التصنيفات الأساسية</h1>
+          <h1 className="text-2xl font-bold">{t("accounts.classificationsTitle")}</h1>
+
         </div>
         <Button onClick={openNew} disabled={!companyId}>
           <Plus className="h-4 w-4 me-1" />{t("common.new")}
