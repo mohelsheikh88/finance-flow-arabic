@@ -144,10 +144,6 @@ function ChartOfAccountsPanel() {
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const parents = useMemo(
-    () => (accounts as any[]).filter((a) => a.is_group && a.id !== form.id),
-    [accounts, form.id],
-  );
 
   const typeById = useMemo(() => {
     const m = new Map<string, any>();
