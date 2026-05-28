@@ -264,7 +264,7 @@ export const translations = {
       normalBalance: "الطبيعة",
       debit: "مدين",
       credit: "دائن",
-      accountTypeSingular: "مجموعة حسابات",
+      accountTypeSingular: "مجموعات الحسابات",
       coreClassification: "تصنيف أساسي",
       grandParent: "أصل رئيسي",
       classificationSingular: "تصنيف أساسي",
