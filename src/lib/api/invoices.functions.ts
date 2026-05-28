@@ -159,7 +159,17 @@ export const createInvoice = createServerFn({ method: "POST" })
     return inv;
   });
 
-async function postInvoiceInternal(supabase: any, userId: string, invoiceId: string) {
+/**
+ * Core posting logic. Routes through approval workflow when one matches
+ * (creates an approval_request and returns without posting). Pass
+ * `bypassApproval` from the approval-handler to actually post.
+ */
+export async function postInvoiceCore(
+  supabase: any,
+  userId: string,
+  invoiceId: string,
+  opts: { bypassApproval?: boolean } = {},
+) {
   // Fetch invoice + partner + lines
   const { data: inv } = await supabase
     .from("invoices")
@@ -168,6 +178,23 @@ async function postInvoiceInternal(supabase: any, userId: string, invoiceId: str
     .single();
   if (!inv) throw new Error("Invoice not found");
   if (inv.status !== "draft") throw new Error("Only draft invoices can be posted");
+
+  // Approval gate
+  if (!opts.bypassApproval) {
+    const res = await maybeRequestApproval(supabase, userId, {
+      companyId: inv.company_id,
+      branchId: inv.branch_id,
+      documentType: "invoice",
+      documentId: inv.id,
+      documentReference: inv.invoice_number,
+      amount: Number(inv.total),
+      currencyCode: inv.currency_code,
+    });
+    if (res.created) {
+      return { pendingApproval: true, requestId: res.requestId };
+    }
+  }
+
 
   const isCustomer = inv.invoice_type === "customer";
   const partnerCtrl = isCustomer ? inv.partners?.receivable_account_id : inv.partners?.payable_account_id;
