@@ -205,6 +205,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const localized = useLocalized();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+  const { bucketName } = useAccountingBuckets(companyId ?? undefined);
 
   const list = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccountType);
