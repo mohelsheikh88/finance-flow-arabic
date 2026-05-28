@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -21,8 +21,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/classifications")({
   component: () => <ClassificationsPage />,
@@ -92,8 +93,31 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
   });
 
   const [open, setOpen] = useState(false);
+
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [filterStatement, setFilterStatement] = useState<Statement | "all">("all");
+  const [filterNormalBalance, setFilterNormalBalance] = useState<NormalBalance | "all">("all");
+  const [filterBucket, setFilterBucket] = useState<Bucket | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive">("all");
+
+  const filteredRows = useMemo(() => {
+    return (rows as any[]).filter((r) => {
+      const matchesSearch =
+        search.trim() === "" ||
+        (r.code && r.code.toLowerCase().includes(search.toLowerCase())) ||
+        (r.name_ar && r.name_ar.toLowerCase().includes(search.toLowerCase())) ||
+        (r.name_en && r.name_en.toLowerCase().includes(search.toLowerCase()));
+      const matchesStatement = filterStatement === "all" || r.statement === filterStatement;
+      const matchesNormalBalance = filterNormalBalance === "all" || r.normal_balance === filterNormalBalance;
+      const matchesBucket = filterBucket === "all" || r.bucket === filterBucket;
+      const matchesStatus = filterStatus === "all" || (filterStatus === "active" ? r.is_active : !r.is_active);
+      return matchesSearch && matchesStatement && matchesNormalBalance && matchesBucket && matchesStatus;
+    });
+  }, [rows, search, filterStatement, filterNormalBalance, filterBucket, filterStatus]);
+
 
   const openNew = () => { setForm(empty); setOpen(true); };
   const openEdit = (r: any) => {
@@ -171,6 +195,73 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           </Button>
         </div>
       )}
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("common.search")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="ps-9"
+          />
+        </div>
+        <Select value={filterStatement} onValueChange={(v) => setFilterStatement(v as Statement | "all")}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder={t("accounts.statement")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
+            <SelectItem value="income_statement">{t("accounts.incomeStatement")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterNormalBalance} onValueChange={(v) => setFilterNormalBalance(v as NormalBalance | "all")}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder={t("accounts.normalBalance")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            <SelectItem value="debit">{t("accounts.debit")}</SelectItem>
+            <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterBucket} onValueChange={(v) => setFilterBucket(v as Bucket | "all")}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder={t("accounts.accountingBucket")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            {BUCKETS.map((b) => (
+              <SelectItem key={b} value={b}>{t(`accounts.${b}`)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "active" | "inactive")}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder={t("common.status")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            <SelectItem value="active">{t("common.active")}</SelectItem>
+            <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setSearch("");
+            setFilterStatement("all");
+            setFilterNormalBalance("all");
+            setFilterBucket("all");
+            setFilterStatus("all");
+          }}
+          className="text-muted-foreground"
+        >
+          <FilterX className="h-4 w-4 me-1" />
+          {t("common.clear")}
+        </Button>
+      </div>
 
       <Card>
         <table className="w-full text-xs">
@@ -187,7 +278,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           </thead>
 
           <tbody>
-            {(rows as any[]).map((r) => (
+            {(filteredRows as any[]).map((r) => (
               <tr key={r.id} className="border-t hover:bg-muted/30">
                 <td className="p-3 font-mono">{r.code}</td>
                 <td className="p-3 font-medium">{localized(r, "name")}</td>
@@ -213,7 +304,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                 </td>
               </tr>
             ))}
-            {rows.length === 0 && (
+            {filteredRows.length === 0 && (
               <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             )}
           </tbody>
