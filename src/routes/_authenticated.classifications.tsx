@@ -2,7 +2,11 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAccountTypes, upsertAccountType, deleteAccountType } from "@/lib/api/accounting.functions";
+import {
+  listClassifications,
+  upsertClassification,
+  deleteClassification,
+} from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -20,19 +24,23 @@ import {
 import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/account-types")({
-  component: AccountTypesPage,
+export const Route = createFileRoute("/_authenticated/classifications")({
+  component: ClassificationsPage,
 });
 
-const CLASSIFICATIONS = ["asset", "liability", "equity", "income", "expense"] as const;
-type Cls = (typeof CLASSIFICATIONS)[number];
+const BUCKETS = ["asset", "liability", "equity", "income", "expense"] as const;
+type Bucket = (typeof BUCKETS)[number];
+type Statement = "balance_sheet" | "income_statement";
+type NormalBalance = "debit" | "credit";
 
 type FormState = {
   id?: string;
   code: string;
   name_ar: string;
   name_en: string;
-  classification: Cls;
+  statement: Statement;
+  normal_balance: NormalBalance;
+  bucket: Bucket;
   is_active: boolean;
   notes: string;
 };
@@ -41,12 +49,14 @@ const empty: FormState = {
   code: "",
   name_ar: "",
   name_en: "",
-  classification: "asset",
+  statement: "balance_sheet",
+  normal_balance: "debit",
+  bucket: "asset",
   is_active: true,
   notes: "",
 };
 
-const clsColors: Record<string, string> = {
+const bucketColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
   liability: "bg-warning/10 text-warning border-warning/30",
   equity: "bg-primary/10 text-primary border-primary/30",
@@ -54,32 +64,25 @@ const clsColors: Record<string, string> = {
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
-function statementLabel(classification: Cls) {
-  switch (classification) {
-    case "asset":
-    case "liability":
-    case "equity":
-      return "الميزانية العمومية";
-    case "income":
-    case "expense":
-      return "قائمة الدخل";
-    default:
-      return "";
-  }
+function statementLabel(s: Statement) {
+  return s === "balance_sheet" ? "الميزانية العمومية" : "قائمة الدخل";
+}
+function normalBalanceLabel(n: NormalBalance) {
+  return n === "debit" ? "مدين" : "دائن";
 }
 
-function AccountTypesPage() {
+function ClassificationsPage() {
   const { t } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
   const qc = useQueryClient();
 
-  const list = useServerFn(listAccountTypes);
-  const upsert = useServerFn(upsertAccountType);
-  const remove = useServerFn(deleteAccountType);
+  const list = useServerFn(listClassifications);
+  const upsert = useServerFn(upsertClassification);
+  const remove = useServerFn(deleteClassification);
 
-  const { data: types = [] } = useQuery({
-    queryKey: ["account_types", companyId],
+  const { data: rows = [] } = useQuery({
+    queryKey: ["classifications", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
@@ -95,7 +98,9 @@ function AccountTypesPage() {
       code: r.code ?? "",
       name_ar: r.name_ar ?? "",
       name_en: r.name_en ?? "",
-      classification: r.classification,
+      statement: r.statement,
+      normal_balance: r.normal_balance,
+      bucket: r.bucket,
       is_active: !!r.is_active,
       notes: r.notes ?? "",
     });
@@ -111,14 +116,16 @@ function AccountTypesPage() {
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          classification: form.classification,
+          statement: form.statement,
+          normal_balance: form.normal_balance,
+          bucket: form.bucket,
           is_active: form.is_active,
           notes: form.notes.trim() || null,
         },
       }),
     onSuccess: () => {
       toast.success(t("common.saved"));
-      qc.invalidateQueries({ queryKey: ["account_types"] });
+      qc.invalidateQueries({ queryKey: ["classifications"] });
       setOpen(false);
       setForm(empty);
     },
@@ -129,34 +136,27 @@ function AccountTypesPage() {
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
       toast.success(t("common.saved"));
-      qc.invalidateQueries({ queryKey: ["account_types"] });
+      qc.invalidateQueries({ queryKey: ["classifications"] });
       setToDelete(null);
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const canSave = form.code && form.name_ar && form.name_en && form.classification && !!companyId;
+  const canSave = form.code && form.name_ar && form.name_en && !!companyId;
 
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/accounts"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.title")}</Link>
+            <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />أنواع الحسابات</Link>
           </Button>
-          <h1 className="text-2xl font-bold">إدارة أنواع الحسابات</h1>
+          <h1 className="text-2xl font-bold">إدارة التصنيفات الأساسية</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link to="/classifications">إدارة التصنيفات الأساسية</Link>
-          </Button>
-          <Button onClick={openNew} disabled={!companyId}>
-            <Plus className="h-4 w-4 me-1" />{t("common.new")}
-          </Button>
-        </div>
+        <Button onClick={openNew} disabled={!companyId}>
+          <Plus className="h-4 w-4 me-1" />{t("common.new")}
+        </Button>
       </div>
-
-
 
       <Card>
         <table className="w-full text-xs">
@@ -165,20 +165,22 @@ function AccountTypesPage() {
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium">البيان</th>
-              <th className="text-start p-3 font-medium">التصنيف الأساسي</th>
+              <th className="text-start p-3 font-medium">الطبيعة</th>
+              <th className="text-start p-3 font-medium">المجموعة المحاسبية</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
-            {(types as any[]).map((r) => (
+            {(rows as any[]).map((r) => (
               <tr key={r.id} className="border-t hover:bg-muted/30">
                 <td className="p-3 font-mono">{r.code}</td>
                 <td className="p-3 font-medium">{localized(r, "name")}</td>
-                <td className="p-3 text-muted-foreground">{statementLabel(r.classification)}</td>
+                <td className="p-3 text-muted-foreground">{statementLabel(r.statement)}</td>
+                <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
                 <td className="p-3">
-                  <Badge variant="outline" className={clsColors[r.classification]}>
-                    {t(`accounts.${r.classification}`)}
+                  <Badge variant="outline" className={bucketColors[r.bucket]}>
+                    {t(`accounts.${r.bucket}`)}
                   </Badge>
                 </td>
                 <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
@@ -196,8 +198,8 @@ function AccountTypesPage() {
                 </td>
               </tr>
             ))}
-            {types.length === 0 && (
-              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+            {rows.length === 0 && (
+              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             )}
           </tbody>
         </table>
@@ -206,7 +208,7 @@ function AccountTypesPage() {
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — نوع حساب</DialogTitle>
+            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — تصنيف أساسي</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -214,11 +216,11 @@ function AccountTypesPage() {
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
             <div>
-              <Label>التصنيف الأساسي *</Label>
-              <Select value={form.classification} onValueChange={(v) => setForm({ ...form, classification: v as Cls })}>
+              <Label>المجموعة المحاسبية *</Label>
+              <Select value={form.bucket} onValueChange={(v) => setForm({ ...form, bucket: v as Bucket })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CLASSIFICATIONS.map((c) => (
+                  {BUCKETS.map((c) => (
                     <SelectItem key={c} value={c}>{t(`accounts.${c}`)}</SelectItem>
                   ))}
                 </SelectContent>
@@ -231,6 +233,26 @@ function AccountTypesPage() {
             <div>
               <Label>{t("common.nameEn")} *</Label>
               <Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} maxLength={255} />
+            </div>
+            <div>
+              <Label>البيان *</Label>
+              <Select value={form.statement} onValueChange={(v) => setForm({ ...form, statement: v as Statement })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="balance_sheet">الميزانية العمومية</SelectItem>
+                  <SelectItem value="income_statement">قائمة الدخل</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>الطبيعة *</Label>
+              <Select value={form.normal_balance} onValueChange={(v) => setForm({ ...form, normal_balance: v as NormalBalance })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="debit">مدين</SelectItem>
+                  <SelectItem value="credit">دائن</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
