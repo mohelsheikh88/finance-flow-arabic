@@ -266,7 +266,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
               </Select>
             </div>
 
-            </div>
+
             <div>
               <Label>{t("common.nameAr")} *</Label>
               <Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} maxLength={255} />
