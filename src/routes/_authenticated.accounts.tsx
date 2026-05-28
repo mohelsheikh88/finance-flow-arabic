@@ -1,8 +1,10 @@
 import { useState, useMemo, useRef } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAccounts, upsertAccount, deleteAccount, importAccounts } from "@/lib/api/accounting.functions";
+import {
+  listAccounts, upsertAccount, deleteAccount, importAccounts, listAccountTypes,
+} from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -17,7 +19,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Download, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Download, Upload, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -25,15 +27,12 @@ export const Route = createFileRoute("/_authenticated/accounts")({
   component: AccountsPage,
 });
 
-const TYPES = ["asset", "liability", "equity", "income", "expense"] as const;
-type AccType = (typeof TYPES)[number];
-
 type FormState = {
   id?: string;
   code: string;
   name_ar: string;
   name_en: string;
-  account_type: AccType;
+  account_type_id: string;
   parent_id: string;
   currency_code: string;
   is_group: boolean;
@@ -46,7 +45,7 @@ const empty: FormState = {
   code: "",
   name_ar: "",
   name_en: "",
-  account_type: "asset",
+  account_type_id: "",
   parent_id: "",
   currency_code: "",
   is_group: false,
@@ -55,6 +54,7 @@ const empty: FormState = {
   notes: "",
 };
 
+
 function AccountsPage() {
   const { t } = useI18n();
   const localized = useLocalized();
@@ -62,12 +62,19 @@ function AccountsPage() {
   const qc = useQueryClient();
 
   const list = useServerFn(listAccounts);
+  const listTypes = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccount);
   const remove = useServerFn(deleteAccount);
 
   const { data: accounts = [] } = useQuery({
     queryKey: ["accounts", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+  const { data: accountTypes = [] } = useQuery({
+    queryKey: ["account_types", companyId],
+    queryFn: () => listTypes({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
 
@@ -80,14 +87,24 @@ function AccountsPage() {
     [accounts, form.id],
   );
 
-  const openNew = () => { setForm(empty); setOpen(true); };
+  const typeById = useMemo(() => {
+    const m = new Map<string, any>();
+    (accountTypes as any[]).forEach((t) => m.set(t.id, t));
+    return m;
+  }, [accountTypes]);
+
+  const openNew = () => {
+    const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
+    setForm({ ...empty, account_type_id: def?.id ?? "" });
+    setOpen(true);
+  };
   const openEdit = (a: any) => {
     setForm({
       id: a.id,
       code: a.code ?? "",
       name_ar: a.name_ar ?? "",
       name_en: a.name_en ?? "",
-      account_type: a.account_type,
+      account_type_id: a.account_type_id ?? (accountTypes as any[]).find((t) => t.classification === a.account_type)?.id ?? "",
       parent_id: a.parent_id ?? "",
       currency_code: a.currency_code ?? "",
       is_group: !!a.is_group,
@@ -107,7 +124,7 @@ function AccountsPage() {
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          account_type: form.account_type,
+          account_type_id: form.account_type_id,
           parent_id: form.parent_id || null,
           currency_code: form.currency_code.trim() || null,
           is_group: form.is_group,
@@ -143,7 +160,6 @@ function AccountsPage() {
     expense: "bg-destructive/10 text-destructive border-destructive/30",
   };
 
-  const canSave = form.code && form.name_ar && form.name_en && !!companyId;
 
   const importFn = useServerFn(importAccounts);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -223,11 +239,15 @@ function AccountsPage() {
           <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
             <Upload className="h-4 w-4 me-1" />Import
           </Button>
-          <Button onClick={openNew} disabled={!companyId}>
+          <Button variant="outline" asChild disabled={!companyId}>
+            <Link to="/account-types"><Settings2 className="h-4 w-4 me-1" />{t("accounts.manageTypes") ?? "إدارة الأنواع"}</Link>
+          </Button>
+          <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
           </Button>
         </div>
       </div>
+
 
       {importResult && (
         <Card className="p-3 text-xs flex items-center justify-between gap-3">
@@ -264,10 +284,17 @@ function AccountsPage() {
                   <td className="p-3 font-mono" style={{ paddingInlineStart: `${12 + depth * 16}px` }}>{a.code}</td>
                   <td className="p-3 font-medium">{localized(a, "name")}</td>
                   <td className="p-3">
-                    <Badge variant="outline" className={typeColors[a.account_type]}>
-                      {t(`accounts.${a.account_type}`)}
-                    </Badge>
+                    {(() => {
+                      const at = typeById.get(a.account_type_id);
+                      const cls = at?.classification ?? a.account_type;
+                      return (
+                        <Badge variant="outline" className={typeColors[cls]}>
+                          {at ? localized(at, "name") : t(`accounts.${cls}`)}
+                        </Badge>
+                      );
+                    })()}
                   </td>
+
                   <td className="p-3 text-center">{a.is_group ? "✓" : ""}</td>
                   <td className="p-3 text-center">{a.is_active ? t("common.active") : t("common.inactive")}</td>
                   <td className="p-3">
@@ -303,13 +330,18 @@ function AccountsPage() {
             </div>
             <div>
               <Label>{t("accounts.type")} *</Label>
-              <Select value={form.account_type} onValueChange={(v) => setForm({ ...form, account_type: v as AccType })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select value={form.account_type_id} onValueChange={(v) => setForm({ ...form, account_type_id: v })}>
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
-                  {TYPES.map((typ) => <SelectItem key={typ} value={typ}>{t(`accounts.${typ}`)}</SelectItem>)}
+                  {(accountTypes as any[]).filter((tp) => tp.is_active).map((tp: any) => (
+                    <SelectItem key={tp.id} value={tp.id}>
+                      {tp.code} — {localized(tp, "name")} ({t(`accounts.${tp.classification}`)})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div>
               <Label>{t("common.nameAr")} *</Label>
               <Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} maxLength={255} />
@@ -351,7 +383,8 @@ function AccountsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-            <Button onClick={() => saveMut.mutate()} disabled={!canSave || saveMut.isPending}>{t("common.save")}</Button>
+            <Button onClick={() => saveMut.mutate()} disabled={!form.code || !form.name_ar || !form.name_en || !form.account_type_id || !companyId || saveMut.isPending}>{t("common.save")}</Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -14,9 +14,49 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_types: {
+        Row: {
+          classification: Database["public"]["Enums"]["account_type"]
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          classification: Database["public"]["Enums"]["account_type"]
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          classification?: Database["public"]["Enums"]["account_type"]
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       accounts: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"]
+          account_type_id: string | null
           code: string
           company_id: string
           created_at: string
@@ -33,6 +73,7 @@ export type Database = {
         }
         Insert: {
           account_type: Database["public"]["Enums"]["account_type"]
+          account_type_id?: string | null
           code: string
           company_id: string
           created_at?: string
@@ -49,6 +90,7 @@ export type Database = {
         }
         Update: {
           account_type?: Database["public"]["Enums"]["account_type"]
+          account_type_id?: string | null
           code?: string
           company_id?: string
           created_at?: string
@@ -64,6 +106,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "accounts_account_type_id_fkey"
+            columns: ["account_type_id"]
+            isOneToOne: false
+            referencedRelation: "account_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "accounts_company_id_fkey"
             columns: ["company_id"]
