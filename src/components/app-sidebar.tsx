@@ -19,7 +19,10 @@ import {
   ShieldCheck,
   Lock,
   History,
-  GitBranch,
+  HandCoins,
+  ShoppingCart,
+  BarChart3,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   Sidebar,
