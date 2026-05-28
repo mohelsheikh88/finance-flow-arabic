@@ -37,7 +37,7 @@ export const listAccountTypes = createServerFn({ method: "GET" })
 const AccountTypeUpsertSchema = z.object({
   id: z.string().uuid().optional(),
   company_id: z.string().uuid(),
-  code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
+  code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   classification: z.enum(ACCOUNT_TYPES),
@@ -231,7 +231,7 @@ export const swapClassificationOrder = createServerFn({ method: "POST" })
 const AccountUpsertSchema = z.object({
   id: z.string().uuid().optional(),
   company_id: z.string().uuid(),
-  code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
+  code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   account_type_id: z.string().uuid(),
@@ -730,7 +730,7 @@ export const listCostCenters = createServerFn({ method: "GET" })
 const CostCenterUpsertSchema = z.object({
   id: z.string().uuid().optional(),
   company_id: z.string().uuid(),
-  code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
+  code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   parent_id: z.string().uuid().nullable().optional(),
