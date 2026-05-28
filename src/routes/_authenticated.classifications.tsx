@@ -222,7 +222,8 @@ function ClassificationsPage() {
               <Label>{t("common.code")} *</Label>
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
-            <div>
+              <Label>{t("accounts.accountingBucket")} *</Label>
+
               <Label>المجموعة المحاسبية *</Label>
               <Select value={form.bucket} onValueChange={(v) => setForm({ ...form, bucket: v as Bucket })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
