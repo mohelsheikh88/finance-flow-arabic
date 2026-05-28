@@ -160,6 +160,11 @@ function AccountsPage() {
     expense: "bg-destructive/10 text-destructive border-destructive/30",
   };
 
+  const statementOf = (classification: string) => {
+    const bs = ["asset", "liability", "equity"];
+    return bs.includes(classification) ? "balanceSheet" : "incomeStatement";
+  };
+
 
   const importFn = useServerFn(importAccounts);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -270,6 +275,7 @@ function AccountsPage() {
             <tr>
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.type")}</th>
               <th className="text-center p-3 font-medium">{t("accounts.isGroup")}</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
@@ -283,6 +289,13 @@ function AccountsPage() {
                 <tr key={a.id} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono" style={{ paddingInlineStart: `${12 + depth * 16}px` }}>{a.code}</td>
                   <td className="p-3 font-medium">{localized(a, "name")}</td>
+                  <td className="p-3 text-muted-foreground text-xs">
+                    {(() => {
+                      const at = typeById.get(a.account_type_id);
+                      const cls = at?.classification ?? a.account_type;
+                      return t(`accounts.${statementOf(cls)}`);
+                    })()}
+                  </td>
                   <td className="p-3">
                     {(() => {
                       const at = typeById.get(a.account_type_id);
@@ -312,7 +325,7 @@ function AccountsPage() {
               );
             })}
             {accounts.length === 0 && (
-              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             )}
           </tbody>
         </table>
