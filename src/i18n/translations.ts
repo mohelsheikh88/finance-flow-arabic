@@ -202,6 +202,9 @@ export const translations = {
       expense: "مصروفات",
       isGroup: "حساب رئيسي (مجموعة)",
       parent: "الحساب الأب",
+      statement: "البيان",
+      balanceSheet: "الميزانية العمومية",
+      incomeStatement: "قائمة الدخل",
     },
     partners: {
       title: "العملاء والموردين",
