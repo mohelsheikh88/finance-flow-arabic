@@ -221,6 +221,7 @@ export const translations = {
       classificationInUse: "هذا التصنيف مرتبط بأنواع حسابات ولا يمكن حذفه",
       backToAccounts: "شجرة الحسابات",
       backToAccountTypes: "أنواع الحسابات",
+      coreClassifications: "التصنيفات الرئيسية",
     },
 
     partners: {
