@@ -92,6 +92,7 @@ export const translations = {
       fiscalPeriods: "الفترات المالية",
       bankAccounts: "الحسابات البنكية",
       paymentMethods: "وسائل الدفع",
+      lockDates: "تواريخ الإقفال",
       finance: "المالية",
       configuration: "الإعدادات",
       accountsReceivable: "الذمم المدينة",
@@ -132,6 +133,13 @@ export const translations = {
         card: "بطاقة",
         other: "أخرى",
       },
+    },
+    lockDates: {
+      new: "تاريخ إقفال جديد",
+      lockDate: "تاريخ الإقفال",
+      scope: "النطاق",
+      allBranches: "كل الفروع",
+      description: "لا يمكن إدخال أو ترحيل أي معاملات مالية في هذا التاريخ أو قبله.",
     },
     dashboard: {
       title: "لوحة المحاسبة العامة",
@@ -461,6 +469,7 @@ export const translations = {
       fiscalPeriods: "Fiscal Periods",
       bankAccounts: "Bank Accounts",
       paymentMethods: "Payment Methods",
+      lockDates: "Lock Dates",
       finance: "Finance",
       configuration: "Configuration",
       accountsReceivable: "Accounts Receivable",
@@ -501,6 +510,13 @@ export const translations = {
         card: "Card",
         other: "Other",
       },
+    },
+    lockDates: {
+      new: "New Lock Date",
+      lockDate: "Lock Date",
+      scope: "Scope",
+      allBranches: "All Branches",
+      description: "No financial transactions can be entered or posted on or before this date.",
     },
     dashboard: {
       title: "Accounting Dashboard",

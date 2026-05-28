@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { maybeRequestApproval } from "./approvals.functions";
+import { assertNotLocked } from "./lock-dates.functions";
 
 const LineSchema = z.object({
   description: z.string().max(500).optional().nullable(),
@@ -67,6 +68,9 @@ export const createInvoice = createServerFn({ method: "POST" })
   .inputValidator((i) => CreateInvoiceSchema.parse(i))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    await assertNotLocked(supabase, data.company_id, data.branch_id, data.invoice_date);
+
 
     // Auto-select journal
     let journalId = data.journal_id;
