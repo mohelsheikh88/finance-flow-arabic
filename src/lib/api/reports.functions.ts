@@ -30,8 +30,10 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
   const [{ data: classifications }, { data: accountTypes }, { data: accounts }] = await Promise.all([
     supabase
       .from("classifications")
-      .select("id, code, name_ar, name_en, statement, normal_balance, bucket")
-      .eq("company_id", companyId),
+      .select("id, code, name_ar, name_en, statement, normal_balance, bucket, sort_order, is_active")
+      .eq("company_id", companyId)
+      .order("sort_order", { ascending: true })
+      .order("code", { ascending: true }),
     supabase
       .from("account_types")
       .select("id, classification_id, classification")
@@ -42,12 +44,13 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
       .eq("company_id", companyId),
   ]);
 
+  const clsList = (classifications ?? []) as any[];
   const clsById = new Map<string, any>();
-  (classifications ?? []).forEach((c: any) => clsById.set(c.id, c));
+  clsList.forEach((c: any) => clsById.set(c.id, c));
 
   // Fallback: pick a default classification per bucket (first one matching) for legacy accounts.
   const clsByBucket = new Map<Bucket, any>();
-  (classifications ?? []).forEach((c: any) => {
+  clsList.forEach((c: any) => {
     if (!clsByBucket.has(c.bucket)) clsByBucket.set(c.bucket, c);
   });
 
@@ -80,8 +83,9 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
       bucket,
     });
   }
-  return accountInfo;
+  return { accountInfo, classifications: clsList };
 }
+
 
 async function getAccountBalances(
   supabase: any,
