@@ -587,6 +587,9 @@ export const translations = {
       expense: "Expense",
       isGroup: "Group Account",
       parent: "Parent Account",
+      statement: "Statement",
+      balanceSheet: "Balance Sheet",
+      incomeStatement: "Profit & Loss",
     },
     partners: {
       title: "Partners",
