@@ -36,7 +36,7 @@ function AgingPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-2">
         <FileText className="h-5 w-5 text-primary" />
-        <h1 className="text-xl font-bold">{t("nav.aging")}</h1>
+        <h1 className="page-title">{t("nav.aging")}</h1>
       </div>
 
       <Card className="p-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">

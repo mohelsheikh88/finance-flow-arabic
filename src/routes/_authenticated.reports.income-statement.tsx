@@ -46,7 +46,7 @@ function IncomeStatementPage() {
   return (
     <div className="p-6 space-y-4">
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2"><TrendingUp className="h-6 w-6 text-primary" /> {t("nav.incomeStatement")}</h1>
+        <h1 className="page-title"><TrendingUp className="h-6 w-6 text-primary" /> {t("nav.incomeStatement")}</h1>
         <p className="text-sm text-muted-foreground">{t("reports.isSubtitle")}</p>
       </div>
 

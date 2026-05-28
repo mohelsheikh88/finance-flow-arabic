@@ -94,7 +94,7 @@ function ApprovalsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-bold">{t("approvals.title")}</h1>
+          <h1 className="page-title">{t("approvals.title")}</h1>
         </div>
         <Dialog open={wfOpen} onOpenChange={setWfOpen}>
           <DialogTrigger asChild>
