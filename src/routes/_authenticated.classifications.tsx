@@ -174,6 +174,27 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const swapMut = useMutation({
+    mutationFn: (vars: { aId: string; bId: string }) => swapOrder({ data: vars }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["classifications"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const hasFilters =
+    search.trim() !== "" ||
+    filterStatement !== "all" ||
+    filterNormalBalance !== "all" ||
+    filterBucket !== "all" ||
+    filterStatus !== "all";
+
+  const move = (r: any, dir: -1 | 1) => {
+    const idx = (rows as any[]).findIndex((x) => x.id === r.id);
+    const target = (rows as any[])[idx + dir];
+    if (!target) return;
+    swapMut.mutate({ aId: r.id, bId: target.id });
+  };
+
+
   const canSave = form.code && form.name_ar && form.name_en && !!companyId;
 
   return (
