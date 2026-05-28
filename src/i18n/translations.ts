@@ -86,7 +86,8 @@ export const translations = {
       companies: "الشركات",
       branches: "الفروع",
       users: "المستخدمين والصلاحيات",
-      chartOfAccounts: "شجرة الحسابات",
+      chartOfAccounts: "إدارة شجرة الحسابات (COA)",
+
       costCenters: "مراكز التكلفة",
       journals: "الدفاتر",
       journalTypes: "أنواع الدفاتر",
