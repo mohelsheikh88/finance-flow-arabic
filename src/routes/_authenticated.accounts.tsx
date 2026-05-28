@@ -134,10 +134,13 @@ function ChartOfAccountsPanel() {
   });
 
 
-
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
+
+  const parents = useMemo(() => {
+    return (accounts as any[]).filter((a) => a.is_group && a.id !== form.id);
+  }, [accounts, form.id]);
 
   const [search, setSearch] = useState("");
   const [filterClassification, setFilterClassification] = useState("all");
