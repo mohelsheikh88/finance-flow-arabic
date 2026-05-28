@@ -457,6 +457,8 @@ export const translations = {
       error: "An error occurred",
       logout: "Sign out",
       welcome: "Welcome",
+      all: "All",
+      clear: "Clear filters",
     },
     auth: {
       login: "Sign in",
