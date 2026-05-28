@@ -149,7 +149,8 @@ export const deleteClassification = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { count } = await (context.supabase as any)
       .from("account_types").select("id", { count: "exact", head: true }).eq("classification_id", data.id);
-    if ((count ?? 0) > 0) throw new Error("هذا التصنيف مرتبط بأنواع حسابات ولا يمكن حذفه");
+    if ((count ?? 0) > 0) throw new Error("This classification is linked to account types and cannot be deleted | هذا التصنيف مرتبط بأنواع حسابات ولا يمكن حذفه");
+
     const { error } = await (context.supabase as any).from("classifications").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
