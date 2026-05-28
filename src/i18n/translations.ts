@@ -304,6 +304,8 @@ export const translations = {
     assets: {
       title: "الأصول الثابتة",
       newAsset: "أصل جديد",
+      postDueDep: "ترحيل الإهلاكات المستحقة",
+
       newCategory: "تصنيف جديد",
       category: "التصنيف",
       acquisitionDate: "تاريخ الاقتناء",
