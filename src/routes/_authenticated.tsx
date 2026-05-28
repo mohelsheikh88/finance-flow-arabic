@@ -63,6 +63,7 @@ function AuthenticatedLayout() {
     const parents = [
       "nav.dashboard", "nav.reports", "nav.accountsReceivable", "nav.accountsPayable",
       "nav.banksGroup", "nav.fixedAssets", "nav.loansGroup", "nav.gl", "nav.configuration",
+      "nav.purchaseProcurement", "nav.inventoryManagement", "nav.humanResources",
     ];
     const children = [
       "nav.mainDashboard", "nav.balanceSheet", "nav.incomeStatement", "nav.aging", "nav.vatReport",
