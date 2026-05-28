@@ -52,12 +52,14 @@ export function AppSidebar() {
   const groups = [
     {
       label: t("nav.dashboard"),
+      icon: LayoutDashboard,
       items: [
         { url: "/dashboard", icon: LayoutDashboard, title: t("nav.mainDashboard") },
       ],
     },
     {
       label: t("nav.accountsReceivable"),
+      icon: HandCoins,
       items: [
         { url: "/dashboards/ar", icon: LayoutDashboard, title: t("nav.arDashboard") },
         { url: "/invoices/customer", icon: FileText, title: t("ar.invoices") },
@@ -68,6 +70,7 @@ export function AppSidebar() {
     },
     {
       label: t("nav.accountsPayable"),
+      icon: ShoppingCart,
       items: [
         { url: "/dashboards/ap", icon: LayoutDashboard, title: t("nav.apDashboard") },
         { url: "/invoices/vendor", icon: Receipt, title: t("ap.bills") },
@@ -78,6 +81,7 @@ export function AppSidebar() {
     },
     {
       label: t("nav.banksGroup"),
+      icon: Landmark,
       items: [
         { url: "/dashboards/banks", icon: LayoutDashboard, title: t("nav.banksDashboard") },
         { url: "/banks", icon: Landmark, title: t("banksGroup.accounts") },
@@ -89,6 +93,7 @@ export function AppSidebar() {
     },
     {
       label: t("nav.fixedAssets"),
+      icon: Briefcase,
       items: [
         { url: "/dashboards/fixed-assets", icon: LayoutDashboard, title: t("nav.fixedAssetsDashboard") },
         { url: "/assets", icon: Briefcase, title: t("nav.assets") },
@@ -96,6 +101,7 @@ export function AppSidebar() {
     },
     {
       label: t("nav.loansGroup"),
+      icon: CreditCard,
       items: [
         { url: "/dashboards/loans", icon: LayoutDashboard, title: t("nav.loansDashboard") },
         { url: "/loans", icon: CreditCard, title: t("nav.loans") },
@@ -103,6 +109,7 @@ export function AppSidebar() {
     },
     {
       label: t("nav.gl"),
+      icon: BookOpen,
       items: [
         { url: "/journal-entries", icon: BookOpen, title: t("nav.journalEntries") },
         { url: "/trial-balance", icon: Calculator, title: t("nav.trialBalance") },
@@ -110,6 +117,7 @@ export function AppSidebar() {
     },
     {
       label: t("nav.reports"),
+      icon: BarChart3,
       items: [
         { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
         { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
@@ -119,6 +127,7 @@ export function AppSidebar() {
     },
     {
       label: t("nav.configuration"),
+      icon: SlidersHorizontal,
       items: [
         { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
