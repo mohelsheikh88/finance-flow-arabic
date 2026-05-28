@@ -556,3 +556,92 @@ function ChartOfAccountsPanel() {
     </div>
   );
 }
+
+const BUCKETS = ["asset", "liability", "equity", "income", "expense"] as const;
+const bucketColors: Record<string, string> = {
+  asset: "bg-info/10 text-info border-info/30",
+  liability: "bg-warning/10 text-warning border-warning/30",
+  equity: "bg-primary/10 text-primary border-primary/30",
+  income: "bg-success/10 text-success border-success/30",
+  expense: "bg-destructive/10 text-destructive border-destructive/30",
+};
+
+function AccountingBucketsPanel() {
+  const { t } = useI18n();
+  const localized = useLocalized();
+  const { companyId } = useBranch();
+  const listCls = useServerFn(listClassifications);
+  const listTypes = useServerFn(listAccountTypes);
+
+  const { data: classifications = [] } = useQuery({
+    queryKey: ["classifications", companyId],
+    queryFn: () => listCls({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+  const { data: accountTypes = [] } = useQuery({
+    queryKey: ["account_types", companyId],
+    queryFn: () => listTypes({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+  const statementOf = (b: string) =>
+    ["asset", "liability", "equity"].includes(b) ? "balanceSheet" : "incomeStatement";
+  const normalOf = (b: string) =>
+    ["asset", "expense"].includes(b) ? "debit" : "credit";
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {BUCKETS.map((b) => {
+        const cls = (classifications as any[]).filter((c) => c.bucket === b && c.is_active);
+        const typesCount = (accountTypes as any[]).filter(
+          (at) => at.classification === b,
+        ).length;
+        return (
+          <Card key={b} className="p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <Badge variant="outline" className={`${bucketColors[b]} text-sm`}>
+                {t(`accounts.${b}`)}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {typesCount} {t("accounts.accountTypesNav")}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <div className="text-muted-foreground">{t("accounts.statement")}</div>
+                <div className="font-medium">{t(`accounts.${statementOf(b)}`)}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">{t("accounts.normalBalance")}</div>
+                <div className="font-medium">{t(`accounts.${normalOf(b)}`)}</div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">
+                {t("accounts.coreClassifications")}
+              </div>
+              {cls.length === 0 ? (
+                <div className="text-xs text-muted-foreground italic">
+                  {t("common.noData")}
+                </div>
+              ) : (
+                <ul className="space-y-1">
+                  {cls.map((c) => (
+                    <li
+                      key={c.id}
+                      className="flex items-center gap-2 text-xs border-t pt-1"
+                    >
+                      <span className="font-mono text-muted-foreground">{c.code}</span>
+                      <span className="font-medium">{localized(c, "name")}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
