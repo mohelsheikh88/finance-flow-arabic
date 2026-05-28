@@ -23,9 +23,11 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          is_group: boolean
           name_ar: string
           name_en: string
           notes: string | null
+          parent_id: string | null
           updated_at: string
         }
         Insert: {
@@ -36,9 +38,11 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_group?: boolean
           name_ar: string
           name_en: string
           notes?: string | null
+          parent_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -49,9 +53,11 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_group?: boolean
           name_ar?: string
           name_en?: string
           notes?: string | null
+          parent_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -60,6 +66,13 @@ export type Database = {
             columns: ["classification_id"]
             isOneToOne: false
             referencedRelation: "classifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_types_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "account_types"
             referencedColumns: ["id"]
           },
         ]

@@ -42,6 +42,8 @@ const AccountTypeUpsertSchema = z.object({
   name_en: z.string().trim().min(1).max(255),
   classification: z.enum(ACCOUNT_TYPES),
   classification_id: z.string().uuid().nullable().optional(),
+  parent_id: z.string().uuid().nullable().optional(),
+  is_group: z.boolean().optional(),
   is_active: z.boolean().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
@@ -89,6 +91,8 @@ export const upsertAccountType = createServerFn({ method: "POST" })
       name_en: data.name_en,
       classification,
       classification_id: data.classification_id ?? null,
+      parent_id: data.parent_id ?? null,
+      is_group: data.is_group ?? false,
       is_active: data.is_active ?? true,
       notes: data.notes ?? null,
     };
@@ -111,6 +115,10 @@ export const deleteAccountType = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
+    const { count: childCount } = await context.supabase
+      .from("account_types").select("id", { count: "exact", head: true }).eq("parent_id", data.id);
+    if ((childCount ?? 0) > 0) throw new Error("This type has children and cannot be deleted | هذا النوع يحتوي على أنواع فرعية ولا يمكن حذفه");
+
     const { count } = await context.supabase
       .from("accounts").select("id", { count: "exact", head: true }).eq("account_type_id", data.id);
     if ((count ?? 0) > 0) throw new Error("This type is used by accounts and cannot be deleted | هذا النوع مستخدم في حسابات ولا يمكن حذفه");
