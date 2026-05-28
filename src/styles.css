@@ -69,8 +69,8 @@
   --primary-light: oklch(0.55 0.20 305);    /* #8B5CF6 */
   --primary-foreground: oklch(0.98 0 0);
 
-  --background: oklch(0.985 0.002 285);
-  --foreground: oklch(0.16 0.01 285);
+  --background: oklch(0.97 0.008 255);
+  --foreground: oklch(0.18 0.02 260);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.16 0.01 285);
   --popover: oklch(1 0 0);
