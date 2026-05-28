@@ -110,7 +110,7 @@ function AssetsPage() {
     code: "", name_ar: "", name_en: "",
     asset_account_id: "", depreciation_account_id: "", accumulated_depreciation_account_id: "",
     default_useful_life_months: 60,
-    default_depreciation_method: "straight_line" as const,
+    default_depreciation_method: "straight_line" as "straight_line" | "declining_balance",
   });
 
   const createCatMut = useMutation({
@@ -119,7 +119,7 @@ function AssetsPage() {
         companyId: companyId!,
         code: catForm.code,
         name_ar: catForm.name_ar,
-    default_depreciation_method: "straight_line" as "straight_line" | "declining_balance",
+        name_en: catForm.name_en,
         asset_account_id: catForm.asset_account_id || null,
         depreciation_account_id: catForm.depreciation_account_id || null,
         accumulated_depreciation_account_id: catForm.accumulated_depreciation_account_id || null,
