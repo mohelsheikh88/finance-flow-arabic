@@ -199,3 +199,9 @@
   50%  { transform: translate3d(2%, -1%, 0) scale(1.05); }
   100% { transform: translate3d(-2%, 1%, 0) scale(1.08); }
 }
+
+@keyframes loading-bar {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(150%); }
+  100% { transform: translateX(300%); }
+}
