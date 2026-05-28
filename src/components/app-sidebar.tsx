@@ -45,12 +45,13 @@ export function AppSidebar() {
     {
       label: t("nav.dashboard"),
       items: [
-        { url: "/dashboard", icon: LayoutDashboard, title: t("nav.dashboard") },
+        { url: "/dashboard", icon: LayoutDashboard, title: t("nav.mainDashboard") },
       ],
     },
     {
       label: t("nav.accountsReceivable"),
       items: [
+        { url: "/dashboards/ar", icon: LayoutDashboard, title: t("nav.arDashboard") },
         { url: "/invoices/customer", icon: FileText, title: t("ar.invoices") },
         { url: "/credit-memos", icon: Receipt, title: t("ar.creditMemo") },
         { url: "/receipts", icon: Wallet, title: t("ar.receipts") },
@@ -60,6 +61,7 @@ export function AppSidebar() {
     {
       label: t("nav.accountsPayable"),
       items: [
+        { url: "/dashboards/ap", icon: LayoutDashboard, title: t("nav.apDashboard") },
         { url: "/invoices/vendor", icon: Receipt, title: t("ap.bills") },
         { url: "/debit-memos", icon: FileText, title: t("ap.debitMemo") },
         { url: "/payments", icon: Wallet, title: t("ap.payments") },
@@ -69,6 +71,7 @@ export function AppSidebar() {
     {
       label: t("nav.banksGroup"),
       items: [
+        { url: "/dashboards/banks", icon: LayoutDashboard, title: t("nav.banksDashboard") },
         { url: "/banks", icon: Landmark, title: t("banksGroup.accounts") },
         { url: "/receipts", icon: Wallet, title: t("banksGroup.receipts") },
         { url: "/payments", icon: Wallet, title: t("banksGroup.payments") },
@@ -79,12 +82,14 @@ export function AppSidebar() {
     {
       label: t("nav.fixedAssets"),
       items: [
+        { url: "/dashboards/fixed-assets", icon: LayoutDashboard, title: t("nav.fixedAssetsDashboard") },
         { url: "/assets", icon: Briefcase, title: t("nav.assets") },
       ],
     },
     {
       label: t("nav.loansGroup"),
       items: [
+        { url: "/dashboards/loans", icon: LayoutDashboard, title: t("nav.loansDashboard") },
         { url: "/loans", icon: CreditCard, title: t("nav.loans") },
       ],
     },
