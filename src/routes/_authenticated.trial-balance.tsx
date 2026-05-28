@@ -77,6 +77,7 @@ function TBPage() {
           </tfoot>
         </table>
       </Card>
-
+    </div>
   );
+
 }
