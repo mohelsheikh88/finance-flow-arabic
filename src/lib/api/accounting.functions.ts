@@ -226,6 +226,35 @@ export const deleteAccount = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Bulk reassign accounts to a different account_type (which drives classification via DB trigger).
+export const bulkUpdateAccountType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; accountIds: string[]; accountTypeId: string }) =>
+    z.object({
+      companyId: z.string().uuid(),
+      accountIds: z.array(z.string().uuid()).min(1).max(2000),
+      accountTypeId: z.string().uuid(),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: at, error: atErr } = await context.supabase
+      .from("account_types")
+      .select("classification, company_id")
+      .eq("id", data.accountTypeId)
+      .single();
+    if (atErr || !at) throw new Error("Invalid account type");
+    if (at.company_id !== data.companyId) throw new Error("Account type does not belong to this company");
+
+    const { error } = await context.supabase
+      .from("accounts")
+      .update({ account_type_id: data.accountTypeId, account_type: at.classification })
+      .in("id", data.accountIds)
+      .eq("company_id", data.companyId);
+    if (error) throw new Error(error.message);
+    return { ok: true, updated: data.accountIds.length };
+  });
+
+
 const ImportRowSchema = z.object({
   code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
