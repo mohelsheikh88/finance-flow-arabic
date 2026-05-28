@@ -635,6 +635,8 @@ export const translations = {
     assets: {
       title: "Fixed Assets",
       newAsset: "New Asset",
+      postDueDep: "Post Due Depreciation",
+
       newCategory: "New Category",
       category: "Category",
       acquisitionDate: "Acquisition Date",
