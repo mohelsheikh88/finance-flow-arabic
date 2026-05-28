@@ -41,6 +41,8 @@ export function Topbar() {
     enabled: !!user,
   });
 
+  const ctxFetching = useIsFetching({ queryKey: ["user-context"] }) > 0;
+
   // Auto-select first company/branch
   useEffect(() => {
     if (ctx?.companies?.length && !companyId) {
