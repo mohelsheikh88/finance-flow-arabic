@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listAccountTypes, upsertAccountType, deleteAccountType, listClassifications, reorderAccountTypes } from "@/lib/api/accounting.functions";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableRow } from "@/components/sortable-row";
 
@@ -360,7 +360,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
       </div>
 
       <Card>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
           <SortableContext items={visible.map((n) => n.id)} strategy={verticalListSortingStrategy}>
             <table className="w-full text-xs">
               <thead className="bg-muted/50">
