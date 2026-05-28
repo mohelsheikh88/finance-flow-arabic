@@ -258,7 +258,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.backToAccountTypes")}</Link>
+              <Link to="/accounts"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.title")}</Link>
             </Button>
             <h1 className="page-title">{t("accounts.classificationsTitle")}</h1>
           </div>
