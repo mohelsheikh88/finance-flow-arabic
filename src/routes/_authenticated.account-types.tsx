@@ -321,90 +321,88 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
       </div>
 
       <Card>
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-start p-3 font-medium">{t("common.code")} / {t("common.name")}</th>
-              <th className="text-start p-3 font-medium">Core Classification</th>
-              <th className="text-start p-3 font-medium">{t("accounts.classification")}</th>
-              <th className="text-center p-3 font-medium">{t("common.type") || "Type"}</th>
-              <th className="text-center p-3 font-medium">{t("common.status")}</th>
-              <th className="text-end p-3 font-medium">{t("common.actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((n) => {
-              const cls = (classifications as any[]).find((c) => c.id === n.classification_id);
-              const hasChildren = n.children.length > 0;
-              const isOpen = expanded.has(n.id);
-              return (
-                <tr key={n.id} className="border-t hover:bg-muted/30">
-                  <td className="p-3">
-                    <div className="flex items-center gap-1" style={{ paddingInlineStart: n.depth * 18 }}>
-                      {hasChildren ? (
-                        <button onClick={() => toggle(n.id)} className="p-0.5 hover:bg-muted rounded">
-                          {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                        </button>
-                      ) : (
-                        <span className="w-4 inline-block" />
-                      )}
-                      {n.is_group ? <FolderTree className="h-3.5 w-3.5 text-primary" /> : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
-                      <span className="font-mono">{n.code}</span>
-                      <span className="mx-1 text-muted-foreground">—</span>
-                      <span className={n.is_group ? "font-semibold" : ""}>{localized(n, "name")}</span>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    {cls ? (
-                      <span className="inline-flex items-center gap-1">
-                        <span className="font-mono text-muted-foreground">{cls.code}</span>
-                        <span>—</span>
-                        <span>{localized(cls, "name")}</span>
-                      </span>
-                    ) : <span className="text-muted-foreground">—</span>}
-                  </td>
-                  <td className="p-3">
-                    <Badge variant="outline" className={clsColors[n.classification]}>
-                      {t(`accounts.${n.classification}`)}
-                    </Badge>
-                  </td>
-                  <td className="p-3 text-center">
-                    <Badge variant="outline">{n.is_group ? (t("common.group") || "Group") : (t("common.leaf") || "Leaf")}</Badge>
-                  </td>
-                  <td className="p-3 text-center">{n.is_active ? t("common.active") : t("common.inactive")}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-1 justify-end">
-                      <Button size="sm" variant="ghost" onClick={() => moveMut.mutate({ id: n.id, direction: "up" })}
-                        disabled={moveMut.isPending} aria-label="move up">
-                        <ArrowUp className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => moveMut.mutate({ id: n.id, direction: "down" })}
-                        disabled={moveMut.isPending} aria-label="move down">
-                        <ArrowDown className="h-3.5 w-3.5" />
-                      </Button>
-
-                      {n.is_group && (
-                        <Button size="sm" variant="ghost" onClick={() => openNew(n, false)} aria-label="add child">
-                          <Plus className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(n)} aria-label={t("common.edit")}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setToDelete(n)}
-                        aria-label={t("common.delete")}
-                        className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </td>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={visible.map((n) => n.id)} strategy={verticalListSortingStrategy}>
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="w-8 p-3"></th>
+                  <th className="text-start p-3 font-medium">{t("common.code")} / {t("common.name")}</th>
+                  <th className="text-start p-3 font-medium">Core Classification</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.classification")}</th>
+                  <th className="text-center p-3 font-medium">{t("common.type") || "Type"}</th>
+                  <th className="text-center p-3 font-medium">{t("common.status")}</th>
+                  <th className="text-end p-3 font-medium">{t("common.actions")}</th>
                 </tr>
-              );
-            })}
-            {visible.length === 0 && (
-              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
-            )}
-          </tbody>
+              </thead>
+              <tbody>
+                {visible.map((n) => {
+                  const cls = (classifications as any[]).find((c) => c.id === n.classification_id);
+                  const hasChildren = n.children.length > 0;
+                  const isOpen = expanded.has(n.id);
+                  return (
+                    <SortableRow key={n.id} id={n.id} className="border-t hover:bg-muted/30">
+                      {({ handle }) => (
+                        <>
+                          <td className="p-3 align-middle">{handle}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1" style={{ paddingInlineStart: n.depth * 18 }}>
+                              {hasChildren ? (
+                                <button onClick={() => toggle(n.id)} className="p-0.5 hover:bg-muted rounded">
+                                  {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                                </button>
+                              ) : (
+                                <span className="w-4 inline-block" />
+                              )}
+                              {n.is_group ? <FolderTree className="h-3.5 w-3.5 text-primary" /> : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+                              <span className="font-mono">{n.code}</span>
+                              <span className="mx-1 text-muted-foreground">—</span>
+                              <span className={n.is_group ? "font-semibold" : ""}>{localized(n, "name")}</span>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            {cls ? (
+                              <span className="inline-flex items-center gap-1">
+                                <span className="font-mono text-muted-foreground">{cls.code}</span>
+                                <span>—</span>
+                                <span>{localized(cls, "name")}</span>
+                              </span>
+                            ) : <span className="text-muted-foreground">—</span>}
+                          </td>
+                          <td className="p-3">
+                            <Badge variant="outline" className={clsColors[n.classification]}>
+                              {t(`accounts.${n.classification}`)}
+                            </Badge>
+                          </td>
+                          <td className="p-3 text-center">
+                            <Badge variant="outline">{n.is_group ? (t("common.group") || "Group") : (t("common.leaf") || "Leaf")}</Badge>
+                          </td>
+                          <td className="p-3 text-center">{n.is_active ? t("common.active") : t("common.inactive")}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1 justify-end">
+                              {n.is_group && (
+                                <Button size="sm" variant="ghost" onClick={() => openNew(n, false)} aria-label="add child">
+                                  <Plus className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              <Button size="sm" variant="ghost" onClick={() => openEdit(n)} aria-label={t("common.edit")}>
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => setToDelete(n)}
+                                aria-label={t("common.delete")}
+                                className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </SortableRow>
+                  );
+                })}
+                {visible.length === 0 && (
+                  <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+
         </table>
       </Card>
 
