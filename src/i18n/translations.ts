@@ -506,7 +506,8 @@ export const translations = {
       companies: "Companies",
       branches: "Branches",
       users: "Users & Permissions",
-      chartOfAccounts: "Chart of Accounts",
+      chartOfAccounts: "COA Management",
+
       costCenters: "Cost Centers",
       journals: "Journals",
       journalTypes: "Journal Types",
