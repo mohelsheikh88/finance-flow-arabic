@@ -96,7 +96,6 @@ function AuthSync() {
 }
 
 function RealtimeSync() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   useEffect(() => {
     const channel = supabase
@@ -105,15 +104,29 @@ function RealtimeSync() {
         "postgres_changes",
         { event: "*", schema: "public" },
         (payload) => {
-          // Invalidate queries scoped to the changed table, plus the router cache
-          queryClient.invalidateQueries({ queryKey: [payload.table] });
-          queryClient.invalidateQueries();
-          router.invalidate();
+          const table = payload.table;
+          const event = payload.eventType; // INSERT | UPDATE | DELETE
+          if (!table) return;
+
+          // Invalidate only queries scoped to this table (any sub-key)
+          queryClient.invalidateQueries({ queryKey: [table] });
+
+          // Event-specific channel (e.g. ["invoices", "INSERT"]) for queries
+          // that subscribe narrowly to one operation type.
+          queryClient.invalidateQueries({ queryKey: [table, event] });
+
+          // For UPDATE/DELETE, also invalidate the specific record key
+          // ["<table>", "<id>"] if present in the payload.
+          const rec: any = (payload as any).new ?? (payload as any).old;
+          const recordId = rec?.id;
+          if (recordId && (event === "UPDATE" || event === "DELETE")) {
+            queryClient.invalidateQueries({ queryKey: [table, recordId] });
+          }
         }
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [router, queryClient]);
+  }, [queryClient]);
   return null;
 }
 
