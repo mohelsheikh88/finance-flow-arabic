@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAccountTypes, upsertAccountType, deleteAccountType, listClassifications } from "@/lib/api/accounting.functions";
+import { listAccountTypes, upsertAccountType, deleteAccountType, listClassifications, moveAccountType } from "@/lib/api/accounting.functions";
+
 
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -18,7 +19,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, ChevronRight, ChevronDown, FolderTree, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, ChevronRight, ChevronDown, FolderTree, FileText, ArrowUp, ArrowDown } from "lucide-react";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account-types")({
@@ -59,7 +61,6 @@ const clsColors: Record<string, string> = {
   income: "bg-success/10 text-success border-success/30",
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
-
 type Row = {
   id: string;
   code: string;
@@ -71,8 +72,11 @@ type Row = {
   is_group: boolean;
   is_active: boolean;
   notes: string | null;
+  sort_order?: number;
 };
 type Node = Row & { depth: number; children: Node[] };
+
+
 
 function buildTree(rows: Row[]): Node[] {
   const map = new Map<string, Node>();
@@ -87,12 +91,15 @@ function buildTree(rows: Row[]): Node[] {
       roots.push(n);
     }
   });
+  const cmp = (a: Node, b: Node) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code);
   const fixDepth = (n: Node, d: number) => {
     n.depth = d;
-    n.children.sort((a, b) => a.code.localeCompare(b.code));
+    n.children.sort(cmp);
     n.children.forEach((c) => fixDepth(c, d + 1));
   };
-  roots.sort((a, b) => a.classification.localeCompare(b.classification) || a.code.localeCompare(b.code));
+  roots.sort((a, b) => a.classification.localeCompare(b.classification) || cmp(a, b));
+
+
   roots.forEach((r) => fixDepth(r, 0));
   return roots;
 }
@@ -117,6 +124,14 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const upsert = useServerFn(upsertAccountType);
   const remove = useServerFn(deleteAccountType);
   const listCls = useServerFn(listClassifications);
+  const move = useServerFn(moveAccountType);
+
+  const moveMut = useMutation({
+    mutationFn: (v: { id: string; direction: "up" | "down" }) => move({ data: v }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["account_types"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const { data: types = [] } = useQuery({
     queryKey: ["account_types", companyId],
@@ -319,6 +334,15 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   <td className="p-3 text-center">{n.is_active ? t("common.active") : t("common.inactive")}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
+                      <Button size="sm" variant="ghost" onClick={() => moveMut.mutate({ id: n.id, direction: "up" })}
+                        disabled={moveMut.isPending} aria-label="move up">
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => moveMut.mutate({ id: n.id, direction: "down" })}
+                        disabled={moveMut.isPending} aria-label="move down">
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
+
                       {n.is_group && (
                         <Button size="sm" variant="ghost" onClick={() => openNew(n, false)} aria-label="add child">
                           <Plus className="h-3.5 w-3.5" />

@@ -28,6 +28,7 @@ export type Database = {
           name_en: string
           notes: string | null
           parent_id: string | null
+          sort_order: number
           updated_at: string
         }
         Insert: {
@@ -43,6 +44,7 @@ export type Database = {
           name_en: string
           notes?: string | null
           parent_id?: string | null
+          sort_order?: number
           updated_at?: string
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           name_en?: string
           notes?: string | null
           parent_id?: string | null
+          sort_order?: number
           updated_at?: string
         }
         Relationships: [
