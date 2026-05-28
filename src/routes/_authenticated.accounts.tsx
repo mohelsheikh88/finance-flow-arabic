@@ -275,6 +275,7 @@ function AccountsPage() {
             <tr>
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.type")}</th>
               <th className="text-center p-3 font-medium">{t("accounts.isGroup")}</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
