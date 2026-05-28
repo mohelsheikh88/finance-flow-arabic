@@ -821,12 +821,22 @@ function ChartOfAccountsTree({
                     </div>
                   </td>
                   <td className="p-3 text-muted-foreground">
-                    {bucketKey ? t(`accounts.${statementOf(bucketKey)}`) : "—"}
+                    {bucketKey
+                      ? t(
+                          `accounts.${
+                            bucketByCode.get(bucketKey)?.statement === "income_statement"
+                              ? "incomeStatement"
+                              : bucketByCode.get(bucketKey)?.statement === "balance_sheet"
+                                ? "balanceSheet"
+                                : statementOf(bucketKey)
+                          }`,
+                        )
+                      : "—"}
                   </td>
                   <td className="p-3">
                     {bucketKey ? (
                       <Badge variant="outline" className={typeColors[bucketKey]}>
-                        {t(`accounts.${bucketKey}`)}
+                        {bucketName(bucketKey, t(`accounts.${bucketKey}`))}
                       </Badge>
                     ) : (
                       <span className="text-muted-foreground">—</span>
