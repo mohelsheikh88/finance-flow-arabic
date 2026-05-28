@@ -86,7 +86,8 @@ export const translations = {
       companies: "الشركات",
       branches: "الفروع",
       users: "المستخدمين والصلاحيات",
-      chartOfAccounts: "شجرة الحسابات",
+      chartOfAccounts: "إدارة شجرة الحسابات (COA)",
+
       costCenters: "مراكز التكلفة",
       journals: "الدفاتر",
       journalTypes: "أنواع الدفاتر",
@@ -505,7 +506,8 @@ export const translations = {
       companies: "Companies",
       branches: "Branches",
       users: "Users & Permissions",
-      chartOfAccounts: "Chart of Accounts",
+      chartOfAccounts: "COA Management",
+
       costCenters: "Cost Centers",
       journals: "Journals",
       journalTypes: "Journal Types",

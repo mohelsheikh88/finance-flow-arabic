@@ -109,12 +109,8 @@ export function AppSidebar() {
       items: [
         { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
-        { url: "/account-types", icon: BookOpen, title: t("accounts.accountTypesNav") },
-        { url: "/classifications", icon: BookOpen, title: t("accounts.classificationsTitle") },
-
-
-        { url: "/cost-centers", icon: Wallet, title: t("nav.costCenters") },
         { url: "/journals", icon: BookOpen, title: t("nav.journalTypes") },
+
         { url: "/currencies", icon: Coins, title: t("nav.currencies") },
         { url: "/taxes", icon: Receipt, title: t("nav.taxesTypes") },
         { url: "/fiscal-periods", icon: CalendarRange, title: t("nav.fiscalPeriods") },
