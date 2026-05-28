@@ -322,8 +322,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("common.all")}</SelectItem>
-              {BUCKETS.map((b) => (
-                <SelectItem key={b} value={b}>{t(`accounts.${b}`)}</SelectItem>
+              {(bucketRows.length ? bucketRows.map((b) => b.code) : (BUCKETS as readonly string[])).map((b) => (
+                <SelectItem key={b} value={b}>{bucketName(b, t(`accounts.${b}`))}</SelectItem>
               ))}
             </SelectContent>
           </Select>
