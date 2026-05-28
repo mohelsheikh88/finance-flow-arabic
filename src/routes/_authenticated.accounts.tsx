@@ -248,7 +248,6 @@ function AccountsPage() {
         </div>
       </div>
 
-      </div>
 
       {importResult && (
         <Card className="p-3 text-xs flex items-center justify-between gap-3">
