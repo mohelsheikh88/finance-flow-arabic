@@ -76,8 +76,10 @@ function useLabels() {
 function ClassificationsPage() {
   const { t } = useI18n();
   const localized = useLocalized();
+  const { statement: statementLabel, normalBalance: normalBalanceLabel } = useLabels();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+
 
   const list = useServerFn(listClassifications);
   const upsert = useServerFn(upsertClassification);
