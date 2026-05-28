@@ -327,28 +327,56 @@ table td, table th {
   letter-spacing: 0;
   text-transform: none;
 }
-/* Grandparent (top-level group) label — larger, uppercase, with magenta underline */
+
+/* === Hierarchy: Grandparent > Parent > Child === */
+
+/* Grandparent (top-level group) label — biggest, uppercase, magenta underline */
 .sidebar-grandparent > [data-sidebar="group-label"] {
-  font-size: 15px;
+  font-size: 17px;
+  line-height: 1.2;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: hsl(300 60% 98%) !important;
-  padding-block: 0.625rem;
+  letter-spacing: 0.10em;
+  color: hsl(0 0% 100%) !important;
+  padding-block: 0.75rem;
+  text-shadow: 0 1px 0 hsl(265 80% 6% / 0.45);
+}
+.sidebar-grandparent > [data-sidebar="group-label"] svg {
+  width: 20px !important;
+  height: 20px !important;
 }
 .sidebar-grandparent > [data-sidebar="group-label"]::after {
   content: "";
   display: block;
   height: 1px;
-  margin-top: 8px;
-  background: linear-gradient(90deg, hsl(327 92% 60% / 0.6), hsl(285 80% 50% / 0.2) 60%, transparent);
+  margin-top: 10px;
+  background: linear-gradient(90deg, hsl(327 92% 60% / 0.7), hsl(285 80% 50% / 0.25) 60%, transparent);
 }
-/* Parent (subgroup) label — medium emphasis */
+
+/* Parent (subgroup) label — medium, capitalized, slightly muted */
 .sidebar-parent > [data-sidebar="group-label"] {
-  font-size: 13.5px;
+  font-size: 14.5px;
+  line-height: 1.25;
   font-weight: 700;
-  color: hsl(300 40% 96% / 0.88) !important;
-  padding-block: 0.5rem;
+  letter-spacing: 0.01em;
+  color: hsl(300 35% 96% / 0.92) !important;
+  padding-block: 0.55rem;
+}
+.sidebar-parent > [data-sidebar="group-label"] svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+/* Child (menu-button) — smallest, comfortable reading */
+[data-sidebar="menu-button"] {
+  font-size: 13px !important;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: hsl(300 20% 92% / 0.85);
+}
+[data-sidebar="menu-button"] svg {
+  width: 15px !important;
+  height: 15px !important;
 }
 
 
