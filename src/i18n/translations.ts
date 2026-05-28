@@ -242,7 +242,7 @@ export const translations = {
     },
     accounts: {
       title: "Chart of Accounts",
-      type: "نوع الحساب",
+      type: "مجموعات الحسابات",
       asset: "أصول",
       liability: "خصوم",
       equity: "حقوق ملكية",
@@ -281,11 +281,11 @@ export const translations = {
       noTypeAssigned: "بدون نوع",
       filterByClassification: "تصفية بالتصنيف",
       allClassifications: "كل التصنيفات",
-      selectAccountType: "اختر نوع الحساب",
+      selectAccountType: "اختر مجموعة الحسابات",
       bulkUpdateSuccess: "تم تحديث الحسابات المحددة",
       selectAll: "تحديد الكل",
       confirmBulkChangeTitle: "تأكيد التغيير الجماعي",
-      confirmBulkChangeMessage: "سيتم تغيير نوع الحساب للحسابات المحددة إلى:",
+      confirmBulkChangeMessage: "سيتم تغيير مجموعة الحسابات للحسابات المحددة إلى:",
     },
 
     partners: {
@@ -733,7 +733,7 @@ export const translations = {
     },
     accounts: {
       title: "Chart of Accounts",
-      type: "Account Type",
+      type: "Accounts Groups",
       asset: "Asset",
       liability: "Liability",
       equity: "Equity",
@@ -772,11 +772,11 @@ export const translations = {
       noTypeAssigned: "No type",
       filterByClassification: "Filter by classification",
       allClassifications: "All classifications",
-      selectAccountType: "Select account type",
+      selectAccountType: "Select accounts group",
       bulkUpdateSuccess: "Selected accounts updated",
       selectAll: "Select all",
       confirmBulkChangeTitle: "Confirm Bulk Change",
-      confirmBulkChangeMessage: "The selected accounts will have their type changed to:",
+      confirmBulkChangeMessage: "The selected accounts will have their group changed to:",
     },
 
     partners: {
