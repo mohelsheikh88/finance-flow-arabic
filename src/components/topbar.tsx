@@ -100,7 +100,10 @@ export function Topbar() {
 
       <div className="flex-1" />
 
+      <OfflineIndicator />
+
       <Button variant="ghost" size="sm" onClick={() => setLocale(locale === "ar" ? "en" : "ar")} className="gap-1">
+
         <Languages className="h-4 w-4" />
         <span className="text-xs">{locale === "ar" ? "EN" : "ع"}</span>
       </Button>
