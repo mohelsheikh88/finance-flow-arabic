@@ -39,23 +39,43 @@ export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + "/");
 
-  const groups = [
     {
-      label: t("nav.dashboard"),
+      label: t("nav.accountsReceivable"),
       items: [
-        { url: "/dashboard", icon: LayoutDashboard, title: t("nav.dashboard") },
+        { url: "/invoices/customer", icon: FileText, title: t("ar.invoices") },
+        { url: "/credit-memos", icon: Receipt, title: t("ar.creditMemo") },
+        { url: "/receipts", icon: Wallet, title: t("ar.receipts") },
+        { url: "/customers", icon: Users, title: t("ar.customers") },
       ],
     },
     {
-      label: t("nav.accounting"),
+      label: t("nav.accountsPayable"),
       items: [
-        { url: "/customers", icon: Users, title: t("nav.customers") },
-        { url: "/partners", icon: Users, title: t("nav.partners") },
-        { url: "/invoices/customer", icon: FileText, title: t("nav.customerInvoices") },
-        { url: "/invoices/vendor", icon: Receipt, title: t("nav.vendorBills") },
-        { url: "/payments", icon: Wallet, title: t("nav.payments") },
-        { url: "/banks", icon: Landmark, title: t("nav.banks") },
+        { url: "/invoices/vendor", icon: Receipt, title: t("ap.bills") },
+        { url: "/debit-memos", icon: FileText, title: t("ap.debitMemo") },
+        { url: "/payments", icon: Wallet, title: t("ap.payments") },
+        { url: "/vendors", icon: Users, title: t("ap.vendors") },
+      ],
+    },
+    {
+      label: t("nav.banksGroup"),
+      items: [
+        { url: "/banks", icon: Landmark, title: t("banksGroup.accounts") },
+        { url: "/receipts", icon: Wallet, title: t("banksGroup.receipts") },
+        { url: "/payments", icon: Wallet, title: t("banksGroup.payments") },
+        { url: "/bank-expenses", icon: Coins, title: t("banksGroup.expenses") },
+        { url: "/bank-reconciliations", icon: Calculator, title: t("banksGroup.reconciliations") },
+      ],
+    },
+    {
+      label: t("nav.fixedAssets"),
+      items: [
         { url: "/assets", icon: Briefcase, title: t("nav.assets") },
+      ],
+    },
+    {
+      label: t("nav.loansGroup"),
+      items: [
         { url: "/loans", icon: CreditCard, title: t("nav.loans") },
       ],
     },
@@ -67,19 +87,6 @@ export function AppSidebar() {
         { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
       ],
     },
-    {
-      label: t("nav.reports"),
-      items: [
-        { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
-        { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
-        { url: "/reports/aging", icon: FileText, title: t("nav.aging") },
-        { url: "/reports/vat", icon: Receipt, title: t("nav.vatReport") },
-      ],
-    },
-    {
-      label: t("nav.configuration"),
-      items: [
-        { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
         { url: "/cost-centers", icon: Wallet, title: t("nav.costCenters") },
         { url: "/journals", icon: BookOpen, title: t("nav.journals") },
         { url: "/taxes", icon: Receipt, title: t("nav.taxes") },
