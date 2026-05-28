@@ -222,6 +222,17 @@ export const translations = {
       backToAccounts: "شجرة الحسابات",
       backToAccountTypes: "أنواع الحسابات",
       coreClassifications: "التصنيفات الرئيسية",
+      classificationMapping: "تعيين التصنيف",
+      classificationMappingTitle: "تعيين التصنيف الأساسي للحسابات",
+      bulkChangeType: "تغيير النوع جماعياً",
+      selectedCount: "محدد",
+      applyBulk: "تطبيق",
+      noTypeAssigned: "بدون نوع",
+      filterByClassification: "تصفية بالتصنيف",
+      allClassifications: "كل التصنيفات",
+      selectAccountType: "اختر نوع الحساب",
+      bulkUpdateSuccess: "تم تحديث الحسابات المحددة",
+      selectAll: "تحديد الكل",
     },
 
     partners: {
