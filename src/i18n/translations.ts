@@ -234,7 +234,7 @@ export const translations = {
       saveDraft: "حفظ كمسودة",
     },
     accounts: {
-      title: "إدارة شجرة الحسابات (COA)",
+      title: "Chart of Accounts",
       type: "نوع الحساب",
       asset: "أصول",
       liability: "خصوم",
@@ -707,7 +707,7 @@ export const translations = {
       saveDraft: "Save as Draft",
     },
     accounts: {
-      title: "COA Management",
+      title: "Chart of Accounts",
       type: "Account Type",
       asset: "Asset",
       liability: "Liability",
