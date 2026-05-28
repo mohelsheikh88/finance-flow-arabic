@@ -495,21 +495,44 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   const cls = (classifications as any[]).find((c) => c.id === n.classification_id);
                   const hasChildren = n.children.length > 0;
                   const isOpen = expanded.has(n.id);
-                  const sibs = siblingsOf(n);
-                  const sibIdx = sibs.findIndex((r) => r.id === n.id);
+                  const isCls = !!n.isClassification;
+                  const sibs = isCls ? [] : siblingsOf(n);
+                  const sibIdx = isCls ? -1 : sibs.findIndex((r) => r.id === n.id);
+                  // Synthetic classification roots used as "Grand Parent" (read-only).
+                  // The user can add child Groups / Leaves under them, but not edit
+                  // or delete them — that lives in Core Classifications.
+                  const realRow: Row | null = isCls
+                    ? {
+                        id: n.id,
+                        code: n.code,
+                        name_ar: n.name_ar,
+                        name_en: n.name_en,
+                        classification: n.classification,
+                        classification_id: n.classification_id,
+                        parent_id: null,
+                        is_group: true,
+                        is_active: true,
+                        notes: null,
+                      }
+                    : (n as Row);
                   return (
                     <SortableRow
                       key={n.id}
                       id={n.id}
-                      className="border-t hover:bg-muted/30"
-                      onMoveUp={() => moveByOne(n.id, -1)}
-                      onMoveDown={() => moveByOne(n.id, 1)}
-                      canMoveUp={sibIdx > 0}
-                      canMoveDown={sibIdx >= 0 && sibIdx < sibs.length - 1}
+                      className={
+                        isCls
+                          ? "border-t bg-muted/40 hover:bg-muted/50"
+                          : "border-t hover:bg-muted/30"
+                      }
+                      disabled={isCls}
+                      onMoveUp={isCls ? undefined : () => moveByOne(n.id, -1)}
+                      onMoveDown={isCls ? undefined : () => moveByOne(n.id, 1)}
+                      canMoveUp={!isCls && sibIdx > 0}
+                      canMoveDown={!isCls && sibIdx >= 0 && sibIdx < sibs.length - 1}
                     >
                       {({ handle }) => (
                         <>
-                          <td className="p-3 align-middle">{handle}</td>
+                          <td className="p-3 align-middle">{isCls ? null : handle}</td>
                           <td className="p-3">
                             <div
                               className="flex items-center gap-1"
@@ -529,20 +552,41 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                               ) : (
                                 <span className="w-4 inline-block" />
                               )}
-                              {n.is_group ? (
-                                <FolderTree className="h-3.5 w-3.5 text-primary" />
+                              {isCls || n.is_group ? (
+                                <FolderTree
+                                  className={
+                                    isCls
+                                      ? "h-4 w-4 text-primary"
+                                      : "h-3.5 w-3.5 text-primary"
+                                  }
+                                />
                               ) : (
                                 <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                               )}
-                              <span className="font-mono">{n.code}</span>
+                              <span className={isCls ? "font-mono font-semibold" : "font-mono"}>
+                                {n.code}
+                              </span>
                               <span className="mx-1 text-muted-foreground">—</span>
-                              <span className={n.is_group ? "font-semibold" : ""}>
+                              <span
+                                className={
+                                  isCls
+                                    ? "font-bold"
+                                    : n.is_group
+                                      ? "font-semibold"
+                                      : ""
+                                }
+                              >
                                 {localized(n, "name")}
                               </span>
+                              {isCls && (
+                                <Badge variant="secondary" className="ms-2 text-[10px]">
+                                  {t("accounts.coreClassification") || "Core Classification"}
+                                </Badge>
+                              )}
                             </div>
                           </td>
                           <td className="p-3">
-                            {cls ? (
+                            {cls && !isCls ? (
                               <span className="inline-flex items-center gap-1">
                                 <span className="font-mono text-muted-foreground">{cls.code}</span>
                                 <span>—</span>
@@ -559,9 +603,11 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                           </td>
                           <td className="p-3 text-center">
                             <Badge variant="outline">
-                              {n.is_group
-                                ? t("common.group") || "Group"
-                                : t("common.leaf") || "Leaf"}
+                              {isCls
+                                ? t("accounts.grandParent") || "Grand Parent"
+                                : n.is_group
+                                  ? t("common.group") || "Group"
+                                  : t("common.leaf") || "Leaf"}
                             </Badge>
                           </td>
                           <td className="p-3 text-center">
@@ -569,39 +615,65 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                           </td>
                           <td className="p-3">
                             <div className="flex items-center gap-1 justify-end">
-                              {n.is_group && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => openNew(n, false)}
-                                  aria-label="add child"
-                                >
-                                  <Plus className="h-3.5 w-3.5" />
-                                </Button>
+                              {isCls ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => openNew(realRow!, true)}
+                                    aria-label="add sub group"
+                                    title={t("common.newGroup") || "New group"}
+                                  >
+                                    <FolderTree className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => openNew(realRow!, false)}
+                                    aria-label="add child"
+                                  >
+                                    <Plus className="h-3.5 w-3.5" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  {n.is_group && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => openNew(n, false)}
+                                      aria-label="add child"
+                                    >
+                                      <Plus className="h-3.5 w-3.5" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => openEdit(n)}
+                                    aria-label={t("common.edit")}
+                                  >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setToDelete(n)}
+                                    aria-label={t("common.delete")}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </>
                               )}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => openEdit(n)}
-                                aria-label={t("common.edit")}
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => setToDelete(n)}
-                                aria-label={t("common.delete")}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
                             </div>
                           </td>
                         </>
                       )}
                     </SortableRow>
                   );
+                })}
+
                 })}
                 {visible.length === 0 && (
                   <tr>
