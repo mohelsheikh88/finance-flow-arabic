@@ -948,6 +948,56 @@ export type Database = {
           },
         ]
       }
+      fiscal_positions: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          income_tax_applicable: boolean
+          is_active: boolean
+          is_saudi: boolean
+          name_ar: string
+          name_en: string
+          updated_at: string
+          vat_applicable: boolean
+          zakat_applicable: boolean
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          income_tax_applicable?: boolean
+          is_active?: boolean
+          is_saudi?: boolean
+          name_ar: string
+          name_en: string
+          updated_at?: string
+          vat_applicable?: boolean
+          zakat_applicable?: boolean
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          income_tax_applicable?: boolean
+          is_active?: boolean
+          is_saudi?: boolean
+          name_ar?: string
+          name_en?: string
+          updated_at?: string
+          vat_applicable?: boolean
+          zakat_applicable?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_positions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fixed_assets: {
         Row: {
           accumulated_depreciation: number

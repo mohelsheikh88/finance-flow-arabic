@@ -175,6 +175,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
             { url: "/journals", icon: BookOpen, title: t("nav.journalTypes") },
             { url: "/currencies", icon: Coins, title: t("nav.currencies") },
             { url: "/taxes", icon: Receipt, title: t("nav.taxesTypes") },
+            { url: "/fiscal-positions", icon: Scale, title: t("nav.fiscalPositions") },
             { url: "/fiscal-periods", icon: CalendarRange, title: t("nav.fiscalPeriods") },
             { url: "/payment-methods", icon: CreditCard, title: t("nav.paymentMethods") },
             { url: "/lock-dates", icon: Lock, title: t("nav.lockDates") },

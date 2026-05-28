@@ -28,6 +28,7 @@ import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
 import { Route as AuthenticatedHrRouteImport } from './routes/_authenticated.hr'
+import { Route as AuthenticatedFiscalPositionsRouteImport } from './routes/_authenticated.fiscal-positions'
 import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authenticated.fiscal-periods'
 import { Route as AuthenticatedDebitMemosRouteImport } from './routes/_authenticated.debit-memos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -157,6 +158,12 @@ const AuthenticatedHrRoute = AuthenticatedHrRouteImport.update({
   path: '/hr',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFiscalPositionsRoute =
+  AuthenticatedFiscalPositionsRouteImport.update({
+    id: '/fiscal-positions',
+    path: '/fiscal-positions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedFiscalPeriodsRoute =
   AuthenticatedFiscalPeriodsRouteImport.update({
     id: '/fiscal-periods',
@@ -360,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/hr': typeof AuthenticatedHrRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
@@ -412,6 +420,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/hr': typeof AuthenticatedHrRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
@@ -466,6 +475,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/_authenticated/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/_authenticated/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/_authenticated/hr': typeof AuthenticatedHrRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
@@ -520,6 +530,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/debit-memos'
     | '/fiscal-periods'
+    | '/fiscal-positions'
     | '/hr'
     | '/inventory'
     | '/journals'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/debit-memos'
     | '/fiscal-periods'
+    | '/fiscal-positions'
     | '/hr'
     | '/inventory'
     | '/journals'
@@ -625,6 +637,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/debit-memos'
     | '/_authenticated/fiscal-periods'
+    | '/_authenticated/fiscal-positions'
     | '/_authenticated/hr'
     | '/_authenticated/inventory'
     | '/_authenticated/journals'
@@ -797,6 +810,13 @@ declare module '@tanstack/react-router' {
       path: '/hr'
       fullPath: '/hr'
       preLoaderRoute: typeof AuthenticatedHrRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/fiscal-positions': {
+      id: '/_authenticated/fiscal-positions'
+      path: '/fiscal-positions'
+      fullPath: '/fiscal-positions'
+      preLoaderRoute: typeof AuthenticatedFiscalPositionsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/fiscal-periods': {
@@ -1045,6 +1065,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDebitMemosRoute: typeof AuthenticatedDebitMemosRoute
   AuthenticatedFiscalPeriodsRoute: typeof AuthenticatedFiscalPeriodsRoute
+  AuthenticatedFiscalPositionsRoute: typeof AuthenticatedFiscalPositionsRoute
   AuthenticatedHrRoute: typeof AuthenticatedHrRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
@@ -1096,6 +1117,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDebitMemosRoute: AuthenticatedDebitMemosRoute,
   AuthenticatedFiscalPeriodsRoute: AuthenticatedFiscalPeriodsRoute,
+  AuthenticatedFiscalPositionsRoute: AuthenticatedFiscalPositionsRoute,
   AuthenticatedHrRoute: AuthenticatedHrRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
