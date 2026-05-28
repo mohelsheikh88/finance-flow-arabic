@@ -122,7 +122,7 @@ function ChartOfAccountsPanel() {
     enabled: !!companyId,
   });
 
-  });
+
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
