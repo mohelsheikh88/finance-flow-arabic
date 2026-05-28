@@ -460,6 +460,144 @@ export type Database = {
           },
         ]
       }
+      invoice_lines: {
+        Row: {
+          account_id: string
+          cost_center_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          invoice_id: string
+          line_number: number
+          quantity: number
+          subtotal: number
+          tax_amount: number
+          tax_id: string | null
+          tax_rate: number
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          account_id: string
+          cost_center_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id: string
+          line_number: number
+          quantity?: number
+          subtotal?: number
+          tax_amount?: number
+          tax_id?: string | null
+          tax_rate?: number
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          account_id?: string
+          cost_center_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string
+          line_number?: number
+          quantity?: number
+          subtotal?: number
+          tax_amount?: number
+          tax_id?: string | null
+          tax_rate?: number
+          total?: number
+          unit_price?: number
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount_due: number
+          amount_paid: number
+          branch_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency_code: string
+          due_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          invoice_type: Database["public"]["Enums"]["invoice_type"]
+          journal_entry_id: string | null
+          journal_id: string | null
+          notes: string | null
+          partner_id: string
+          posted_at: string | null
+          posted_by: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          tax_amount: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          amount_due?: number
+          amount_paid?: number
+          branch_id: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          due_date?: string | null
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          invoice_type: Database["public"]["Enums"]["invoice_type"]
+          journal_entry_id?: string | null
+          journal_id?: string | null
+          notes?: string | null
+          partner_id: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_due?: number
+          amount_paid?: number
+          branch_id?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          invoice_type?: Database["public"]["Enums"]["invoice_type"]
+          journal_entry_id?: string | null
+          journal_id?: string | null
+          notes?: string | null
+          partner_id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           branch_id: string
@@ -882,6 +1020,30 @@ export type Database = {
           },
         ]
       }
+      payment_allocations: {
+        Row: {
+          allocated_amount: number
+          created_at: string
+          id: string
+          invoice_id: string
+          payment_id: string
+        }
+        Insert: {
+          allocated_amount: number
+          created_at?: string
+          id?: string
+          invoice_id: string
+          payment_id: string
+        }
+        Update: {
+          allocated_amount?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          payment_id?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           bank_account_id: string | null
@@ -982,6 +1144,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          branch_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency_code: string
+          direction: Database["public"]["Enums"]["payment_direction"]
+          id: string
+          journal_entry_id: string | null
+          journal_id: string | null
+          notes: string | null
+          partner_id: string
+          payment_date: string
+          payment_method_id: string | null
+          payment_number: string
+          posted_at: string | null
+          posted_by: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          branch_id: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          direction: Database["public"]["Enums"]["payment_direction"]
+          id?: string
+          journal_entry_id?: string | null
+          journal_id?: string | null
+          notes?: string | null
+          partner_id: string
+          payment_date: string
+          payment_method_id?: string | null
+          payment_number: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          branch_id?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          direction?: Database["public"]["Enums"]["payment_direction"]
+          id?: string
+          journal_entry_id?: string | null
+          journal_id?: string | null
+          notes?: string | null
+          partner_id?: string
+          payment_date?: string
+          payment_method_id?: string | null
+          payment_number?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1203,9 +1443,18 @@ export type Database = {
         | "accountant"
         | "internal_auditor"
       fiscal_period_status: "open" | "closed" | "locked"
+      invoice_status:
+        | "draft"
+        | "posted"
+        | "paid"
+        | "partially_paid"
+        | "cancelled"
+      invoice_type: "customer" | "vendor"
       je_status: "draft" | "posted" | "cancelled"
       journal_type: "sales" | "purchase" | "bank" | "cash" | "misc"
+      payment_direction: "inbound" | "outbound"
       payment_method_type: "cash" | "bank_transfer" | "check" | "card" | "other"
+      payment_status: "draft" | "posted" | "cancelled"
       tax_type: "sale" | "purchase"
     }
     CompositeTypes: {
@@ -1344,9 +1593,19 @@ export const Constants = {
         "internal_auditor",
       ],
       fiscal_period_status: ["open", "closed", "locked"],
+      invoice_status: [
+        "draft",
+        "posted",
+        "paid",
+        "partially_paid",
+        "cancelled",
+      ],
+      invoice_type: ["customer", "vendor"],
       je_status: ["draft", "posted", "cancelled"],
       journal_type: ["sales", "purchase", "bank", "cash", "misc"],
+      payment_direction: ["inbound", "outbound"],
       payment_method_type: ["cash", "bank_transfer", "check", "card", "other"],
+      payment_status: ["draft", "posted", "cancelled"],
       tax_type: ["sale", "purchase"],
     },
   },
