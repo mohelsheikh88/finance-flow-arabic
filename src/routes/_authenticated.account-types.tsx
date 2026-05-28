@@ -87,12 +87,21 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const list = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccountType);
   const remove = useServerFn(deleteAccountType);
+  const listCls = useServerFn(listClassifications);
 
   const { data: types = [] } = useQuery({
     queryKey: ["account_types", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+
+  const { data: classifications = [] } = useQuery({
+    queryKey: ["classifications", companyId],
+    queryFn: () => listCls({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+  const activeClassifications = (classifications as any[]).filter((c) => c.is_active);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
@@ -106,6 +115,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
       name_ar: r.name_ar ?? "",
       name_en: r.name_en ?? "",
       classification: r.classification,
+      classification_id: r.classification_id ?? null,
       is_active: !!r.is_active,
       notes: r.notes ?? "",
     });
@@ -113,19 +123,24 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   };
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      upsert({
+    mutationFn: () => {
+      const selected = (classifications as any[]).find((c) => c.id === form.classification_id);
+      const cls = (selected?.bucket as Cls) ?? form.classification;
+      return upsert({
         data: {
           id: form.id,
           company_id: companyId!,
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          classification: form.classification,
+          classification: cls,
+          classification_id: form.classification_id,
           is_active: form.is_active,
           notes: form.notes.trim() || null,
         },
-      }),
+      });
+    },
+
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["account_types"] });
