@@ -45,7 +45,8 @@ function AccountsPage() {
           <TabsTrigger value="types">{t("accounts.accountTypesNav")}</TabsTrigger>
           <TabsTrigger value="classifications">{t("accounts.coreClassifications")}</TabsTrigger>
           <TabsTrigger value="mapping">{t("accounts.classificationMapping")}</TabsTrigger>
-          <TabsTrigger value="cost-centers">{t("nav.cost-centers")}</TabsTrigger>
+          <TabsTrigger value="cost-centers">{t("nav.costCenters")}</TabsTrigger>
+
         </TabsList>
         <TabsContent value="coa" className="mt-4">
           <ChartOfAccountsPanel />
