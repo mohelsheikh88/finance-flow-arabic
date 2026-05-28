@@ -1309,6 +1309,39 @@ export type Database = {
           },
         ]
       }
+      lock_dates: {
+        Row: {
+          branch_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          lock_date: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lock_date: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lock_date?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partners: {
         Row: {
           address_ar: string | null
@@ -1858,6 +1891,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_date_locked: {
+        Args: { _branch_id: string; _company_id: string; _txn_date: string }
+        Returns: boolean
+      }
     }
     Enums: {
       account_type: "asset" | "liability" | "equity" | "income" | "expense"
