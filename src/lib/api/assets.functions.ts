@@ -158,3 +158,193 @@ export const getDepreciationSchedule = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { schedule: rows || [] };
   });
+
+/**
+ * Post all due depreciation schedule rows (period_date <= asOf, not yet posted)
+ * for the given company. Creates one JE per asset per period:
+ *   Dr Depreciation Expense / Cr Accumulated Depreciation.
+ * Updates the asset's accumulated depreciation, book value, and status.
+ *
+ * Safe to call repeatedly — already-posted rows are skipped.
+ */
+export async function postDueDepreciationCore(
+  supabase: any,
+  userId: string | null,
+  args: { companyId?: string; asOf?: string } = {},
+) {
+  const asOf = args.asOf ?? new Date().toISOString().split("T")[0];
+
+  // Pull all unposted due rows joined with asset + accounts
+  let q = supabase
+    .from("depreciation_schedule")
+    .select(`
+      id, period_date, depreciation_amount, accumulated_depreciation, book_value, asset_id,
+      fixed_assets!inner(
+        id, company_id, branch_id, code, name_ar, name_en,
+        depreciation_account_id, accumulated_depreciation_account_id,
+        acquisition_cost, useful_life_months
+      )
+    `)
+    .eq("is_posted", false)
+    .lte("period_date", asOf)
+    .order("period_date");
+  if (args.companyId) q = q.eq("fixed_assets.company_id", args.companyId);
+  const { data: rows, error } = await q;
+  if (error) throw new Error(error.message);
+  if (!rows || rows.length === 0) {
+    return { posted: 0, skipped: 0, errors: [] as Array<{ id: string; reason: string }> };
+  }
+
+  // Cache misc journal per company
+  const journalCache = new Map<string, { id: string; prefix: string }>();
+  async function getMiscJournal(companyId: string) {
+    if (journalCache.has(companyId)) return journalCache.get(companyId)!;
+    const { data: j } = await supabase
+      .from("journals")
+      .select("id, sequence_prefix")
+      .eq("company_id", companyId)
+      .eq("journal_type", "misc")
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+    if (!j) throw new Error(`No misc/general journal configured for company ${companyId}`);
+    const entry = { id: j.id, prefix: j.sequence_prefix ?? "DEP" };
+    journalCache.set(companyId, entry);
+    return entry;
+  }
+
+  let posted = 0;
+  let skipped = 0;
+  const errors: Array<{ id: string; reason: string }> = [];
+
+  for (const row of rows as any[]) {
+    const asset = row.fixed_assets;
+    if (!asset) { skipped++; continue; }
+    if (!asset.depreciation_account_id || !asset.accumulated_depreciation_account_id) {
+      errors.push({ id: row.id, reason: `Asset ${asset.code} missing depreciation accounts` });
+      skipped++;
+      continue;
+    }
+    try {
+      const journal = await getMiscJournal(asset.company_id);
+
+      // Period for this date
+      const { data: period } = await supabase
+        .from("fiscal_periods")
+        .select("id, status")
+        .eq("company_id", asset.company_id)
+        .lte("date_from", row.period_date)
+        .gte("date_to", row.period_date)
+        .maybeSingle();
+      if (period && period.status !== "open") {
+        errors.push({ id: row.id, reason: "Fiscal period closed" });
+        skipped++;
+        continue;
+      }
+
+      // Next sequence
+      const { data: jSeq } = await supabase
+        .from("journals")
+        .select("sequence_next")
+        .eq("id", journal.id)
+        .single();
+      const seq = jSeq?.sequence_next ?? 1;
+      const yr = new Date(row.period_date).getFullYear();
+      const entryNumber = `${journal.prefix}/${yr}/${String(seq).padStart(5, "0")}`;
+      const amount = Number(row.depreciation_amount);
+
+      const { data: je, error: jeErr } = await supabase
+        .from("journal_entries")
+        .insert({
+          company_id: asset.company_id,
+          branch_id: asset.branch_id,
+          journal_id: journal.id,
+          period_id: period?.id ?? null,
+          entry_number: entryNumber,
+          entry_date: row.period_date,
+          reference: `DEP-${asset.code}`,
+          description: `Depreciation – ${asset.code} ${asset.name_en} (${row.period_date})`,
+          status: "posted",
+          total_debit: amount,
+          total_credit: amount,
+          source_type: "depreciation",
+          source_id: row.id,
+          created_by: userId,
+          posted_by: userId,
+          posted_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+      if (jeErr || !je) throw new Error(jeErr?.message ?? "Failed JE");
+
+      const { error: lErr } = await supabase.from("journal_entry_lines").insert([
+        {
+          entry_id: je.id,
+          line_number: 1,
+          account_id: asset.depreciation_account_id,
+          description: `Depreciation expense – ${asset.code}`,
+          debit: amount,
+          credit: 0,
+        },
+        {
+          entry_id: je.id,
+          line_number: 2,
+          account_id: asset.accumulated_depreciation_account_id,
+          description: `Accumulated depreciation – ${asset.code}`,
+          debit: 0,
+          credit: amount,
+        },
+      ]);
+      if (lErr) {
+        await supabase.from("journal_entries").delete().eq("id", je.id);
+        throw new Error(lErr.message);
+      }
+
+      await supabase.from("journals").update({ sequence_next: seq + 1 }).eq("id", journal.id);
+
+      await supabase
+        .from("depreciation_schedule")
+        .update({
+          is_posted: true,
+          journal_entry_id: je.id,
+          posted_at: new Date().toISOString(),
+          posted_by: userId,
+        })
+        .eq("id", row.id);
+
+      // Update asset rollup
+      const newAccum = Number(row.accumulated_depreciation);
+      const newBook = Number(row.book_value);
+      const isFinal = newBook <= Number(asset.acquisition_cost) - Number(asset.acquisition_cost) + 0.01
+        ? false : false; // computed below
+      await supabase
+        .from("fixed_assets")
+        .update({
+          accumulated_depreciation: newAccum,
+          current_book_value: newBook,
+          status: newAccum >= Number(asset.acquisition_cost) - 0.01 ? "fully_depreciated" : "active",
+        })
+        .eq("id", asset.id);
+
+      posted++;
+    } catch (e: any) {
+      errors.push({ id: row.id, reason: e.message });
+      skipped++;
+    }
+  }
+
+  return { posted, skipped, errors };
+}
+
+export const postDueDepreciation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      companyId: z.string().uuid().optional(),
+      asOf: z.string().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    return postDueDepreciationCore(context.supabase, context.userId!, data);
+  });
+
