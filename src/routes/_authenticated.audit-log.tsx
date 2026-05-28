@@ -40,9 +40,6 @@ function AuditLogPage() {
     limit: number;
   }>({ tableName: "", action: "", from: "", to: "", limit: 100 });
 
-  const { data: tables = [] } = useQuery<string[]>({
-    queryKey: ["audit_tables"],
-    queryFn: () => tablesFn(),
   const { data: tables = [] } = useQuery({
     queryKey: ["audit_tables"],
     queryFn: () => tablesFn() as Promise<string[]>,
@@ -60,8 +57,6 @@ function AuditLogPage() {
           limit: filters.limit,
         },
       }) as Promise<AuditRow[]>,
-  });
-      }),
   });
 
   const [selected, setSelected] = useState<AuditRow | null>(null);
