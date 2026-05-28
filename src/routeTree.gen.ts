@@ -9,38 +9,375 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
+import { Route as AuthenticatedTrialBalanceRouteImport } from './routes/_authenticated.trial-balance'
+import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.taxes'
+import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
+import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
+import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
+import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authenticated.fiscal-periods'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedCurrenciesRouteImport } from './routes/_authenticated.currencies'
+import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenticated.cost-centers'
+import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated.companies'
+import { Route as AuthenticatedBanksRouteImport } from './routes/_authenticated.banks'
+import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated.assets'
+import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated.accounts'
+import { Route as AuthenticatedJournalEntriesIndexRouteImport } from './routes/_authenticated.journal-entries.index'
+import { Route as AuthenticatedReportsVatRouteImport } from './routes/_authenticated.reports.vat'
+import { Route as AuthenticatedReportsIncomeStatementRouteImport } from './routes/_authenticated.reports.income-statement'
+import { Route as AuthenticatedReportsBalanceSheetRouteImport } from './routes/_authenticated.reports.balance-sheet'
+import { Route as AuthenticatedReportsAgingRouteImport } from './routes/_authenticated.reports.aging'
+import { Route as AuthenticatedJournalEntriesNewRouteImport } from './routes/_authenticated.journal-entries.new'
+import { Route as AuthenticatedInvoicesVendorRouteImport } from './routes/_authenticated.invoices.vendor'
+import { Route as AuthenticatedInvoicesCustomerRouteImport } from './routes/_authenticated.invoices.customer'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTrialBalanceRoute =
+  AuthenticatedTrialBalanceRouteImport.update({
+    id: '/trial-balance',
+    path: '/trial-balance',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedTaxesRoute = AuthenticatedTaxesRouteImport.update({
+  id: '/taxes',
+  path: '/taxes',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPartnersRoute = AuthenticatedPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedJournalsRoute = AuthenticatedJournalsRouteImport.update({
+  id: '/journals',
+  path: '/journals',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFiscalPeriodsRoute =
+  AuthenticatedFiscalPeriodsRouteImport.update({
+    id: '/fiscal-periods',
+    path: '/fiscal-periods',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCurrenciesRoute = AuthenticatedCurrenciesRouteImport.update({
+  id: '/currencies',
+  path: '/currencies',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCostCentersRoute =
+  AuthenticatedCostCentersRouteImport.update({
+    id: '/cost-centers',
+    path: '/cost-centers',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedBanksRoute = AuthenticatedBanksRouteImport.update({
+  id: '/banks',
+  path: '/banks',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAccountsRoute = AuthenticatedAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedJournalEntriesIndexRoute =
+  AuthenticatedJournalEntriesIndexRouteImport.update({
+    id: '/journal-entries/',
+    path: '/journal-entries/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsVatRoute = AuthenticatedReportsVatRouteImport.update({
+  id: '/reports/vat',
+  path: '/reports/vat',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedReportsIncomeStatementRoute =
+  AuthenticatedReportsIncomeStatementRouteImport.update({
+    id: '/reports/income-statement',
+    path: '/reports/income-statement',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsBalanceSheetRoute =
+  AuthenticatedReportsBalanceSheetRouteImport.update({
+    id: '/reports/balance-sheet',
+    path: '/reports/balance-sheet',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsAgingRoute =
+  AuthenticatedReportsAgingRouteImport.update({
+    id: '/reports/aging',
+    path: '/reports/aging',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedJournalEntriesNewRoute =
+  AuthenticatedJournalEntriesNewRouteImport.update({
+    id: '/journal-entries/new',
+    path: '/journal-entries/new',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedInvoicesVendorRoute =
+  AuthenticatedInvoicesVendorRouteImport.update({
+    id: '/invoices/vendor',
+    path: '/invoices/vendor',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedInvoicesCustomerRoute =
+  AuthenticatedInvoicesCustomerRouteImport.update({
+    id: '/invoices/customer',
+    path: '/invoices/customer',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/accounts': typeof AuthenticatedAccountsRoute
+  '/assets': typeof AuthenticatedAssetsRoute
+  '/banks': typeof AuthenticatedBanksRoute
+  '/companies': typeof AuthenticatedCompaniesRoute
+  '/cost-centers': typeof AuthenticatedCostCentersRoute
+  '/currencies': typeof AuthenticatedCurrenciesRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/journals': typeof AuthenticatedJournalsRoute
+  '/loans': typeof AuthenticatedLoansRoute
+  '/partners': typeof AuthenticatedPartnersRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/setup': typeof AuthenticatedSetupRoute
+  '/taxes': typeof AuthenticatedTaxesRoute
+  '/trial-balance': typeof AuthenticatedTrialBalanceRoute
+  '/users': typeof AuthenticatedUsersRoute
+  '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
+  '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
+  '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
+  '/reports/aging': typeof AuthenticatedReportsAgingRoute
+  '/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
+  '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/reports/vat': typeof AuthenticatedReportsVatRoute
+  '/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/accounts': typeof AuthenticatedAccountsRoute
+  '/assets': typeof AuthenticatedAssetsRoute
+  '/banks': typeof AuthenticatedBanksRoute
+  '/companies': typeof AuthenticatedCompaniesRoute
+  '/cost-centers': typeof AuthenticatedCostCentersRoute
+  '/currencies': typeof AuthenticatedCurrenciesRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/journals': typeof AuthenticatedJournalsRoute
+  '/loans': typeof AuthenticatedLoansRoute
+  '/partners': typeof AuthenticatedPartnersRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/setup': typeof AuthenticatedSetupRoute
+  '/taxes': typeof AuthenticatedTaxesRoute
+  '/trial-balance': typeof AuthenticatedTrialBalanceRoute
+  '/users': typeof AuthenticatedUsersRoute
+  '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
+  '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
+  '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
+  '/reports/aging': typeof AuthenticatedReportsAgingRoute
+  '/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
+  '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/reports/vat': typeof AuthenticatedReportsVatRoute
+  '/journal-entries': typeof AuthenticatedJournalEntriesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
+  '/_authenticated/assets': typeof AuthenticatedAssetsRoute
+  '/_authenticated/banks': typeof AuthenticatedBanksRoute
+  '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
+  '/_authenticated/cost-centers': typeof AuthenticatedCostCentersRoute
+  '/_authenticated/currencies': typeof AuthenticatedCurrenciesRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/_authenticated/journals': typeof AuthenticatedJournalsRoute
+  '/_authenticated/loans': typeof AuthenticatedLoansRoute
+  '/_authenticated/partners': typeof AuthenticatedPartnersRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/setup': typeof AuthenticatedSetupRoute
+  '/_authenticated/taxes': typeof AuthenticatedTaxesRoute
+  '/_authenticated/trial-balance': typeof AuthenticatedTrialBalanceRoute
+  '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_authenticated/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
+  '/_authenticated/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
+  '/_authenticated/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
+  '/_authenticated/reports/aging': typeof AuthenticatedReportsAgingRoute
+  '/_authenticated/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
+  '/_authenticated/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/_authenticated/reports/vat': typeof AuthenticatedReportsVatRoute
+  '/_authenticated/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/accounts'
+    | '/assets'
+    | '/banks'
+    | '/companies'
+    | '/cost-centers'
+    | '/currencies'
+    | '/dashboard'
+    | '/fiscal-periods'
+    | '/journals'
+    | '/loans'
+    | '/partners'
+    | '/settings'
+    | '/setup'
+    | '/taxes'
+    | '/trial-balance'
+    | '/users'
+    | '/invoices/customer'
+    | '/invoices/vendor'
+    | '/journal-entries/new'
+    | '/reports/aging'
+    | '/reports/balance-sheet'
+    | '/reports/income-statement'
+    | '/reports/vat'
+    | '/journal-entries/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/accounts'
+    | '/assets'
+    | '/banks'
+    | '/companies'
+    | '/cost-centers'
+    | '/currencies'
+    | '/dashboard'
+    | '/fiscal-periods'
+    | '/journals'
+    | '/loans'
+    | '/partners'
+    | '/settings'
+    | '/setup'
+    | '/taxes'
+    | '/trial-balance'
+    | '/users'
+    | '/invoices/customer'
+    | '/invoices/vendor'
+    | '/journal-entries/new'
+    | '/reports/aging'
+    | '/reports/balance-sheet'
+    | '/reports/income-statement'
+    | '/reports/vat'
+    | '/journal-entries'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/login'
+    | '/_authenticated/accounts'
+    | '/_authenticated/assets'
+    | '/_authenticated/banks'
+    | '/_authenticated/companies'
+    | '/_authenticated/cost-centers'
+    | '/_authenticated/currencies'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/fiscal-periods'
+    | '/_authenticated/journals'
+    | '/_authenticated/loans'
+    | '/_authenticated/partners'
+    | '/_authenticated/settings'
+    | '/_authenticated/setup'
+    | '/_authenticated/taxes'
+    | '/_authenticated/trial-balance'
+    | '/_authenticated/users'
+    | '/_authenticated/invoices/customer'
+    | '/_authenticated/invoices/vendor'
+    | '/_authenticated/journal-entries/new'
+    | '/_authenticated/reports/aging'
+    | '/_authenticated/reports/balance-sheet'
+    | '/_authenticated/reports/income-statement'
+    | '/_authenticated/reports/vat'
+    | '/_authenticated/journal-entries/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +385,251 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/users': {
+      id: '/_authenticated/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/trial-balance': {
+      id: '/_authenticated/trial-balance'
+      path: '/trial-balance'
+      fullPath: '/trial-balance'
+      preLoaderRoute: typeof AuthenticatedTrialBalanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/taxes': {
+      id: '/_authenticated/taxes'
+      path: '/taxes'
+      fullPath: '/taxes'
+      preLoaderRoute: typeof AuthenticatedTaxesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/setup': {
+      id: '/_authenticated/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof AuthenticatedSetupRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/partners': {
+      id: '/_authenticated/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof AuthenticatedPartnersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/loans': {
+      id: '/_authenticated/loans'
+      path: '/loans'
+      fullPath: '/loans'
+      preLoaderRoute: typeof AuthenticatedLoansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/journals': {
+      id: '/_authenticated/journals'
+      path: '/journals'
+      fullPath: '/journals'
+      preLoaderRoute: typeof AuthenticatedJournalsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/fiscal-periods': {
+      id: '/_authenticated/fiscal-periods'
+      path: '/fiscal-periods'
+      fullPath: '/fiscal-periods'
+      preLoaderRoute: typeof AuthenticatedFiscalPeriodsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/currencies': {
+      id: '/_authenticated/currencies'
+      path: '/currencies'
+      fullPath: '/currencies'
+      preLoaderRoute: typeof AuthenticatedCurrenciesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/cost-centers': {
+      id: '/_authenticated/cost-centers'
+      path: '/cost-centers'
+      fullPath: '/cost-centers'
+      preLoaderRoute: typeof AuthenticatedCostCentersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/companies': {
+      id: '/_authenticated/companies'
+      path: '/companies'
+      fullPath: '/companies'
+      preLoaderRoute: typeof AuthenticatedCompaniesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/banks': {
+      id: '/_authenticated/banks'
+      path: '/banks'
+      fullPath: '/banks'
+      preLoaderRoute: typeof AuthenticatedBanksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/assets': {
+      id: '/_authenticated/assets'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AuthenticatedAssetsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/accounts': {
+      id: '/_authenticated/accounts'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AuthenticatedAccountsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/journal-entries/': {
+      id: '/_authenticated/journal-entries/'
+      path: '/journal-entries'
+      fullPath: '/journal-entries/'
+      preLoaderRoute: typeof AuthenticatedJournalEntriesIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/vat': {
+      id: '/_authenticated/reports/vat'
+      path: '/reports/vat'
+      fullPath: '/reports/vat'
+      preLoaderRoute: typeof AuthenticatedReportsVatRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/income-statement': {
+      id: '/_authenticated/reports/income-statement'
+      path: '/reports/income-statement'
+      fullPath: '/reports/income-statement'
+      preLoaderRoute: typeof AuthenticatedReportsIncomeStatementRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/balance-sheet': {
+      id: '/_authenticated/reports/balance-sheet'
+      path: '/reports/balance-sheet'
+      fullPath: '/reports/balance-sheet'
+      preLoaderRoute: typeof AuthenticatedReportsBalanceSheetRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/aging': {
+      id: '/_authenticated/reports/aging'
+      path: '/reports/aging'
+      fullPath: '/reports/aging'
+      preLoaderRoute: typeof AuthenticatedReportsAgingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/journal-entries/new': {
+      id: '/_authenticated/journal-entries/new'
+      path: '/journal-entries/new'
+      fullPath: '/journal-entries/new'
+      preLoaderRoute: typeof AuthenticatedJournalEntriesNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/invoices/vendor': {
+      id: '/_authenticated/invoices/vendor'
+      path: '/invoices/vendor'
+      fullPath: '/invoices/vendor'
+      preLoaderRoute: typeof AuthenticatedInvoicesVendorRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/invoices/customer': {
+      id: '/_authenticated/invoices/customer'
+      path: '/invoices/customer'
+      fullPath: '/invoices/customer'
+      preLoaderRoute: typeof AuthenticatedInvoicesCustomerRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
+  AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
+  AuthenticatedBanksRoute: typeof AuthenticatedBanksRoute
+  AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
+  AuthenticatedCostCentersRoute: typeof AuthenticatedCostCentersRoute
+  AuthenticatedCurrenciesRoute: typeof AuthenticatedCurrenciesRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFiscalPeriodsRoute: typeof AuthenticatedFiscalPeriodsRoute
+  AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
+  AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
+  AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
+  AuthenticatedTaxesRoute: typeof AuthenticatedTaxesRoute
+  AuthenticatedTrialBalanceRoute: typeof AuthenticatedTrialBalanceRoute
+  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedInvoicesCustomerRoute: typeof AuthenticatedInvoicesCustomerRoute
+  AuthenticatedInvoicesVendorRoute: typeof AuthenticatedInvoicesVendorRoute
+  AuthenticatedJournalEntriesNewRoute: typeof AuthenticatedJournalEntriesNewRoute
+  AuthenticatedReportsAgingRoute: typeof AuthenticatedReportsAgingRoute
+  AuthenticatedReportsBalanceSheetRoute: typeof AuthenticatedReportsBalanceSheetRoute
+  AuthenticatedReportsIncomeStatementRoute: typeof AuthenticatedReportsIncomeStatementRoute
+  AuthenticatedReportsVatRoute: typeof AuthenticatedReportsVatRoute
+  AuthenticatedJournalEntriesIndexRoute: typeof AuthenticatedJournalEntriesIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
+  AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
+  AuthenticatedBanksRoute: AuthenticatedBanksRoute,
+  AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
+  AuthenticatedCostCentersRoute: AuthenticatedCostCentersRoute,
+  AuthenticatedCurrenciesRoute: AuthenticatedCurrenciesRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFiscalPeriodsRoute: AuthenticatedFiscalPeriodsRoute,
+  AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
+  AuthenticatedLoansRoute: AuthenticatedLoansRoute,
+  AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSetupRoute: AuthenticatedSetupRoute,
+  AuthenticatedTaxesRoute: AuthenticatedTaxesRoute,
+  AuthenticatedTrialBalanceRoute: AuthenticatedTrialBalanceRoute,
+  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedInvoicesCustomerRoute: AuthenticatedInvoicesCustomerRoute,
+  AuthenticatedInvoicesVendorRoute: AuthenticatedInvoicesVendorRoute,
+  AuthenticatedJournalEntriesNewRoute: AuthenticatedJournalEntriesNewRoute,
+  AuthenticatedReportsAgingRoute: AuthenticatedReportsAgingRoute,
+  AuthenticatedReportsBalanceSheetRoute: AuthenticatedReportsBalanceSheetRoute,
+  AuthenticatedReportsIncomeStatementRoute:
+    AuthenticatedReportsIncomeStatementRoute,
+  AuthenticatedReportsVatRoute: AuthenticatedReportsVatRoute,
+  AuthenticatedJournalEntriesIndexRoute: AuthenticatedJournalEntriesIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
