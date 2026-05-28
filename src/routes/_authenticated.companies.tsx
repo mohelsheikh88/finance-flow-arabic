@@ -123,14 +123,24 @@ function Page() {
       if (id) return updateCompanyFn({ data: { id, ...payload } });
       return createCompanyFn({ data: payload });
     },
-    onSuccess: () => {
-      toast.success(t("common.saved"));
+    onSuccess: (_data, _vars, _ctx) => {
+      const isNew = !coForm.id;
+      const name = coForm.name_ar || coForm.name_en || coForm.code;
+      toast.success(
+        isNew ? `تم إنشاء الشركة "${name}" بنجاح` : `تم تحديث الشركة "${name}" بنجاح`,
+        {
+          description: isNew
+            ? "السبب: إضافة شركة جديدة — تم تحديث القوائم المنسدلة (Topbar/Sidebar) تلقائيًا."
+            : "السبب: تعديل بيانات شركة — تم تحديث القوائم المنسدلة (Topbar/Sidebar) تلقائيًا.",
+        }
+      );
       qc.invalidateQueries({ queryKey: ["companies"] });
       qc.invalidateQueries({ queryKey: ["user-context"] });
       setCoOpen(false);
     },
-
+    onError: (e: Error) => toast.error(e.message),
   });
+
 
   // Branch dialog
   const [brOpen, setBrOpen] = useState(false);
