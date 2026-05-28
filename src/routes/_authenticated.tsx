@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   const { user, loading } = useAuth();
+  const { dir } = useI18n();
   const navigate = useNavigate();
 
   useEffect(() => {
