@@ -242,6 +242,35 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
           </tbody>
         </table>
       </Card>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("accounts.confirmBulkChangeTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("accounts.confirmBulkChangeMessage", { count: selected.size })}
+              <br />
+              <span className="font-semibold text-foreground mt-2 block">
+                {bulkTypeId ? localized(typeById.get(bulkTypeId)?.name_ar, typeById.get(bulkTypeId)?.name_en) : ""}
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmOpen(false)}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={mut.isPending}
+              onClick={() => {
+                setConfirmOpen(false);
+                mut.mutate();
+              }}
+            >
+              {t("common.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 
