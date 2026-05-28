@@ -258,6 +258,8 @@ export const translations = {
       debit: "مدين",
       credit: "دائن",
       accountTypeSingular: "نوع حساب",
+      coreClassification: "تصنيف أساسي",
+      grandParent: "أصل رئيسي",
       classificationSingular: "تصنيف أساسي",
       typeInUse: "هذا النوع مستخدم في حسابات ولا يمكن حذفه",
       classificationInUse: "هذا التصنيف مرتبط بأنواع حسابات ولا يمكن حذفه",
