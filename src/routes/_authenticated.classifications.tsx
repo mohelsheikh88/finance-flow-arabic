@@ -219,6 +219,26 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     reorderMut.mutate(reordered.map((r) => r.id));
   };
 
+  const moveByOne = (id: string, dir: -1 | 1) => {
+    if (hasFilters) {
+      toast.error("Clear filters before reordering | امسح الفلاتر قبل إعادة الترتيب");
+      return;
+    }
+    const prev = qc.getQueryData<any[]>(["classifications", companyId]);
+    if (!prev) return;
+    const sorted = prev.slice().sort(
+      (a, b) => ((a.sort_order ?? 0) - (b.sort_order ?? 0)) || String(a.code).localeCompare(String(b.code))
+    );
+    const idx = sorted.findIndex((r) => r.id === id);
+    const target = idx + dir;
+    if (idx < 0 || target < 0 || target >= sorted.length) return;
+    const reordered = arrayMove(sorted, idx, target);
+    const orderMap = new Map(reordered.map((r, i) => [r.id, (i + 1) * 10]));
+    const next = prev.map((r) => (orderMap.has(r.id) ? { ...r, sort_order: orderMap.get(r.id)! } : r));
+    qc.setQueryData(["classifications", companyId], next);
+    reorderMut.mutate(reordered.map((r) => r.id));
+  };
+
 
 
 
