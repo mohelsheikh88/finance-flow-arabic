@@ -223,6 +223,28 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
 
   const visible = useMemo(() => flatten(tree, expanded), [tree, expanded]);
 
+  const siblingsOf = (row: Row): Row[] =>
+    (types as Row[])
+      .filter((r) => r.classification === row.classification && (r.parent_id ?? null) === (row.parent_id ?? null))
+      .slice()
+      .sort((x, y) => ((x.sort_order ?? 0) - (y.sort_order ?? 0)) || x.code.localeCompare(y.code));
+
+  const moveByOne = (id: string, dir: -1 | 1) => {
+    const prev = qc.getQueryData<Row[]>(["account_types", companyId]);
+    if (!prev) return;
+    const row = prev.find((r) => r.id === id);
+    if (!row) return;
+    const sibs = siblingsOf(row);
+    const idx = sibs.findIndex((r) => r.id === id);
+    const target = idx + dir;
+    if (idx < 0 || target < 0 || target >= sibs.length) return;
+    const reordered = arrayMove(sibs, idx, target);
+    const orderMap = new Map(reordered.map((r, i) => [r.id, (i + 1) * 10]));
+    const next = prev.map((r) => (orderMap.has(r.id) ? { ...r, sort_order: orderMap.get(r.id)! } : r));
+    qc.setQueryData(["account_types", companyId], next);
+    reorderMut.mutate({ orderedIds: reordered.map((r) => r.id) });
+  };
+
   const groups = useMemo(() => (types as Row[]).filter((r) => r.is_group), [types]);
 
   const [open, setOpen] = useState(false);
