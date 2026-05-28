@@ -92,8 +92,8 @@ async function getAccountBalances(
   companyId: string,
   dateFrom: string | null,
   dateTo: string,
-): Promise<AcctRow[]> {
-  const accountInfo = await buildAccountClassificationMap(supabase, companyId);
+): Promise<{ rows: AcctRow[]; classifications: any[] }> {
+  const { accountInfo, classifications } = await buildAccountClassificationMap(supabase, companyId);
 
   let q = supabase
     .from("journal_entry_lines")
@@ -131,11 +131,13 @@ async function getAccountBalances(
       balance: 0,
     };
     const delta = Number(r.debit) - Number(r.credit);
-    // Use the classification's normal balance: debit-natured accounts keep delta, credit-natured flip.
     cur.balance += info.normal_balance === "debit" ? delta : -delta;
     map.set(a.id, cur);
   }
-  return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
+  return {
+    rows: Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code)),
+    classifications,
+  };
 }
 
 type Group = {
@@ -144,30 +146,70 @@ type Group = {
   name_ar: string | null;
   name_en: string | null;
   bucket: Bucket;
+  sort_order: number;
   accounts: AcctRow[];
   total: number;
 };
 
-function groupByClassification(rows: AcctRow[], buckets: Bucket[]): Group[] {
-  const filtered = rows.filter((r) => buckets.includes(r.bucket));
+/**
+ * Build groups driven by the Core Classifications list itself.
+ * - Every active classification matching the requested buckets appears as a group,
+ *   even when it has no accounts yet (total = 0, accounts = []).
+ * - Groups are ordered by classifications.sort_order then code.
+ * - Accounts that fall back to a bucket without a classification get a synthetic group.
+ */
+function groupByClassification(
+  rows: AcctRow[],
+  buckets: Bucket[],
+  classifications: any[],
+): Group[] {
   const byKey = new Map<string, Group>();
-  for (const r of filtered) {
-    const key = r.classification_id ?? `__bucket:${r.bucket}`;
-    const g = byKey.get(key) ?? {
-      classification_id: r.classification_id,
-      code: r.classification_code,
-      name_ar: r.classification_name_ar,
-      name_en: r.classification_name_en,
-      bucket: r.bucket,
+
+  // 1) Seed groups from active classifications matching the requested buckets.
+  const seedCls = classifications
+    .filter((c) => c.is_active !== false && buckets.includes(c.bucket as Bucket));
+  for (const c of seedCls) {
+    byKey.set(c.id, {
+      classification_id: c.id,
+      code: c.code,
+      name_ar: c.name_ar,
+      name_en: c.name_en,
+      bucket: c.bucket as Bucket,
+      sort_order: typeof c.sort_order === "number" ? c.sort_order : 0,
       accounts: [],
       total: 0,
-    };
+    });
+  }
+
+  // 2) Place account rows into their group; create fallback groups for accounts
+  //    whose classification was inactive/missing.
+  const filtered = rows.filter((r) => buckets.includes(r.bucket));
+  for (const r of filtered) {
+    const key = r.classification_id ?? `__bucket:${r.bucket}`;
+    let g = byKey.get(key);
+    if (!g) {
+      g = {
+        classification_id: r.classification_id,
+        code: r.classification_code,
+        name_ar: r.classification_name_ar,
+        name_en: r.classification_name_en,
+        bucket: r.bucket,
+        sort_order: Number.MAX_SAFE_INTEGER,
+        accounts: [],
+        total: 0,
+      };
+      byKey.set(key, g);
+    }
     g.accounts.push(r);
     g.total += r.balance;
-    byKey.set(key, g);
   }
-  return Array.from(byKey.values()).sort((a, b) => (a.code ?? "").localeCompare(b.code ?? ""));
+
+  return Array.from(byKey.values()).sort((a, b) => {
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+    return (a.code ?? "").localeCompare(b.code ?? "");
+  });
 }
+
 
 export const getBalanceSheet = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
