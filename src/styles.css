@@ -152,8 +152,61 @@
   .font-mono, .tabular {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
+  .font-mono, .tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 }
+
+/* ===== Page title system — professional, hero-grade typography ===== */
+.page-title {
+  font-size: clamp(1.625rem, 1.2rem + 1.2vw, 2.125rem);
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-foreground);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  padding-inline-start: 0.875rem;
+}
+.page-title::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, oklch(0.78 0.12 82) 0%, oklch(0.28 0.09 260) 100%);
+  box-shadow: 0 0 0 1px oklch(0.78 0.12 82 / 0.25);
+}
+.page-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--color-muted-foreground);
+  font-weight: 500;
+  max-width: 70ch;
+}
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block-end: 1rem;
+  margin-block-end: 1.25rem;
+  border-block-end: 1px solid var(--color-border);
+}
+.page-header-text { display: flex; flex-direction: column; min-width: 0; }
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-foreground);
+}
+
 
 /* Logical scrollbar styling so it works on both RTL and LTR */
 .scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
