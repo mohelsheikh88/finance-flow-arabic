@@ -600,19 +600,22 @@ function ChartOfAccountsTree({
     const sortByOrder = (a: any, b: any) =>
       (a.sort_order ?? 0) - (b.sort_order ?? 0) || String(a.code).localeCompare(String(b.code));
 
-    const BUCKET_ORDER = ["asset", "liability", "equity", "income", "expense"] as const;
+    const bucketKeys = Array.from(clsByBucket.keys()).sort(
+      (a, b) => bucketOrder(a) - bucketOrder(b) || String(a).localeCompare(String(b)),
+    );
     const roots: TreeNode[] = [];
 
-    BUCKET_ORDER.forEach((b) => {
+    bucketKeys.forEach((b) => {
       const cArr = (clsByBucket.get(b) ?? []).slice().sort(sortByOrder);
       if (cArr.length === 0) return;
+      const bucketRec = bucketByCode.get(b);
       const bucketNode: TreeNode = {
         id: `b:${b}`,
         kind: "bucket",
-        code: b.toUpperCase(),
-        name: t(`accounts.${b}`),
+        code: (bucketRec?.code ?? b).toUpperCase(),
+        name: bucketName(b, t(`accounts.${b}`)),
         depth: 0,
-        data: { bucket: b },
+        data: { bucket: b, bucketRec },
         children: [],
       };
       cArr.forEach((c) => {
