@@ -384,7 +384,7 @@ export const translations = {
   en: {
     common: {
       appName: "Al Hayat Financial ERP",
-      appShort: "Al Hayat ERP",
+      appShort: "Financial ERP",
       loading: "Loading...",
       save: "Save",
       cancel: "Cancel",
