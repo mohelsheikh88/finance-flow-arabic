@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   Lock,
   History,
-  ChevronDown,
   GitBranch,
 } from "lucide-react";
 import {
@@ -178,9 +177,8 @@ export function AppSidebar() {
             >
               <SidebarGroup>
                 <SidebarGroupLabel asChild>
-                  <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 py-2 text-base font-bold text-sidebar-primary hover:text-sidebar-primary/80 transition-colors">
+                  <CollapsibleTrigger className="flex w-full items-center gap-2 text-xs font-medium uppercase tracking-wider text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors">
                     <span className="truncate">{g.label}</span>
-                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
