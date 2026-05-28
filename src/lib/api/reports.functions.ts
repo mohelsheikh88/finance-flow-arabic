@@ -30,8 +30,10 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
   const [{ data: classifications }, { data: accountTypes }, { data: accounts }] = await Promise.all([
     supabase
       .from("classifications")
-      .select("id, code, name_ar, name_en, statement, normal_balance, bucket")
-      .eq("company_id", companyId),
+      .select("id, code, name_ar, name_en, statement, normal_balance, bucket, sort_order, is_active")
+      .eq("company_id", companyId)
+      .order("sort_order", { ascending: true })
+      .order("code", { ascending: true }),
     supabase
       .from("account_types")
       .select("id, classification_id, classification")
@@ -42,12 +44,13 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
       .eq("company_id", companyId),
   ]);
 
+  const clsList = (classifications ?? []) as any[];
   const clsById = new Map<string, any>();
-  (classifications ?? []).forEach((c: any) => clsById.set(c.id, c));
+  clsList.forEach((c: any) => clsById.set(c.id, c));
 
   // Fallback: pick a default classification per bucket (first one matching) for legacy accounts.
   const clsByBucket = new Map<Bucket, any>();
-  (classifications ?? []).forEach((c: any) => {
+  clsList.forEach((c: any) => {
     if (!clsByBucket.has(c.bucket)) clsByBucket.set(c.bucket, c);
   });
 
@@ -80,16 +83,17 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
       bucket,
     });
   }
-  return accountInfo;
+  return { accountInfo, classifications: clsList };
 }
+
 
 async function getAccountBalances(
   supabase: any,
   companyId: string,
   dateFrom: string | null,
   dateTo: string,
-): Promise<AcctRow[]> {
-  const accountInfo = await buildAccountClassificationMap(supabase, companyId);
+): Promise<{ rows: AcctRow[]; classifications: any[] }> {
+  const { accountInfo, classifications } = await buildAccountClassificationMap(supabase, companyId);
 
   let q = supabase
     .from("journal_entry_lines")
@@ -127,11 +131,13 @@ async function getAccountBalances(
       balance: 0,
     };
     const delta = Number(r.debit) - Number(r.credit);
-    // Use the classification's normal balance: debit-natured accounts keep delta, credit-natured flip.
     cur.balance += info.normal_balance === "debit" ? delta : -delta;
     map.set(a.id, cur);
   }
-  return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
+  return {
+    rows: Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code)),
+    classifications,
+  };
 }
 
 type Group = {
@@ -140,38 +146,77 @@ type Group = {
   name_ar: string | null;
   name_en: string | null;
   bucket: Bucket;
+  sort_order: number;
   accounts: AcctRow[];
   total: number;
 };
 
-function groupByClassification(rows: AcctRow[], buckets: Bucket[]): Group[] {
-  const filtered = rows.filter((r) => buckets.includes(r.bucket));
+/**
+ * Build groups driven by the Core Classifications list itself.
+ * - Every active classification matching the requested buckets appears as a group,
+ *   even when it has no accounts yet (total = 0, accounts = []).
+ * - Groups are ordered by classifications.sort_order then code.
+ * - Accounts that fall back to a bucket without a classification get a synthetic group.
+ */
+function groupByClassification(
+  rows: AcctRow[],
+  buckets: Bucket[],
+  classifications: any[],
+): Group[] {
   const byKey = new Map<string, Group>();
-  for (const r of filtered) {
-    const key = r.classification_id ?? `__bucket:${r.bucket}`;
-    const g = byKey.get(key) ?? {
-      classification_id: r.classification_id,
-      code: r.classification_code,
-      name_ar: r.classification_name_ar,
-      name_en: r.classification_name_en,
-      bucket: r.bucket,
+
+  // 1) Seed groups from active classifications matching the requested buckets.
+  const seedCls = classifications
+    .filter((c) => c.is_active !== false && buckets.includes(c.bucket as Bucket));
+  for (const c of seedCls) {
+    byKey.set(c.id, {
+      classification_id: c.id,
+      code: c.code,
+      name_ar: c.name_ar,
+      name_en: c.name_en,
+      bucket: c.bucket as Bucket,
+      sort_order: typeof c.sort_order === "number" ? c.sort_order : 0,
       accounts: [],
       total: 0,
-    };
+    });
+  }
+
+  // 2) Place account rows into their group; create fallback groups for accounts
+  //    whose classification was inactive/missing.
+  const filtered = rows.filter((r) => buckets.includes(r.bucket));
+  for (const r of filtered) {
+    const key = r.classification_id ?? `__bucket:${r.bucket}`;
+    let g = byKey.get(key);
+    if (!g) {
+      g = {
+        classification_id: r.classification_id,
+        code: r.classification_code,
+        name_ar: r.classification_name_ar,
+        name_en: r.classification_name_en,
+        bucket: r.bucket,
+        sort_order: Number.MAX_SAFE_INTEGER,
+        accounts: [],
+        total: 0,
+      };
+      byKey.set(key, g);
+    }
     g.accounts.push(r);
     g.total += r.balance;
-    byKey.set(key, g);
   }
-  return Array.from(byKey.values()).sort((a, b) => (a.code ?? "").localeCompare(b.code ?? ""));
+
+  return Array.from(byKey.values()).sort((a, b) => {
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+    return (a.code ?? "").localeCompare(b.code ?? "");
+  });
 }
+
 
 export const getBalanceSheet = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; asOfDate: string }) => i)
   .handler(async ({ data, context }) => {
-    const rows = await getAccountBalances(context.supabase, data.companyId, null, data.asOfDate);
+    const { rows, classifications } = await getAccountBalances(context.supabase, data.companyId, null, data.asOfDate);
 
-    // Drive grouping from the classification.statement field.
     const bsRows = rows.filter((r) => r.statement === "balance_sheet");
     const isRows = rows.filter((r) => r.statement === "income_statement");
 
@@ -192,9 +237,9 @@ export const getBalanceSheet = createServerFn({ method: "GET" })
       assets,
       liabilities,
       equity,
-      assetGroups: groupByClassification(bsRows, ["asset"]),
-      liabilityGroups: groupByClassification(bsRows, ["liability"]),
-      equityGroups: groupByClassification(bsRows, ["equity"]),
+      assetGroups: groupByClassification(bsRows, ["asset"], classifications),
+      liabilityGroups: groupByClassification(bsRows, ["liability"], classifications),
+      equityGroups: groupByClassification(bsRows, ["equity"], classifications),
       totals: {
         assets: totalAssets,
         liabilities: totalLiabilities,
@@ -205,11 +250,12 @@ export const getBalanceSheet = createServerFn({ method: "GET" })
     };
   });
 
+
 export const getIncomeStatement = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; dateFrom: string; dateTo: string }) => i)
   .handler(async ({ data, context }) => {
-    const rows = await getAccountBalances(context.supabase, data.companyId, data.dateFrom, data.dateTo);
+    const { rows, classifications } = await getAccountBalances(context.supabase, data.companyId, data.dateFrom, data.dateTo);
 
     const isRows = rows.filter((r) => r.statement === "income_statement");
     const income = isRows.filter((r) => r.bucket === "income");
@@ -223,8 +269,8 @@ export const getIncomeStatement = createServerFn({ method: "GET" })
       dateTo: data.dateTo,
       income,
       expenses,
-      incomeGroups: groupByClassification(isRows, ["income"]),
-      expenseGroups: groupByClassification(isRows, ["expense"]),
+      incomeGroups: groupByClassification(isRows, ["income"], classifications),
+      expenseGroups: groupByClassification(isRows, ["expense"], classifications),
       totals: {
         income: totalIncome,
         expenses: totalExpenses,
@@ -232,3 +278,4 @@ export const getIncomeStatement = createServerFn({ method: "GET" })
       },
     };
   });
+
