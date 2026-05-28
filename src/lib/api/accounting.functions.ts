@@ -50,12 +50,44 @@ export const upsertAccountType = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof AccountTypeUpsertSchema>) => AccountTypeUpsertSchema.parse(i))
   .handler(async ({ data, context }) => {
+    let classification = data.classification;
+    // Validate classification_id relationship if provided
+    if (data.classification_id) {
+      const { data: cls, error: clsErr } = await context.supabase
+        .from("classifications")
+        .select("id, company_id, is_active, bucket")
+        .eq("id", data.classification_id)
+        .maybeSingle();
+      if (clsErr) throw new Error(clsErr.message);
+      if (!cls) throw new Error("Selected classification not found | التصنيف المحدد غير موجود");
+      if (cls.company_id !== data.company_id) {
+        throw new Error("Classification belongs to another company | التصنيف يخص شركة أخرى");
+      }
+      if (!cls.is_active) {
+        throw new Error("Selected classification is inactive | التصنيف المحدد غير مفعل");
+      }
+      classification = cls.bucket as any;
+    }
+
+    // Prevent changing bucket on a type already used by accounts of a different bucket
+    if (data.id) {
+      const { data: existing } = await context.supabase
+        .from("account_types").select("classification").eq("id", data.id).maybeSingle();
+      if (existing && existing.classification !== classification) {
+        const { count } = await context.supabase
+          .from("accounts").select("id", { count: "exact", head: true }).eq("account_type_id", data.id);
+        if ((count ?? 0) > 0) {
+          throw new Error("Cannot change bucket: type is used by existing accounts | لا يمكن تغيير التصنيف الأساسي لأن النوع مستخدم في حسابات قائمة");
+        }
+      }
+    }
+
     const payload: any = {
       company_id: data.company_id,
       code: data.code,
       name_ar: data.name_ar,
       name_en: data.name_en,
-      classification: data.classification,
+      classification,
       classification_id: data.classification_id ?? null,
       is_active: data.is_active ?? true,
       notes: data.notes ?? null,
@@ -71,6 +103,7 @@ export const upsertAccountType = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 
 
