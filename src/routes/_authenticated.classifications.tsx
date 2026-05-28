@@ -8,7 +8,7 @@ import {
   deleteClassification,
   reorderClassifications,
 } from "@/lib/api/accounting.functions";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableRow } from "@/components/sortable-row";
 
@@ -353,7 +353,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       </div>
 
       <Card>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
           <SortableContext items={(filteredRows as any[]).map((r) => r.id)} strategy={verticalListSortingStrategy}>
             <table className="w-full text-xs">
               <thead className="bg-muted/50">
