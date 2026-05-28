@@ -212,11 +212,11 @@ function ClassificationsPage() {
       </Card>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
-            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — {t("accounts.classificationSingular")}</DialogTitle>
-
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — تصنيف أساسي</DialogTitle>
+            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — {t("accounts.classificationSingular")}</DialogTitle>
           </DialogHeader>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>{t("common.code")} *</Label>
