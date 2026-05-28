@@ -70,11 +70,11 @@ export const createInvoice = createServerFn({ method: "POST" })
     // Auto-select journal
     let journalId = data.journal_id;
     if (!journalId) {
-      const wantedType = data.invoice_type === "customer" ? "sale" : "purchase";
+      const wantedType = data.invoice_type === "customer" ? "sales" : "purchase";
       const { data: j } = await supabase
         .from("journals")
         .select("id, sequence_prefix, sequence_next")
-      const wantedType = data.invoice_type === "customer" ? "sales" : "purchase";
+        .eq("company_id", data.company_id)
         .eq("journal_type", wantedType)
         .eq("is_active", true)
         .limit(1)
