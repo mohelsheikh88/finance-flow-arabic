@@ -21,6 +21,9 @@ import {
   History,
   HandCoins,
   ShoppingCart,
+  ShoppingBag,
+  Package,
+  UsersRound,
   BarChart3,
   SlidersHorizontal,
 
@@ -141,6 +144,27 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
           items: [
             { url: "/journal-entries", icon: BookOpen, title: t("nav.journalEntries") },
             { url: "/trial-balance", icon: Calculator, title: t("nav.trialBalance") },
+          ],
+        },
+        {
+          label: t("nav.purchaseProcurement"),
+          icon: ShoppingBag,
+          items: [
+            { url: "/purchase", icon: ShoppingBag, title: t("common.willBeBuiltLater") },
+          ],
+        },
+        {
+          label: t("nav.inventoryManagement"),
+          icon: Package,
+          items: [
+            { url: "/inventory", icon: Package, title: t("common.willBeBuiltLater") },
+          ],
+        },
+        {
+          label: t("nav.humanResources"),
+          icon: UsersRound,
+          items: [
+            { url: "/hr", icon: UsersRound, title: t("common.willBeBuiltLater") },
           ],
         },
         {
