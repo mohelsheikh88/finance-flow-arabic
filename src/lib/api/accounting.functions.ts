@@ -108,7 +108,8 @@ export const listClassifications = createServerFn({ method: "GET" })
 const ClassificationUpsertSchema = z.object({
   id: z.string().uuid().optional(),
   company_id: z.string().uuid(),
-  code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
+  code: z.string().trim().min(1).max(50),
+
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   statement: z.enum(STATEMENTS),
