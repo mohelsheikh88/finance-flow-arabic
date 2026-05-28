@@ -478,6 +478,48 @@ export const getTrialBalance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; asOfDate: string }) => i)
   .handler(async ({ data, context }) => {
+    // Build classification metadata per account so the TB groups can show
+    // the user-defined classification name/bucket rather than the legacy enum only.
+    const [{ data: classifications }, { data: accountTypes }, { data: accountsList }] = await Promise.all([
+      context.supabase
+        .from("classifications")
+        .select("id, code, name_ar, name_en, statement, normal_balance, bucket")
+        .eq("company_id", data.companyId),
+      context.supabase
+        .from("account_types")
+        .select("id, classification_id, classification")
+        .eq("company_id", data.companyId),
+      context.supabase
+        .from("accounts")
+        .select("id, account_type_id, account_type")
+        .eq("company_id", data.companyId),
+    ]);
+    const clsById = new Map<string, any>();
+    (classifications ?? []).forEach((c: any) => clsById.set(c.id, c));
+    const clsByBucket = new Map<string, any>();
+    (classifications ?? []).forEach((c: any) => { if (!clsByBucket.has(c.bucket)) clsByBucket.set(c.bucket, c); });
+    const typeById = new Map<string, any>();
+    (accountTypes ?? []).forEach((t: any) => typeById.set(t.id, t));
+    const acctMeta = new Map<string, any>();
+    for (const a of accountsList ?? []) {
+      let cls: any = null;
+      if (a.account_type_id) {
+        const at = typeById.get(a.account_type_id);
+        if (at?.classification_id) cls = clsById.get(at.classification_id) ?? null;
+        if (!cls && at?.classification) cls = clsByBucket.get(at.classification) ?? null;
+      }
+      if (!cls) cls = clsByBucket.get(a.account_type) ?? null;
+      acctMeta.set(a.id, {
+        classification_id: cls?.id ?? null,
+        classification_code: cls?.code ?? null,
+        classification_name_ar: cls?.name_ar ?? null,
+        classification_name_en: cls?.name_en ?? null,
+        bucket: cls?.bucket ?? a.account_type,
+        statement: cls?.statement ?? null,
+        normal_balance: cls?.normal_balance ?? null,
+      });
+    }
+
     // Get all posted lines up to date
     const { data: rows, error } = await context.supabase
       .from("journal_entry_lines")
@@ -491,18 +533,24 @@ export const getTrialBalance = createServerFn({ method: "GET" })
 
     const map = new Map<
       string,
-      { id: string; code: string; name_ar: string; name_en: string; type: string; debit: number; credit: number }
+      {
+        id: string; code: string; name_ar: string; name_en: string; type: string;
+        classification_id: string | null; classification_code: string | null;
+        classification_name_ar: string | null; classification_name_en: string | null;
+        bucket: string; statement: string | null; normal_balance: string | null;
+        debit: number; credit: number;
+      }
     >();
     for (const r of rows ?? []) {
       const acc = (r as any).accounts;
+      const meta = acctMeta.get(acc.id) ?? {
+        classification_id: null, classification_code: null,
+        classification_name_ar: null, classification_name_en: null,
+        bucket: acc.account_type, statement: null, normal_balance: null,
+      };
       const cur = map.get(acc.id) ?? {
-        id: acc.id,
-        code: acc.code,
-        name_ar: acc.name_ar,
-        name_en: acc.name_en,
-        type: acc.account_type,
-        debit: 0,
-        credit: 0,
+        id: acc.id, code: acc.code, name_ar: acc.name_ar, name_en: acc.name_en,
+        type: acc.account_type, ...meta, debit: 0, credit: 0,
       };
       cur.debit += Number(r.debit);
       cur.credit += Number(r.credit);
@@ -510,6 +558,7 @@ export const getTrialBalance = createServerFn({ method: "GET" })
     }
     return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
   });
+
 
 export const getDashboardKpis = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
