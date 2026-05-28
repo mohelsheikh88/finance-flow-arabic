@@ -657,7 +657,7 @@ function ChartOfAccountsTree({
     });
 
     return roots;
-  }, [accounts, accountTypes, classifications, localized, t]);
+  }, [accounts, accountTypes, classifications, localized, t, bucketByCode, bucketName, bucketOrder]);
 
   const allExpandableIds = useMemo(() => {
     const ids: string[] = [];
