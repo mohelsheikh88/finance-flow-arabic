@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { maybeRequestApproval } from "./approvals.functions";
 
 const CreatePaymentSchema = z.object({
   company_id: z.string().uuid(),
