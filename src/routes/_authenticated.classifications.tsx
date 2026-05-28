@@ -393,13 +393,13 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                         <td className="p-3 align-middle">{handle}</td>
                         <td className="p-3 font-mono">{r.code}</td>
                         <td className="p-3 font-medium">{localized(r, "name")}</td>
-                        <td className="p-3 text-muted-foreground">{statementLabel(r.statement)}</td>
-                        <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
                         <td className="p-3">
                           <Badge variant="outline" className={bucketColors[r.bucket]}>
                             {bucketName(r.bucket, t(`accounts.${r.bucket}`))}
                           </Badge>
                         </td>
+                        <td className="p-3 text-muted-foreground">{statementLabel(r.statement)}</td>
+                        <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
                         <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
                         <td className="p-3">
                           <div className="flex items-center gap-1 justify-end">
