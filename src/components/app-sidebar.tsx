@@ -63,8 +63,9 @@ export function AppSidebar() {
       label: t("nav.gl"),
       items: [
         { url: "/journal-entries", icon: BookOpen, title: t("nav.journalEntries") },
-        { url: "/trial-balance", icon: Calculator, title: t("nav.trialBalance") },
+        { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
       ],
+    },
     },
     {
       label: t("nav.reports"),
