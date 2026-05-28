@@ -379,8 +379,18 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   const cls = (classifications as any[]).find((c) => c.id === n.classification_id);
                   const hasChildren = n.children.length > 0;
                   const isOpen = expanded.has(n.id);
+                  const sibs = siblingsOf(n);
+                  const sibIdx = sibs.findIndex((r) => r.id === n.id);
                   return (
-                    <SortableRow key={n.id} id={n.id} className="border-t hover:bg-muted/30">
+                    <SortableRow
+                      key={n.id}
+                      id={n.id}
+                      className="border-t hover:bg-muted/30"
+                      onMoveUp={() => moveByOne(n.id, -1)}
+                      onMoveDown={() => moveByOne(n.id, 1)}
+                      canMoveUp={sibIdx > 0}
+                      canMoveDown={sibIdx >= 0 && sibIdx < sibs.length - 1}
+                    >
                       {({ handle }) => (
                         <>
                           <td className="p-3 align-middle">{handle}</td>
