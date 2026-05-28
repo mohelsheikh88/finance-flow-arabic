@@ -816,6 +816,15 @@ export const translations = {
       payable: "Payable to ZATCA",
       refundable: "Refundable",
     },
+    fiscalPositions: {
+      title: "Fiscal Positions",
+      subtitle: "Organize tax bearer status for Saudi and non-Saudi per Zakat requirements",
+      isSaudi: "Saudi",
+      nonSaudi: "Non-Saudi",
+      vatApplicable: "VAT Applicable",
+      zakatApplicable: "Zakat Applicable",
+      incomeTaxApplicable: "Income Tax Applicable",
+    },
     customers: {
       title: "Customers",
       totalReceivable: "Total Receivables",
