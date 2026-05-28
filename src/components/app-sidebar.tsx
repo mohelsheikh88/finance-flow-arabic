@@ -18,6 +18,7 @@ import {
   TrendingUp,
   ShieldCheck,
   Lock,
+  History,
 } from "lucide-react";
 import {
   Sidebar,
