@@ -11,38 +11,38 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import React from "react";
 
-// ---- Capture postgres_changes handlers from the mocked Supabase client ----
-// ---- Capture postgres_changes handlers from the mocked Supabase client ----
+// ---- Capture postgres_changes mocks.handlers from the mocked Supabase client ----
+// ---- Capture postgres_changes mocks.handlers from the mocked Supabase client ----
 type Handler = (payload: any) => void;
 
 const mocks = vi.hoisted(() => ({
-  handlers: {} as Record<string, Handler[]>,
-  subscribeMock: vi.fn(),
-  removeChannelMock: vi.fn(),
-  routerInvalidate: vi.fn(),
+  mocks.handlers: {} as Record<string, Handler[]>,
+  mocks.subscribeMock: vi.fn(),
+  mocks.removeChannelMock: vi.fn(),
+  mocks.routerInvalidate: vi.fn(),
 }));
 
 vi.mock("@/integrations/supabase/client", () => {
   const channel = () => {
     const api: any = {
       on: (_event: string, opts: { table: string }, cb: Handler) => {
-        (mocks.handlers[opts.table] ??= []).push(cb);
+        (mocks.mocks.handlers[opts.table] ??= []).push(cb);
         return api;
       },
-      subscribe: mocks.subscribeMock,
+      subscribe: mocks.mocks.subscribeMock,
     };
     return api;
   };
   return {
     supabase: {
       channel,
-      removeChannel: mocks.removeChannelMock,
+      removeChannel: mocks.mocks.removeChannelMock,
     },
   };
 });
 
 vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => ({ invalidate: mocks.routerInvalidate }),
+  useRouter: () => ({ invalidate: mocks.mocks.routerInvalidate }),
 }));
 
 
@@ -68,14 +68,14 @@ function mount(qc: QueryClient, roles: string[] = ["admin"]) {
 }
 
 beforeEach(() => {
-  for (const k of Object.keys(handlers)) delete handlers[k];
-  subscribeMock.mockClear();
-  removeChannelMock.mockClear();
-  routerInvalidate.mockClear();
+  for (const k of Object.keys(mocks.handlers)) delete mocks.handlers[k];
+  mocks.subscribeMock.mockClear();
+  mocks.removeChannelMock.mockClear();
+  mocks.routerInvalidate.mockClear();
 });
 
 function fire(table: string, eventType: "INSERT" | "UPDATE" | "DELETE", row: any) {
-  const hs = handlers[table] ?? [];
+  const hs = mocks.handlers[table] ?? [];
   expect(hs.length, `no handler registered for ${table}`).toBeGreaterThan(0);
   for (const h of hs) {
     h({ eventType, new: eventType === "DELETE" ? null : row, old: eventType === "INSERT" ? null : row });
@@ -99,7 +99,7 @@ describe("scoped-realtime → user-context invalidation", () => {
       const spy = vi.spyOn(qc, "invalidateQueries");
 
       mount(qc, ["admin"]);
-      expect(subscribeMock).toHaveBeenCalled();
+      expect(mocks.subscribeMock).toHaveBeenCalled();
 
       fire(table, "INSERT", { id: "new-id" });
 
