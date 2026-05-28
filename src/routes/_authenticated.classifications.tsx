@@ -333,72 +333,61 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       </div>
 
       <Card>
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">{t("common.name")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
-              <th className="text-center p-3 font-medium">{t("common.status")}</th>
-              <th className="text-end p-3 font-medium">{t("common.actions")}</th>
-            </tr>
-          </thead>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={(filteredRows as any[]).map((r) => r.id)} strategy={verticalListSortingStrategy}>
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="w-8 p-3"></th>
+                  <th className="text-start p-3 font-medium">{t("common.code")}</th>
+                  <th className="text-start p-3 font-medium">{t("common.name")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
+                  <th className="text-center p-3 font-medium">{t("common.status")}</th>
+                  <th className="text-end p-3 font-medium">{t("common.actions")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(filteredRows as any[]).map((r) => (
+                  <SortableRow key={r.id} id={r.id} disabled={hasFilters} className="border-t hover:bg-muted/30">
+                    {({ handle }) => (
+                      <>
+                        <td className="p-3 align-middle">{handle}</td>
+                        <td className="p-3 font-mono">{r.code}</td>
+                        <td className="p-3 font-medium">{localized(r, "name")}</td>
+                        <td className="p-3 text-muted-foreground">{statementLabel(r.statement)}</td>
+                        <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
+                        <td className="p-3">
+                          <Badge variant="outline" className={bucketColors[r.bucket]}>
+                            {t(`accounts.${r.bucket}`)}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1 justify-end">
+                            <Button size="sm" variant="ghost" onClick={() => openEdit(r)} aria-label={t("common.edit")}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setToDelete(r)}
+                              aria-label={t("common.delete")}
+                              className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </>
+                    )}
+                  </SortableRow>
+                ))}
+                {filteredRows.length === 0 && (
+                  <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </SortableContext>
+        </DndContext>
 
-          <tbody>
-            {(filteredRows as any[]).map((r) => (
-              <tr key={r.id} className="border-t hover:bg-muted/30">
-                <td className="p-3 font-mono">{r.code}</td>
-                <td className="p-3 font-medium">{localized(r, "name")}</td>
-                <td className="p-3 text-muted-foreground">{statementLabel(r.statement)}</td>
-                <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
-                <td className="p-3">
-                  <Badge variant="outline" className={bucketColors[r.bucket]}>
-                    {t(`accounts.${r.bucket}`)}
-                  </Badge>
-                </td>
-                <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
-                <td className="p-3">
-                  <div className="flex items-center gap-1 justify-end">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => move(r, -1)}
-                      disabled={hasFilters || swapMut.isPending || (rows as any[]).findIndex((x) => x.id === r.id) === 0}
-                      aria-label="Move up"
-                      title={hasFilters ? t("common.clear") : undefined}
-                    >
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => move(r, 1)}
-                      disabled={hasFilters || swapMut.isPending || (rows as any[]).findIndex((x) => x.id === r.id) === (rows as any[]).length - 1}
-                      aria-label="Move down"
-                      title={hasFilters ? t("common.clear") : undefined}
-                    >
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => openEdit(r)} aria-label={t("common.edit")}>
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setToDelete(r)}
-                      aria-label={t("common.delete")}
-                      className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </td>
-
-              </tr>
-            ))}
-            {filteredRows.length === 0 && (
-              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
-            )}
-          </tbody>
-        </table>
       </Card>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
