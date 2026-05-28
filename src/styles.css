@@ -152,9 +152,6 @@
   .font-mono, .tabular {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-  .font-mono, .tabular {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
   }
 }
 
