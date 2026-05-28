@@ -487,9 +487,10 @@ table td, table th {
   }
 
   /* Bigger touch targets */
+  /* Bigger touch targets */
   [data-sidebar="menu-button"] {
     min-height: 44px;
-    font-size: 14.5px;
+    font-size: 13.5px !important;
     padding-inline: 0.75rem;
   }
 
@@ -498,16 +499,19 @@ table td, table th {
     transform: none;
   }
 
-  /* Larger icons + tighter group label */
+  /* Larger icons on mobile */
   [data-sidebar="menu-button"] svg {
-    width: 18px;
-    height: 18px;
+    width: 17px !important;
+    height: 17px !important;
   }
 
-  /* Slightly larger grandparent label on mobile */
+  /* Preserve hierarchy on mobile */
   .sidebar-grandparent > [data-sidebar="group-label"] {
-    font-size: 14.5px;
-    padding-block: 0.75rem;
+    font-size: 16.5px;
+    padding-block: 0.85rem;
+  }
+  .sidebar-parent > [data-sidebar="group-label"] {
+    font-size: 14px;
   }
 
   /* Tweaked active glow — softer to avoid bleed in narrow sheet */
