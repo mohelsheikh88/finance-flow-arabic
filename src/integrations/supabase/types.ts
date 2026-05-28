@@ -17,6 +17,7 @@ export type Database = {
       account_types: {
         Row: {
           classification: Database["public"]["Enums"]["account_type"]
+          classification_id: string | null
           code: string
           company_id: string
           created_at: string
@@ -29,6 +30,7 @@ export type Database = {
         }
         Insert: {
           classification: Database["public"]["Enums"]["account_type"]
+          classification_id?: string | null
           code: string
           company_id: string
           created_at?: string
@@ -41,6 +43,7 @@ export type Database = {
         }
         Update: {
           classification?: Database["public"]["Enums"]["account_type"]
+          classification_id?: string | null
           code?: string
           company_id?: string
           created_at?: string
@@ -51,7 +54,15 @@ export type Database = {
           notes?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "account_types_classification_id_fkey"
+            columns: ["classification_id"]
+            isOneToOne: false
+            referencedRelation: "classifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       accounts: {
         Row: {
@@ -595,6 +606,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      classifications: {
+        Row: {
+          bucket: Database["public"]["Enums"]["account_type"]
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          normal_balance: string
+          notes: string | null
+          statement: string
+          updated_at: string
+        }
+        Insert: {
+          bucket: Database["public"]["Enums"]["account_type"]
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          normal_balance: string
+          notes?: string | null
+          statement: string
+          updated_at?: string
+        }
+        Update: {
+          bucket?: Database["public"]["Enums"]["account_type"]
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          normal_balance?: string
+          notes?: string | null
+          statement?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       companies: {
         Row: {
