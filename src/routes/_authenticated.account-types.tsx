@@ -673,8 +673,6 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                     </SortableRow>
                   );
                 })}
-
-                })}
                 {visible.length === 0 && (
                   <tr>
                     <td colSpan={7} className="p-8 text-center text-muted-foreground">
