@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -297,24 +297,34 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
     [types, classifications],
   );
 
+  const allExpandableIds = useMemo(() => {
+    const ids: string[] = [];
+    const walk = (n: Node) => {
+      if (n.children.length) {
+        ids.push(n.id);
+        n.children.forEach(walk);
+      }
+    };
+    tree.forEach(walk);
+    return ids;
+  }, [tree]);
+
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const didInitExpand = useRef(false);
+  useEffect(() => {
+    if (!didInitExpand.current && allExpandableIds.length > 0) {
+      setExpanded(new Set(allExpandableIds));
+      didInitExpand.current = true;
+    }
+  }, [allExpandableIds]);
+
   const toggle = (id: string) =>
     setExpanded((s) => {
       const next = new Set(s);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  const expandAll = () => {
-    const all = new Set<string>();
-    const walk = (n: Node) => {
-      if (n.children.length) {
-        all.add(n.id);
-        n.children.forEach(walk);
-      }
-    };
-    tree.forEach(walk);
-    setExpanded(all);
-  };
+  const expandAll = () => setExpanded(new Set(allExpandableIds));
   const collapseAll = () => setExpanded(new Set());
 
   const visible = useMemo(() => flatten(tree, expanded), [tree, expanded]);
@@ -541,55 +551,67 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                         <>
                           <td className="p-3 align-middle">{isCls ? null : handle}</td>
                           <td className="p-3">
-                            <div
-                              className="flex items-center gap-1"
-                              style={{ paddingInlineStart: n.depth * 18 }}
-                            >
-                              {hasChildren ? (
-                                <button
-                                  onClick={() => toggle(n.id)}
-                                  className="p-0.5 hover:bg-muted rounded"
-                                >
-                                  {isOpen ? (
-                                    <ChevronDown className="h-3.5 w-3.5" />
-                                  ) : (
-                                    <ChevronRight className="h-3.5 w-3.5" />
-                                  )}
-                                </button>
-                              ) : (
-                                <span className="w-4 inline-block" />
-                              )}
-                              {isCls || n.is_group ? (
-                                <FolderTree
+                            <div className="flex items-stretch">
+                              {Array.from({ length: n.depth }).map((_, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-block w-5 border-s border-dashed border-border/60"
+                                  aria-hidden
+                                />
+                              ))}
+                              <div className="flex items-center gap-1 ps-1">
+                                {n.depth > 0 && (
+                                  <span
+                                    className="inline-block w-3 border-t border-dashed border-border/60 -ms-1"
+                                    aria-hidden
+                                  />
+                                )}
+                                {hasChildren ? (
+                                  <button
+                                    onClick={() => toggle(n.id)}
+                                    className="p-0.5 hover:bg-muted rounded"
+                                  >
+                                    {isOpen ? (
+                                      <ChevronDown className="h-3.5 w-3.5" />
+                                    ) : (
+                                      <ChevronRight className="h-3.5 w-3.5" />
+                                    )}
+                                  </button>
+                                ) : (
+                                  <span className="w-4 inline-block" />
+                                )}
+                                {isCls || n.is_group ? (
+                                  <FolderTree
+                                    className={
+                                      isCls
+                                        ? "h-4 w-4 text-primary"
+                                        : "h-3.5 w-3.5 text-primary"
+                                    }
+                                  />
+                                ) : (
+                                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                                )}
+                                <span className={isCls ? "font-mono font-semibold" : "font-mono"}>
+                                  {n.code}
+                                </span>
+                                <span className="mx-1 text-muted-foreground">—</span>
+                                <span
                                   className={
                                     isCls
-                                      ? "h-4 w-4 text-primary"
-                                      : "h-3.5 w-3.5 text-primary"
+                                      ? "font-bold"
+                                      : n.is_group
+                                        ? "font-semibold"
+                                        : ""
                                   }
-                                />
-                              ) : (
-                                <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                              )}
-                              <span className={isCls ? "font-mono font-semibold" : "font-mono"}>
-                                {n.code}
-                              </span>
-                              <span className="mx-1 text-muted-foreground">—</span>
-                              <span
-                                className={
-                                  isCls
-                                    ? "font-bold"
-                                    : n.is_group
-                                      ? "font-semibold"
-                                      : ""
-                                }
-                              >
-                                {localized(n, "name")}
-                              </span>
-                              {isCls && (
-                                <Badge variant="secondary" className="ms-2 text-[10px]">
-                                  {t("accounts.coreClassification") || "Core Classification"}
-                                </Badge>
-                              )}
+                                >
+                                  {localized(n, "name")}
+                                </span>
+                                {isCls && (
+                                  <Badge variant="secondary" className="ms-2 text-[10px]">
+                                    {t("accounts.coreClassification") || "Core Classification"}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td className="p-3">
