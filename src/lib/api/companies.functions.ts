@@ -32,9 +32,7 @@ export const listBranches = createServerFn({ method: "GET" })
     const { supabase } = context;
     let q = supabase.from("branches").select("*");
     if (data.companyId) q = q.eq("company_id", data.companyId);
-    const { data: rows, error } = await q
-      .order("is_main", { ascending: false })
-      .order("name_en");
+    const { data: rows, error } = await q.order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
     return rows ?? [];
   });

@@ -10,7 +10,7 @@ export const getUserContext = createServerFn({ method: "GET" })
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role, company_id").eq("user_id", userId),
       supabase.from("companies").select("*").order("name_en"),
-      supabase.from("branches").select("*").order("name_en"),
+      supabase.from("branches").select("*").order("created_at", { ascending: true }),
     ]);
 
     return {
