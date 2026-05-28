@@ -64,18 +64,22 @@ const bucketColors: Record<string, string> = {
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
-function statementLabel(s: Statement) {
-  return s === "balance_sheet" ? "الميزانية العمومية" : "قائمة الدخل";
+function useLabels() {
+  const { t } = useI18n();
+  return {
+    statement: (s: Statement) => s === "balance_sheet" ? t("accounts.balanceSheet") : t("accounts.incomeStatement"),
+    normalBalance: (n: NormalBalance) => n === "debit" ? t("accounts.debit") : t("accounts.credit"),
+  };
 }
-function normalBalanceLabel(n: NormalBalance) {
-  return n === "debit" ? "مدين" : "دائن";
-}
+
 
 function ClassificationsPage() {
   const { t } = useI18n();
   const localized = useLocalized();
+  const { statement: statementLabel, normalBalance: normalBalanceLabel } = useLabels();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+
 
   const list = useServerFn(listClassifications);
   const upsert = useServerFn(upsertClassification);
@@ -149,9 +153,10 @@ function ClassificationsPage() {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />أنواع الحسابات</Link>
+            <Link to="/account-types"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.backToAccountTypes")}</Link>
           </Button>
-          <h1 className="text-2xl font-bold">إدارة التصنيفات الأساسية</h1>
+          <h1 className="text-2xl font-bold">{t("accounts.classificationsTitle")}</h1>
+
         </div>
         <Button onClick={openNew} disabled={!companyId}>
           <Plus className="h-4 w-4 me-1" />{t("common.new")}
@@ -163,9 +168,10 @@ function ClassificationsPage() {
           <thead className="bg-muted/50">
             <tr>
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">{t("common.name")}</th>
-              <th className="text-start p-3 font-medium">البيان</th>
-              <th className="text-start p-3 font-medium">الطبيعة</th>
+              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
+
               <th className="text-start p-3 font-medium">المجموعة المحاسبية</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
@@ -208,15 +214,17 @@ function ClassificationsPage() {
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — تصنيف أساسي</DialogTitle>
+            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — {t("accounts.classificationSingular")}</DialogTitle>
           </DialogHeader>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>{t("common.code")} *</Label>
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
             <div>
-              <Label>المجموعة المحاسبية *</Label>
+              <Label>{t("accounts.accountingBucket")} *</Label>
+
               <Select value={form.bucket} onValueChange={(v) => setForm({ ...form, bucket: v as Bucket })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -235,25 +243,26 @@ function ClassificationsPage() {
               <Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} maxLength={255} />
             </div>
             <div>
-              <Label>البيان *</Label>
+              <Label>{t("accounts.statement")} *</Label>
               <Select value={form.statement} onValueChange={(v) => setForm({ ...form, statement: v as Statement })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="balance_sheet">الميزانية العمومية</SelectItem>
-                  <SelectItem value="income_statement">قائمة الدخل</SelectItem>
+                  <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
+                  <SelectItem value="income_statement">{t("accounts.incomeStatement")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>الطبيعة *</Label>
+              <Label>{t("accounts.normalBalance")} *</Label>
               <Select value={form.normal_balance} onValueChange={(v) => setForm({ ...form, normal_balance: v as NormalBalance })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="debit">مدين</SelectItem>
-                  <SelectItem value="credit">دائن</SelectItem>
+                  <SelectItem value="debit">{t("accounts.debit")}</SelectItem>
+                  <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               <Label>{t("common.active")}</Label>

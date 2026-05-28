@@ -54,25 +54,31 @@ const clsColors: Record<string, string> = {
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
-function statementLabel(classification: Cls) {
-  switch (classification) {
-    case "asset":
-    case "liability":
-    case "equity":
-      return "الميزانية العمومية";
-    case "income":
-    case "expense":
-      return "قائمة الدخل";
-    default:
-      return "";
-  }
+function useStatementLabel() {
+  const { t } = useI18n();
+  return (classification: Cls) => {
+    switch (classification) {
+      case "asset":
+      case "liability":
+      case "equity":
+        return t("accounts.balanceSheet");
+      case "income":
+      case "expense":
+        return t("accounts.incomeStatement");
+      default:
+        return "";
+    }
+  };
 }
+
 
 function AccountTypesPage() {
   const { t } = useI18n();
   const localized = useLocalized();
+  const statementLabel = useStatementLabel();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+
 
   const list = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccountType);
@@ -144,11 +150,11 @@ function AccountTypesPage() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/accounts"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.title")}</Link>
           </Button>
-          <h1 className="text-2xl font-bold">إدارة أنواع الحسابات</h1>
+          <h1 className="text-2xl font-bold">{t("accounts.accountTypesTitle")}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" asChild>
-            <Link to="/classifications">إدارة التصنيفات الأساسية</Link>
+            <Link to="/classifications">{t("accounts.manageClassifications")}</Link>
           </Button>
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
@@ -158,12 +164,14 @@ function AccountTypesPage() {
 
 
 
+
       <Card>
         <table className="w-full text-xs">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">{t("common.name")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.classification")}</th>
+
               <th className="text-start p-3 font-medium">البيان</th>
               <th className="text-start p-3 font-medium">التصنيف الأساسي</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
@@ -206,7 +214,8 @@ function AccountTypesPage() {
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — نوع حساب</DialogTitle>
+            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — {t("accounts.accountTypeSingular")}</DialogTitle>
+
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -214,8 +223,9 @@ function AccountTypesPage() {
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
             <div>
-              <Label>التصنيف الأساسي *</Label>
+              <Label>{t("accounts.classification")} *</Label>
               <Select value={form.classification} onValueChange={(v) => setForm({ ...form, classification: v as Cls })}>
+
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {CLASSIFICATIONS.map((c) => (
