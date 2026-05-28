@@ -56,6 +56,18 @@ export function AppSidebar() {
       items: [
         { url: "/dashboard", icon: LayoutDashboard, title: t("nav.mainDashboard") },
       ],
+      subgroups: [
+        {
+          label: t("nav.reports"),
+          icon: BarChart3,
+          items: [
+            { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
+            { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
+            { url: "/reports/aging", icon: FileText, title: t("nav.aging") },
+            { url: "/reports/vat", icon: Receipt, title: t("nav.vatReport") },
+          ],
+        },
+      ],
     },
     {
       label: t("nav.accountsReceivable"),
@@ -113,16 +125,6 @@ export function AppSidebar() {
       items: [
         { url: "/journal-entries", icon: BookOpen, title: t("nav.journalEntries") },
         { url: "/trial-balance", icon: Calculator, title: t("nav.trialBalance") },
-      ],
-    },
-    {
-      label: t("nav.reports"),
-      icon: BarChart3,
-      items: [
-        { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
-        { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
-        { url: "/reports/aging", icon: FileText, title: t("nav.aging") },
-        { url: "/reports/vat", icon: Receipt, title: t("nav.vatReport") },
       ],
     },
     {
