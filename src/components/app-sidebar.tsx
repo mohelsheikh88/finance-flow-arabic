@@ -24,6 +24,9 @@ import {
   BarChart3,
   SlidersHorizontal,
   ChevronDown,
+  Pin,
+  PinOff,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -35,16 +38,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
 import { BrandLogo, BrandMark } from "@/components/brand-logo";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
 
+type AppSidebarProps = {
+  pinned?: boolean;
+  onTogglePin?: () => void;
+};
 
-
-export function AppSidebar() {
+export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {}) {
   const { t, locale } = useI18n();
+  const { signOut } = useAuth();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
@@ -161,12 +171,39 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
 
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="px-2 py-2">
-          {collapsed ? (
-            <BrandMark size={28} />
-          ) : (
-            <BrandLogo size={34} variant="light" />
+      <SidebarHeader className="border-b border-sidebar-border/60">
+        <div className="flex items-center gap-2.5 px-2 py-2.5">
+          {/* Glass-morphism logo container */}
+          <div className="relative shrink-0">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[hsl(327,92%,55%)]/40 to-[hsl(280,70%,55%)]/30 blur-md opacity-70" />
+            <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] ring-1 ring-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              {collapsed ? <BrandMark size={26} /> : <BrandMark size={26} />}
+            </div>
+          </div>
+          {!collapsed && (
+            <div className="flex-1 min-w-0 flex items-center gap-1.5">
+              <div className="flex-1 min-w-0">
+                <BrandLogo size={28} variant="light" />
+              </div>
+              {onTogglePin && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={onTogglePin}
+                  aria-label={pinned ? "Unpin sidebar" : "Pin sidebar"}
+                  title={pinned ? "Unpin" : "Pin"}
+                  className={
+                    "h-8 w-8 shrink-0 rounded-md transition-all " +
+                    (pinned
+                      ? "bg-[hsl(263,55%,32%)]/35 text-[hsl(280,80%,75%)] ring-1 ring-[hsl(327,92%,60%)]/40 hover:bg-[hsl(263,55%,32%)]/55"
+                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40")
+                  }
+                >
+                  {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </SidebarHeader>
@@ -288,6 +325,20 @@ export function AppSidebar() {
           );
         })}
       </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border/60 p-2">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => signOut()}
+          className="w-full justify-start gap-2.5 h-10 rounded-md text-sidebar-foreground/80 hover:text-white hover:bg-gradient-to-r hover:from-[hsl(327,80%,40%)]/40 hover:to-[hsl(263,60%,26%)]/40"
+          aria-label="Logout"
+          title="Logout"
+        >
+          <LogOut className="h-[17px] w-[17px] shrink-0" />
+          {!collapsed && <span className="truncate text-[13.5px] font-medium">{t("auth.signOut") || "Logout"}</span>}
+        </Button>
+      </SidebarFooter>
     </Sidebar>
   );
 }
