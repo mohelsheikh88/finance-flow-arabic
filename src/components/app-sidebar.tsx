@@ -56,7 +56,6 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
   const { t, locale } = useI18n();
   const { signOut } = useAuth();
   const { state } = useSidebar();
-  const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + "/");
