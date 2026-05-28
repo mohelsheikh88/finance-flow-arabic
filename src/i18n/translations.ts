@@ -548,6 +548,7 @@ export const translations = {
       topDebtors: "Top Debtors",
       byCategory: "By Category",
       comingSoon: "Coming Soon",
+      willBeBuiltLater: "Will be built later",
       depreciation: "Accumulated Depreciation",
       nbv: "Net Book Value",
       cost: "Cost",
