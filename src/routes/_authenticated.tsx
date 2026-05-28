@@ -17,20 +17,20 @@ const PIN_KEY = "sidebar:pinned";
 function measureLabelWidth(
   groups: { text: string; size: number; weight: number; indent: number }[]
 ): number {
-  if (typeof document === "undefined") return 280;
+  if (typeof document === "undefined") return 420;
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
-  if (!ctx) return 280;
+  if (!ctx) return 420;
   let max = 0;
   for (const g of groups) {
     ctx.font = `${g.weight} ${g.size}px "Cairo", "Tajawal", system-ui, sans-serif`;
-    // 25% buffer to absorb Cairo web-font vs canvas-fallback metric drift
-    const w = ctx.measureText(g.text).width * 1.25 + g.indent;
+    // Wider buffer absorbs Cairo web-font metric drift and active/hover glow room.
+    const w = ctx.measureText(g.text).width * 1.35 + g.indent;
     if (w > max) max = w;
   }
-  // icon (22) + gap (12) + side padding (40) + chevron-room (24) + safety (24)
-  const total = Math.ceil(max + 22 + 12 + 40 + 24 + 24);
-  return Math.max(340, Math.min(760, total));
+  // icon + gap + nesting/padding + glow/active indicator breathing room.
+  const total = Math.ceil(max + 22 + 14 + 72 + 44 + 56);
+  return Math.max(420, Math.min(900, total));
 }
 
 
