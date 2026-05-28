@@ -73,7 +73,7 @@ function useLabels() {
 }
 
 
-function ClassificationsPage() {
+export function ClassificationsPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useI18n();
   const localized = useLocalized();
   const { statement: statementLabel, normalBalance: normalBalanceLabel } = useLabels();
