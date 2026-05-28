@@ -65,10 +65,19 @@ export const moveAccountType = createServerFn({ method: "POST" })
     const swapIdx = data.direction === "up" ? idx - 1 : idx + 1;
     if (idx < 0 || swapIdx < 0 || swapIdx >= sorted.length) return { ok: true, moved: false };
 
+    // Normalize sort_order across siblings to guarantee distinct values, then swap.
+    for (let i = 0; i < sorted.length; i++) {
+      const desired = (i + 1) * 10;
+      if ((sorted[i].sort_order ?? -1) !== desired) {
+        const u = await sb.from("account_types").update({ sort_order: desired }).eq("id", sorted[i].id);
+        if (u.error) throw new Error(u.error.message);
+        sorted[i].sort_order = desired;
+      }
+    }
     const a = sorted[idx], b = sorted[swapIdx];
-    const aOrder = a.sort_order ?? 0;
-    const bOrder = b.sort_order ?? 0;
-    const tmp = -Math.abs(aOrder) - Math.abs(bOrder) - 1;
+    const aOrder = a.sort_order as number;
+    const bOrder = b.sort_order as number;
+    const tmp = -(aOrder + bOrder + 1);
     let r = await sb.from("account_types").update({ sort_order: tmp }).eq("id", a.id);
     if (r.error) throw new Error(r.error.message);
     r = await sb.from("account_types").update({ sort_order: aOrder }).eq("id", b.id);
@@ -77,6 +86,8 @@ export const moveAccountType = createServerFn({ method: "POST" })
     if (r.error) throw new Error(r.error.message);
     return { ok: true, moved: true };
   });
+
+
 
 
 const AccountTypeUpsertSchema = z.object({
