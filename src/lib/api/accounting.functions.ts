@@ -80,6 +80,8 @@ export const deleteAccountType = createServerFn({ method: "POST" })
     const { error } = await context.supabase.from("account_types").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
 
 // ---------------- Classifications (core, customizable per company) ----------------
 
