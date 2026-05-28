@@ -245,7 +245,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                 <SidebarGroupLabel asChild>
                   <CollapsibleTrigger className="group/trigger flex h-auto w-full cursor-pointer items-center gap-2.5 rounded-md px-2 transition-colors hover:bg-sidebar-accent/50">
                     <g.icon className="h-[18px] w-[18px] shrink-0 text-[hsl(327,92%,72%)]" />
-                    <span className="flex-1 truncate text-start">{g.label}</span>
+                    <span className="flex-1 whitespace-nowrap text-start">{g.label}</span>
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
@@ -262,7 +262,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                             <SidebarGroupLabel asChild>
                               <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-sidebar-accent/40">
                                 <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
-                                <span className="flex-1 truncate text-start">{sg.label}</span>
+                                <span className="flex-1 whitespace-nowrap text-start">{sg.label}</span>
                               </CollapsibleTrigger>
                             </SidebarGroupLabel>
                             <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
@@ -282,7 +282,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                                       >
                                         <Link to={item.url} className="flex items-center gap-2.5">
                                           <item.icon className="h-[15px] w-[15px] shrink-0 text-sidebar-foreground/70" />
-                                          <span className="truncate">{item.title}</span>
+                                          <span className="whitespace-nowrap">{item.title}</span>
                                         </Link>
                                       </SidebarMenuButton>
                                     </SidebarMenuItem>
@@ -310,7 +310,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                             >
                               <Link to={item.url} className="flex items-center gap-2.5">
                                 <item.icon className="h-[15px] w-[15px] shrink-0 text-sidebar-foreground/70" />
-                                <span className="truncate">{item.title}</span>
+                                <span className="whitespace-nowrap">{item.title}</span>
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>
