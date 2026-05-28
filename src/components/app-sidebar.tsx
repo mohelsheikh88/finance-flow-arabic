@@ -49,7 +49,9 @@ export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + "/");
 
-  const groups = [
+  type NavItem = { url: string; icon: any; title: string };
+  type NavGroup = { label: string; icon: any; items?: NavItem[]; subgroups?: { label: string; icon: any; items: NavItem[] }[] };
+  const groups: NavGroup[] = [
     {
       label: t("nav.dashboard"),
       icon: LayoutDashboard,
