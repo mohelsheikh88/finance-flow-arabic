@@ -975,7 +975,7 @@ function AccountingBucketsPanel() {
         data: {
           id: form.id,
           company_id: companyId!,
-          code: form.code.trim(),
+          code: form.code.trim() as any,
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
           statement: form.statement,
