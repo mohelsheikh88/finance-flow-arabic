@@ -392,6 +392,7 @@ export const translations = {
       edit: "Edit",
       create: "Create",
       add: "Add",
+      new: "New",
       search: "Search...",
       actions: "Actions",
       yes: "Yes",
