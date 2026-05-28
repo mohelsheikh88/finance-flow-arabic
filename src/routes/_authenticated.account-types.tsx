@@ -21,7 +21,7 @@ import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account-types")({
-  component: AccountTypesPage,
+  component: () => <AccountTypesPage />,
 });
 
 const CLASSIFICATIONS = ["asset", "liability", "equity", "income", "expense"] as const;
