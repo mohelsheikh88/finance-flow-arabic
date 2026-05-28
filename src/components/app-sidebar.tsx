@@ -177,11 +177,11 @@ export function AppSidebar() {
             >
               <SidebarGroup>
                 <SidebarGroupLabel asChild>
-                  <CollapsibleTrigger className="flex w-full items-center gap-2 text-xs font-medium uppercase tracking-wider text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors">
+                <SidebarGroupLabel asChild>
+                  <CollapsibleTrigger className="flex h-auto w-full items-center gap-2 py-2 text-[13px] font-semibold text-sidebar-foreground/85 hover:text-sidebar-foreground transition-colors">
                     <span className="truncate">{g.label}</span>
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
-                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                   <SidebarGroupContent>
                     <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
                       <SidebarMenu>
