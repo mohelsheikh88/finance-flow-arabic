@@ -87,7 +87,8 @@ export const moveAccountType = createServerFn({ method: "POST" })
     return { ok: true, moved: true };
   });
 
-// Reorder a sibling group (same parent + classification) in one shot.
+// Reorder a sibling group. Root account types can move across classifications;
+// child account types must stay within the same parent classification.
 export const reorderAccountTypes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; orderedIds: string[] }) =>
@@ -98,7 +99,7 @@ export const reorderAccountTypes = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
-    // Verify all belong to same company + parent + classification
+    // Verify all belong to same company + parent. Children must also share classification.
     const { data: rows, error } = await sb
       .from("account_types")
       .select("id, company_id, parent_id, classification")
@@ -108,8 +109,11 @@ export const reorderAccountTypes = createServerFn({ method: "POST" })
     const first = rows[0];
     for (const r of rows) {
       if (r.company_id !== data.companyId) throw new Error("Cross-company reorder denied");
-      if ((r.parent_id ?? null) !== (first.parent_id ?? null) || r.classification !== first.classification) {
-        throw new Error("All items must be siblings (same parent and classification)");
+      if ((r.parent_id ?? null) !== (first.parent_id ?? null)) {
+        throw new Error("All items must be siblings (same parent)");
+      }
+      if (first.parent_id && r.classification !== first.classification) {
+        throw new Error("Child items must stay within the same classification");
       }
     }
     // First pass: bump to negative temp to avoid uniqueness conflicts (none here, but safe).
