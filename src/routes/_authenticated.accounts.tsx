@@ -345,17 +345,20 @@ function ChartOfAccountsPanel() {
           <Input placeholder={t("common.search")} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="space-y-1">
-          <Label>{t("accounts.type")}</Label>
+          <Label>{t("accounts.classification")}</Label>
           <Select value={filterClassification} onValueChange={setFilterClassification}>
             <SelectTrigger><SelectValue placeholder={t("common.all")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("common.all")}</SelectItem>
-              {["asset", "liability", "equity", "income", "expense"].map((cls) => (
-                <SelectItem key={cls} value={cls}>{t(`accounts.${cls}`)}</SelectItem>
+              {(classifications as any[]).filter((c) => c.is_active).map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.code} — {localized(c, "name")}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-1">
           <Label>{t("accounts.isGroup")}</Label>
           <Select value={filterIsGroup} onValueChange={setFilterIsGroup}>
