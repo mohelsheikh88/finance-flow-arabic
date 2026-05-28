@@ -76,8 +76,7 @@ type Row = {
 };
 type Node = Row & { depth: number; children: Node[] };
 
-};
-type Node = Row & { depth: number; children: Node[] };
+
 
 function buildTree(rows: Row[]): Node[] {
   const map = new Map<string, Node>();
@@ -88,9 +87,9 @@ function buildTree(rows: Row[]): Node[] {
       const p = map.get(n.parent_id)!;
       n.depth = p.depth + 1;
       p.children.push(n);
-    } else {
-      roots.push(n);
-    }
+  const cmp = (a: Node, b: Node) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code);
+  const fixDepth = (n: Node, d: number) => {
+
   });
   const fixDepth = (n: Node, d: number) => {
   const cmp = (a: Node, b: Node) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code);
