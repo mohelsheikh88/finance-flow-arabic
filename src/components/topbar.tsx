@@ -20,10 +20,11 @@ import { Languages, LogOut, User } from "lucide-react";
 import { useI18n, useLocalized } from "@/i18n";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useIsFetching } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getUserContext } from "@/lib/api/context.functions";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { OfflineIndicator } from "@/components/offline-indicator";
 
 export function Topbar() {
