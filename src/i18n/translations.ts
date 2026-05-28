@@ -624,6 +624,7 @@ export const translations = {
       classificationInUse: "This classification is linked to account types and cannot be deleted",
       backToAccounts: "Chart of Accounts",
       backToAccountTypes: "Account Types",
+      coreClassifications: "Core Classifications",
     },
 
     partners: {
