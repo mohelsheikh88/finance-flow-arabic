@@ -78,6 +78,77 @@ export const deleteAccount = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const ImportRowSchema = z.object({
+  code: z.string().trim().min(1).max(50),
+  name_ar: z.string().trim().min(1).max(255),
+  name_en: z.string().trim().min(1).max(255),
+  account_type: z.enum(ACCOUNT_TYPES),
+  parent_code: z.string().trim().max(50).optional().nullable(),
+  currency_code: z.string().trim().max(10).optional().nullable(),
+  is_group: z.boolean().optional(),
+  is_active: z.boolean().optional(),
+  is_reconcilable: z.boolean().optional(),
+  notes: z.string().max(2000).optional().nullable(),
+});
+
+export const importAccounts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; rows: z.infer<typeof ImportRowSchema>[] }) =>
+    z.object({
+      companyId: z.string().uuid(),
+      rows: z.array(ImportRowSchema).min(1).max(2000),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: existing, error: exErr } = await context.supabase
+      .from("accounts").select("id, code").eq("company_id", data.companyId);
+    if (exErr) throw new Error(exErr.message);
+    const codeToId = new Map<string, string>();
+    (existing ?? []).forEach((r: any) => codeToId.set(r.code, r.id));
+
+    // Sort: parents (no parent_code) first so parent_id can resolve
+    const sorted = [...data.rows].sort((a, b) =>
+      (a.parent_code ? 1 : 0) - (b.parent_code ? 1 : 0) || a.code.localeCompare(b.code),
+    );
+
+    let created = 0, updated = 0;
+    const errors: { code: string; error: string }[] = [];
+
+    for (const r of sorted) {
+      const parent_id = r.parent_code ? (codeToId.get(r.parent_code) ?? null) : null;
+      if (r.parent_code && !parent_id) {
+        errors.push({ code: r.code, error: `Parent code "${r.parent_code}" not found` });
+        continue;
+      }
+      const payload: any = {
+        company_id: data.companyId,
+        code: r.code,
+        name_ar: r.name_ar,
+        name_en: r.name_en,
+        account_type: r.account_type,
+        parent_id,
+        currency_code: r.currency_code || null,
+        is_group: r.is_group ?? false,
+        is_active: r.is_active ?? true,
+        is_reconcilable: r.is_reconcilable ?? false,
+        notes: r.notes || null,
+      };
+      const existingId = codeToId.get(r.code);
+      if (existingId) {
+        const { error } = await context.supabase.from("accounts").update(payload).eq("id", existingId);
+        if (error) { errors.push({ code: r.code, error: error.message }); continue; }
+        updated++;
+      } else {
+        const { data: ins, error } = await context.supabase.from("accounts").insert(payload).select("id, code").single();
+        if (error) { errors.push({ code: r.code, error: error.message }); continue; }
+        codeToId.set(ins.code, ins.id);
+        created++;
+      }
+    }
+    return { created, updated, errors };
+  });
+
+
 
 export const listPartners = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
