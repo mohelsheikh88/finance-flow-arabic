@@ -43,9 +43,12 @@ function AuditLogPage() {
   const { data: tables = [] } = useQuery<string[]>({
     queryKey: ["audit_tables"],
     queryFn: () => tablesFn(),
+  const { data: tables = [] } = useQuery({
+    queryKey: ["audit_tables"],
+    queryFn: () => tablesFn() as Promise<string[]>,
   });
 
-  const { data: rows = [], refetch, isFetching } = useQuery<AuditRow[]>({
+  const { data: rows = [], refetch, isFetching } = useQuery({
     queryKey: ["audit_log", filters],
     queryFn: () =>
       fetchFn({
@@ -56,6 +59,8 @@ function AuditLogPage() {
           to: filters.to || null,
           limit: filters.limit,
         },
+      }) as Promise<AuditRow[]>,
+  });
       }),
   });
 
