@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedVendorsRouteImport } from './routes/_authenticated.vendors'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
 import { Route as AuthenticatedTrialBalanceRouteImport } from './routes/_authenticated.trial-balance'
 import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.taxes'
@@ -23,12 +24,16 @@ import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authenticated.fiscal-periods'
+import { Route as AuthenticatedDebitMemosRouteImport } from './routes/_authenticated.debit-memos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated.customers'
 import { Route as AuthenticatedCurrenciesRouteImport } from './routes/_authenticated.currencies'
+import { Route as AuthenticatedCreditMemosRouteImport } from './routes/_authenticated.credit-memos'
 import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenticated.cost-centers'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated.companies'
 import { Route as AuthenticatedBanksRouteImport } from './routes/_authenticated.banks'
+import { Route as AuthenticatedBankReconciliationsRouteImport } from './routes/_authenticated.bank-reconciliations'
+import { Route as AuthenticatedBankExpensesRouteImport } from './routes/_authenticated.bank-expenses'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated.assets'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated.approvals'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated.accounts'
@@ -55,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedVendorsRoute = AuthenticatedVendorsRouteImport.update({
+  id: '/vendors',
+  path: '/vendors',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   id: '/users',
@@ -113,6 +123,11 @@ const AuthenticatedFiscalPeriodsRoute =
     path: '/fiscal-periods',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDebitMemosRoute = AuthenticatedDebitMemosRouteImport.update({
+  id: '/debit-memos',
+  path: '/debit-memos',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -128,6 +143,12 @@ const AuthenticatedCurrenciesRoute = AuthenticatedCurrenciesRouteImport.update({
   path: '/currencies',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedCreditMemosRoute =
+  AuthenticatedCreditMemosRouteImport.update({
+    id: '/credit-memos',
+    path: '/credit-memos',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCostCentersRoute =
   AuthenticatedCostCentersRouteImport.update({
     id: '/cost-centers',
@@ -144,6 +165,18 @@ const AuthenticatedBanksRoute = AuthenticatedBanksRouteImport.update({
   path: '/banks',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBankReconciliationsRoute =
+  AuthenticatedBankReconciliationsRouteImport.update({
+    id: '/bank-reconciliations',
+    path: '/bank-reconciliations',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedBankExpensesRoute =
+  AuthenticatedBankExpensesRouteImport.update({
+    id: '/bank-expenses',
+    path: '/bank-expenses',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
   id: '/assets',
   path: '/assets',
@@ -219,12 +252,16 @@ export interface FileRoutesByFullPath {
   '/accounts': typeof AuthenticatedAccountsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/assets': typeof AuthenticatedAssetsRoute
+  '/bank-expenses': typeof AuthenticatedBankExpensesRoute
+  '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
+  '/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
@@ -236,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/taxes': typeof AuthenticatedTaxesRoute
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/vendors': typeof AuthenticatedVendorsRoute
   '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
@@ -252,12 +290,16 @@ export interface FileRoutesByTo {
   '/accounts': typeof AuthenticatedAccountsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/assets': typeof AuthenticatedAssetsRoute
+  '/bank-expenses': typeof AuthenticatedBankExpensesRoute
+  '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
+  '/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
@@ -269,6 +311,7 @@ export interface FileRoutesByTo {
   '/taxes': typeof AuthenticatedTaxesRoute
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/vendors': typeof AuthenticatedVendorsRoute
   '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
@@ -287,12 +330,16 @@ export interface FileRoutesById {
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
+  '/_authenticated/bank-expenses': typeof AuthenticatedBankExpensesRoute
+  '/_authenticated/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/_authenticated/banks': typeof AuthenticatedBanksRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/cost-centers': typeof AuthenticatedCostCentersRoute
+  '/_authenticated/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/_authenticated/currencies': typeof AuthenticatedCurrenciesRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/_authenticated/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
@@ -304,6 +351,7 @@ export interface FileRoutesById {
   '/_authenticated/taxes': typeof AuthenticatedTaxesRoute
   '/_authenticated/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_authenticated/vendors': typeof AuthenticatedVendorsRoute
   '/_authenticated/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/_authenticated/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/_authenticated/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
@@ -322,12 +370,16 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/approvals'
     | '/assets'
+    | '/bank-expenses'
+    | '/bank-reconciliations'
     | '/banks'
     | '/companies'
     | '/cost-centers'
+    | '/credit-memos'
     | '/currencies'
     | '/customers'
     | '/dashboard'
+    | '/debit-memos'
     | '/fiscal-periods'
     | '/journals'
     | '/loans'
@@ -339,6 +391,7 @@ export interface FileRouteTypes {
     | '/taxes'
     | '/trial-balance'
     | '/users'
+    | '/vendors'
     | '/invoices/customer'
     | '/invoices/vendor'
     | '/journal-entries/new'
@@ -355,12 +408,16 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/approvals'
     | '/assets'
+    | '/bank-expenses'
+    | '/bank-reconciliations'
     | '/banks'
     | '/companies'
     | '/cost-centers'
+    | '/credit-memos'
     | '/currencies'
     | '/customers'
     | '/dashboard'
+    | '/debit-memos'
     | '/fiscal-periods'
     | '/journals'
     | '/loans'
@@ -372,6 +429,7 @@ export interface FileRouteTypes {
     | '/taxes'
     | '/trial-balance'
     | '/users'
+    | '/vendors'
     | '/invoices/customer'
     | '/invoices/vendor'
     | '/journal-entries/new'
@@ -389,12 +447,16 @@ export interface FileRouteTypes {
     | '/_authenticated/accounts'
     | '/_authenticated/approvals'
     | '/_authenticated/assets'
+    | '/_authenticated/bank-expenses'
+    | '/_authenticated/bank-reconciliations'
     | '/_authenticated/banks'
     | '/_authenticated/companies'
     | '/_authenticated/cost-centers'
+    | '/_authenticated/credit-memos'
     | '/_authenticated/currencies'
     | '/_authenticated/customers'
     | '/_authenticated/dashboard'
+    | '/_authenticated/debit-memos'
     | '/_authenticated/fiscal-periods'
     | '/_authenticated/journals'
     | '/_authenticated/loans'
@@ -406,6 +468,7 @@ export interface FileRouteTypes {
     | '/_authenticated/taxes'
     | '/_authenticated/trial-balance'
     | '/_authenticated/users'
+    | '/_authenticated/vendors'
     | '/_authenticated/invoices/customer'
     | '/_authenticated/invoices/vendor'
     | '/_authenticated/journal-entries/new'
@@ -446,6 +509,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/vendors': {
+      id: '/_authenticated/vendors'
+      path: '/vendors'
+      fullPath: '/vendors'
+      preLoaderRoute: typeof AuthenticatedVendorsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/users': {
       id: '/_authenticated/users'
@@ -524,6 +594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFiscalPeriodsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/debit-memos': {
+      id: '/_authenticated/debit-memos'
+      path: '/debit-memos'
+      fullPath: '/debit-memos'
+      preLoaderRoute: typeof AuthenticatedDebitMemosRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -545,6 +622,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCurrenciesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/credit-memos': {
+      id: '/_authenticated/credit-memos'
+      path: '/credit-memos'
+      fullPath: '/credit-memos'
+      preLoaderRoute: typeof AuthenticatedCreditMemosRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/cost-centers': {
       id: '/_authenticated/cost-centers'
       path: '/cost-centers'
@@ -564,6 +648,20 @@ declare module '@tanstack/react-router' {
       path: '/banks'
       fullPath: '/banks'
       preLoaderRoute: typeof AuthenticatedBanksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/bank-reconciliations': {
+      id: '/_authenticated/bank-reconciliations'
+      path: '/bank-reconciliations'
+      fullPath: '/bank-reconciliations'
+      preLoaderRoute: typeof AuthenticatedBankReconciliationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/bank-expenses': {
+      id: '/_authenticated/bank-expenses'
+      path: '/bank-expenses'
+      fullPath: '/bank-expenses'
+      preLoaderRoute: typeof AuthenticatedBankExpensesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/assets': {
@@ -657,12 +755,16 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
+  AuthenticatedBankExpensesRoute: typeof AuthenticatedBankExpensesRoute
+  AuthenticatedBankReconciliationsRoute: typeof AuthenticatedBankReconciliationsRoute
   AuthenticatedBanksRoute: typeof AuthenticatedBanksRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCostCentersRoute: typeof AuthenticatedCostCentersRoute
+  AuthenticatedCreditMemosRoute: typeof AuthenticatedCreditMemosRoute
   AuthenticatedCurrenciesRoute: typeof AuthenticatedCurrenciesRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDebitMemosRoute: typeof AuthenticatedDebitMemosRoute
   AuthenticatedFiscalPeriodsRoute: typeof AuthenticatedFiscalPeriodsRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
@@ -674,6 +776,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTaxesRoute: typeof AuthenticatedTaxesRoute
   AuthenticatedTrialBalanceRoute: typeof AuthenticatedTrialBalanceRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedVendorsRoute: typeof AuthenticatedVendorsRoute
   AuthenticatedInvoicesCustomerRoute: typeof AuthenticatedInvoicesCustomerRoute
   AuthenticatedInvoicesVendorRoute: typeof AuthenticatedInvoicesVendorRoute
   AuthenticatedJournalEntriesNewRoute: typeof AuthenticatedJournalEntriesNewRoute
@@ -688,12 +791,16 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
+  AuthenticatedBankExpensesRoute: AuthenticatedBankExpensesRoute,
+  AuthenticatedBankReconciliationsRoute: AuthenticatedBankReconciliationsRoute,
   AuthenticatedBanksRoute: AuthenticatedBanksRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCostCentersRoute: AuthenticatedCostCentersRoute,
+  AuthenticatedCreditMemosRoute: AuthenticatedCreditMemosRoute,
   AuthenticatedCurrenciesRoute: AuthenticatedCurrenciesRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDebitMemosRoute: AuthenticatedDebitMemosRoute,
   AuthenticatedFiscalPeriodsRoute: AuthenticatedFiscalPeriodsRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
@@ -705,6 +812,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTaxesRoute: AuthenticatedTaxesRoute,
   AuthenticatedTrialBalanceRoute: AuthenticatedTrialBalanceRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedVendorsRoute: AuthenticatedVendorsRoute,
   AuthenticatedInvoicesCustomerRoute: AuthenticatedInvoicesCustomerRoute,
   AuthenticatedInvoicesVendorRoute: AuthenticatedInvoicesVendorRoute,
   AuthenticatedJournalEntriesNewRoute: AuthenticatedJournalEntriesNewRoute,
@@ -729,3 +837,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
