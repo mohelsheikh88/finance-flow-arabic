@@ -60,7 +60,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Al Hayat ERP" },
-      { name: "description", content: "نظام تخطيط موارد المؤسسات - Al Hayat Enterprise ERP" },
+      { name: "description", content: "نظام تخطيط موارد المؤسسات - Al Hayat ERP" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
