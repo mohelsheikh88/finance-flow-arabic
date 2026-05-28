@@ -27,6 +27,8 @@ import * as XLSX from "xlsx";
 import { AccountTypesPage } from "./_authenticated.account-types";
 import { ClassificationsPage } from "./_authenticated.classifications";
 import { AccountClassificationsPage } from "./_authenticated.account-classifications";
+import { CostCentersPage } from "./_authenticated.cost-centers";
+
 
 export const Route = createFileRoute("/_authenticated/accounts")({
   component: AccountsPage,
