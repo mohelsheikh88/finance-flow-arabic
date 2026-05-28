@@ -616,6 +616,11 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                             </div>
                           </td>
                           <td className="p-3">
+                            <Badge variant="outline" className={clsColors[n.classification]}>
+                              {bucketName(n.classification, t(`accounts.${n.classification}`))}
+                            </Badge>
+                          </td>
+                          <td className="p-3">
                             {cls && !isCls ? (
                               <span className="inline-flex items-center gap-1">
                                 <span className="font-mono text-muted-foreground">{cls.code}</span>
@@ -625,11 +630,6 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                             ) : (
                               <span className="text-muted-foreground">—</span>
                             )}
-                          </td>
-                          <td className="p-3">
-                            <Badge variant="outline" className={clsColors[n.classification]}>
-                              {bucketName(n.classification, t(`accounts.${n.classification}`))}
-                            </Badge>
                           </td>
                           <td className="p-3 text-center">
                             <Badge variant="outline">
