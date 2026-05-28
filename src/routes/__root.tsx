@@ -16,6 +16,7 @@ import { BranchProvider } from "@/lib/branch-context";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ConflictTrackerProvider, useConflictRealtimeSubscriber } from "@/lib/conflict-tracker";
+import { OfflineQueueProvider } from "@/lib/offline-queue";
 import { toast } from "sonner";
 
 function NotFoundComponent() {
