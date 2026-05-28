@@ -501,8 +501,8 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   <th className="text-start p-3 font-medium">
                     {t("common.code")} / {t("common.name")}
                   </th>
-                  <th className="text-start p-3 font-medium">Core Classification</th>
-                  <th className="text-start p-3 font-medium">{t("accounts.classification")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.coreClassification")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
                   <th className="text-center p-3 font-medium">{t("common.type") || "Type"}</th>
                   <th className="text-center p-3 font-medium">{t("common.status")}</th>
                   <th className="text-end p-3 font-medium">{t("common.actions")}</th>
