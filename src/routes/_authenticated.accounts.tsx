@@ -284,10 +284,17 @@ function AccountsPage() {
                   <td className="p-3 font-mono" style={{ paddingInlineStart: `${12 + depth * 16}px` }}>{a.code}</td>
                   <td className="p-3 font-medium">{localized(a, "name")}</td>
                   <td className="p-3">
-                    <Badge variant="outline" className={typeColors[a.account_type]}>
-                      {t(`accounts.${a.account_type}`)}
-                    </Badge>
+                    {(() => {
+                      const at = typeById.get(a.account_type_id);
+                      const cls = at?.classification ?? a.account_type;
+                      return (
+                        <Badge variant="outline" className={typeColors[cls]}>
+                          {at ? localized(at, "name") : t(`accounts.${cls}`)}
+                        </Badge>
+                      );
+                    })()}
                   </td>
+
                   <td className="p-3 text-center">{a.is_group ? "✓" : ""}</td>
                   <td className="p-3 text-center">{a.is_active ? t("common.active") : t("common.inactive")}</td>
                   <td className="p-3">
