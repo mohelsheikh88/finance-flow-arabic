@@ -140,7 +140,7 @@ export function AppSidebar() {
       <SidebarContent>
         {groups.map((g) => (
           <SidebarGroup key={g.label}>
-            {!collapsed && <SidebarGroupLabel>{g.label}</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel className="text-base font-bold py-2">{g.label}</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {g.items.map((item) => (
