@@ -469,6 +469,7 @@ export const translations = {
       fiscalPeriods: "Fiscal Periods",
       bankAccounts: "Bank Accounts",
       paymentMethods: "Payment Methods",
+      lockDates: "Lock Dates",
       finance: "Finance",
       configuration: "Configuration",
       accountsReceivable: "Accounts Receivable",
@@ -509,6 +510,13 @@ export const translations = {
         card: "Card",
         other: "Other",
       },
+    },
+    lockDates: {
+      new: "New Lock Date",
+      lockDate: "Lock Date",
+      scope: "Scope",
+      allBranches: "All Branches",
+      description: "No financial transactions can be entered or posted on or before this date.",
     },
     dashboard: {
       title: "Accounting Dashboard",
