@@ -133,7 +133,6 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold text-sidebar-foreground">{t("common.appShort")}</span>
-              <span className="text-[10px] text-sidebar-foreground/60">Enterprise</span>
             </div>
           )}
         </div>
