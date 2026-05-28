@@ -195,6 +195,73 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           </Button>
         </div>
       )}
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("common.search")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="ps-9"
+          />
+        </div>
+        <Select value={filterStatement} onValueChange={(v) => setFilterStatement(v as Statement | "all")}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder={t("accounts.statement")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
+            <SelectItem value="income_statement">{t("accounts.incomeStatement")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterNormalBalance} onValueChange={(v) => setFilterNormalBalance(v as NormalBalance | "all")}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder={t("accounts.normalBalance")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            <SelectItem value="debit">{t("accounts.debit")}</SelectItem>
+            <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterBucket} onValueChange={(v) => setFilterBucket(v as Bucket | "all")}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder={t("accounts.accountingBucket")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            {BUCKETS.map((b) => (
+              <SelectItem key={b} value={b}>{t(`accounts.${b}`)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "active" | "inactive")}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder={t("common.status")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("common.all")}</SelectItem>
+            <SelectItem value="active">{t("common.active")}</SelectItem>
+            <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setSearch("");
+            setFilterStatement("all");
+            setFilterNormalBalance("all");
+            setFilterBucket("all");
+            setFilterStatus("all");
+          }}
+          className="text-muted-foreground"
+        >
+          <FilterX className="h-4 w-4 me-1" />
+          {t("common.clear")}
+        </Button>
+      </div>
 
       <Card>
         <table className="w-full text-xs">
@@ -211,7 +278,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           </thead>
 
           <tbody>
-            {(rows as any[]).map((r) => (
+            {(filteredRows as any[]).map((r) => (
               <tr key={r.id} className="border-t hover:bg-muted/30">
                 <td className="p-3 font-mono">{r.code}</td>
                 <td className="p-3 font-medium">{localized(r, "name")}</td>
@@ -237,7 +304,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                 </td>
               </tr>
             ))}
-            {rows.length === 0 && (
+            {filteredRows.length === 0 && (
               <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             )}
           </tbody>
