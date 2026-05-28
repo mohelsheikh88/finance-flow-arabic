@@ -90,11 +90,31 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     queryKey: ["classifications", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
     enabled: !!companyId,
-  });
-
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [filterStatement, setFilterStatement] = useState<Statement | "all">("all");
+  const [filterNormalBalance, setFilterNormalBalance] = useState<NormalBalance | "all">("all");
+  const [filterBucket, setFilterBucket] = useState<Bucket | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive">("all");
+
+  const filteredRows = useMemo(() => {
+    return (rows as any[]).filter((r) => {
+      const matchesSearch =
+        search.trim() === "" ||
+        (r.code && r.code.toLowerCase().includes(search.toLowerCase())) ||
+        (r.name_ar && r.name_ar.toLowerCase().includes(search.toLowerCase())) ||
+        (r.name_en && r.name_en.toLowerCase().includes(search.toLowerCase()));
+      const matchesStatement = filterStatement === "all" || r.statement === filterStatement;
+      const matchesNormalBalance = filterNormalBalance === "all" || r.normal_balance === filterNormalBalance;
+      const matchesBucket = filterBucket === "all" || r.bucket === filterBucket;
+      const matchesStatus = filterStatus === "all" || (filterStatus === "active" ? r.is_active : !r.is_active);
+      return matchesSearch && matchesStatement && matchesNormalBalance && matchesBucket && matchesStatus;
+    });
+  }, [rows, search, filterStatement, filterNormalBalance, filterBucket, filterStatus]);
+
 
   const openNew = () => { setForm(empty); setOpen(true); };
   const openEdit = (r: any) => {
