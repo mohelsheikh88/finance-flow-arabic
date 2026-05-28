@@ -151,9 +151,9 @@ export const createInvoice = createServerFn({ method: "POST" })
     // Bump journal sequence
     await supabase.from("journals").update({ sequence_next: seq + 1 }).eq("id", journalId);
 
-    // Post if requested
+    // Post if requested (will route via approval workflow if one matches)
     if (data.status === "posted") {
-      await postInvoiceInternal(context.supabase, context.userId!, inv.id);
+      await postInvoiceCore(context.supabase, context.userId!, inv.id);
     }
 
     return inv;
