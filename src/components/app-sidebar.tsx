@@ -171,12 +171,39 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
   return (
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
 
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="px-2 py-2">
-          {collapsed ? (
-            <BrandMark size={28} />
-          ) : (
-            <BrandLogo size={34} variant="light" />
+      <SidebarHeader className="border-b border-sidebar-border/60">
+        <div className="flex items-center gap-2.5 px-2 py-2.5">
+          {/* Glass-morphism logo container */}
+          <div className="relative shrink-0">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[hsl(327,92%,55%)]/40 to-[hsl(280,70%,55%)]/30 blur-md opacity-70" />
+            <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] ring-1 ring-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              {collapsed ? <BrandMark size={26} /> : <BrandMark size={26} />}
+            </div>
+          </div>
+          {!collapsed && (
+            <div className="flex-1 min-w-0 flex items-center gap-1.5">
+              <div className="flex-1 min-w-0">
+                <BrandLogo size={28} variant="light" />
+              </div>
+              {onTogglePin && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={onTogglePin}
+                  aria-label={pinned ? "Unpin sidebar" : "Pin sidebar"}
+                  title={pinned ? "Unpin" : "Pin"}
+                  className={
+                    "h-8 w-8 shrink-0 rounded-md transition-all " +
+                    (pinned
+                      ? "bg-[hsl(263,55%,32%)]/35 text-[hsl(280,80%,75%)] ring-1 ring-[hsl(327,92%,60%)]/40 hover:bg-[hsl(263,55%,32%)]/55"
+                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40")
+                  }
+                >
+                  {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </SidebarHeader>
