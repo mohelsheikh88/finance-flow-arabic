@@ -24,7 +24,6 @@ import {
   BarChart3,
   SlidersHorizontal,
   ChevronDown,
-  ChevronDown,
   Pin,
   PinOff,
   LogOut,
@@ -57,7 +56,6 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
   const { t, locale } = useI18n();
   const { signOut } = useAuth();
   const { state } = useSidebar();
-  const { t, locale } = useI18n();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
