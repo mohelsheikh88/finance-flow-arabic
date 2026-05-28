@@ -69,6 +69,7 @@ export const translations = {
       topDebtors: "أكبر المدينين",
       byCategory: "حسب الفئة",
       comingSoon: "قريباً",
+      willBeBuiltLater: "سيتم بناءه لاحقاً",
       depreciation: "الإهلاك المتراكم",
       nbv: "القيمة الدفترية",
       cost: "التكلفة",
