@@ -11,74 +11,72 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import React from "react";
 
-// ---- Capture postgres_changes mocks.handlers from the mocked Supabase client ----
-// ---- Capture postgres_changes mocks.handlers from the mocked Supabase client ----
 type Handler = (payload: any) => void;
 
-const mocks = vi.hoisted(() => ({
-  mocks.handlers: {} as Record<string, Handler[]>,
-  mocks.subscribeMock: vi.fn(),
-  mocks.removeChannelMock: vi.fn(),
-  mocks.routerInvalidate: vi.fn(),
+// vi.mock is hoisted — capture refs via vi.hoisted so the factory can see them.
+const m = vi.hoisted(() => ({
+  handlers: {} as Record<string, Handler[]>,
+  subscribeMock: vi.fn(),
+  removeChannelMock: vi.fn(),
+  routerInvalidate: vi.fn(),
 }));
 
 vi.mock("@/integrations/supabase/client", () => {
   const channel = () => {
     const api: any = {
       on: (_event: string, opts: { table: string }, cb: Handler) => {
-        (mocks.mocks.handlers[opts.table] ??= []).push(cb);
+        (m.handlers[opts.table] ??= []).push(cb);
         return api;
       },
-      subscribe: mocks.mocks.subscribeMock,
+      subscribe: m.subscribeMock,
     };
     return api;
   };
   return {
-    supabase: {
-      channel,
-      removeChannel: mocks.mocks.removeChannelMock,
-    },
+    supabase: { channel, removeChannel: m.removeChannelMock },
   };
 });
 
 vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => ({ invalidate: mocks.mocks.routerInvalidate }),
+  useRouter: () => ({ invalidate: m.routerInvalidate }),
 }));
 
-
-
-// Import AFTER mocks so the hook resolves to mocked modules
+// Import AFTER mocks so the hook resolves to mocked modules.
 import { useScopedRealtime } from "@/lib/scoped-realtime";
 
-function Harness({ qc, roles }: { qc: QueryClient; roles: string[] }) {
-  useScopedRealtime({
-    userRoles: roles,
-    companyId: "co-1",
-    branchId: "br-1",
-  });
+function Harness({ roles }: { roles: string[] }) {
+  useScopedRealtime({ userRoles: roles, companyId: "co-1", branchId: "br-1" });
   return null;
 }
 
 function mount(qc: QueryClient, roles: string[] = ["admin"]) {
   return render(
     <QueryClientProvider client={qc}>
-      <Harness qc={qc} roles={roles} />
+      <Harness roles={roles} />
     </QueryClientProvider>
   );
 }
 
 beforeEach(() => {
-  for (const k of Object.keys(mocks.handlers)) delete mocks.handlers[k];
-  mocks.subscribeMock.mockClear();
-  mocks.removeChannelMock.mockClear();
-  mocks.routerInvalidate.mockClear();
+  for (const k of Object.keys(m.handlers)) delete m.handlers[k];
+  m.subscribeMock.mockClear();
+  m.removeChannelMock.mockClear();
+  m.routerInvalidate.mockClear();
 });
 
-function fire(table: string, eventType: "INSERT" | "UPDATE" | "DELETE", row: any) {
-  const hs = mocks.handlers[table] ?? [];
+function fire(
+  table: string,
+  eventType: "INSERT" | "UPDATE" | "DELETE",
+  row: any
+) {
+  const hs = m.handlers[table] ?? [];
   expect(hs.length, `no handler registered for ${table}`).toBeGreaterThan(0);
   for (const h of hs) {
-    h({ eventType, new: eventType === "DELETE" ? null : row, old: eventType === "INSERT" ? null : row });
+    h({
+      eventType,
+      new: eventType === "DELETE" ? null : row,
+      old: eventType === "INSERT" ? null : row,
+    });
   }
 }
 
@@ -94,27 +92,29 @@ describe("scoped-realtime → user-context invalidation", () => {
   it.each(contextTables)(
     "INSERT on %s invalidates the user-context query key",
     (table) => {
-      const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      qc.setQueryData(["user-context"], { roles: ["admin"], companies: [], branches: [] });
+      const qc = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      qc.setQueryData(["user-context"], { roles: ["admin"] });
       const spy = vi.spyOn(qc, "invalidateQueries");
 
       mount(qc, ["admin"]);
-      expect(mocks.subscribeMock).toHaveBeenCalled();
+      expect(m.subscribeMock).toHaveBeenCalled();
 
       fire(table, "INSERT", { id: "new-id" });
 
       const calls = spy.mock.calls.map((c) => (c[0] as any)?.queryKey);
       expect(calls).toContainEqual(["user-context"]);
-      // Also invalidates the table key itself
       expect(calls).toContainEqual([table]);
     }
   );
 
   it.each(contextTables)(
-    "UPDATE on %s invalidates the user-context query key",
+    "UPDATE on %s invalidates the user-context query key + record key",
     (table) => {
-      const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      qc.setQueryData(["user-context"], { roles: ["admin"] });
+      const qc = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
       const spy = vi.spyOn(qc, "invalidateQueries");
 
       mount(qc, ["admin"]);
@@ -122,16 +122,16 @@ describe("scoped-realtime → user-context invalidation", () => {
 
       const calls = spy.mock.calls.map((c) => (c[0] as any)?.queryKey);
       expect(calls).toContainEqual(["user-context"]);
-      // Per-record key also invalidated for UPDATE
       expect(calls).toContainEqual([table, "rec-1"]);
     }
   );
 
   it.each(contextTables)(
-    "DELETE on %s invalidates the user-context query key",
+    "DELETE on %s invalidates the user-context query key + record key",
     (table) => {
-      const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      qc.setQueryData(["user-context"], { roles: ["admin"] });
+      const qc = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
       const spy = vi.spyOn(qc, "invalidateQueries");
 
       mount(qc, ["admin"]);
@@ -143,14 +143,13 @@ describe("scoped-realtime → user-context invalidation", () => {
     }
   );
 
-  it("a non-context table event does NOT invalidate user-context", () => {
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    qc.setQueryData(["user-context"], { roles: ["admin"] });
+  it("non-context table event does NOT invalidate user-context", () => {
+    const qc = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     const spy = vi.spyOn(qc, "invalidateQueries");
 
     mount(qc, ["admin"]);
-    // 'invoices' is subscribed for admin (FINANCE includes admin) but is NOT in
-    // the context-tables list — should not touch user-context.
     fire("invoices", "INSERT", { id: "inv-1" });
 
     const calls = spy.mock.calls.map((c) => (c[0] as any)?.queryKey);
@@ -159,10 +158,11 @@ describe("scoped-realtime → user-context invalidation", () => {
   });
 
   it("after invalidation, the next fetch returns fresh dropdown data", async () => {
-
     // End-to-end: realtime event → invalidate ["user-context"] → next fetch
-    // returns updated branches (what the Topbar dropdown displays).
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    // returns updated branches (the source of the Topbar dropdown).
+    const qc = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
 
     let serverBranches = [{ id: "br-1", name_en: "HQ" }];
     const refetcher = vi.fn(async () => ({
@@ -175,11 +175,10 @@ describe("scoped-realtime → user-context invalidation", () => {
 
     mount(qc, ["admin"]);
 
-    // Server inserts a new branch; realtime delivers the event.
     serverBranches = [...serverBranches, { id: "br-2", name_en: "New Branch" }];
     fire("branches", "INSERT", { id: "br-2" });
 
-    // The query is now marked stale — fetching it again calls the queryFn.
+    // Query is now stale — refetch returns fresh data.
     await qc.fetchQuery({ queryKey: ["user-context"], queryFn: refetcher });
 
     const data = qc.getQueryData<any>(["user-context"]);
@@ -187,4 +186,3 @@ describe("scoped-realtime → user-context invalidation", () => {
     expect(refetcher).toHaveBeenCalledTimes(2);
   });
 });
-
