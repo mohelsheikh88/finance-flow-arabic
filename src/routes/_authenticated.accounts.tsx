@@ -134,10 +134,13 @@ function ChartOfAccountsPanel() {
   });
 
 
-
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
+
+  const parents = useMemo(() => {
+    return (accounts as any[]).filter((a) => a.is_group && a.id !== form.id);
+  }, [accounts, form.id]);
 
   const [search, setSearch] = useState("");
   const [filterClassification, setFilterClassification] = useState("all");
@@ -437,6 +440,20 @@ function ChartOfAccountsPanel() {
             <div>
               <Label>{t("common.nameEn")} *</Label>
               <Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} maxLength={255} />
+            </div>
+            <div>
+              <Label>{t("accounts.parent")}</Label>
+              <Select value={form.parent_id || "__none"} onValueChange={(v) => setForm({ ...form, parent_id: v === "__none" ? "" : v })}>
+                <SelectTrigger><SelectValue placeholder={t("accounts.selectParent")} /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none">—</SelectItem>
+                  {parents.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} — {localized(p, "name")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="col-span-2 flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
