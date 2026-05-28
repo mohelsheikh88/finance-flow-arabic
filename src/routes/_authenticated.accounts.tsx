@@ -971,6 +971,9 @@ function AccountingBucketsPanel() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounting_buckets"] });
+      qc.invalidateQueries({ queryKey: ["classifications"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
+      qc.invalidateQueries({ queryKey: ["accounts"] });
       setOpen(false);
       setForm(emptyBForm);
     },
@@ -982,6 +985,9 @@ function AccountingBucketsPanel() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounting_buckets"] });
+      qc.invalidateQueries({ queryKey: ["classifications"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
+      qc.invalidateQueries({ queryKey: ["accounts"] });
       setToDelete(null);
     },
     onError: (e: Error) => toast.error(e.message),
