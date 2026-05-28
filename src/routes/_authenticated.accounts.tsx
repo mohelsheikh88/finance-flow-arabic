@@ -135,24 +135,90 @@ function AccountsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const typeColors: Record<string, string> = {
-    asset: "bg-info/10 text-info border-info/30",
-    liability: "bg-warning/10 text-warning border-warning/30",
-    equity: "bg-primary/10 text-primary border-primary/30",
-    income: "bg-success/10 text-success border-success/30",
-    expense: "bg-destructive/10 text-destructive border-destructive/30",
+  const importFn = useServerFn(importAccounts);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importResult, setImportResult] = useState<{ created: number; updated: number; errors: { code: string; error: string }[] } | null>(null);
+
+  const importMut = useMutation({
+    mutationFn: (rows: any[]) => importFn({ data: { companyId: companyId!, rows } }),
+    onSuccess: (res) => {
+      setImportResult(res);
+      qc.invalidateQueries({ queryKey: ["accounts"] });
+      const msg = `+${res.created} / ~${res.updated}` + (res.errors.length ? ` (${res.errors.length} ⚠)` : "");
+      res.errors.length ? toast.warning(msg) : toast.success(msg);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleExport = () => {
+    const rows = (accounts as any[]).map((a) => ({
+      code: a.code,
+      name_ar: a.name_ar,
+      name_en: a.name_en,
+      account_type: a.account_type,
+      parent_code: (accounts as any[]).find((p) => p.id === a.parent_id)?.code ?? "",
+      currency_code: a.currency_code ?? "",
+      is_group: a.is_group ? 1 : 0,
+      is_active: a.is_active ? 1 : 0,
+      is_reconcilable: a.is_reconcilable ? 1 : 0,
+      notes: a.notes ?? "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{
+      code: "", name_ar: "", name_en: "", account_type: "asset",
+      parent_code: "", currency_code: "", is_group: 0, is_active: 1, is_reconcilable: 0, notes: "",
+    }]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "accounts");
+    XLSX.writeFile(wb, `chart_of_accounts_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  const canSave = form.code && form.name_ar && form.name_en && !!companyId;
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f || !companyId) return;
+    try {
+      const buf = await f.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
+      const rows = raw.map((r) => ({
+        code: String(r.code ?? "").trim(),
+        name_ar: String(r.name_ar ?? "").trim(),
+        name_en: String(r.name_en ?? "").trim(),
+        account_type: String(r.account_type ?? "").trim().toLowerCase(),
+        parent_code: r.parent_code ? String(r.parent_code).trim() : null,
+        currency_code: r.currency_code ? String(r.currency_code).trim() : null,
+        is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
+        is_active: r.is_active === undefined || r.is_active === "" ? true
+          : r.is_active === true || r.is_active === 1 || String(r.is_active).toLowerCase() === "true",
+        is_reconcilable: r.is_reconcilable === true || r.is_reconcilable === 1 || String(r.is_reconcilable).toLowerCase() === "true",
+        notes: r.notes ? String(r.notes) : null,
+      })).filter((r) => r.code);
+      if (!rows.length) { toast.error(t("common.noData")); return; }
+      importMut.mutate(rows);
+    } catch (err: any) {
+      toast.error(err.message ?? "Import failed");
+    }
+  };
 
   return (
     <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">{t("accounts.title")}</h1>
-        <Button onClick={openNew} disabled={!companyId}>
-          <Plus className="h-4 w-4 me-1" />{t("common.new")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+          <Button variant="outline" onClick={handleExport} disabled={!companyId}>
+            <Download className="h-4 w-4 me-1" />Export
+          </Button>
+          <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
+            <Upload className="h-4 w-4 me-1" />Import
+          </Button>
+          <Button onClick={openNew} disabled={!companyId}>
+            <Plus className="h-4 w-4 me-1" />{t("common.new")}
+          </Button>
+        </div>
       </div>
+
 
       <Card>
         <table className="w-full text-xs">
