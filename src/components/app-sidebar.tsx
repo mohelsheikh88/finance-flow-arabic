@@ -177,7 +177,7 @@ export function AppSidebar() {
             >
               <SidebarGroup>
                 <SidebarGroupLabel asChild>
-                  <CollapsibleTrigger className="flex h-auto w-full items-center gap-2 py-2 text-[13px] font-semibold text-sidebar-foreground/85 hover:text-sidebar-foreground transition-colors">
+                  <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-[13px] font-semibold text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground">
                     <span className="truncate">{g.label}</span>
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
