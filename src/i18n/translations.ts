@@ -755,7 +755,7 @@ export const translations = {
       normalBalance: "Normal Balance",
       debit: "Debit",
       credit: "Credit",
-      accountTypeSingular: "Account Group",
+      accountTypeSingular: "Accounts Groups",
       coreClassification: "Core Classification",
       grandParent: "Grand Parent",
       classificationSingular: "Classification",
