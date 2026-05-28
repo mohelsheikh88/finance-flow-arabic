@@ -33,6 +33,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useI18n } from "@/i18n";
+import { BrandLogo, BrandMark } from "@/components/brand-logo";
+
 
 export function AppSidebar() {
   const { t, locale } = useI18n();
@@ -133,17 +135,15 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
 
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-1">
-          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary-light to-primary flex items-center justify-center text-white text-sm font-bold shrink-0">
-            FE
-          </div>
-          {!collapsed && (
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold text-sidebar-foreground">{t("common.appShort")}</span>
-            </div>
+        <div className="px-2 py-2">
+          {collapsed ? (
+            <BrandMark size={28} />
+          ) : (
+            <BrandLogo size={34} variant="light" />
           )}
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         {groups.map((g) => (
           <SidebarGroup key={g.label}>

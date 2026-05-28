@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { BrandMark } from "@/components/brand-logo";
+
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -58,12 +60,13 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-primary-deep via-primary to-primary-light">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 text-primary-foreground">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
-            <span className="text-2xl font-bold">AH</span>
+          <div className="inline-flex items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4 p-3">
+            <BrandMark size={56} />
           </div>
-          <h1 className="text-3xl font-bold">{t("common.appName")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("common.appName")}</h1>
           <p className="mt-2 text-sm text-white/80">{t(mode === "login" ? "auth.loginSubtitle" : "auth.signupSubtitle")}</p>
         </div>
+
 
         <Card className="p-8">
           <form onSubmit={onSubmit} className="space-y-4">
