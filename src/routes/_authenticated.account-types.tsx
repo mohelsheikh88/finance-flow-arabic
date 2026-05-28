@@ -160,7 +160,8 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const canSave = form.code && form.name_ar && form.name_en && form.classification && !!companyId;
+  const canSave = form.code && form.name_ar && form.name_en && form.classification_id && !!companyId;
+
 
   return (
     <div className={embedded ? "space-y-4" : "p-6 space-y-4"}>
