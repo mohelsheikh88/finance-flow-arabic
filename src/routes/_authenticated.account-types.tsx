@@ -251,15 +251,21 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
             </div>
             <div>
               <Label>{t("accounts.classification")} *</Label>
-              <Select value={form.classification} onValueChange={(v) => setForm({ ...form, classification: v as Cls })}>
-
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select value={form.classification_id ?? ""} onValueChange={(v) => {
+                const sel = activeClassifications.find((c: any) => c.id === v);
+                setForm({ ...form, classification_id: v, classification: (sel?.bucket as Cls) ?? form.classification });
+              }}>
+                <SelectTrigger><SelectValue placeholder={t("common.select") || "—"} /></SelectTrigger>
                 <SelectContent>
-                  {CLASSIFICATIONS.map((c) => (
-                    <SelectItem key={c} value={c}>{t(`accounts.${c}`)}</SelectItem>
+                  {activeClassifications.map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code} — {localized(c, "name")}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
             </div>
             <div>
               <Label>{t("common.nameAr")} *</Label>
