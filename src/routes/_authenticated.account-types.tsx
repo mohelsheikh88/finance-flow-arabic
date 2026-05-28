@@ -87,11 +87,10 @@ function buildTree(rows: Row[]): Node[] {
       const p = map.get(n.parent_id)!;
       n.depth = p.depth + 1;
       p.children.push(n);
-  const cmp = (a: Node, b: Node) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code);
-  const fixDepth = (n: Node, d: number) => {
-
+    } else {
+      roots.push(n);
+    }
   });
-  const fixDepth = (n: Node, d: number) => {
   const cmp = (a: Node, b: Node) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code);
   const fixDepth = (n: Node, d: number) => {
     n.depth = d;
@@ -99,6 +98,7 @@ function buildTree(rows: Row[]): Node[] {
     n.children.forEach((c) => fixDepth(c, d + 1));
   };
   roots.sort((a, b) => a.classification.localeCompare(b.classification) || cmp(a, b));
+
 
   roots.forEach((r) => fixDepth(r, 0));
   return roots;
