@@ -242,25 +242,26 @@ function ClassificationsPage() {
               <Label>{t("common.nameEn")} *</Label>
               <Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} maxLength={255} />
             </div>
+            <div>
               <Label>{t("accounts.statement")} *</Label>
               <Select value={form.statement} onValueChange={(v) => setForm({ ...form, statement: v as Statement })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
                   <SelectItem value="income_statement">{t("accounts.incomeStatement")}</SelectItem>
-
-                  <SelectItem value="income_statement">قائمة الدخل</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>الطبيعة *</Label>
+              <Label>{t("accounts.normalBalance")} *</Label>
               <Select value={form.normal_balance} onValueChange={(v) => setForm({ ...form, normal_balance: v as NormalBalance })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="debit">مدين</SelectItem>
-                  <SelectItem value="credit">دائن</SelectItem>
+                  <SelectItem value="debit">{t("accounts.debit")}</SelectItem>
+                  <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
                 </SelectContent>
+              </Select>
+
               </Select>
             </div>
             <div className="flex items-center gap-2">
