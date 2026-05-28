@@ -174,7 +174,7 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
           </div>
           <Button
             disabled={selected.size === 0 || !bulkTypeId || mut.isPending}
-            onClick={() => mut.mutate()}
+            onClick={() => setConfirmOpen(true)}
           >
             {t("accounts.applyBulk")}
           </Button>
