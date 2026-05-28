@@ -402,9 +402,13 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                 })}
                 {visible.length === 0 && (
                   <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
-
-        </table>
+                )}
+              </tbody>
+            </table>
+          </SortableContext>
+        </DndContext>
       </Card>
+
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
