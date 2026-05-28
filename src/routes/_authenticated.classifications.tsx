@@ -168,9 +168,10 @@ function ClassificationsPage() {
           <thead className="bg-muted/50">
             <tr>
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">{t("common.name")}</th>
-              <th className="text-start p-3 font-medium">البيان</th>
-              <th className="text-start p-3 font-medium">الطبيعة</th>
+              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
+              <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
+
               <th className="text-start p-3 font-medium">المجموعة المحاسبية</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
