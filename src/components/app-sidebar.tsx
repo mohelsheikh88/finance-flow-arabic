@@ -16,6 +16,7 @@ import {
   CalendarRange,
   Wallet,
   TrendingUp,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
