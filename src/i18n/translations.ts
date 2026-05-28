@@ -149,6 +149,9 @@ export const translations = {
       banksGroup: "الخزينة والبنوك",
       fixedAssets: "الأصول الثابتة",
       loansGroup: "القروض",
+      purchaseProcurement: "المشتريات والتوريدات",
+      inventoryManagement: "إدارة المخزون",
+      humanResources: "الموارد البشرية",
     },
     ar: {
       invoices: "فواتير العملاء",
