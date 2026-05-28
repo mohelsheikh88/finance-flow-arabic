@@ -319,5 +319,5 @@ export const postInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => i)
   .handler(async ({ data, context }) => {
-    return postInvoiceInternal(context.supabase, context.userId!, data.id);
+    return postInvoiceCore(context.supabase, context.userId!, data.id);
   });
