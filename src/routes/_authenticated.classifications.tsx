@@ -242,12 +242,13 @@ function ClassificationsPage() {
               <Label>{t("common.nameEn")} *</Label>
               <Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} maxLength={255} />
             </div>
-            <div>
-              <Label>البيان *</Label>
+              <Label>{t("accounts.statement")} *</Label>
               <Select value={form.statement} onValueChange={(v) => setForm({ ...form, statement: v as Statement })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="balance_sheet">الميزانية العمومية</SelectItem>
+                  <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
+                  <SelectItem value="income_statement">{t("accounts.incomeStatement")}</SelectItem>
+
                   <SelectItem value="income_statement">قائمة الدخل</SelectItem>
                 </SelectContent>
               </Select>
