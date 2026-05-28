@@ -61,7 +61,6 @@ const clsColors: Record<string, string> = {
   income: "bg-success/10 text-success border-success/30",
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
-
 type Row = {
   id: string;
   code: string;
@@ -73,6 +72,10 @@ type Row = {
   is_group: boolean;
   is_active: boolean;
   notes: string | null;
+  sort_order?: number;
+};
+type Node = Row & { depth: number; children: Node[] };
+
 };
 type Node = Row & { depth: number; children: Node[] };
 
@@ -90,11 +93,14 @@ function buildTree(rows: Row[]): Node[] {
     }
   });
   const fixDepth = (n: Node, d: number) => {
+  const cmp = (a: Node, b: Node) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code);
+  const fixDepth = (n: Node, d: number) => {
     n.depth = d;
-    n.children.sort((a, b) => a.code.localeCompare(b.code));
+    n.children.sort(cmp);
     n.children.forEach((c) => fixDepth(c, d + 1));
   };
-  roots.sort((a, b) => a.classification.localeCompare(b.classification) || a.code.localeCompare(b.code));
+  roots.sort((a, b) => a.classification.localeCompare(b.classification) || cmp(a, b));
+
   roots.forEach((r) => fixDepth(r, 0));
   return roots;
 }
