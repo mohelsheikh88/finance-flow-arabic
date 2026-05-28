@@ -48,6 +48,7 @@ export function AppSidebar() {
     {
       label: t("nav.accounting"),
       items: [
+        { url: "/customers", icon: Users, title: t("nav.customers") },
         { url: "/partners", icon: Users, title: t("nav.partners") },
         { url: "/invoices/customer", icon: FileText, title: t("nav.customerInvoices") },
         { url: "/invoices/vendor", icon: Receipt, title: t("nav.vendorBills") },
