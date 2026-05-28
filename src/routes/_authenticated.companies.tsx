@@ -123,14 +123,24 @@ function Page() {
       if (id) return updateCompanyFn({ data: { id, ...payload } });
       return createCompanyFn({ data: payload });
     },
-    onSuccess: () => {
-      toast.success(t("common.saved"));
+    onSuccess: (_data, _vars, _ctx) => {
+      const isNew = !coForm.id;
+      const name = coForm.name_ar || coForm.name_en || coForm.code;
+      toast.success(
+        isNew ? `تم إنشاء الشركة "${name}" بنجاح` : `تم تحديث الشركة "${name}" بنجاح`,
+        {
+          description: isNew
+            ? "السبب: إضافة شركة جديدة — تم تحديث القوائم المنسدلة (Topbar/Sidebar) تلقائيًا."
+            : "السبب: تعديل بيانات شركة — تم تحديث القوائم المنسدلة (Topbar/Sidebar) تلقائيًا.",
+        }
+      );
       qc.invalidateQueries({ queryKey: ["companies"] });
       qc.invalidateQueries({ queryKey: ["user-context"] });
       setCoOpen(false);
     },
-
+    onError: (e: Error) => toast.error(e.message),
   });
+
 
   // Branch dialog
   const [brOpen, setBrOpen] = useState(false);
@@ -161,12 +171,20 @@ function Page() {
       return createBranchFn({ data: payload });
     },
     onSuccess: () => {
-      toast.success(t("common.saved"));
+      const isNew = !brForm.id;
+      const name = brForm.name_ar || brForm.name_en || brForm.code;
+      toast.success(
+        isNew ? `تم إنشاء الفرع "${name}" بنجاح` : `تم تحديث الفرع "${name}" بنجاح`,
+        {
+          description: isNew
+            ? "السبب: إضافة فرع جديد — تم تحديث منتقي الفروع في الـ Topbar والقوائم تلقائيًا."
+            : "السبب: تعديل بيانات فرع — تم تحديث منتقي الفروع في الـ Topbar والقوائم تلقائيًا.",
+        }
+      );
       qc.invalidateQueries({ queryKey: ["branches"] });
       qc.invalidateQueries({ queryKey: ["user-context"] });
       setBrOpen(false);
     },
-
     onError: (e: Error) => toast.error(e.message),
   });
 
