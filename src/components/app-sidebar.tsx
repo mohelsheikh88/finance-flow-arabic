@@ -118,8 +118,8 @@ export function AppSidebar() {
         { url: "/lock-dates", icon: Lock, title: t("nav.lockDates") },
         { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
         { url: "/users", icon: Users, title: t("nav.users") },
+        { url: "/audit-log", icon: History, title: "سجل التدقيق" },
         { url: "/settings", icon: Settings, title: t("nav.generalSettings") },
-      ],
     },
   ];
 
