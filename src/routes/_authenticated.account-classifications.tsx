@@ -19,6 +19,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account-classifications")({
@@ -67,6 +77,7 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
   const [filterCls, setFilterCls] = useState<string>("__all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkTypeId, setBulkTypeId] = useState<string>("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -163,7 +174,7 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
           </div>
           <Button
             disabled={selected.size === 0 || !bulkTypeId || mut.isPending}
-            onClick={() => mut.mutate()}
+            onClick={() => setConfirmOpen(true)}
           >
             {t("accounts.applyBulk")}
           </Button>
@@ -231,6 +242,35 @@ export function AccountClassificationsPage({ embedded = false }: { embedded?: bo
           </tbody>
         </table>
       </Card>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("accounts.confirmBulkChangeTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selected.size + " " + t("accounts.confirmBulkChangeMessage")}
+              <br />
+              <span className="font-semibold text-foreground mt-2 block">
+                {bulkTypeId ? localized(typeById.get(bulkTypeId)?.name_ar, typeById.get(bulkTypeId)?.name_en) : ""}
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmOpen(false)}>
+              {t("common.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={mut.isPending}
+              onClick={() => {
+                setConfirmOpen(false);
+                mut.mutate();
+              }}
+            >
+              {t("common.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 
