@@ -119,6 +119,20 @@ export const translations = {
       reconciliations: "تسويات بنكية",
       accounts: "الحسابات البنكية",
     },
+    paymentMethods: {
+      new: "وسيلة دفع جديدة",
+      type: "النوع",
+      bank: "الحساب البنكي",
+      inbound: "للتحصيل",
+      outbound: "للدفع",
+      types: {
+        cash: "نقدًا",
+        bank_transfer: "تحويل بنكي",
+        check: "شيك",
+        card: "بطاقة",
+        other: "أخرى",
+      },
+    },
     dashboard: {
       title: "لوحة المحاسبة العامة",
       subtitle: "نظرة شاملة على الوضع المالي للشركة",
@@ -473,6 +487,20 @@ export const translations = {
       expenses: "Bank Expenses",
       reconciliations: "Bank Reconciliations",
       accounts: "Bank Accounts",
+    },
+    paymentMethods: {
+      new: "New Payment Method",
+      type: "Type",
+      bank: "Bank Account",
+      inbound: "For Receipts",
+      outbound: "For Payments",
+      types: {
+        cash: "Cash",
+        bank_transfer: "Bank Transfer",
+        check: "Cheque",
+        card: "Card",
+        other: "Other",
+      },
     },
     dashboard: {
       title: "Accounting Dashboard",

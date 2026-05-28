@@ -112,6 +112,7 @@ export function AppSidebar() {
         { url: "/taxes", icon: Receipt, title: t("nav.taxes") },
         { url: "/currencies", icon: Coins, title: t("nav.currencies") },
         { url: "/fiscal-periods", icon: CalendarRange, title: t("nav.fiscalPeriods") },
+        { url: "/payment-methods", icon: CreditCard, title: t("nav.paymentMethods") },
         { url: "/companies", icon: Building2, title: t("nav.companies") },
         { url: "/users", icon: Users, title: t("nav.users") },
         { url: "/settings", icon: Settings, title: t("nav.settings") },
