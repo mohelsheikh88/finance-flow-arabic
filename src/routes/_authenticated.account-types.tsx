@@ -199,6 +199,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
+              <th className="text-start p-3 font-medium">Core Classification</th>
               <th className="text-start p-3 font-medium">{t("accounts.classification")}</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
@@ -206,11 +207,24 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
           </thead>
 
           <tbody>
-            {(types as any[]).map((r) => (
+            {(types as any[]).map((r) => {
+              const cls = (classifications as any[]).find((c) => c.id === r.classification_id);
+              return (
               <tr key={r.id} className="border-t hover:bg-muted/30">
                 <td className="p-3 font-mono">{r.code}</td>
                 <td className="p-3 font-medium">{localized(r, "name")}</td>
                 <td className="p-3 text-muted-foreground">{statementLabel(r.classification)}</td>
+                <td className="p-3">
+                  {cls ? (
+                    <span className="inline-flex items-center gap-1">
+                      <span className="font-mono text-muted-foreground">{cls.code}</span>
+                      <span>—</span>
+                      <span>{localized(cls, "name")}</span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
                 <td className="p-3">
                   <Badge variant="outline" className={clsColors[r.classification]}>
                     {t(`accounts.${r.classification}`)}
@@ -230,13 +244,15 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {types.length === 0 && (
-              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             )}
           </tbody>
         </table>
       </Card>
+
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
