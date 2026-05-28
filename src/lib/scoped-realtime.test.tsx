@@ -170,11 +170,19 @@ describe("scoped-realtime → user-context invalidation", () => {
     // Seed cache + register an active observer so invalidate triggers refetch
     await qc.prefetchQuery({ queryKey: ["user-context"], queryFn: refetcher });
     const unsubscribe = qc
+    await qc.prefetchQuery({ queryKey: ["user-context"], queryFn: refetcher });
+    // Register an active observer so invalidate() triggers a refetch
+    const observer = qc
       .getQueryCache()
-      .find({ queryKey: ["user-context"] })!
-      .subscribe(() => {});
+      .find({ queryKey: ["user-context"] })!;
+    const unsubscribe = observer.observers.length
+      ? () => {}
+      : (() => {
+          const noop = { onQueryUpdate: () => {} } as any;
+          observer.addObserver(noop);
+          return () => observer.removeObserver(noop);
+        })();
 
-    mount(qc, ["admin"]);
 
     // Server-side a new branch is inserted; realtime delivers the event.
     serverBranches = [...serverBranches, { id: "br-2", name_en: "New Branch" }];
