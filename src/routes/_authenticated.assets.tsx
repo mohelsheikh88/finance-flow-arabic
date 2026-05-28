@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAssets, listCategories, createAsset, createCategory, getDepreciationSchedule } from "@/lib/api/assets.functions";
+import { listAssets, listCategories, createAsset, createCategory, getDepreciationSchedule, postDueDepreciation } from "@/lib/api/assets.functions";
+
 import { listAccounts } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -17,7 +18,8 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Plus, Eye } from "lucide-react";
+import { Briefcase, Plus, Eye, PlayCircle } from "lucide-react";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/assets")({
@@ -37,6 +39,21 @@ function AssetsPage() {
   const create = useServerFn(createAsset);
   const createCat = useServerFn(createCategory);
   const getSched = useServerFn(getDepreciationSchedule);
+  const postDep = useServerFn(postDueDepreciation);
+  const postDepMut = useMutation({
+    mutationFn: () => postDep({ data: { companyId: companyId! } }),
+    onSuccess: (r: any) => {
+      qc.invalidateQueries({ queryKey: ["assets"] });
+      qc.invalidateQueries({ queryKey: ["depreciation_schedule"] });
+      if (r?.errors?.length) {
+        toast.warning(`${r.posted} posted, ${r.skipped} skipped`);
+      } else {
+        toast.success(`${r.posted} depreciation entries posted`);
+      }
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
 
   const [open, setOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
@@ -154,6 +171,11 @@ function AssetsPage() {
           <h1 className="text-xl font-bold">{t("assets.title")}</h1>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => postDepMut.mutate()} disabled={postDepMut.isPending || !companyId}>
+            <PlayCircle className="h-4 w-4 me-1" />{t("assets.postDueDep")}
+          </Button>
+
+
           <Dialog open={catOpen} onOpenChange={setCatOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm"><Plus className="h-4 w-4 me-1" />{t("assets.newCategory")}</Button>

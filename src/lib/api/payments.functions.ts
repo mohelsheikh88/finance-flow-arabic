@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { maybeRequestApproval } from "./approvals.functions";
 
 const CreatePaymentSchema = z.object({
   company_id: z.string().uuid(),
@@ -144,20 +145,58 @@ export const createPayment = createServerFn({ method: "POST" })
     }
 
     if (data.status === "posted") {
-      await postPaymentInternal(supabase, userId!, pay.id, cashAccountId, partnerCtrl);
+      await postPaymentCore(supabase, userId!, pay.id);
     }
 
     return pay;
   });
 
-async function postPaymentInternal(supabase: any, userId: string, paymentId: string, cashAccountId: string, partnerCtrl: string) {
+/**
+ * Core posting logic for payments. Routes through approval workflow when one
+ * matches (creates an approval_request and returns). Pass `bypassApproval`
+ * from the approval-handler to post regardless.
+ */
+export async function postPaymentCore(
+  supabase: any,
+  userId: string,
+  paymentId: string,
+  opts: { bypassApproval?: boolean } = {},
+) {
   const { data: pay } = await supabase
     .from("payments")
-    .select("*, payment_allocations(*)")
+    .select("*, payment_allocations(*), bank_accounts(gl_account_id), partners(receivable_account_id, payable_account_id), journals(default_debit_account_id, default_credit_account_id)")
     .eq("id", paymentId)
     .single();
   if (!pay) throw new Error("Payment not found");
   if (pay.status !== "draft") throw new Error("Already posted");
+
+  // Approval gate
+  if (!opts.bypassApproval) {
+    const res = await maybeRequestApproval(supabase, userId, {
+      companyId: pay.company_id,
+      branchId: pay.branch_id,
+      documentType: "payment",
+      documentId: pay.id,
+      documentReference: pay.payment_number,
+      amount: Number(pay.amount),
+      currencyCode: pay.currency_code,
+    });
+    if (res.created) {
+      return { pendingApproval: true, requestId: res.requestId };
+    }
+  }
+
+  const cashAccountId: string | null =
+    pay.bank_accounts?.gl_account_id ||
+    pay.journals?.default_debit_account_id ||
+    pay.journals?.default_credit_account_id;
+  if (!cashAccountId) throw new Error("No bank/cash account configured");
+
+  const partnerCtrl =
+    pay.direction === "inbound"
+      ? pay.partners?.receivable_account_id
+      : pay.partners?.payable_account_id;
+  if (!partnerCtrl) throw new Error("Partner has no control account configured");
 
   const isInbound = pay.direction === "inbound";
 

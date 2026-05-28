@@ -304,6 +304,8 @@ export const translations = {
     assets: {
       title: "الأصول الثابتة",
       newAsset: "أصل جديد",
+      postDueDep: "ترحيل الإهلاكات المستحقة",
+
       newCategory: "تصنيف جديد",
       category: "التصنيف",
       acquisitionDate: "تاريخ الاقتناء",
@@ -633,6 +635,8 @@ export const translations = {
     assets: {
       title: "Fixed Assets",
       newAsset: "New Asset",
+      postDueDep: "Post Due Depreciation",
+
       newCategory: "New Category",
       category: "Category",
       acquisitionDate: "Acquisition Date",

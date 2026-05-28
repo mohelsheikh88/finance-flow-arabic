@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { maybeRequestApproval } from "./approvals.functions";
 
 const LineSchema = z.object({
   description: z.string().max(500).optional().nullable(),
@@ -150,15 +151,25 @@ export const createInvoice = createServerFn({ method: "POST" })
     // Bump journal sequence
     await supabase.from("journals").update({ sequence_next: seq + 1 }).eq("id", journalId);
 
-    // Post if requested
+    // Post if requested (will route via approval workflow if one matches)
     if (data.status === "posted") {
-      await postInvoiceInternal(context.supabase, context.userId!, inv.id);
+      await postInvoiceCore(context.supabase, context.userId!, inv.id);
     }
 
     return inv;
   });
 
-async function postInvoiceInternal(supabase: any, userId: string, invoiceId: string) {
+/**
+ * Core posting logic. Routes through approval workflow when one matches
+ * (creates an approval_request and returns without posting). Pass
+ * `bypassApproval` from the approval-handler to actually post.
+ */
+export async function postInvoiceCore(
+  supabase: any,
+  userId: string,
+  invoiceId: string,
+  opts: { bypassApproval?: boolean } = {},
+) {
   // Fetch invoice + partner + lines
   const { data: inv } = await supabase
     .from("invoices")
@@ -167,6 +178,23 @@ async function postInvoiceInternal(supabase: any, userId: string, invoiceId: str
     .single();
   if (!inv) throw new Error("Invoice not found");
   if (inv.status !== "draft") throw new Error("Only draft invoices can be posted");
+
+  // Approval gate
+  if (!opts.bypassApproval) {
+    const res = await maybeRequestApproval(supabase, userId, {
+      companyId: inv.company_id,
+      branchId: inv.branch_id,
+      documentType: "invoice",
+      documentId: inv.id,
+      documentReference: inv.invoice_number,
+      amount: Number(inv.total),
+      currencyCode: inv.currency_code,
+    });
+    if (res.created) {
+      return { pendingApproval: true, requestId: res.requestId };
+    }
+  }
+
 
   const isCustomer = inv.invoice_type === "customer";
   const partnerCtrl = isCustomer ? inv.partners?.receivable_account_id : inv.partners?.payable_account_id;
@@ -291,5 +319,5 @@ export const postInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => i)
   .handler(async ({ data, context }) => {
-    return postInvoiceInternal(context.supabase, context.userId!, data.id);
+    return postInvoiceCore(context.supabase, context.userId!, data.id);
   });
