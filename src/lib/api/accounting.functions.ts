@@ -72,7 +72,7 @@ export const upsertAccountType = createServerFn({ method: "POST" })
     return row;
   });
 
-  });
+
 
 export const deleteAccountType = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
