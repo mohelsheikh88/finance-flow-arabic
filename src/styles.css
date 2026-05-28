@@ -63,50 +63,50 @@
 
 :root {
   --radius: 0.5rem;
-  /* Al Hayat — Finance Navy + Gold (inspired by global finance identities) */
-  --primary: oklch(0.28 0.09 260);          /* #0E2A55 navy */
-  --primary-deep: oklch(0.22 0.08 260);     /* #0A1B38 deep navy */
-  --primary-light: oklch(0.45 0.13 255);    /* royal blue accent */
-  --primary-foreground: oklch(0.99 0 0);
+  /* Premium Deep Purple + Magenta theme (matches sidebar) */
+  --primary: oklch(0.34 0.16 295);           /* deep purple */
+  --primary-deep: oklch(0.22 0.13 295);      /* deeper purple */
+  --primary-light: oklch(0.60 0.24 315);     /* purple-violet glow */
+  --primary-foreground: oklch(0.99 0.005 320);
 
-  /* Gold accent for emphasis (CTA highlights, badges) */
-  --accent: oklch(0.94 0.04 85);
-  --accent-foreground: oklch(0.32 0.08 75);
+  /* Magenta accent for emphasis (CTAs, highlights, badges) */
+  --accent: oklch(0.62 0.27 0);              /* vivid magenta */
+  --accent-foreground: oklch(0.99 0 0);
 
-  --background: oklch(0.985 0.003 250);
-  --foreground: oklch(0.18 0.02 260);
+  --background: oklch(0.985 0.006 310);
+  --foreground: oklch(0.18 0.04 295);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.015 260);
+  --card-foreground: oklch(0.18 0.04 295);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.015 260);
+  --popover-foreground: oklch(0.18 0.04 295);
 
-  --secondary: oklch(0.96 0.006 255);
-  --secondary-foreground: oklch(0.22 0.08 260);
-  --muted: oklch(0.96 0.006 255);
-  --muted-foreground: oklch(0.48 0.02 260);
+  --secondary: oklch(0.965 0.012 310);
+  --secondary-foreground: oklch(0.28 0.12 295);
+  --muted: oklch(0.965 0.012 310);
+  --muted-foreground: oklch(0.48 0.04 295);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.98 0 0);
   --success: oklch(0.58 0.15 155);
   --success-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.78 0.14 80);            /* gold-tinted */
+  --warning: oklch(0.78 0.14 80);
   --warning-foreground: oklch(0.20 0.05 80);
-  --info: oklch(0.55 0.14 240);
+  --info: oklch(0.55 0.18 295);
   --info-foreground: oklch(0.98 0 0);
 
-  --border: oklch(0.91 0.006 255);
-  --input: oklch(0.91 0.006 255);
-  --ring: oklch(0.45 0.13 255);
+  --border: oklch(0.91 0.012 310);
+  --input: oklch(0.91 0.012 310);
+  --ring: oklch(0.60 0.24 315);
 
-  /* Sidebar — deep navy with gold-touched primary highlight */
-  --sidebar: oklch(0.20 0.07 260);
-  --sidebar-foreground: oklch(0.95 0.01 260);
-  --sidebar-primary: oklch(0.78 0.12 82);    /* gold for active state */
-  --sidebar-primary-foreground: oklch(0.18 0.05 80);
-  --sidebar-accent: oklch(0.27 0.08 260);
-  --sidebar-accent-foreground: oklch(0.98 0.005 260);
-  --sidebar-border: oklch(0.30 0.06 260);
-  --sidebar-ring: oklch(0.78 0.12 82);
+  /* Sidebar — deep purple with magenta highlight */
+  --sidebar: hsl(263 55% 14%);
+  --sidebar-foreground: hsl(280 25% 94%);
+  --sidebar-primary: hsl(327 92% 58%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(263 50% 22%);
+  --sidebar-accent-foreground: hsl(280 30% 97%);
+  --sidebar-border: hsl(263 40% 26%);
+  --sidebar-ring: hsl(327 92% 58%);
 }
 
 .dark {
