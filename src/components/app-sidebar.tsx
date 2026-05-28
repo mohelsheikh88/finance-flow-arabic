@@ -202,77 +202,83 @@ export function AppSidebar() {
               defaultOpen={groupActive}
               className="group/collapsible"
             >
-              <SidebarGroup>
+              <SidebarGroup className="sidebar-grandparent">
                 <SidebarGroupLabel asChild>
-                  <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-[13px] font-semibold text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground">
-                    <g.icon className="h-4 w-4 shrink-0 text-sidebar-foreground/70" />
-                    <span className="truncate">{g.label}</span>
+                  <CollapsibleTrigger className="group/trigger flex h-auto w-full cursor-pointer items-center gap-2.5 rounded-md px-2 transition-colors hover:bg-sidebar-accent/50">
+                    <g.icon className="h-[18px] w-[18px] shrink-0 text-[hsl(327,92%,72%)]" />
+                    <span className="flex-1 truncate text-start">{g.label}</span>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-sidebar-foreground/60 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                  <SidebarGroupContent>
+                  <SidebarGroupContent className="relative ms-3 ps-3 border-s border-dashed border-sidebar-border/70">
                     {g.subgroups?.map((sg) => {
                       const subActive = sg.items.some((it) => isActive(it.url));
                       return (
-                        <Collapsible key={sg.label} defaultOpen={subActive} className="group/subcollapsible">
-                          <SidebarGroupLabel asChild>
-                            <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[12px] font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground">
-                              <sg.icon className="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/60" />
-                              <span className="truncate">{sg.label}</span>
-                            </CollapsibleTrigger>
-                          </SidebarGroupLabel>
-                          <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                            <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
-                              <SidebarMenu>
-                                {sg.items.map((item) => (
-                                  <SidebarMenuItem key={item.url} className="relative">
-                                    <span
-                                      aria-hidden
-                                      className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-px w-2.5 bg-sidebar-border/60 start-[-12px]"
-                                    />
-                                    <SidebarMenuButton
-                                      asChild
-                                      isActive={isActive(item.url)}
-                                      tooltip={item.title}
-                                      className="gap-2"
-                                    >
-                                      <Link to={item.url} className="flex items-center gap-2">
-                                        <item.icon className="h-4 w-4 shrink-0 text-sidebar-foreground/60" />
-                                        <span className="truncate">{item.title}</span>
-                                      </Link>
-                                    </SidebarMenuButton>
-                                  </SidebarMenuItem>
-                                ))}
-                              </SidebarMenu>
-                            </div>
-                          </CollapsibleContent>
+                        <Collapsible key={sg.label} defaultOpen={subActive} className="group/subcollapsible relative">
+                          <span
+                            aria-hidden
+                            className="pointer-events-none absolute top-5 h-px w-3 bg-sidebar-border/70 start-[-12px]"
+                          />
+                          <SidebarGroup className="sidebar-parent p-0">
+                            <SidebarGroupLabel asChild>
+                              <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-sidebar-accent/40">
+                                <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
+                                <span className="flex-1 truncate text-start">{sg.label}</span>
+                                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/50 transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-180" />
+                              </CollapsibleTrigger>
+                            </SidebarGroupLabel>
+                            <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                              <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
+                                <SidebarMenu>
+                                  {sg.items.map((item) => (
+                                    <SidebarMenuItem key={item.url} className="relative">
+                                      <span
+                                        aria-hidden
+                                        className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-px w-3 bg-sidebar-border/60 start-[-12px]"
+                                      />
+                                      <SidebarMenuButton
+                                        asChild
+                                        isActive={isActive(item.url)}
+                                        tooltip={item.title}
+                                        className="h-9 gap-2.5 text-[13.5px]"
+                                      >
+                                        <Link to={item.url} className="flex items-center gap-2.5">
+                                          <item.icon className="h-[15px] w-[15px] shrink-0 text-sidebar-foreground/70" />
+                                          <span className="truncate">{item.title}</span>
+                                        </Link>
+                                      </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                  ))}
+                                </SidebarMenu>
+                              </div>
+                            </CollapsibleContent>
+                          </SidebarGroup>
                         </Collapsible>
                       );
                     })}
                     {g.items && (
-                      <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
-                        <SidebarMenu>
-                          {g.items.map((item) => (
-                            <SidebarMenuItem key={item.url} className="relative">
-                              <span
-                                aria-hidden
-                                className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-px w-2.5 bg-sidebar-border/60 start-[-12px]"
-                              />
-                              <SidebarMenuButton
-                                asChild
-                                isActive={isActive(item.url)}
-                                tooltip={item.title}
-                                className="gap-2"
-                              >
-                                <Link to={item.url} className="flex items-center gap-2">
-                                  <item.icon className="h-4 w-4 shrink-0 text-sidebar-foreground/60" />
-                                  <span className="truncate">{item.title}</span>
-                                </Link>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          ))}
-                        </SidebarMenu>
-                      </div>
+                      <SidebarMenu>
+                        {g.items.map((item) => (
+                          <SidebarMenuItem key={item.url} className="relative">
+                            <span
+                              aria-hidden
+                              className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-px w-3 bg-sidebar-border/70 start-[-12px]"
+                            />
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive(item.url)}
+                              tooltip={item.title}
+                              className="h-9 gap-2.5 text-[13.5px]"
+                            >
+                              <Link to={item.url} className="flex items-center gap-2.5">
+                                <item.icon className="h-[15px] w-[15px] shrink-0 text-sidebar-foreground/70" />
+                                <span className="truncate">{item.title}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
                     )}
                   </SidebarGroupContent>
                 </CollapsibleContent>
