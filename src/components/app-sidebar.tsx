@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   Lock,
   History,
+  ChevronDown,
+  GitBranch,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,8 +34,10 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
 import { BrandLogo, BrandMark } from "@/components/brand-logo";
+
 
 
 export function AppSidebar() {
