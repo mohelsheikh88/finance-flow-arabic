@@ -444,8 +444,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
               <Select value={form.bucket} onValueChange={(v) => setForm({ ...form, bucket: v as Bucket })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {BUCKETS.map((c) => (
-                    <SelectItem key={c} value={c}>{t(`accounts.${c}`)}</SelectItem>
+                  {(bucketRows.length ? bucketRows.map((b) => b.code) : (BUCKETS as readonly string[])).map((c) => (
+                    <SelectItem key={c} value={c}>{bucketName(c, t(`accounts.${c}`))}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
