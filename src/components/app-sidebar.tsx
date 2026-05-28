@@ -130,16 +130,6 @@ export function AppSidebar() {
     {
       label: t("nav.configuration"),
       icon: SlidersHorizontal,
-      subgroups: [
-        {
-          label: t("nav.generalSetting"),
-          icon: Settings,
-          items: [
-            { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
-            { url: "/users", icon: Users, title: t("nav.users") },
-          ],
-        },
-      ],
       items: [
         { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
         { url: "/journals", icon: BookOpen, title: t("nav.journalTypes") },
@@ -149,8 +139,14 @@ export function AppSidebar() {
         { url: "/payment-methods", icon: CreditCard, title: t("nav.paymentMethods") },
         { url: "/lock-dates", icon: Lock, title: t("nav.lockDates") },
         { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
-        { url: "/audit-log", icon: History, title: "سجل التدقيق" },
-        { url: "/settings", icon: Settings, title: t("nav.generalSettings") },
+      ],
+    },
+    {
+      label: t("nav.generalSetting"),
+      icon: Settings,
+      items: [
+        { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
+        { url: "/users", icon: Users, title: t("nav.users") },
       ],
     },
   ];
