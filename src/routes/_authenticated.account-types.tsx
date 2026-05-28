@@ -180,10 +180,13 @@ function buildTree(rows: Row[], classifications: ClsRow[]): Node[] {
     n.children.forEach((c) => fixDepth(c, d + 1));
   };
 
+  // Classification roots keep the exact order returned by Core Classifications
+  // (already sorted by sort_order). Any orphan account_type roots come after.
+  orphanRoots.sort(cmp);
   const roots = [...clsNodes.values(), ...orphanRoots];
-  roots.sort(cmp);
   roots.forEach((r) => fixDepth(r, 0));
   return roots;
+}
 }
 
 function flatten(nodes: Node[], expanded: Set<string>): Node[] {
