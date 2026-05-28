@@ -19,12 +19,15 @@ import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
+import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
 import { Route as AuthenticatedPaymentMethodsRouteImport } from './routes/_authenticated.payment-methods'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
 import { Route as AuthenticatedLockDatesRouteImport } from './routes/_authenticated.lock-dates'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
+import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
+import { Route as AuthenticatedHrRouteImport } from './routes/_authenticated.hr'
 import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authenticated.fiscal-periods'
 import { Route as AuthenticatedDebitMemosRouteImport } from './routes/_authenticated.debit-memos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -108,6 +111,11 @@ const AuthenticatedReceiptsRoute = AuthenticatedReceiptsRouteImport.update({
   path: '/receipts',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPurchaseRoute = AuthenticatedPurchaseRouteImport.update({
+  id: '/purchase',
+  path: '/purchase',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -137,6 +145,16 @@ const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
 const AuthenticatedJournalsRoute = AuthenticatedJournalsRouteImport.update({
   id: '/journals',
   path: '/journals',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHrRoute = AuthenticatedHrRouteImport.update({
+  id: '/hr',
+  path: '/hr',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedFiscalPeriodsRoute =
@@ -342,12 +360,15 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/hr': typeof AuthenticatedHrRoute
+  '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
   '/lock-dates': typeof AuthenticatedLockDatesRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -391,12 +412,15 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/hr': typeof AuthenticatedHrRoute
+  '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
   '/lock-dates': typeof AuthenticatedLockDatesRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -442,12 +466,15 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/_authenticated/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
+  '/_authenticated/hr': typeof AuthenticatedHrRoute
+  '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
   '/_authenticated/lock-dates': typeof AuthenticatedLockDatesRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
   '/_authenticated/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
@@ -493,12 +520,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/debit-memos'
     | '/fiscal-periods'
+    | '/hr'
+    | '/inventory'
     | '/journals'
     | '/loans'
     | '/lock-dates'
     | '/partners'
     | '/payment-methods'
     | '/payments'
+    | '/purchase'
     | '/receipts'
     | '/settings'
     | '/setup'
@@ -542,12 +572,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/debit-memos'
     | '/fiscal-periods'
+    | '/hr'
+    | '/inventory'
     | '/journals'
     | '/loans'
     | '/lock-dates'
     | '/partners'
     | '/payment-methods'
     | '/payments'
+    | '/purchase'
     | '/receipts'
     | '/settings'
     | '/setup'
@@ -592,12 +625,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/debit-memos'
     | '/_authenticated/fiscal-periods'
+    | '/_authenticated/hr'
+    | '/_authenticated/inventory'
     | '/_authenticated/journals'
     | '/_authenticated/loans'
     | '/_authenticated/lock-dates'
     | '/_authenticated/partners'
     | '/_authenticated/payment-methods'
     | '/_authenticated/payments'
+    | '/_authenticated/purchase'
     | '/_authenticated/receipts'
     | '/_authenticated/settings'
     | '/_authenticated/setup'
@@ -700,6 +736,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReceiptsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/purchase': {
+      id: '/_authenticated/purchase'
+      path: '/purchase'
+      fullPath: '/purchase'
+      preLoaderRoute: typeof AuthenticatedPurchaseRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/payments': {
       id: '/_authenticated/payments'
       path: '/payments'
@@ -740,6 +783,20 @@ declare module '@tanstack/react-router' {
       path: '/journals'
       fullPath: '/journals'
       preLoaderRoute: typeof AuthenticatedJournalsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/inventory': {
+      id: '/_authenticated/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof AuthenticatedInventoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/hr': {
+      id: '/_authenticated/hr'
+      path: '/hr'
+      fullPath: '/hr'
+      preLoaderRoute: typeof AuthenticatedHrRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/fiscal-periods': {
@@ -988,12 +1045,15 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDebitMemosRoute: typeof AuthenticatedDebitMemosRoute
   AuthenticatedFiscalPeriodsRoute: typeof AuthenticatedFiscalPeriodsRoute
+  AuthenticatedHrRoute: typeof AuthenticatedHrRoute
+  AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
   AuthenticatedLockDatesRoute: typeof AuthenticatedLockDatesRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
   AuthenticatedPaymentMethodsRoute: typeof AuthenticatedPaymentMethodsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
@@ -1036,12 +1096,15 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDebitMemosRoute: AuthenticatedDebitMemosRoute,
   AuthenticatedFiscalPeriodsRoute: AuthenticatedFiscalPeriodsRoute,
+  AuthenticatedHrRoute: AuthenticatedHrRoute,
+  AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
   AuthenticatedLockDatesRoute: AuthenticatedLockDatesRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
   AuthenticatedPaymentMethodsRoute: AuthenticatedPaymentMethodsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,

@@ -21,6 +21,9 @@ import {
   History,
   HandCoins,
   ShoppingCart,
+  ShoppingBag,
+  Package,
+  UsersRound,
   BarChart3,
   SlidersHorizontal,
 
