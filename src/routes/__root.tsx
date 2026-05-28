@@ -15,6 +15,8 @@ import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { BranchProvider } from "@/lib/branch-context";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ConflictTrackerProvider, useConflictRealtimeSubscriber } from "@/lib/conflict-tracker";
+import { toast } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -114,6 +116,10 @@ function RealtimeSync() {
   return null;
 }
 
+function ConflictSubscriber() {
+  useConflictRealtimeSubscriber();
+  return null;
+}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -122,10 +128,13 @@ function RootComponent() {
       <I18nProvider>
         <AuthProvider>
           <BranchProvider>
-            <AuthSync />
-            <RealtimeSync />
-            <Outlet />
-            <Toaster richColors position="top-center" />
+            <ConflictTrackerProvider>
+              <AuthSync />
+              <RealtimeSync />
+              <ConflictSubscriber />
+              <Outlet />
+              <Toaster richColors position="top-center" />
+            </ConflictTrackerProvider>
           </BranchProvider>
         </AuthProvider>
       </I18nProvider>
