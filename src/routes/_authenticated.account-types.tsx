@@ -54,6 +54,20 @@ const clsColors: Record<string, string> = {
   expense: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
+function statementLabel(classification: Cls) {
+  switch (classification) {
+    case "asset":
+    case "liability":
+    case "equity":
+      return "الميزانية العمومية";
+    case "income":
+    case "expense":
+      return "قائمة الدخل";
+    default:
+      return "";
+  }
+}
+
 function AccountTypesPage() {
   const { t } = useI18n();
   const localized = useLocalized();
@@ -143,6 +157,7 @@ function AccountTypesPage() {
             <tr>
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
+              <th className="text-start p-3 font-medium">البيان</th>
               <th className="text-start p-3 font-medium">التصنيف الأساسي</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
@@ -153,6 +168,7 @@ function AccountTypesPage() {
               <tr key={r.id} className="border-t hover:bg-muted/30">
                 <td className="p-3 font-mono">{r.code}</td>
                 <td className="p-3 font-medium">{localized(r, "name")}</td>
+                <td className="p-3 text-muted-foreground">{statementLabel(r.classification)}</td>
                 <td className="p-3">
                   <Badge variant="outline" className={clsColors[r.classification]}>
                     {t(`accounts.${r.classification}`)}
@@ -174,7 +190,7 @@ function AccountTypesPage() {
               </tr>
             ))}
             {types.length === 0 && (
-              <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             )}
           </tbody>
         </table>
