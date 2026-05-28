@@ -100,6 +100,7 @@ function ChartOfAccountsPanel() {
 
   const list = useServerFn(listAccounts);
   const listTypes = useServerFn(listAccountTypes);
+  const listCls = useServerFn(listClassifications);
   const upsert = useServerFn(upsertAccount);
   const remove = useServerFn(deleteAccount);
 
@@ -113,6 +114,14 @@ function ChartOfAccountsPanel() {
     queryKey: ["account_types", companyId],
     queryFn: () => listTypes({ data: { companyId: companyId! } }),
     enabled: !!companyId,
+  });
+
+  const { data: classifications = [] } = useQuery({
+    queryKey: ["classifications", companyId],
+    queryFn: () => listCls({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
   });
 
   const [open, setOpen] = useState(false);
