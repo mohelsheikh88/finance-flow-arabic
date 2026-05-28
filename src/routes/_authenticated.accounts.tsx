@@ -239,10 +239,15 @@ function AccountsPage() {
           <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
             <Upload className="h-4 w-4 me-1" />Import
           </Button>
-          <Button onClick={openNew} disabled={!companyId}>
+          <Button variant="outline" asChild disabled={!companyId}>
+            <Link to="/account-types"><Settings2 className="h-4 w-4 me-1" />{t("accounts.manageTypes") ?? "إدارة الأنواع"}</Link>
+          </Button>
+          <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
           </Button>
         </div>
+      </div>
+
       </div>
 
       {importResult && (
