@@ -211,7 +211,7 @@ export function AppSidebar() {
                               className="gap-2"
                             >
                               <Link to={item.url} className="flex items-center gap-2">
-                                <GitBranch className="h-4 w-4 shrink-0 text-sidebar-foreground/60 rtl:-scale-x-100" />
+                                <item.icon className="h-4 w-4 shrink-0 text-sidebar-foreground/60" />
                                 <span className="truncate">{item.title}</span>
                               </Link>
                             </SidebarMenuButton>
