@@ -59,7 +59,7 @@ export const translations = {
     },
     nav: {
       dashboard: "لوحة التحكم",
-      accounting: "المحاسبة والمالية",
+      accounting: "أقسام المالية",
       partners: "العملاء والموردين",
       customers: "العملاء",
       vendors: "الموردين",
@@ -337,7 +337,7 @@ export const translations = {
     },
     nav: {
       dashboard: "Dashboard",
-      accounting: "Accounting & Finance",
+      accounting: "Financial Modules",
       partners: "Partners",
       customers: "Customers",
       vendors: "Vendors",
