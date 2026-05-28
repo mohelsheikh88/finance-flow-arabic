@@ -415,6 +415,139 @@ export const reorderClassifications = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ---------------- Accounting Buckets (managed metadata per company) ----------------
+
+export const listAccountingBuckets = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => i)
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await (context.supabase as any)
+      .from("accounting_buckets")
+      .select("*")
+      .eq("company_id", data.companyId)
+      .order("sort_order", { ascending: true })
+      .order("code");
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as any[];
+  });
+
+const AccountingBucketUpsertSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  code: z.string().trim().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/),
+  name_ar: z.string().trim().min(1).max(255),
+  name_en: z.string().trim().min(1).max(255),
+  statement: z.enum(STATEMENTS),
+  normal_balance: z.enum(NORMAL_BALANCES),
+  sort_order: z.number().int().optional(),
+  is_active: z.boolean().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+});
+
+export const upsertAccountingBucket = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: z.infer<typeof AccountingBucketUpsertSchema>) =>
+    AccountingBucketUpsertSchema.parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const payload: any = {
+      company_id: data.company_id,
+      code: data.code,
+      name_ar: data.name_ar,
+      name_en: data.name_en,
+      statement: data.statement,
+      normal_balance: data.normal_balance,
+      sort_order: data.sort_order ?? 0,
+      is_active: data.is_active ?? true,
+      notes: data.notes ?? null,
+    };
+    if (data.id) {
+      const { data: row, error } = await (context.supabase as any)
+        .from("accounting_buckets")
+        .update(payload)
+        .eq("id", data.id)
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await (context.supabase as any)
+      .from("accounting_buckets")
+      .insert(payload)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteAccountingBucket = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    // Look up the bucket to find its code, then ensure no classifications use it.
+    const { data: b, error: bErr } = await sb
+      .from("accounting_buckets")
+      .select("id, company_id, code")
+      .eq("id", data.id)
+      .single();
+    if (bErr) throw new Error(bErr.message);
+    if (!b) throw new Error("Bucket not found");
+
+    const { count } = await sb
+      .from("classifications")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", b.company_id)
+      .eq("bucket", b.code);
+    if ((count ?? 0) > 0)
+      throw new Error(
+        "This bucket is linked to classifications and cannot be deleted | هذا البند مرتبط بتصنيفات ولا يمكن حذفه",
+      );
+
+    const { error } = await sb.from("accounting_buckets").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const reorderAccountingBuckets = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; orderedIds: string[] }) =>
+    z
+      .object({
+        companyId: z.string().uuid(),
+        orderedIds: z.array(z.string().uuid()).min(1).max(2000),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: rows, error } = await sb
+      .from("accounting_buckets")
+      .select("id, company_id")
+      .in("id", data.orderedIds);
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length !== data.orderedIds.length) throw new Error("Some items not found");
+    for (const r of rows) {
+      if (r.company_id !== data.companyId) throw new Error("Cross-company reorder denied");
+    }
+    for (let i = 0; i < data.orderedIds.length; i++) {
+      const u = await sb
+        .from("accounting_buckets")
+        .update({ sort_order: -(i + 1) })
+        .eq("id", data.orderedIds[i]);
+      if (u.error) throw new Error(u.error.message);
+    }
+    for (let i = 0; i < data.orderedIds.length; i++) {
+      const u = await sb
+        .from("accounting_buckets")
+        .update({ sort_order: (i + 1) * 10 })
+        .eq("id", data.orderedIds[i]);
+      if (u.error) throw new Error(u.error.message);
+    }
+    return { ok: true };
+  });
+
+
 // ---------------- Accounts ----------------
 
 const AccountUpsertSchema = z.object({

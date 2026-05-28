@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listAccounts, upsertAccount, deleteAccount, importAccounts, listAccountTypes, listClassifications,
+  listAccountingBuckets, upsertAccountingBucket, deleteAccountingBucket,
 } from "@/lib/api/accounting.functions";
 
 import { useBranch } from "@/lib/branch-context";
@@ -886,9 +887,19 @@ function AccountingBucketsPanel() {
   const { t } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
+  const qc = useQueryClient();
+
+  const listBuckets = useServerFn(listAccountingBuckets);
+  const upsert = useServerFn(upsertAccountingBucket);
+  const remove = useServerFn(deleteAccountingBucket);
   const listCls = useServerFn(listClassifications);
   const listTypes = useServerFn(listAccountTypes);
 
+  const { data: buckets = [] } = useQuery({
+    queryKey: ["accounting_buckets", companyId],
+    queryFn: () => listBuckets({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
   const { data: classifications = [] } = useQuery({
     queryKey: ["classifications", companyId],
     queryFn: () => listCls({ data: { companyId: companyId! } }),
@@ -900,64 +911,328 @@ function AccountingBucketsPanel() {
     enabled: !!companyId,
   });
 
-  const statementOf = (b: string) =>
-    ["asset", "liability", "equity"].includes(b) ? "balanceSheet" : "incomeStatement";
-  const normalOf = (b: string) =>
-    ["asset", "expense"].includes(b) ? "debit" : "credit";
+  type BForm = {
+    id?: string;
+    code: string;
+    name_ar: string;
+    name_en: string;
+    statement: "balance_sheet" | "income_statement";
+    normal_balance: "debit" | "credit";
+    sort_order: number;
+    is_active: boolean;
+    notes: string;
+  };
+  const emptyBForm: BForm = {
+    code: "",
+    name_ar: "",
+    name_en: "",
+    statement: "balance_sheet",
+    normal_balance: "debit",
+    sort_order: 0,
+    is_active: true,
+    notes: "",
+  };
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<BForm>(emptyBForm);
+  const [toDelete, setToDelete] = useState<any | null>(null);
+
+  const openNew = () =>
+    setForm({ ...emptyBForm, sort_order: ((buckets as any[]).length + 1) * 10 });
+  const openEdit = (b: any) =>
+    setForm({
+      id: b.id,
+      code: b.code,
+      name_ar: b.name_ar,
+      name_en: b.name_en,
+      statement: b.statement,
+      normal_balance: b.normal_balance,
+      sort_order: b.sort_order ?? 0,
+      is_active: !!b.is_active,
+      notes: b.notes ?? "",
+    });
+
+  const saveMut = useMutation({
+    mutationFn: () =>
+      upsert({
+        data: {
+          id: form.id,
+          company_id: companyId!,
+          code: form.code.trim(),
+          name_ar: form.name_ar.trim(),
+          name_en: form.name_en.trim(),
+          statement: form.statement,
+          normal_balance: form.normal_balance,
+          sort_order: form.sort_order,
+          is_active: form.is_active,
+          notes: form.notes.trim() || null,
+        },
+      }),
+    onSuccess: () => {
+      toast.success(t("common.saved"));
+      qc.invalidateQueries({ queryKey: ["accounting_buckets"] });
+      setOpen(false);
+      setForm(emptyBForm);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => remove({ data: { id } }),
+    onSuccess: () => {
+      toast.success(t("common.saved"));
+      qc.invalidateQueries({ queryKey: ["accounting_buckets"] });
+      setToDelete(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const canSave = !!(form.code && form.name_ar && form.name_en && companyId);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {BUCKETS.map((b) => {
-        const cls = (classifications as any[]).filter((c) => c.bucket === b && c.is_active);
-        const typesCount = (accountTypes as any[]).filter(
-          (at) => at.classification === b,
-        ).length;
-        return (
-          <Card key={b} className="p-4 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <Badge variant="outline" className={`${bucketColors[b]} text-sm`}>
-                {t(`accounts.${b}`)}
-              </Badge>
-              <span className="text-xs text-muted-foreground">
-                {typesCount} {t("accounts.accountTypesNav")}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <div className="text-muted-foreground">{t("accounts.statement")}</div>
-                <div className="font-medium">{t(`accounts.${statementOf(b)}`)}</div>
-              </div>
-              <div>
-                <div className="text-muted-foreground">{t("accounts.normalBalance")}</div>
-                <div className="font-medium">{t(`accounts.${normalOf(b)}`)}</div>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">
-                {t("accounts.coreClassifications")}
-              </div>
-              {cls.length === 0 ? (
-                <div className="text-xs text-muted-foreground italic">
-                  {t("common.noData")}
+    <div className="space-y-4">
+      <div className="flex items-center justify-end">
+        <Button
+          onClick={() => {
+            openNew();
+            setOpen(true);
+          }}
+          disabled={!companyId}
+        >
+          <Plus className="h-4 w-4 me-1" />
+          {t("common.new")}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {(buckets as any[]).map((b) => {
+          const cls = (classifications as any[]).filter(
+            (c) => c.bucket === b.code && c.is_active,
+          );
+          const typesCount = (accountTypes as any[]).filter(
+            (at) => at.classification === b.code,
+          ).length;
+          const swatch =
+            bucketColors[b.code] ?? "bg-muted text-foreground border-border";
+          return (
+            <Card key={b.id} className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={`${swatch} text-sm`}>
+                    {localized(b, "name")}
+                  </Badge>
+                  {!b.is_active && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {t("common.inactive")}
+                    </Badge>
+                  )}
                 </div>
-              ) : (
-                <ul className="space-y-1">
-                  {cls.map((c) => (
-                    <li
-                      key={c.id}
-                      className="flex items-center gap-2 text-xs border-t pt-1"
-                    >
-                      <span className="font-mono text-muted-foreground">{c.code}</span>
-                      <span className="font-medium">{localized(c, "name")}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      openEdit(b);
+                      setOpen(true);
+                    }}
+                    aria-label={t("common.edit")}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setToDelete(b)}
+                    aria-label={t("common.delete")}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground font-mono">{b.code}</div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <div className="text-muted-foreground">{t("accounts.statement")}</div>
+                  <div className="font-medium">
+                    {t(
+                      b.statement === "balance_sheet"
+                        ? "accounts.balanceSheet"
+                        : "accounts.incomeStatement",
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">{t("accounts.normalBalance")}</div>
+                  <div className="font-medium">
+                    {t(b.normal_balance === "debit" ? "accounts.debit" : "accounts.credit")}
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">
+                  {t("accounts.coreClassifications")} · {typesCount}{" "}
+                  {t("accounts.accountTypesNav")}
+                </div>
+                {cls.length === 0 ? (
+                  <div className="text-xs text-muted-foreground italic">
+                    {t("common.noData")}
+                  </div>
+                ) : (
+                  <ul className="space-y-1">
+                    {cls.map((c) => (
+                      <li
+                        key={c.id}
+                        className="flex items-center gap-2 text-xs border-t pt-1"
+                      >
+                        <span className="font-mono text-muted-foreground">{c.code}</span>
+                        <span className="font-medium">{localized(c, "name")}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+        {(buckets as any[]).length === 0 && (
+          <div className="col-span-full p-8 text-center text-muted-foreground text-sm">
+            {t("common.noData")}
+          </div>
+        )}
+      </div>
+
+      <Dialog
+        open={open}
+        onOpenChange={(o) => {
+          setOpen(o);
+          if (!o) setForm(emptyBForm);
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {form.id ? t("common.edit") : t("common.new")} — {t("accounts.accountingBucket")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>{t("common.code")} *</Label>
+              <Input
+                value={form.code}
+                onChange={(e) => setForm({ ...form, code: e.target.value })}
+                maxLength={50}
+                placeholder="asset"
+              />
             </div>
-          </Card>
-        );
-      })}
+            <div>
+              <Label>{t("common.nameAr")} *</Label>
+              <Input
+                value={form.name_ar}
+                onChange={(e) => setForm({ ...form, name_ar: e.target.value })}
+                maxLength={255}
+              />
+            </div>
+            <div>
+              <Label>{t("common.nameEn")} *</Label>
+              <Input
+                value={form.name_en}
+                onChange={(e) => setForm({ ...form, name_en: e.target.value })}
+                maxLength={255}
+              />
+            </div>
+            <div>
+              <Label>{t("accounts.statement")} *</Label>
+              <Select
+                value={form.statement}
+                onValueChange={(v) => setForm({ ...form, statement: v as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="balance_sheet">{t("accounts.balanceSheet")}</SelectItem>
+                  <SelectItem value="income_statement">
+                    {t("accounts.incomeStatement")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>{t("accounts.normalBalance")} *</Label>
+              <Select
+                value={form.normal_balance}
+                onValueChange={(v) => setForm({ ...form, normal_balance: v as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="debit">{t("accounts.debit")}</SelectItem>
+                  <SelectItem value="credit">{t("accounts.credit")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Sort order</Label>
+              <Input
+                type="number"
+                value={form.sort_order}
+                onChange={(e) =>
+                  setForm({ ...form, sort_order: parseInt(e.target.value || "0", 10) })
+                }
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={(v) => setForm({ ...form, is_active: v })}
+              />
+              <Label>{t("common.active")}</Label>
+            </div>
+            <div className="col-span-2">
+              <Label>{t("common.notes")}</Label>
+              <Input
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                maxLength={2000}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={() => saveMut.mutate()} disabled={!canSave || saveMut.isPending}>
+              {t("common.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("common.delete")} — {toDelete?.code}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete ? localized(toDelete, "name") : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => toDelete && deleteMut.mutate(toDelete.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+
 

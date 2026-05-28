@@ -80,6 +80,51 @@ export type Database = {
           },
         ]
       }
+      accounting_buckets: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          normal_balance: string
+          notes: string | null
+          sort_order: number
+          statement: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          normal_balance?: string
+          notes?: string | null
+          sort_order?: number
+          statement?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          normal_balance?: string
+          notes?: string | null
+          sort_order?: number
+          statement?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       accounts: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"]
