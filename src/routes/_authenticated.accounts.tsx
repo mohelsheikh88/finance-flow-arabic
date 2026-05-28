@@ -262,24 +262,18 @@ function ChartOfAccountsPanel() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">{t("accounts.title")}</h1>
-        <div className="flex items-center gap-2">
-          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
-          <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-            <Download className="h-4 w-4 me-1" />Export
-          </Button>
-          <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
-            <Upload className="h-4 w-4 me-1" />Import
-          </Button>
-          <Button variant="outline" asChild disabled={!companyId}>
-            <Link to="/account-types"><Settings2 className="h-4 w-4 me-1" />{t("accounts.manageTypes") ?? "إدارة الأنواع"}</Link>
-          </Button>
-          <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
-            <Plus className="h-4 w-4 me-1" />{t("common.new")}
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-end gap-2">
+        <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+        <Button variant="outline" onClick={handleExport} disabled={!companyId}>
+          <Download className="h-4 w-4 me-1" />Export
+        </Button>
+        <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
+          <Upload className="h-4 w-4 me-1" />Import
+        </Button>
+        <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
+          <Plus className="h-4 w-4 me-1" />{t("common.new")}
+        </Button>
       </div>
 
 
