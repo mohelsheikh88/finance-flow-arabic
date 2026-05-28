@@ -144,10 +144,6 @@ function ChartOfAccountsPanel() {
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const parents = useMemo(
-    () => (accounts as any[]).filter((a) => a.is_group && a.id !== form.id),
-    [accounts, form.id],
-  );
 
   const typeById = useMemo(() => {
     const m = new Map<string, any>();
@@ -442,31 +438,9 @@ function ChartOfAccountsPanel() {
               <Label>{t("common.nameEn")} *</Label>
               <Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} maxLength={255} />
             </div>
-            <div className="col-span-2">
-              <Label>{t("accounts.parent")}</Label>
-              <Select value={form.parent_id || "__none"} onValueChange={(v) => setForm({ ...form, parent_id: v === "__none" ? "" : v })}>
-                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none">—</SelectItem>
-                  {parents.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id}>{p.code} — {localized(p, "name")}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{t("common.currency")}</Label>
-              <Input value={form.currency_code} onChange={(e) => setForm({ ...form, currency_code: e.target.value.toUpperCase() })} maxLength={10} placeholder="SAR" />
-            </div>
-            <div className="flex items-end gap-4">
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_group} onCheckedChange={(v) => setForm({ ...form, is_group: v })} />
-                <Label>{t("accounts.isGroup")}</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-                <Label>{t("common.active")}</Label>
-              </div>
+            <div className="col-span-2 flex items-center gap-2">
+              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
+              <Label>{t("common.active")}</Label>
             </div>
             <div className="col-span-2">
               <Label>{t("common.notes")}</Label>
