@@ -636,6 +636,17 @@ export const translations = {
       backToAccounts: "Chart of Accounts",
       backToAccountTypes: "Account Types",
       coreClassifications: "Core Classifications",
+      classificationMapping: "Classification Mapping",
+      classificationMappingTitle: "Map Core Classification to Accounts",
+      bulkChangeType: "Bulk Change Type",
+      selectedCount: "selected",
+      applyBulk: "Apply",
+      noTypeAssigned: "No type",
+      filterByClassification: "Filter by classification",
+      allClassifications: "All classifications",
+      selectAccountType: "Select account type",
+      bulkUpdateSuccess: "Selected accounts updated",
+      selectAll: "Select all",
     },
 
     partners: {
