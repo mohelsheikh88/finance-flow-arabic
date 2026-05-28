@@ -630,6 +630,9 @@ export const translations = {
       banksGroup: "Treasury & Banks",
       fixedAssets: "Fixed Assets",
       loansGroup: "Loans",
+      purchaseProcurement: "Purchase & Procurement",
+      inventoryManagement: "Inventory Management",
+      humanResources: "Human Resources",
     },
     ar: {
       invoices: "Invoices",
