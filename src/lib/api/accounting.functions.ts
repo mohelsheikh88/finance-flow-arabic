@@ -434,7 +434,12 @@ export const listAccountingBuckets = createServerFn({ method: "GET" })
 const AccountingBucketUpsertSchema = z.object({
   id: z.string().uuid().optional(),
   company_id: z.string().uuid(),
-  code: z.string().trim().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/),
+  code: z.enum(ACCOUNT_TYPES, {
+    errorMap: () => ({
+      message:
+        "Bucket code must be one of: asset, liability, equity, income, expense | كود البند يجب أن يكون أحد القيم: asset, liability, equity, income, expense",
+    }),
+  }),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   statement: z.enum(STATEMENTS),
