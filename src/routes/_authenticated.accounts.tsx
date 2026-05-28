@@ -135,6 +135,16 @@ function AccountsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const typeColors: Record<string, string> = {
+    asset: "bg-info/10 text-info border-info/30",
+    liability: "bg-warning/10 text-warning border-warning/30",
+    equity: "bg-primary/10 text-primary border-primary/30",
+    income: "bg-success/10 text-success border-success/30",
+    expense: "bg-destructive/10 text-destructive border-destructive/30",
+  };
+
+  const canSave = form.code && form.name_ar && form.name_en && !!companyId;
+
   const importFn = useServerFn(importAccounts);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importResult, setImportResult] = useState<{ created: number; updated: number; errors: { code: string; error: string }[] } | null>(null);
