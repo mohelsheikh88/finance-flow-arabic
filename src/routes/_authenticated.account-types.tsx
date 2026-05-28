@@ -148,13 +148,13 @@ function AccountTypesPage() {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/accounts"><ArrowLeft className="h-4 w-4 me-1" />{t("accounts.title")}</Link>
-          </Button>
-          <h1 className="text-2xl font-bold">إدارة أنواع الحسابات</h1>
+          <h1 className="text-2xl font-bold">{t("accounts.accountTypesTitle")}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" asChild>
-            <Link to="/classifications">إدارة التصنيفات الأساسية</Link>
+            <Link to="/classifications">{t("accounts.manageClassifications")}</Link>
+          </Button>
+
           </Button>
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
