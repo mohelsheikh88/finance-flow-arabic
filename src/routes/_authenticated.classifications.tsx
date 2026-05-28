@@ -87,6 +87,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
   const { statement: statementLabel, normalBalance: normalBalanceLabel } = useLabels();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+  const { buckets: bucketRows, bucketName } = useAccountingBuckets(companyId ?? undefined);
 
 
   const list = useServerFn(listClassifications);
