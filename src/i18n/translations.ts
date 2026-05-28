@@ -797,6 +797,7 @@ export const translations = {
       isGroup: "Group Account",
       leafAccount: "Sub Account",
       parent: "Parent Account",
+      selectParent: "Select Parent Account",
       statement: "Statement",
       balanceSheet: "Balance Sheet",
       incomeStatement: "Profit & Loss",
