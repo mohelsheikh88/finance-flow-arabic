@@ -26,7 +26,7 @@ import {
 import { Plus, Pencil, Trash2, Download, Upload, ChevronDown, ChevronRight, FolderTree, FileText } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { AccountTypesPage } from "./_authenticated.account-types";
+
 import { ClassificationsPage } from "./_authenticated.classifications";
 import { AccountClassificationsPage } from "./_authenticated.account-classifications";
 import { CostCentersPage } from "./_authenticated.cost-centers";
