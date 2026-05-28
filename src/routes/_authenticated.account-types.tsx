@@ -168,6 +168,7 @@ function AccountTypesPage() {
               <tr key={r.id} className="border-t hover:bg-muted/30">
                 <td className="p-3 font-mono">{r.code}</td>
                 <td className="p-3 font-medium">{localized(r, "name")}</td>
+                <td className="p-3 text-muted-foreground">{statementLabel(r.classification)}</td>
                 <td className="p-3">
                   <Badge variant="outline" className={clsColors[r.classification]}>
                     {t(`accounts.${r.classification}`)}
