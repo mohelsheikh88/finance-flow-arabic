@@ -18,13 +18,79 @@ export const listAccounts = createServerFn({ method: "GET" })
 
 const ACCOUNT_TYPES = ["asset", "liability", "equity", "income", "expense"] as const;
 
+// ---------------- Account Types (customizable per company) ----------------
+
+export const listAccountTypes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => i)
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("account_types")
+      .select("*")
+      .eq("company_id", data.companyId)
+      .order("classification")
+      .order("code");
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const AccountTypeUpsertSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
+  name_ar: z.string().trim().min(1).max(255),
+  name_en: z.string().trim().min(1).max(255),
+  classification: z.enum(ACCOUNT_TYPES),
+  is_active: z.boolean().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+});
+
+export const upsertAccountType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: z.infer<typeof AccountTypeUpsertSchema>) => AccountTypeUpsertSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const payload: any = {
+      company_id: data.company_id,
+      code: data.code,
+      name_ar: data.name_ar,
+      name_en: data.name_en,
+      classification: data.classification,
+      is_active: data.is_active ?? true,
+      notes: data.notes ?? null,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("account_types").update(payload).eq("id", data.id).select().single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("account_types").insert(payload).select().single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteAccountType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { count } = await context.supabase
+      .from("accounts").select("id", { count: "exact", head: true }).eq("account_type_id", data.id);
+    if ((count ?? 0) > 0) throw new Error("هذا النوع مستخدم في حسابات ولا يمكن حذفه");
+    const { error } = await context.supabase.from("account_types").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------------- Accounts ----------------
+
 const AccountUpsertSchema = z.object({
   id: z.string().uuid().optional(),
   company_id: z.string().uuid(),
   code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
-  account_type: z.enum(ACCOUNT_TYPES),
+  account_type_id: z.string().uuid(),
   parent_id: z.string().uuid().nullable().optional(),
   currency_code: z.string().trim().min(1).max(10).nullable().optional(),
   is_group: z.boolean().optional(),
@@ -37,12 +103,17 @@ export const upsertAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof AccountUpsertSchema>) => AccountUpsertSchema.parse(i))
   .handler(async ({ data, context }) => {
+    // Resolve classification from selected account type (DB trigger will also sync it)
+    const { data: at, error: atErr } = await context.supabase
+      .from("account_types").select("classification").eq("id", data.account_type_id).single();
+    if (atErr || !at) throw new Error("Invalid account type");
     const payload: any = {
       company_id: data.company_id,
       code: data.code,
       name_ar: data.name_ar,
       name_en: data.name_en,
-      account_type: data.account_type,
+      account_type: at.classification,
+      account_type_id: data.account_type_id,
       parent_id: data.parent_id ?? null,
       currency_code: data.currency_code || null,
       is_group: data.is_group ?? false,
@@ -61,6 +132,7 @@ export const upsertAccount = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 export const deleteAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
