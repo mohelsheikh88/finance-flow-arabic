@@ -234,6 +234,8 @@ export const translations = {
       selectAccountType: "اختر نوع الحساب",
       bulkUpdateSuccess: "تم تحديث الحسابات المحددة",
       selectAll: "تحديد الكل",
+      confirmBulkChangeTitle: "تأكيد التغيير الجماعي",
+      confirmBulkChangeMessage: "سيتم تغيير نوع الحساب للحسابات المحددة إلى:",
     },
 
     partners: {
