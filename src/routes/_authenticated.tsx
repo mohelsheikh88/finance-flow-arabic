@@ -14,21 +14,24 @@ export const Route = createFileRoute("/_authenticated")({
 
 const PIN_KEY = "sidebar:pinned";
 
-function measureLabelWidth(labels: string[]): number {
-  if (typeof document === "undefined") return 264;
+function measureLabelWidth(
+  groups: { text: string; size: number; weight: number; indent: number }[]
+): number {
+  if (typeof document === "undefined") return 280;
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
-  if (!ctx) return 264;
-  ctx.font = '600 14px "Cairo", "Tajawal", system-ui, sans-serif';
-  let maxText = 0;
-  for (const l of labels) {
-    const w = ctx.measureText(l).width;
-    if (w > maxText) maxText = w;
+  if (!ctx) return 280;
+  let max = 0;
+  for (const g of groups) {
+    ctx.font = `${g.weight} ${g.size}px "Cairo", "Tajawal", system-ui, sans-serif`;
+    const w = ctx.measureText(g.text).width + g.indent;
+    if (w > max) max = w;
   }
-  // icon (18) + gap (10) + chevron (16) + padding (32) + indents/safety (40)
-  const total = Math.ceil(maxText + 18 + 10 + 16 + 32 + 40);
-  return Math.max(240, Math.min(420, total));
+  // icon (18) + gap (10) + side padding (24) + safety (16)
+  const total = Math.ceil(max + 18 + 10 + 24 + 16);
+  return Math.max(240, Math.min(480, total));
 }
+
 
 function AuthenticatedLayout() {
   const { user, loading } = useAuth();
@@ -53,28 +56,34 @@ function AuthenticatedLayout() {
 
   const open = pinned || hovered;
 
-  // Dynamic width — measure widest top-level + subgroup labels
+  // Dynamic width — auto-fit widest label across all three levels
   const sidebarWidth = useMemo(() => {
-    const labels = [
-      t("nav.financialAccounting"),
-      t("nav.generalSetting"),
-      t("nav.dashboard"),
-      t("nav.reports"),
-      t("nav.accountsReceivable"),
-      t("nav.accountsPayable"),
-      t("nav.banksGroup"),
-      t("nav.fixedAssets"),
-      t("nav.loansGroup"),
-      t("nav.gl"),
-      t("nav.configuration"),
-      t("nav.companiesBranches"),
-      t("nav.users"),
-      t("nav.chartOfAccounts"),
-      t("nav.balanceSheet"),
-      t("nav.incomeStatement"),
-    ].filter(Boolean) as string[];
-    return measureLabelWidth(labels);
+    const grandparents = ["nav.financialAccounting", "nav.generalSetting"];
+    const parents = [
+      "nav.dashboard", "nav.reports", "nav.accountsReceivable", "nav.accountsPayable",
+      "nav.banksGroup", "nav.fixedAssets", "nav.loansGroup", "nav.gl", "nav.configuration",
+    ];
+    const children = [
+      "nav.mainDashboard", "nav.balanceSheet", "nav.incomeStatement", "nav.aging", "nav.vatReport",
+      "nav.arDashboard", "ar.invoices", "ar.creditMemo", "ar.receipts", "ar.customers",
+      "nav.apDashboard", "ap.bills", "ap.debitMemo", "ap.payments", "ap.vendors",
+      "nav.banksDashboard", "banksGroup.accounts", "banksGroup.receipts", "banksGroup.payments",
+      "banksGroup.expenses", "banksGroup.reconciliations",
+      "nav.fixedAssetsDashboard", "nav.assets",
+      "nav.loansDashboard", "nav.loans",
+      "nav.journalEntries", "nav.trialBalance",
+      "nav.chartOfAccounts", "nav.journalTypes", "nav.currencies", "nav.taxesTypes",
+      "nav.fiscalPeriods", "nav.paymentMethods", "nav.lockDates", "approvals.title",
+      "nav.companiesBranches", "nav.users",
+    ];
+    const entries = [
+      ...grandparents.map((k) => ({ text: t(k), size: 17, weight: 800, indent: 0 })),
+      ...parents.map((k) => ({ text: t(k), size: 14.5, weight: 700, indent: 24 })),
+      ...children.map((k) => ({ text: t(k), size: 13.5, weight: 500, indent: 48 })),
+    ].filter((e) => !!e.text);
+    return measureLabelWidth(entries);
   }, [t]);
+
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login", replace: true });
