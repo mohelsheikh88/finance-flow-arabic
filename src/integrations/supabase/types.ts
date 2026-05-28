@@ -87,6 +87,287 @@ export type Database = {
           },
         ]
       }
+      approval_actions: {
+        Row: {
+          acted_at: string
+          acted_by: string
+          action: Database["public"]["Enums"]["approval_status"]
+          comments: string | null
+          id: string
+          request_id: string
+          step_order: number
+        }
+        Insert: {
+          acted_at?: string
+          acted_by: string
+          action: Database["public"]["Enums"]["approval_status"]
+          comments?: string | null
+          id?: string
+          request_id: string
+          step_order: number
+        }
+        Update: {
+          acted_at?: string
+          acted_by?: string
+          action?: Database["public"]["Enums"]["approval_status"]
+          comments?: string | null
+          id?: string
+          request_id?: string
+          step_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_actions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "approval_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_requests: {
+        Row: {
+          amount: number
+          branch_id: string
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          currency_code: string
+          current_step: number
+          document_id: string
+          document_reference: string | null
+          document_type: Database["public"]["Enums"]["approval_doc_type"]
+          id: string
+          notes: string | null
+          requested_by: string
+          status: Database["public"]["Enums"]["approval_status"]
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          amount?: number
+          branch_id: string
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          currency_code?: string
+          current_step?: number
+          document_id: string
+          document_reference?: string | null
+          document_type: Database["public"]["Enums"]["approval_doc_type"]
+          id?: string
+          notes?: string | null
+          requested_by: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          amount?: number
+          branch_id?: string
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          currency_code?: string
+          current_step?: number
+          document_id?: string
+          document_reference?: string | null
+          document_type?: Database["public"]["Enums"]["approval_doc_type"]
+          id?: string
+          notes?: string | null
+          requested_by?: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_requests_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_steps_def: {
+        Row: {
+          created_at: string
+          id: string
+          required_role: Database["public"]["Enums"]["app_role"]
+          step_name_ar: string
+          step_name_en: string
+          step_order: number
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          required_role: Database["public"]["Enums"]["app_role"]
+          step_name_ar: string
+          step_name_en: string
+          step_order: number
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          required_role?: Database["public"]["Enums"]["app_role"]
+          step_name_ar?: string
+          step_name_en?: string
+          step_order?: number
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_steps_def_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_workflows: {
+        Row: {
+          company_id: string
+          created_at: string
+          currency_code: string
+          document_type: Database["public"]["Enums"]["approval_doc_type"]
+          id: string
+          is_active: boolean
+          max_amount: number | null
+          min_amount: number
+          name_ar: string
+          name_en: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          currency_code?: string
+          document_type: Database["public"]["Enums"]["approval_doc_type"]
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name_ar: string
+          name_en: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          currency_code?: string
+          document_type?: Database["public"]["Enums"]["approval_doc_type"]
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name_ar?: string
+          name_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      asset_categories: {
+        Row: {
+          accumulated_depreciation_account_id: string | null
+          asset_account_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          default_depreciation_method: Database["public"]["Enums"]["depreciation_method"]
+          default_useful_life_months: number
+          depreciation_account_id: string | null
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          updated_at: string
+        }
+        Insert: {
+          accumulated_depreciation_account_id?: string | null
+          asset_account_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          default_depreciation_method?: Database["public"]["Enums"]["depreciation_method"]
+          default_useful_life_months?: number
+          depreciation_account_id?: string | null
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          updated_at?: string
+        }
+        Update: {
+          accumulated_depreciation_account_id?: string | null
+          asset_account_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          default_depreciation_method?: Database["public"]["Enums"]["depreciation_method"]
+          default_useful_life_months?: number
+          depreciation_account_id?: string | null
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      asset_disposals: {
+        Row: {
+          asset_id: string
+          book_value_at_disposal: number
+          created_at: string
+          created_by: string | null
+          disposal_date: string
+          disposal_type: string
+          gain_loss: number
+          id: string
+          journal_entry_id: string | null
+          notes: string | null
+          proceeds: number
+        }
+        Insert: {
+          asset_id: string
+          book_value_at_disposal: number
+          created_at?: string
+          created_by?: string | null
+          disposal_date: string
+          disposal_type: string
+          gain_loss: number
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          proceeds?: number
+        }
+        Update: {
+          asset_id?: string
+          book_value_at_disposal?: number
+          created_at?: string
+          created_by?: string | null
+          disposal_date?: string
+          disposal_type?: string
+          gain_loss?: number
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          proceeds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_disposals_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_accounts: {
         Row: {
           account_number: string | null
@@ -377,6 +658,56 @@ export type Database = {
         }
         Relationships: []
       }
+      depreciation_schedule: {
+        Row: {
+          accumulated_depreciation: number
+          asset_id: string
+          book_value: number
+          created_at: string
+          depreciation_amount: number
+          id: string
+          is_posted: boolean
+          journal_entry_id: string | null
+          period_date: string
+          posted_at: string | null
+          posted_by: string | null
+        }
+        Insert: {
+          accumulated_depreciation: number
+          asset_id: string
+          book_value: number
+          created_at?: string
+          depreciation_amount: number
+          id?: string
+          is_posted?: boolean
+          journal_entry_id?: string | null
+          period_date: string
+          posted_at?: string | null
+          posted_by?: string | null
+        }
+        Update: {
+          accumulated_depreciation?: number
+          asset_id?: string
+          book_value?: number
+          created_at?: string
+          depreciation_amount?: number
+          id?: string
+          is_posted?: boolean
+          journal_entry_id?: string | null
+          period_date?: string
+          posted_at?: string | null
+          posted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "depreciation_schedule_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           company_id: string
@@ -456,6 +787,101 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fixed_assets: {
+        Row: {
+          accumulated_depreciation: number
+          accumulated_depreciation_account_id: string | null
+          acquisition_cost: number
+          acquisition_date: string
+          asset_account_id: string | null
+          branch_id: string
+          category_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          current_book_value: number
+          depreciation_account_id: string | null
+          depreciation_method: Database["public"]["Enums"]["depreciation_method"]
+          depreciation_start_date: string
+          description: string | null
+          id: string
+          invoice_id: string | null
+          name_ar: string
+          name_en: string
+          notes: string | null
+          partner_id: string | null
+          salvage_value: number
+          status: Database["public"]["Enums"]["asset_status"]
+          updated_at: string
+          useful_life_months: number
+        }
+        Insert: {
+          accumulated_depreciation?: number
+          accumulated_depreciation_account_id?: string | null
+          acquisition_cost: number
+          acquisition_date: string
+          asset_account_id?: string | null
+          branch_id: string
+          category_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          current_book_value?: number
+          depreciation_account_id?: string | null
+          depreciation_method?: Database["public"]["Enums"]["depreciation_method"]
+          depreciation_start_date: string
+          description?: string | null
+          id?: string
+          invoice_id?: string | null
+          name_ar: string
+          name_en: string
+          notes?: string | null
+          partner_id?: string | null
+          salvage_value?: number
+          status?: Database["public"]["Enums"]["asset_status"]
+          updated_at?: string
+          useful_life_months: number
+        }
+        Update: {
+          accumulated_depreciation?: number
+          accumulated_depreciation_account_id?: string | null
+          acquisition_cost?: number
+          acquisition_date?: string
+          asset_account_id?: string | null
+          branch_id?: string
+          category_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          current_book_value?: number
+          depreciation_account_id?: string | null
+          depreciation_method?: Database["public"]["Enums"]["depreciation_method"]
+          depreciation_start_date?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string | null
+          name_ar?: string
+          name_en?: string
+          notes?: string | null
+          partner_id?: string | null
+          salvage_value?: number
+          status?: Database["public"]["Enums"]["asset_status"]
+          updated_at?: string
+          useful_life_months?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixed_assets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "asset_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -1442,6 +1868,14 @@ export type Database = {
         | "chief_accountant"
         | "accountant"
         | "internal_auditor"
+      approval_doc_type:
+        | "journal_entry"
+        | "invoice"
+        | "payment"
+        | "asset_disposal"
+      approval_status: "pending" | "approved" | "rejected" | "cancelled"
+      asset_status: "draft" | "active" | "fully_depreciated" | "disposed"
+      depreciation_method: "straight_line" | "declining_balance"
       fiscal_period_status: "open" | "closed" | "locked"
       invoice_status:
         | "draft"
@@ -1592,6 +2026,15 @@ export const Constants = {
         "accountant",
         "internal_auditor",
       ],
+      approval_doc_type: [
+        "journal_entry",
+        "invoice",
+        "payment",
+        "asset_disposal",
+      ],
+      approval_status: ["pending", "approved", "rejected", "cancelled"],
+      asset_status: ["draft", "active", "fully_depreciated", "disposed"],
+      depreciation_method: ["straight_line", "declining_balance"],
       fiscal_period_status: ["open", "closed", "locked"],
       invoice_status: [
         "draft",
