@@ -6,18 +6,19 @@ import { GripVertical } from "lucide-react";
 type Props = {
   id: string;
   disabled?: boolean;
-  children: (handleProps: { handle: ReactNode; isDragging: boolean }) => ReactNode;
   className?: string;
+  children: (args: { handle: ReactNode; isDragging: boolean }) => ReactNode;
 };
 
-export function SortableRow({ id, disabled, children, className }: Props) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+export function SortableRow({ id, disabled, className, children }: Props) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id, disabled });
 
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+    background: isDragging ? "var(--color-muted)" : undefined,
     position: "relative",
     zIndex: isDragging ? 10 : undefined,
   };
@@ -25,26 +26,19 @@ export function SortableRow({ id, disabled, children, className }: Props) {
   const handle = (
     <button
       type="button"
-      ref={setNodeRef as any}
+      ref={setActivatorNodeRef}
       {...attributes}
       {...listeners}
       disabled={disabled}
       aria-label="Drag to reorder"
-      className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed p-1"
-      onClick={(e) => e.preventDefault()}
+      className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed p-1 inline-flex"
     >
       <GripVertical className="h-3.5 w-3.5" />
     </button>
   );
 
-  // We attach the ref to the handle button so dragging the handle moves the row.
-  // The row wrapper uses style/transform but needs its own ref via a div.
   return (
-    <tr
-      style={style}
-      className={className}
-      data-sortable-id={id}
-    >
+    <tr ref={setNodeRef} style={style} className={className} data-sortable-id={id}>
       {children({ handle, isDragging })}
     </tr>
   );
