@@ -241,11 +241,11 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
               defaultOpen={groupActive}
               className="group/collapsible"
             >
+              <SidebarGroup className="sidebar-grandparent">
+                <SidebarGroupLabel asChild>
                   <CollapsibleTrigger className="group/trigger flex h-auto w-full cursor-pointer items-center gap-2.5 rounded-md px-2 transition-colors hover:bg-sidebar-accent/50">
                     <g.icon className="h-[18px] w-[18px] shrink-0 text-[hsl(327,92%,72%)]" />
                     <span className="flex-1 truncate text-start">{g.label}</span>
-                  </CollapsibleTrigger>
-                    <ChevronDown className="h-4 w-4 shrink-0 text-sidebar-foreground/60 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
@@ -258,11 +258,11 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                             aria-hidden
                             className="pointer-events-none absolute top-5 h-px w-3 bg-sidebar-border/70 start-[-12px]"
                           />
+                          <SidebarGroup className="sidebar-parent p-0">
+                            <SidebarGroupLabel asChild>
                               <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-sidebar-accent/40">
                                 <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
                                 <span className="flex-1 truncate text-start">{sg.label}</span>
-                              </CollapsibleTrigger>
-                                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/50 transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-180" />
                               </CollapsibleTrigger>
                             </SidebarGroupLabel>
                             <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
