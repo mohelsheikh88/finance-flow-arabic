@@ -107,17 +107,17 @@ export function AppSidebar() {
     {
       label: t("nav.configuration"),
       items: [
+        { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
         { url: "/cost-centers", icon: Wallet, title: t("nav.costCenters") },
-        { url: "/journals", icon: BookOpen, title: t("nav.journals") },
-        { url: "/taxes", icon: Receipt, title: t("nav.taxes") },
+        { url: "/journals", icon: BookOpen, title: t("nav.journalTypes") },
         { url: "/currencies", icon: Coins, title: t("nav.currencies") },
+        { url: "/taxes", icon: Receipt, title: t("nav.taxesTypes") },
         { url: "/fiscal-periods", icon: CalendarRange, title: t("nav.fiscalPeriods") },
-        { url: "/fiscal-periods", icon: CalendarRange, title: t("nav.fiscalPeriods") },
-        { url: "/lock-dates", icon: Lock, title: t("nav.lockDates") },
         { url: "/payment-methods", icon: CreditCard, title: t("nav.paymentMethods") },
+        { url: "/lock-dates", icon: Lock, title: t("nav.lockDates") },
         { url: "/users", icon: Users, title: t("nav.users") },
-        { url: "/settings", icon: Settings, title: t("nav.settings") },
+        { url: "/settings", icon: Settings, title: t("nav.generalSettings") },
       ],
     },
   ];
