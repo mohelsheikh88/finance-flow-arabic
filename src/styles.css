@@ -211,15 +211,15 @@
 .scroll-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 .scroll-thin::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); }
 
-/* Al Hayat — professional finance surface (navy + gold accents) */
+/* Premium purple/magenta app surface */
 .bg-app-surface {
-  background-color: oklch(0.98 0.005 255);
+  background-color: oklch(0.985 0.008 310);
   background-image:
-    radial-gradient(ellipse 1200px 700px at 8% -10%, oklch(0.28 0.09 260 / 0.18), transparent 60%),
-    radial-gradient(ellipse 1000px 600px at 100% 10%, oklch(0.45 0.13 255 / 0.14), transparent 55%),
-    radial-gradient(ellipse 1100px 700px at 50% 110%, oklch(0.78 0.12 82 / 0.10), transparent 60%),
+    radial-gradient(ellipse 1200px 700px at 8% -10%, hsl(327 92% 55% / 0.12), transparent 60%),
+    radial-gradient(ellipse 1000px 600px at 100% 10%, hsl(263 55% 32% / 0.14), transparent 55%),
+    radial-gradient(ellipse 1100px 700px at 50% 110%, hsl(285 80% 50% / 0.10), transparent 60%),
     radial-gradient(circle at 30% 50%, oklch(1 0 0 / 0.55), transparent 55%),
-    linear-gradient(135deg, oklch(0.99 0.003 255) 0%, oklch(0.96 0.01 250) 50%, oklch(0.97 0.012 245) 100%);
+    linear-gradient(135deg, oklch(0.99 0.005 310) 0%, oklch(0.965 0.012 305) 50%, oklch(0.97 0.014 315) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -229,9 +229,9 @@
   inset: -20%;
   pointer-events: none;
   background:
-    radial-gradient(circle 400px at 20% 30%, oklch(0.45 0.13 255 / 0.14), transparent 60%),
-    radial-gradient(circle 500px at 80% 70%, oklch(0.28 0.09 260 / 0.14), transparent 60%),
-    radial-gradient(circle 350px at 60% 20%, oklch(0.78 0.12 82 / 0.10), transparent 60%);
+    radial-gradient(circle 400px at 20% 30%, hsl(327 92% 55% / 0.14), transparent 60%),
+    radial-gradient(circle 500px at 80% 70%, hsl(263 55% 32% / 0.14), transparent 60%),
+    radial-gradient(circle 350px at 60% 20%, hsl(285 80% 50% / 0.10), transparent 60%);
   filter: blur(40px);
   animation: stc-float 18s ease-in-out infinite alternate;
 }
@@ -241,12 +241,53 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, oklch(0.28 0.09 260 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.28 0.09 260 / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, hsl(263 55% 32% / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(263 55% 32% / 0.05) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
 }
+
+@keyframes stc-float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(2%, -1%) scale(1.04); }
+}
+
+/* Card & Table polish — subtle purple tint that ties to the sidebar */
+.card, [data-slot="card"] {
+  border-color: hsl(263 30% 88%);
+  box-shadow:
+    0 1px 0 hsl(263 40% 95%),
+    0 8px 24px -16px hsl(263 55% 32% / 0.18);
+}
+.card:hover, [data-slot="card"]:hover {
+  box-shadow:
+    0 1px 0 hsl(263 40% 95%),
+    0 14px 32px -14px hsl(263 55% 32% / 0.28),
+    0 0 0 1px hsl(327 92% 60% / 0.18);
+}
+
+table thead {
+  background: linear-gradient(180deg, hsl(263 40% 97%), hsl(263 40% 94%));
+}
+table thead th {
+  color: hsl(263 45% 28%);
+  font-weight: 700;
+  border-bottom: 1px solid hsl(263 30% 86%) !important;
+}
+table tbody tr {
+  transition: background-color .15s ease;
+}
+table tbody tr:hover {
+  background-color: hsl(327 90% 96% / 0.55);
+}
+table tbody tr:nth-child(even) {
+  background-color: hsl(263 40% 99%);
+}
+table td, table th {
+  border-color: hsl(263 25% 92%);
+}
+
 
 
 @keyframes loading-bar {
