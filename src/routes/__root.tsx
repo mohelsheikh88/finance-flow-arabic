@@ -92,6 +92,29 @@ function AuthSync() {
   return null;
 }
 
+function RealtimeSync() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const channel = supabase
+      .channel("global-db-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public" },
+        (payload) => {
+          // Invalidate queries scoped to the changed table, plus the router cache
+          queryClient.invalidateQueries({ queryKey: [payload.table] });
+          queryClient.invalidateQueries();
+          router.invalidate();
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [router, queryClient]);
+  return null;
+}
+
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
@@ -100,6 +123,7 @@ function RootComponent() {
         <AuthProvider>
           <BranchProvider>
             <AuthSync />
+            <RealtimeSync />
             <Outlet />
             <Toaster richColors position="top-center" />
           </BranchProvider>
