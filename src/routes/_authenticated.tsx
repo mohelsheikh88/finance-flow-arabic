@@ -74,8 +74,8 @@ function AuthenticatedLayout() {
       "nav.fixedAssetsDashboard", "nav.assets",
       "nav.loansDashboard", "nav.loans",
       "nav.journalEntries", "nav.trialBalance",
-      "nav.chartOfAccounts", "nav.journalTypes", "nav.currencies", "nav.taxesTypes",
-      "nav.fiscalPeriods", "nav.paymentMethods", "nav.lockDates", "approvals.title",
+       "nav.chartOfAccounts", "nav.journalTypes", "nav.currencies", "nav.taxesTypes",
+       "nav.fiscalPositions", "nav.fiscalPeriods", "nav.paymentMethods", "nav.lockDates", "approvals.title",
       "nav.companiesBranches", "nav.users",
       "common.willBeBuiltLater",
     ];
