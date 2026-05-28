@@ -62,12 +62,19 @@ function AccountsPage() {
   const qc = useQueryClient();
 
   const list = useServerFn(listAccounts);
+  const listTypes = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccount);
   const remove = useServerFn(deleteAccount);
 
   const { data: accounts = [] } = useQuery({
     queryKey: ["accounts", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+  const { data: accountTypes = [] } = useQuery({
+    queryKey: ["account_types", companyId],
+    queryFn: () => listTypes({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
 
@@ -80,14 +87,24 @@ function AccountsPage() {
     [accounts, form.id],
   );
 
-  const openNew = () => { setForm(empty); setOpen(true); };
+  const typeById = useMemo(() => {
+    const m = new Map<string, any>();
+    (accountTypes as any[]).forEach((t) => m.set(t.id, t));
+    return m;
+  }, [accountTypes]);
+
+  const openNew = () => {
+    const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
+    setForm({ ...empty, account_type_id: def?.id ?? "" });
+    setOpen(true);
+  };
   const openEdit = (a: any) => {
     setForm({
       id: a.id,
       code: a.code ?? "",
       name_ar: a.name_ar ?? "",
       name_en: a.name_en ?? "",
-      account_type: a.account_type,
+      account_type_id: a.account_type_id ?? (accountTypes as any[]).find((t) => t.classification === a.account_type)?.id ?? "",
       parent_id: a.parent_id ?? "",
       currency_code: a.currency_code ?? "",
       is_group: !!a.is_group,
@@ -107,7 +124,7 @@ function AccountsPage() {
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          account_type: form.account_type,
+          account_type_id: form.account_type_id,
           parent_id: form.parent_id || null,
           currency_code: form.currency_code.trim() || null,
           is_group: form.is_group,
@@ -143,7 +160,6 @@ function AccountsPage() {
     expense: "bg-destructive/10 text-destructive border-destructive/30",
   };
 
-  const canSave = form.code && form.name_ar && form.name_en && !!companyId;
 
   const importFn = useServerFn(importAccounts);
   const fileRef = useRef<HTMLInputElement>(null);
