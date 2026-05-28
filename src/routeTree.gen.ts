@@ -36,6 +36,7 @@ import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedBanksRouteImport } from './routes/_authenticated.banks'
 import { Route as AuthenticatedBankReconciliationsRouteImport } from './routes/_authenticated.bank-reconciliations'
 import { Route as AuthenticatedBankExpensesRouteImport } from './routes/_authenticated.bank-expenses'
+import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated.audit-log'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated.assets'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated.approvals'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated.accounts'
@@ -190,6 +191,11 @@ const AuthenticatedBankExpensesRoute =
     path: '/bank-expenses',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAuditLogRoute = AuthenticatedAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
   id: '/assets',
   path: '/assets',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/accounts': typeof AuthenticatedAccountsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/assets': typeof AuthenticatedAssetsRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/accounts': typeof AuthenticatedAccountsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/assets': typeof AuthenticatedAssetsRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
   '/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
+  '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
   '/_authenticated/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/_authenticated/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/_authenticated/banks': typeof AuthenticatedBanksRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/approvals'
     | '/assets'
+    | '/audit-log'
     | '/bank-expenses'
     | '/bank-reconciliations'
     | '/banks'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/approvals'
     | '/assets'
+    | '/audit-log'
     | '/bank-expenses'
     | '/bank-reconciliations'
     | '/banks'
@@ -470,6 +481,7 @@ export interface FileRouteTypes {
     | '/_authenticated/accounts'
     | '/_authenticated/approvals'
     | '/_authenticated/assets'
+    | '/_authenticated/audit-log'
     | '/_authenticated/bank-expenses'
     | '/_authenticated/bank-reconciliations'
     | '/_authenticated/banks'
@@ -703,6 +715,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBankExpensesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/audit-log': {
+      id: '/_authenticated/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AuthenticatedAuditLogRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/assets': {
       id: '/_authenticated/assets'
       path: '/assets'
@@ -794,6 +813,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
+  AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
   AuthenticatedBankExpensesRoute: typeof AuthenticatedBankExpensesRoute
   AuthenticatedBankReconciliationsRoute: typeof AuthenticatedBankReconciliationsRoute
   AuthenticatedBanksRoute: typeof AuthenticatedBanksRoute
@@ -832,6 +852,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
+  AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
   AuthenticatedBankExpensesRoute: AuthenticatedBankExpensesRoute,
   AuthenticatedBankReconciliationsRoute: AuthenticatedBankReconciliationsRoute,
   AuthenticatedBanksRoute: AuthenticatedBanksRoute,
