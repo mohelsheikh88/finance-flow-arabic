@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAssets, listCategories, createAsset, createCategory, getDepreciationSchedule } from "@/lib/api/assets.functions";
+import { listAssets, listCategories, createAsset, createCategory, getDepreciationSchedule, postDueDepreciation } from "@/lib/api/assets.functions";
+
 import { listAccounts } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
