@@ -101,7 +101,7 @@ function buildTree(rows: Row[]): Node[] {
     n.children.sort(cmp);
     n.children.forEach((c) => fixDepth(c, d + 1));
   };
-  roots.sort((a, b) => a.classification.localeCompare(b.classification) || cmp(a, b));
+  roots.sort(cmp);
 
 
   roots.forEach((r) => fixDepth(r, 0));
@@ -151,7 +151,10 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
     if (!a) return;
 
     const siblings = prev
-      .filter((r) => r.classification === a.classification && (r.parent_id ?? null) === (a.parent_id ?? null))
+      .filter((r) => {
+        const sameParent = (r.parent_id ?? null) === (a.parent_id ?? null);
+        return sameParent && (!a.parent_id || r.classification === a.classification);
+      })
       .slice()
       .sort((x, y) => ((x.sort_order ?? 0) - (y.sort_order ?? 0)) || x.code.localeCompare(y.code));
     if (siblings.length < 2) return;
@@ -225,7 +228,10 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
 
   const siblingsOf = (row: Row): Row[] =>
     (types as Row[])
-      .filter((r) => r.classification === row.classification && (r.parent_id ?? null) === (row.parent_id ?? null))
+      .filter((r) => {
+        const sameParent = (r.parent_id ?? null) === (row.parent_id ?? null);
+        return sameParent && (!row.parent_id || r.classification === row.classification);
+      })
       .slice()
       .sort((x, y) => ((x.sort_order ?? 0) - (y.sort_order ?? 0)) || x.code.localeCompare(y.code));
 
