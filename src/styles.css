@@ -96,15 +96,15 @@
   --input: oklch(0.91 0.005 285);
   --ring: oklch(0.55 0.20 305);
 
-  /* Sidebar: deep finance navy with emerald accent — cohesive with accounting modules */
-  --sidebar: oklch(0.22 0.04 260);
-  --sidebar-foreground: oklch(0.92 0.01 260);
-  --sidebar-primary: oklch(0.62 0.17 152);
+  /* Sidebar: STC deep purple brand */
+  --sidebar: oklch(0.22 0.10 305);
+  --sidebar-foreground: oklch(0.95 0.01 305);
+  --sidebar-primary: oklch(0.65 0.22 305);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.30 0.05 260);
-  --sidebar-accent-foreground: oklch(0.98 0.01 152);
-  --sidebar-border: oklch(0.30 0.03 260);
-  --sidebar-ring: oklch(0.62 0.17 152);
+  --sidebar-accent: oklch(0.30 0.13 305);
+  --sidebar-accent-foreground: oklch(0.98 0.01 305);
+  --sidebar-border: oklch(0.32 0.10 305);
+  --sidebar-ring: oklch(0.65 0.22 305);
 }
 
 .dark {
