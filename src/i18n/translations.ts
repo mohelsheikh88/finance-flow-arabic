@@ -272,7 +272,7 @@ export const translations = {
       classificationInUse: "هذا التصنيف مرتبط بمجموعات حسابات ولا يمكن حذفه",
       backToAccounts: "إدارة شجرة الحسابات (COA)",
       backToAccountTypes: "مجموعات الحسابات",
-      coreClassifications: "مجموعات الحسابات",
+      coreClassifications: "أنواع الحسابات",
       classificationMapping: "تعيين التصنيف",
       classificationMappingTitle: "تعيين التصنيف الأساسي للحسابات",
       bulkChangeType: "تغيير النوع جماعياً",
