@@ -109,10 +109,9 @@ export const createJournalEntry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => CreateJESchema.parse(i))
   .handler(async ({ data, context }) => {
-  .handler(async ({ data, context }) => {
     await assertNotLocked(context.supabase, data.company_id, data.branch_id, data.entry_date);
 
-
+    const totalDebit = data.lines.reduce((s, l) => s + l.debit, 0);
     const totalCredit = data.lines.reduce((s, l) => s + l.credit, 0);
     if (Math.abs(totalDebit - totalCredit) > 0.001) {
       throw new Error(`Entry not balanced: D=${totalDebit} C=${totalCredit}`);
