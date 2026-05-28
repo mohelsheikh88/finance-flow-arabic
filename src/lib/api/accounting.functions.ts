@@ -156,6 +156,34 @@ export const deleteClassification = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const swapClassificationOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { aId: string; bId: string }) =>
+    z.object({ aId: z.string().uuid(), bId: z.string().uuid() }).parse(i)
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: rows, error } = await sb
+      .from("classifications")
+      .select("id, sort_order")
+      .in("id", [data.aId, data.bId]);
+    if (error) throw new Error(error.message);
+    const a = (rows ?? []).find((r: any) => r.id === data.aId);
+    const b = (rows ?? []).find((r: any) => r.id === data.bId);
+    if (!a || !b) throw new Error("Classification not found");
+    const aOrder = a.sort_order ?? 0;
+    const bOrder = b.sort_order ?? 0;
+    const tmp = -Math.abs(aOrder) - Math.abs(bOrder) - 1;
+    const e1 = await sb.from("classifications").update({ sort_order: tmp }).eq("id", a.id);
+    if (e1.error) throw new Error(e1.error.message);
+    const e2 = await sb.from("classifications").update({ sort_order: aOrder }).eq("id", b.id);
+    if (e2.error) throw new Error(e2.error.message);
+    const e3 = await sb.from("classifications").update({ sort_order: bOrder }).eq("id", a.id);
+    if (e3.error) throw new Error(e3.error.message);
+    return { ok: true };
+  });
+
+
 
 
 // ---------------- Accounts ----------------
