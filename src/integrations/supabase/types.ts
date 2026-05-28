@@ -619,6 +619,7 @@ export type Database = {
           name_en: string
           normal_balance: string
           notes: string | null
+          sort_order: number
           statement: string
           updated_at: string
         }
@@ -633,6 +634,7 @@ export type Database = {
           name_en: string
           normal_balance: string
           notes?: string | null
+          sort_order?: number
           statement: string
           updated_at?: string
         }
@@ -647,6 +649,7 @@ export type Database = {
           name_en?: string
           normal_balance?: string
           notes?: string | null
+          sort_order?: number
           statement?: string
           updated_at?: string
         }
