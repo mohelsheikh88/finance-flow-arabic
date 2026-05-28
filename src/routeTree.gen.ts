@@ -39,6 +39,7 @@ import { Route as AuthenticatedReportsAgingRouteImport } from './routes/_authent
 import { Route as AuthenticatedJournalEntriesNewRouteImport } from './routes/_authenticated.journal-entries.new'
 import { Route as AuthenticatedInvoicesVendorRouteImport } from './routes/_authenticated.invoices.vendor'
 import { Route as AuthenticatedInvoicesCustomerRouteImport } from './routes/_authenticated.invoices.customer'
+import { Route as ApiPublicHooksPostDepreciationRouteImport } from './routes/api/public/hooks/post-depreciation'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -199,6 +200,12 @@ const AuthenticatedInvoicesCustomerRoute =
     path: '/invoices/customer',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const ApiPublicHooksPostDepreciationRoute =
+  ApiPublicHooksPostDepreciationRouteImport.update({
+    id: '/api/public/hooks/post-depreciation',
+    path: '/api/public/hooks/post-depreciation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
   '/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
+  '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -261,6 +269,7 @@ export interface FileRoutesByTo {
   '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
   '/journal-entries': typeof AuthenticatedJournalEntriesIndexRoute
+  '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -294,6 +303,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
   '/_authenticated/reports/vat': typeof AuthenticatedReportsVatRoute
   '/_authenticated/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
+  '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/reports/income-statement'
     | '/reports/vat'
     | '/journal-entries/'
+    | '/api/public/hooks/post-depreciation'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/reports/income-statement'
     | '/reports/vat'
     | '/journal-entries'
+    | '/api/public/hooks/post-depreciation'
   id:
     | '__root__'
     | '/'
@@ -390,12 +402,14 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/income-statement'
     | '/_authenticated/reports/vat'
     | '/_authenticated/journal-entries/'
+    | '/api/public/hooks/post-depreciation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiPublicHooksPostDepreciationRoute: typeof ApiPublicHooksPostDepreciationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -610,6 +624,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoicesCustomerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/hooks/post-depreciation': {
+      id: '/api/public/hooks/post-depreciation'
+      path: '/api/public/hooks/post-depreciation'
+      fullPath: '/api/public/hooks/post-depreciation'
+      preLoaderRoute: typeof ApiPublicHooksPostDepreciationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -682,7 +703,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiPublicHooksPostDepreciationRoute: ApiPublicHooksPostDepreciationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
