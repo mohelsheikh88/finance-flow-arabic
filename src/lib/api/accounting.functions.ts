@@ -24,15 +24,60 @@ export const listAccountTypes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string }) => i)
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase
+    const { data: rows, error } = await (context.supabase as any)
       .from("account_types")
       .select("*")
       .eq("company_id", data.companyId)
       .order("classification")
+      .order("sort_order", { ascending: true })
       .order("code");
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
+
+export const moveAccountType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string; direction: "up" | "down" }) =>
+    z.object({ id: z.string().uuid(), direction: z.enum(["up", "down"]) }).parse(i)
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: cur, error: e1 } = await sb
+      .from("account_types")
+      .select("id, company_id, parent_id, classification, sort_order, code")
+      .eq("id", data.id)
+      .single();
+    if (e1 || !cur) throw new Error(e1?.message || "Not found");
+
+    let q = sb
+      .from("account_types")
+      .select("id, sort_order, code")
+      .eq("company_id", cur.company_id)
+      .eq("classification", cur.classification);
+    q = cur.parent_id ? q.eq("parent_id", cur.parent_id) : q.is("parent_id", null);
+    const { data: siblings, error: e2 } = await q;
+    if (e2) throw new Error(e2.message);
+
+    const sorted = (siblings ?? []).slice().sort((a: any, b: any) =>
+      (a.sort_order ?? 0) - (b.sort_order ?? 0) || String(a.code).localeCompare(String(b.code))
+    );
+    const idx = sorted.findIndex((r: any) => r.id === cur.id);
+    const swapIdx = data.direction === "up" ? idx - 1 : idx + 1;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= sorted.length) return { ok: true, moved: false };
+
+    const a = sorted[idx], b = sorted[swapIdx];
+    const aOrder = a.sort_order ?? 0;
+    const bOrder = b.sort_order ?? 0;
+    const tmp = -Math.abs(aOrder) - Math.abs(bOrder) - 1;
+    let r = await sb.from("account_types").update({ sort_order: tmp }).eq("id", a.id);
+    if (r.error) throw new Error(r.error.message);
+    r = await sb.from("account_types").update({ sort_order: aOrder }).eq("id", b.id);
+    if (r.error) throw new Error(r.error.message);
+    r = await sb.from("account_types").update({ sort_order: bOrder }).eq("id", a.id);
+    if (r.error) throw new Error(r.error.message);
+    return { ok: true, moved: true };
+  });
+
 
 const AccountTypeUpsertSchema = z.object({
   id: z.string().uuid().optional(),
