@@ -32,7 +32,6 @@ function measureLabelWidth(
   const total = Math.ceil(max + 20 + 10 + 32 + 20);
   return Math.max(260, Math.min(560, total));
 }
-}
 
 
 function AuthenticatedLayout() {
