@@ -224,6 +224,8 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
+    // Synthetic classification rows (id: "cls:<uuid>") are read-only.
+    if (String(active.id).startsWith("cls:") || String(over.id).startsWith("cls:")) return;
     const prev = qc.getQueryData<Row[]>(["account_types", companyId]);
     if (!prev) return;
     const a = prev.find((r) => r.id === active.id);
