@@ -172,7 +172,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
   return (
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
 
-      <SidebarHeader className="border-b border-sidebar-border/60">
+      <SidebarHeader className="overflow-visible border-b border-sidebar-border/60">
         <div className="flex items-center gap-2.5 px-2 py-2.5">
           {/* Glass-morphism logo container */}
           <div className="relative shrink-0">
@@ -209,7 +209,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="overflow-y-auto overflow-x-hidden px-3">
         {groups.map((g) => {
           const groupActive = g.items?.some((it) => isActive(it.url)) || g.subgroups?.some((sg) => sg.items.some((it) => isActive(it.url)));
           if (collapsed) {
@@ -248,7 +248,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                     <span className="flex-1 whitespace-nowrap text-start">{g.label}</span>
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
-                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <CollapsibleContent className="overflow-visible data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                   <SidebarGroupContent className="relative ms-3 ps-3 border-s border-dashed border-sidebar-border/70">
                     {g.subgroups?.map((sg) => {
                       const subActive = sg.items.some((it) => isActive(it.url));
@@ -265,7 +265,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                                 <span className="flex-1 whitespace-nowrap text-start">{sg.label}</span>
                               </CollapsibleTrigger>
                             </SidebarGroupLabel>
-                            <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                            <CollapsibleContent className="overflow-visible data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                               <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
                                 <SidebarMenu>
                                   {sg.items.map((item) => (
@@ -335,7 +335,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
           title="Logout"
         >
           <LogOut className="h-[17px] w-[17px] shrink-0" />
-          {!collapsed && <span className="truncate text-[13.5px] font-medium">{t("auth.signOut") || "Logout"}</span>}
+          {!collapsed && <span className="whitespace-nowrap text-[13.5px] font-medium">{t("auth.signOut") || "Logout"}</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>

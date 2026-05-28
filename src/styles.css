@@ -429,7 +429,7 @@ table td, table th {
 [data-sidebar="menu-button"][data-active="true"]::before {
   content: "";
   position: absolute;
-  inset-inline-end: -1px;
+  inset-inline-end: 3px;
   top: 12%;
   bottom: 12%;
   width: 4px;
@@ -445,7 +445,7 @@ table td, table th {
 [data-sidebar="menu-button"][data-active="true"]::after {
   content: "";
   position: absolute;
-  inset-inline-start: 6px;
+  inset-inline-start: 10px;
   top: 50%;
   transform: translateY(-50%);
   width: 6px;
