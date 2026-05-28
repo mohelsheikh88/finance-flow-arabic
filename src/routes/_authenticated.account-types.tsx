@@ -501,8 +501,8 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                   <th className="text-start p-3 font-medium">
                     {t("common.code")} / {t("common.name")}
                   </th>
-                  <th className="text-start p-3 font-medium">{t("accounts.coreClassification")}</th>
                   <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.coreClassification")}</th>
                   <th className="text-center p-3 font-medium">{t("common.type") || "Type"}</th>
                   <th className="text-center p-3 font-medium">{t("common.status")}</th>
                   <th className="text-end p-3 font-medium">{t("common.actions")}</th>
@@ -616,6 +616,11 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                             </div>
                           </td>
                           <td className="p-3">
+                            <Badge variant="outline" className={clsColors[n.classification]}>
+                              {bucketName(n.classification, t(`accounts.${n.classification}`))}
+                            </Badge>
+                          </td>
+                          <td className="p-3">
                             {cls && !isCls ? (
                               <span className="inline-flex items-center gap-1">
                                 <span className="font-mono text-muted-foreground">{cls.code}</span>
@@ -625,11 +630,6 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                             ) : (
                               <span className="text-muted-foreground">—</span>
                             )}
-                          </td>
-                          <td className="p-3">
-                            <Badge variant="outline" className={clsColors[n.classification]}>
-                              {bucketName(n.classification, t(`accounts.${n.classification}`))}
-                            </Badge>
                           </td>
                           <td className="p-3 text-center">
                             <Badge variant="outline">
