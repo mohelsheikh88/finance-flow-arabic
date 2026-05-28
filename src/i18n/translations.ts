@@ -278,6 +278,7 @@ export const translations = {
       isGroup: "حساب رئيسي (مجموعة)",
       leafAccount: "حساب فرعي",
       parent: "الحساب الأب",
+      selectParent: "اختر الحساب الأب",
       statement: "البيان",
       balanceSheet: "الميزانية العمومية",
       incomeStatement: "قائمة الدخل",
