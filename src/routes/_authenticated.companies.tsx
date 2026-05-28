@@ -171,12 +171,20 @@ function Page() {
       return createBranchFn({ data: payload });
     },
     onSuccess: () => {
-      toast.success(t("common.saved"));
+      const isNew = !brForm.id;
+      const name = brForm.name_ar || brForm.name_en || brForm.code;
+      toast.success(
+        isNew ? `تم إنشاء الفرع "${name}" بنجاح` : `تم تحديث الفرع "${name}" بنجاح`,
+        {
+          description: isNew
+            ? "السبب: إضافة فرع جديد — تم تحديث منتقي الفروع في الـ Topbar والقوائم تلقائيًا."
+            : "السبب: تعديل بيانات فرع — تم تحديث منتقي الفروع في الـ Topbar والقوائم تلقائيًا.",
+        }
+      );
       qc.invalidateQueries({ queryKey: ["branches"] });
       qc.invalidateQueries({ queryKey: ["user-context"] });
       setBrOpen(false);
     },
-
     onError: (e: Error) => toast.error(e.message),
   });
 
