@@ -214,7 +214,8 @@ function AccountTypesPage() {
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — نوع حساب</DialogTitle>
+            <DialogTitle>{form.id ? t("common.edit") : t("common.new")} — {t("accounts.accountTypeSingular")}</DialogTitle>
+
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <div>
