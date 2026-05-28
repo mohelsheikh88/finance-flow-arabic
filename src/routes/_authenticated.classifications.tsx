@@ -91,7 +91,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
   const list = useServerFn(listClassifications);
   const upsert = useServerFn(upsertClassification);
   const remove = useServerFn(deleteClassification);
-  const swapOrder = useServerFn(swapClassificationOrder);
+  const reorder = useServerFn(reorderClassifications);
+
 
 
   const { data: rows = [] } = useQuery({
@@ -178,11 +179,16 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const swapMut = useMutation({
-    mutationFn: (vars: { aId: string; bId: string }) => swapOrder({ data: vars }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["classifications"] }),
-    onError: (e: Error) => toast.error(e.message),
+  const reorderMut = useMutation({
+    mutationFn: (orderedIds: string[]) => reorder({ data: { companyId: companyId!, orderedIds } }),
+    onError: (e: Error, _v, ctx: any) => {
+      if (ctx?.prev) qc.setQueryData(["classifications", companyId], ctx.prev);
+      toast.error(e.message);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["classifications", companyId] }),
   });
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const hasFilters =
     search.trim() !== "" ||
@@ -191,12 +197,29 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     filterBucket !== "all" ||
     filterStatus !== "all";
 
-  const move = (r: any, dir: -1 | 1) => {
-    const idx = (rows as any[]).findIndex((x) => x.id === r.id);
-    const target = (rows as any[])[idx + dir];
-    if (!target) return;
-    swapMut.mutate({ aId: r.id, bId: target.id });
+  const handleDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    if (hasFilters) {
+      toast.error("Clear filters before reordering | امسح الفلاتر قبل إعادة الترتيب");
+      return;
+    }
+    const prev = qc.getQueryData<any[]>(["classifications", companyId]);
+    if (!prev) return;
+    const sorted = prev.slice().sort(
+      (a, b) => ((a.sort_order ?? 0) - (b.sort_order ?? 0)) || String(a.code).localeCompare(String(b.code))
+    );
+    const fromIdx = sorted.findIndex((r) => r.id === active.id);
+    const toIdx = sorted.findIndex((r) => r.id === over.id);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const reordered = arrayMove(sorted, fromIdx, toIdx);
+    const orderMap = new Map(reordered.map((r, i) => [r.id, (i + 1) * 10]));
+    const next = prev.map((r) => (orderMap.has(r.id) ? { ...r, sort_order: orderMap.get(r.id)! } : r));
+    qc.setQueryData(["classifications", companyId], next);
+    reorderMut.mutate(reordered.map((r) => r.id));
   };
+
+
 
 
   const canSave = form.code && form.name_ar && form.name_en && !!companyId;
