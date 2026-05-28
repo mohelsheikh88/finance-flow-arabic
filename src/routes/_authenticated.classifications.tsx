@@ -397,7 +397,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
                         <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
                         <td className="p-3">
                           <Badge variant="outline" className={bucketColors[r.bucket]}>
-                            {t(`accounts.${r.bucket}`)}
+                            {bucketName(r.bucket, t(`accounts.${r.bucket}`))}
                           </Badge>
                         </td>
                         <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
