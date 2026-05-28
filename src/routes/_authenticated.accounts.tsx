@@ -3,8 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  listAccounts, upsertAccount, deleteAccount, importAccounts, listAccountTypes,
+  listAccounts, upsertAccount, deleteAccount, importAccounts, listAccountTypes, listClassifications,
 } from "@/lib/api/accounting.functions";
+
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -99,6 +100,7 @@ function ChartOfAccountsPanel() {
 
   const list = useServerFn(listAccounts);
   const listTypes = useServerFn(listAccountTypes);
+  const listCls = useServerFn(listClassifications);
   const upsert = useServerFn(upsertAccount);
   const remove = useServerFn(deleteAccount);
 
@@ -113,6 +115,14 @@ function ChartOfAccountsPanel() {
     queryFn: () => listTypes({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+
+  const { data: classifications = [] } = useQuery({
+    queryKey: ["classifications", companyId],
+    queryFn: () => listCls({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
@@ -144,9 +154,9 @@ function ChartOfAccountsPanel() {
       }
       if (filterClassification !== "all") {
         const at = typeById.get(a.account_type_id);
-        const cls = at?.classification ?? a.account_type;
-        if (cls !== filterClassification) return false;
+        if ((at?.classification_id ?? null) !== filterClassification) return false;
       }
+
       if (filterIsGroup !== "all") {
         const isGroup = filterIsGroup === "group";
         if (a.is_group !== isGroup) return false;
@@ -335,17 +345,20 @@ function ChartOfAccountsPanel() {
           <Input placeholder={t("common.search")} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="space-y-1">
-          <Label>{t("accounts.type")}</Label>
+          <Label>{t("accounts.classification")}</Label>
           <Select value={filterClassification} onValueChange={setFilterClassification}>
             <SelectTrigger><SelectValue placeholder={t("common.all")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("common.all")}</SelectItem>
-              {["asset", "liability", "equity", "income", "expense"].map((cls) => (
-                <SelectItem key={cls} value={cls}>{t(`accounts.${cls}`)}</SelectItem>
+              {(classifications as any[]).filter((c) => c.is_active).map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.code} — {localized(c, "name")}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-1">
           <Label>{t("accounts.isGroup")}</Label>
           <Select value={filterIsGroup} onValueChange={setFilterIsGroup}>
