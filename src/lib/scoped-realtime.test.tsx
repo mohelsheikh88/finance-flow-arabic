@@ -152,7 +152,11 @@ describe("scoped-realtime → user-context invalidation", () => {
 
     const calls = spy.mock.calls.map((c) => (c[0] as any)?.queryKey);
     expect(calls).toContainEqual(["invoices"]);
+    expect(calls).not.toContainEqual(["user-context"]);
+  });
+
   it("after invalidation, the next fetch returns fresh dropdown data", async () => {
+
     // End-to-end: realtime event → invalidate ["user-context"] → next fetch
     // returns updated branches (what the Topbar dropdown displays).
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
