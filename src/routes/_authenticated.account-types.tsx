@@ -629,7 +629,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                           </td>
                           <td className="p-3">
                             <Badge variant="outline" className={clsColors[n.classification]}>
-                              {t(`accounts.${n.classification}`)}
+                              {bucketName(n.classification, t(`accounts.${n.classification}`))}
                             </Badge>
                           </td>
                           <td className="p-3 text-center">
