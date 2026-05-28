@@ -351,9 +351,12 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const [toDelete, setToDelete] = useState<Row | null>(null);
 
   const openNew = (parent?: Row, isGroup = false) => {
+    // If parent is a synthetic classification root, attach as a real root account_type
+    // under that classification (parent_id stays null).
+    const isClsParent = !!parent && String(parent.id).startsWith("cls:");
     setForm({
       ...empty,
-      parent_id: parent?.id ?? null,
+      parent_id: isClsParent ? null : (parent?.id ?? null),
       classification: parent?.classification ?? "asset",
       classification_id: parent?.classification_id ?? null,
       is_group: isGroup,
