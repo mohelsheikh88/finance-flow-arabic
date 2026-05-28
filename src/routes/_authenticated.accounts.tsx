@@ -118,6 +118,11 @@ function ChartOfAccountsPanel() {
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
 
+  const [search, setSearch] = useState("");
+  const [filterClassification, setFilterClassification] = useState("all");
+  const [filterIsGroup, setFilterIsGroup] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+
   const parents = useMemo(
     () => (accounts as any[]).filter((a) => a.is_group && a.id !== form.id),
     [accounts, form.id],
@@ -128,6 +133,31 @@ function ChartOfAccountsPanel() {
     (accountTypes as any[]).forEach((t) => m.set(t.id, t));
     return m;
   }, [accountTypes]);
+
+  const filteredAccounts = useMemo(() => {
+    const text = search.trim().toLowerCase();
+    return (accounts as any[]).filter((a) => {
+      if (text) {
+        const name = localized(a, "name").toLowerCase();
+        const code = (a.code ?? "").toLowerCase();
+        if (!name.includes(text) && !code.includes(text)) return false;
+      }
+      if (filterClassification !== "all") {
+        const at = typeById.get(a.account_type_id);
+        const cls = at?.classification ?? a.account_type;
+        if (cls !== filterClassification) return false;
+      }
+      if (filterIsGroup !== "all") {
+        const isGroup = filterIsGroup === "group";
+        if (a.is_group !== isGroup) return false;
+      }
+      if (filterStatus !== "all") {
+        const isActive = filterStatus === "active";
+        if (a.is_active !== isActive) return false;
+      }
+      return true;
+    });
+  }, [accounts, search, filterClassification, filterIsGroup, filterStatus, localized, typeById]);
 
   const openNew = () => {
     const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
@@ -299,6 +329,52 @@ function ChartOfAccountsPanel() {
         </Card>
       )}
 
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="space-y-1">
+          <Label>{t("common.search")}</Label>
+          <Input placeholder={t("common.search")} value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <Label>{t("accounts.type")}</Label>
+          <Select value={filterClassification} onValueChange={setFilterClassification}>
+            <SelectTrigger><SelectValue placeholder={t("common.all")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              {["asset", "liability", "equity", "income", "expense"].map((cls) => (
+                <SelectItem key={cls} value={cls}>{t(`accounts.${cls}`)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label>{t("accounts.isGroup")}</Label>
+          <Select value={filterIsGroup} onValueChange={setFilterIsGroup}>
+            <SelectTrigger><SelectValue placeholder={t("common.all")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              <SelectItem value="group">{t("accounts.isGroup")}</SelectItem>
+              <SelectItem value="leaf">{t("accounts.leafAccount")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label>{t("common.status")}</Label>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger><SelectValue placeholder={t("common.all")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              <SelectItem value="active">{t("common.active")}</SelectItem>
+              <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-end">
+          <Button variant="outline" className="w-full" onClick={() => { setSearch(""); setFilterClassification("all"); setFilterIsGroup("all"); setFilterStatus("all"); }}>
+            {t("common.clear")}
+          </Button>
+        </div>
+      </div>
+
       <Card>
         <table className="w-full text-xs">
           <thead className="bg-muted/50">
@@ -313,7 +389,7 @@ function ChartOfAccountsPanel() {
             </tr>
           </thead>
           <tbody>
-            {(accounts as any[]).map((a) => {
+            {(filteredAccounts as any[]).map((a) => {
               const depth = (a.code.match(/^\d+/)?.[0]?.length ?? 1) - 1;
               return (
                 <tr key={a.id} className="border-t hover:bg-muted/30">
@@ -354,7 +430,7 @@ function ChartOfAccountsPanel() {
                 </tr>
               );
             })}
-            {accounts.length === 0 && (
+            {filteredAccounts.length === 0 && (
               <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             )}
           </tbody>
