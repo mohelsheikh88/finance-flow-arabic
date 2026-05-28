@@ -151,7 +151,6 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
     const b = prev.find((r) => r.id === over.id);
     if (!a || !b) return;
     if (a.classification !== b.classification || (a.parent_id ?? null) !== (b.parent_id ?? null)) {
-      toast.error("Items must stay within the same group | يجب البقاء داخل نفس المجموعة");
       return;
     }
     const siblings = prev
