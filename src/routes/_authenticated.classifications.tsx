@@ -90,7 +90,10 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     queryKey: ["classifications", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
     enabled: !!companyId,
+  });
+
   const [open, setOpen] = useState(false);
+
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
 
