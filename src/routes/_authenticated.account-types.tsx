@@ -187,7 +187,6 @@ function buildTree(rows: Row[], classifications: ClsRow[]): Node[] {
   roots.forEach((r) => fixDepth(r, 0));
   return roots;
 }
-}
 
 function flatten(nodes: Node[], expanded: Set<string>): Node[] {
   const out: Node[] = [];
