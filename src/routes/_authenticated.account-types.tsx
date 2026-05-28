@@ -124,6 +124,14 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
   const upsert = useServerFn(upsertAccountType);
   const remove = useServerFn(deleteAccountType);
   const listCls = useServerFn(listClassifications);
+  const move = useServerFn(moveAccountType);
+
+  const moveMut = useMutation({
+    mutationFn: (v: { id: string; direction: "up" | "down" }) => move({ data: v }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["account_types"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const { data: types = [] } = useQuery({
     queryKey: ["account_types", companyId],
