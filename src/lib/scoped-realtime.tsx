@@ -157,6 +157,17 @@ export function useScopedRealtime(opts: {
           if (cfg?.scope.kind === "child") {
             queryClient.invalidateQueries({ queryKey: [cfg.scope.parentTable] });
           }
+          // Tables that feed the user-context cache (sidebar/topbar dropdowns)
+          if (
+            table === "branches" ||
+            table === "companies" ||
+            table === "user_branch_access" ||
+            table === "user_roles" ||
+            table === "profiles"
+          ) {
+            queryClient.invalidateQueries({ queryKey: ["user-context"] });
+          }
+
           // Refresh active route loaders (cheap; router-side dedup applies)
           router.invalidate();
         }
