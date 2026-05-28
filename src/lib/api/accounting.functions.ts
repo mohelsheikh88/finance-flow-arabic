@@ -149,7 +149,7 @@ const AccountTypeUpsertSchema = z.object({
   code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
-  classification: z.enum(ACCOUNT_TYPES),
+  classification: z.string().trim().min(1).max(50),
   classification_id: z.string().uuid().nullable().optional(),
   parent_id: z.string().uuid().nullable().optional(),
   is_group: z.boolean().optional(),
@@ -288,7 +288,7 @@ const ClassificationUpsertSchema = z.object({
   name_en: z.string().trim().min(1).max(255),
   statement: z.enum(STATEMENTS),
   normal_balance: z.enum(NORMAL_BALANCES),
-  bucket: z.enum(ACCOUNT_TYPES),
+  bucket: z.string().trim().min(1).max(50),
   is_active: z.boolean().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
@@ -434,12 +434,7 @@ export const listAccountingBuckets = createServerFn({ method: "GET" })
 const AccountingBucketUpsertSchema = z.object({
   id: z.string().uuid().optional(),
   company_id: z.string().uuid(),
-  code: z.enum(ACCOUNT_TYPES, {
-    errorMap: () => ({
-      message:
-        "Bucket code must be one of: asset, liability, equity, income, expense | كود البند يجب أن يكون أحد القيم: asset, liability, equity, income, expense",
-    }),
-  }),
+  code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   statement: z.enum(STATEMENTS),
@@ -672,7 +667,7 @@ const ImportRowSchema = z.object({
   code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
-  account_type: z.enum(ACCOUNT_TYPES),
+  account_type: z.string().trim().min(1).max(50),
   parent_code: z.string().trim().max(50).optional().nullable(),
   currency_code: z.string().trim().max(10).optional().nullable(),
   is_group: z.boolean().optional(),

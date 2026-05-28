@@ -891,7 +891,6 @@ function ChartOfAccountsTree({
 }
 
 
-const BUCKETS = ["asset", "liability", "equity", "income", "expense"] as const;
 const bucketColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
   liability: "bg-warning/10 text-warning border-warning/30",
@@ -1141,22 +1140,12 @@ function AccountingBucketsPanel() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>{t("common.code")} *</Label>
-              <Select
+              <Input
                 value={form.code}
-                onValueChange={(v) => setForm({ ...form, code: v })}
+                onChange={(e) => setForm({ ...form, code: e.target.value })}
+                maxLength={50}
                 disabled={!!form.id}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("common.code")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {BUCKETS.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
             <div>
               <Label>{t("common.nameAr")} *</Label>

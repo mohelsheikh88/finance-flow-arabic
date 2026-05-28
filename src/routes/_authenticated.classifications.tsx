@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/classifications")({
 });
 
 const BUCKETS = ["asset", "liability", "equity", "income", "expense"] as const;
-type Bucket = (typeof BUCKETS)[number];
+type Bucket = string;
 type Statement = "balance_sheet" | "income_statement";
 type NormalBalance = "debit" | "credit";
 
@@ -111,7 +111,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
   const [search, setSearch] = useState("");
   const [filterStatement, setFilterStatement] = useState<Statement | "all">("all");
   const [filterNormalBalance, setFilterNormalBalance] = useState<NormalBalance | "all">("all");
-  const [filterBucket, setFilterBucket] = useState<Bucket | "all">("all");
+  const [filterBucket, setFilterBucket] = useState<string | "all">("all");
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive">("all");
 
   const filteredRows = useMemo(() => {

@@ -70,8 +70,7 @@ export const Route = createFileRoute("/_authenticated/account-types")({
   component: () => <AccountTypesPage />,
 });
 
-const CLASSIFICATIONS = ["asset", "liability", "equity", "income", "expense"] as const;
-type Cls = (typeof CLASSIFICATIONS)[number];
+type Cls = string;
 type FormState = {
   id?: string;
   code: string;
