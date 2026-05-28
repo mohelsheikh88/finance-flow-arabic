@@ -13,6 +13,7 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-ki
 import { SortableRow } from "@/components/sortable-row";
 
 import { useBranch } from "@/lib/branch-context";
+import { useAccountingBuckets } from "@/lib/use-buckets";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
