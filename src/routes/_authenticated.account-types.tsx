@@ -75,8 +75,10 @@ function useStatementLabel() {
 function AccountTypesPage() {
   const { t } = useI18n();
   const localized = useLocalized();
+  const statementLabel = useStatementLabel();
   const { companyId } = useBranch();
   const qc = useQueryClient();
+
 
   const list = useServerFn(listAccountTypes);
   const upsert = useServerFn(upsertAccountType);
