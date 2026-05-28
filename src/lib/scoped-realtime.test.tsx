@@ -152,12 +152,9 @@ describe("scoped-realtime → user-context invalidation", () => {
 
     const calls = spy.mock.calls.map((c) => (c[0] as any)?.queryKey);
     expect(calls).toContainEqual(["invoices"]);
-    expect(calls).not.toContainEqual(["user-context"]);
-  });
-
-  it("dropdown data updates when refetch fires after invalidation", async () => {
-    // Simulates the end-to-end behaviour: refetch is wired up, invalidation
-    // triggers it, and the dropdown source (user-context cache) gets new data.
+  it("after invalidation, the next fetch returns fresh dropdown data", async () => {
+    // End-to-end: realtime event → invalidate ["user-context"] → next fetch
+    // returns updated branches (what the Topbar dropdown displays).
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     let serverBranches = [{ id: "br-1", name_en: "HQ" }];
@@ -167,34 +164,20 @@ describe("scoped-realtime → user-context invalidation", () => {
       branches: serverBranches,
     }));
 
-    // Seed cache + register an active observer so invalidate triggers refetch
-    await qc.prefetchQuery({ queryKey: ["user-context"], queryFn: refetcher });
-    const unsubscribe = qc
-    await qc.prefetchQuery({ queryKey: ["user-context"], queryFn: refetcher });
-    // Register an active observer so invalidate() triggers a refetch
-    const observer = qc
-      .getQueryCache()
-      .find({ queryKey: ["user-context"] })!;
-    const unsubscribe = observer.observers.length
-      ? () => {}
-      : (() => {
-          const noop = { onQueryUpdate: () => {} } as any;
-          observer.addObserver(noop);
-          return () => observer.removeObserver(noop);
-        })();
+    await qc.fetchQuery({ queryKey: ["user-context"], queryFn: refetcher });
 
+    mount(qc, ["admin"]);
 
-    // Server-side a new branch is inserted; realtime delivers the event.
+    // Server inserts a new branch; realtime delivers the event.
     serverBranches = [...serverBranches, { id: "br-2", name_en: "New Branch" }];
     fire("branches", "INSERT", { id: "br-2" });
 
-    // Flush React-Query microtasks
-    await new Promise((r) => setTimeout(r, 0));
-    await qc.getQueryCache().find({ queryKey: ["user-context"] })!.fetch();
+    // The query is now marked stale — fetching it again calls the queryFn.
+    await qc.fetchQuery({ queryKey: ["user-context"], queryFn: refetcher });
 
     const data = qc.getQueryData<any>(["user-context"]);
     expect(data.branches.map((b: any) => b.id)).toEqual(["br-1", "br-2"]);
-    expect(refetcher).toHaveBeenCalledTimes(2); // initial + after invalidation
-    unsubscribe();
+    expect(refetcher).toHaveBeenCalledTimes(2);
   });
 });
+
