@@ -92,6 +92,7 @@ export const translations = {
       fiscalPeriods: "الفترات المالية",
       bankAccounts: "الحسابات البنكية",
       paymentMethods: "وسائل الدفع",
+      lockDates: "تواريخ الإقفال",
       finance: "المالية",
       configuration: "الإعدادات",
       accountsReceivable: "الذمم المدينة",
@@ -132,6 +133,13 @@ export const translations = {
         card: "بطاقة",
         other: "أخرى",
       },
+    },
+    lockDates: {
+      new: "تاريخ إقفال جديد",
+      lockDate: "تاريخ الإقفال",
+      scope: "النطاق",
+      allBranches: "كل الفروع",
+      description: "لا يمكن إدخال أو ترحيل أي معاملات مالية في هذا التاريخ أو قبله.",
     },
     dashboard: {
       title: "لوحة المحاسبة العامة",
