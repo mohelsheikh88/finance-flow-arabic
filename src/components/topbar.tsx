@@ -66,8 +66,21 @@ export function Topbar() {
 
   const initials = (user?.email ?? "U").slice(0, 2).toUpperCase();
 
-  return (
-    <header className="h-12 border-b bg-card flex items-center px-3 gap-2 shrink-0">
+    <header className="relative h-12 border-b bg-card flex items-center px-3 gap-2 shrink-0">
+      {ctxFetching && (
+        <div className="absolute left-0 right-0 top-0 h-0.5 overflow-hidden">
+          <div className="h-full w-1/3 bg-primary animate-[loading-bar_1.2s_ease-in-out_infinite]" />
+        </div>
+      )}
+      <SidebarTrigger />
+
+      {ctxFetching && (
+        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>{locale === "ar" ? "يتم تحديث البيانات…" : "Updating data…"}</span>
+        </div>
+      )}
+
       <SidebarTrigger />
 
       <div className="flex items-center gap-2 ms-2">
