@@ -289,6 +289,13 @@ function AccountsPage() {
                 <tr key={a.id} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono" style={{ paddingInlineStart: `${12 + depth * 16}px` }}>{a.code}</td>
                   <td className="p-3 font-medium">{localized(a, "name")}</td>
+                  <td className="p-3 text-muted-foreground text-xs">
+                    {(() => {
+                      const at = typeById.get(a.account_type_id);
+                      const cls = at?.classification ?? a.account_type;
+                      return t(`accounts.${statementOf(cls)}`);
+                    })()}
+                  </td>
                   <td className="p-3">
                     {(() => {
                       const at = typeById.get(a.account_type_id);
