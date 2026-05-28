@@ -26,7 +26,7 @@ import {
 import { Plus, Pencil, Trash2, Download, Upload, ChevronDown, ChevronRight, FolderTree, FileText } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { AccountTypesPage } from "./_authenticated.account-types";
+
 import { ClassificationsPage } from "./_authenticated.classifications";
 import { AccountClassificationsPage } from "./_authenticated.account-classifications";
 import { CostCentersPage } from "./_authenticated.cost-centers";
@@ -44,7 +44,6 @@ function AccountsPage() {
       <Tabs defaultValue="coa" className="w-full">
         <TabsList>
           <TabsTrigger value="coa">{t("accounts.title")}</TabsTrigger>
-          <TabsTrigger value="types">{t("accounts.accountTypesNav")}</TabsTrigger>
           <TabsTrigger value="classifications">{t("accounts.coreClassifications")}</TabsTrigger>
           <TabsTrigger value="buckets">{t("accounts.accountingBucket")}</TabsTrigger>
           <TabsTrigger value="mapping">{t("accounts.classificationMapping")}</TabsTrigger>
@@ -53,9 +52,6 @@ function AccountsPage() {
         </TabsList>
         <TabsContent value="coa" className="mt-4">
           <ChartOfAccountsPanel />
-        </TabsContent>
-        <TabsContent value="types" className="mt-4">
-          <AccountTypesPage embedded />
         </TabsContent>
         <TabsContent value="classifications" className="mt-4">
           <ClassificationsPage embedded />
