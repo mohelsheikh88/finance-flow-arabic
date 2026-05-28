@@ -39,6 +39,13 @@ export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + "/");
 
+  const groups = [
+    {
+      label: t("nav.dashboard"),
+      items: [
+        { url: "/dashboard", icon: LayoutDashboard, title: t("nav.dashboard") },
+      ],
+    },
     {
       label: t("nav.accountsReceivable"),
       items: [
@@ -87,6 +94,19 @@ export function AppSidebar() {
         { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
       ],
     },
+    {
+      label: t("nav.reports"),
+      items: [
+        { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
+        { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
+        { url: "/reports/aging", icon: FileText, title: t("nav.aging") },
+        { url: "/reports/vat", icon: Receipt, title: t("nav.vatReport") },
+      ],
+    },
+    {
+      label: t("nav.configuration"),
+      items: [
+        { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
         { url: "/cost-centers", icon: Wallet, title: t("nav.costCenters") },
         { url: "/journals", icon: BookOpen, title: t("nav.journals") },
         { url: "/taxes", icon: Receipt, title: t("nav.taxes") },
