@@ -87,6 +87,44 @@ export const moveAccountType = createServerFn({ method: "POST" })
     return { ok: true, moved: true };
   });
 
+// Reorder a sibling group (same parent + classification) in one shot.
+export const reorderAccountTypes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; orderedIds: string[] }) =>
+    z.object({
+      companyId: z.string().uuid(),
+      orderedIds: z.array(z.string().uuid()).min(1).max(2000),
+    }).parse(i)
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    // Verify all belong to same company + parent + classification
+    const { data: rows, error } = await sb
+      .from("account_types")
+      .select("id, company_id, parent_id, classification")
+      .in("id", data.orderedIds);
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length !== data.orderedIds.length) throw new Error("Some items not found");
+    const first = rows[0];
+    for (const r of rows) {
+      if (r.company_id !== data.companyId) throw new Error("Cross-company reorder denied");
+      if ((r.parent_id ?? null) !== (first.parent_id ?? null) || r.classification !== first.classification) {
+        throw new Error("All items must be siblings (same parent and classification)");
+      }
+    }
+    // First pass: bump to negative temp to avoid uniqueness conflicts (none here, but safe).
+    for (let i = 0; i < data.orderedIds.length; i++) {
+      const u = await sb.from("account_types").update({ sort_order: -(i + 1) }).eq("id", data.orderedIds[i]);
+      if (u.error) throw new Error(u.error.message);
+    }
+    for (let i = 0; i < data.orderedIds.length; i++) {
+      const u = await sb.from("account_types").update({ sort_order: (i + 1) * 10 }).eq("id", data.orderedIds[i]);
+      if (u.error) throw new Error(u.error.message);
+    }
+    return { ok: true };
+  });
+
+
 
 
 
@@ -286,6 +324,37 @@ export const swapClassificationOrder = createServerFn({ method: "POST" })
     if (e3.error) throw new Error(e3.error.message);
     return { ok: true };
   });
+
+export const reorderClassifications = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; orderedIds: string[] }) =>
+    z.object({
+      companyId: z.string().uuid(),
+      orderedIds: z.array(z.string().uuid()).min(1).max(2000),
+    }).parse(i)
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: rows, error } = await sb
+      .from("classifications")
+      .select("id, company_id")
+      .in("id", data.orderedIds);
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length !== data.orderedIds.length) throw new Error("Some items not found");
+    for (const r of rows) {
+      if (r.company_id !== data.companyId) throw new Error("Cross-company reorder denied");
+    }
+    for (let i = 0; i < data.orderedIds.length; i++) {
+      const u = await sb.from("classifications").update({ sort_order: -(i + 1) }).eq("id", data.orderedIds[i]);
+      if (u.error) throw new Error(u.error.message);
+    }
+    for (let i = 0; i < data.orderedIds.length; i++) {
+      const u = await sb.from("classifications").update({ sort_order: (i + 1) * 10 }).eq("id", data.orderedIds[i]);
+      if (u.error) throw new Error(u.error.message);
+    }
+    return { ok: true };
+  });
+
 
 
 

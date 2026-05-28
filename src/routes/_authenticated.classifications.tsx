@@ -6,8 +6,12 @@ import {
   listClassifications,
   upsertClassification,
   deleteClassification,
-  swapClassificationOrder,
+  reorderClassifications,
 } from "@/lib/api/accounting.functions";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableRow } from "@/components/sortable-row";
+
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -22,7 +26,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX } from "lucide-react";
 import { toast } from "sonner";
 
 
@@ -87,7 +91,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
   const list = useServerFn(listClassifications);
   const upsert = useServerFn(upsertClassification);
   const remove = useServerFn(deleteClassification);
-  const swapOrder = useServerFn(swapClassificationOrder);
+  const reorder = useServerFn(reorderClassifications);
+
 
 
   const { data: rows = [] } = useQuery({
@@ -174,11 +179,16 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const swapMut = useMutation({
-    mutationFn: (vars: { aId: string; bId: string }) => swapOrder({ data: vars }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["classifications"] }),
-    onError: (e: Error) => toast.error(e.message),
+  const reorderMut = useMutation({
+    mutationFn: (orderedIds: string[]) => reorder({ data: { companyId: companyId!, orderedIds } }),
+    onError: (e: Error, _v, ctx: any) => {
+      if (ctx?.prev) qc.setQueryData(["classifications", companyId], ctx.prev);
+      toast.error(e.message);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["classifications", companyId] }),
   });
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const hasFilters =
     search.trim() !== "" ||
@@ -187,12 +197,29 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     filterBucket !== "all" ||
     filterStatus !== "all";
 
-  const move = (r: any, dir: -1 | 1) => {
-    const idx = (rows as any[]).findIndex((x) => x.id === r.id);
-    const target = (rows as any[])[idx + dir];
-    if (!target) return;
-    swapMut.mutate({ aId: r.id, bId: target.id });
+  const handleDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    if (hasFilters) {
+      toast.error("Clear filters before reordering | امسح الفلاتر قبل إعادة الترتيب");
+      return;
+    }
+    const prev = qc.getQueryData<any[]>(["classifications", companyId]);
+    if (!prev) return;
+    const sorted = prev.slice().sort(
+      (a, b) => ((a.sort_order ?? 0) - (b.sort_order ?? 0)) || String(a.code).localeCompare(String(b.code))
+    );
+    const fromIdx = sorted.findIndex((r) => r.id === active.id);
+    const toIdx = sorted.findIndex((r) => r.id === over.id);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const reordered = arrayMove(sorted, fromIdx, toIdx);
+    const orderMap = new Map(reordered.map((r, i) => [r.id, (i + 1) * 10]));
+    const next = prev.map((r) => (orderMap.has(r.id) ? { ...r, sort_order: orderMap.get(r.id)! } : r));
+    qc.setQueryData(["classifications", companyId], next);
+    reorderMut.mutate(reordered.map((r) => r.id));
   };
+
+
 
 
   const canSave = form.code && form.name_ar && form.name_en && !!companyId;
@@ -306,72 +333,61 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       </div>
 
       <Card>
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">{t("common.name")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
-              <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
-              <th className="text-center p-3 font-medium">{t("common.status")}</th>
-              <th className="text-end p-3 font-medium">{t("common.actions")}</th>
-            </tr>
-          </thead>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={(filteredRows as any[]).map((r) => r.id)} strategy={verticalListSortingStrategy}>
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="w-8 p-3"></th>
+                  <th className="text-start p-3 font-medium">{t("common.code")}</th>
+                  <th className="text-start p-3 font-medium">{t("common.name")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.statement")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.normalBalance")}</th>
+                  <th className="text-start p-3 font-medium">{t("accounts.accountingBucket")}</th>
+                  <th className="text-center p-3 font-medium">{t("common.status")}</th>
+                  <th className="text-end p-3 font-medium">{t("common.actions")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(filteredRows as any[]).map((r) => (
+                  <SortableRow key={r.id} id={r.id} disabled={hasFilters} className="border-t hover:bg-muted/30">
+                    {({ handle }) => (
+                      <>
+                        <td className="p-3 align-middle">{handle}</td>
+                        <td className="p-3 font-mono">{r.code}</td>
+                        <td className="p-3 font-medium">{localized(r, "name")}</td>
+                        <td className="p-3 text-muted-foreground">{statementLabel(r.statement)}</td>
+                        <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
+                        <td className="p-3">
+                          <Badge variant="outline" className={bucketColors[r.bucket]}>
+                            {t(`accounts.${r.bucket}`)}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1 justify-end">
+                            <Button size="sm" variant="ghost" onClick={() => openEdit(r)} aria-label={t("common.edit")}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setToDelete(r)}
+                              aria-label={t("common.delete")}
+                              className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </>
+                    )}
+                  </SortableRow>
+                ))}
+                {filteredRows.length === 0 && (
+                  <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </SortableContext>
+        </DndContext>
 
-          <tbody>
-            {(filteredRows as any[]).map((r) => (
-              <tr key={r.id} className="border-t hover:bg-muted/30">
-                <td className="p-3 font-mono">{r.code}</td>
-                <td className="p-3 font-medium">{localized(r, "name")}</td>
-                <td className="p-3 text-muted-foreground">{statementLabel(r.statement)}</td>
-                <td className="p-3 text-muted-foreground">{normalBalanceLabel(r.normal_balance)}</td>
-                <td className="p-3">
-                  <Badge variant="outline" className={bucketColors[r.bucket]}>
-                    {t(`accounts.${r.bucket}`)}
-                  </Badge>
-                </td>
-                <td className="p-3 text-center">{r.is_active ? t("common.active") : t("common.inactive")}</td>
-                <td className="p-3">
-                  <div className="flex items-center gap-1 justify-end">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => move(r, -1)}
-                      disabled={hasFilters || swapMut.isPending || (rows as any[]).findIndex((x) => x.id === r.id) === 0}
-                      aria-label="Move up"
-                      title={hasFilters ? t("common.clear") : undefined}
-                    >
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => move(r, 1)}
-                      disabled={hasFilters || swapMut.isPending || (rows as any[]).findIndex((x) => x.id === r.id) === (rows as any[]).length - 1}
-                      aria-label="Move down"
-                      title={hasFilters ? t("common.clear") : undefined}
-                    >
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => openEdit(r)} aria-label={t("common.edit")}>
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setToDelete(r)}
-                      aria-label={t("common.delete")}
-                      className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </td>
-
-              </tr>
-            ))}
-            {filteredRows.length === 0 && (
-              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>
-            )}
-          </tbody>
-        </table>
       </Card>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
