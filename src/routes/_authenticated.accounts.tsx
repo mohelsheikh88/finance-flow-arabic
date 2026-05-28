@@ -60,9 +60,7 @@ function AccountsPage() {
   );
 }
 
-    </div>
-  );
-}
+
 
 
 type FormState = {
