@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Topbar } from "@/components/topbar";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { useI18n } from "@/i18n";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   const { user, loading } = useAuth();
+  const { dir } = useI18n();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,7 +30,7 @@ function AuthenticatedLayout() {
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="min-h-screen flex w-full bg-muted/30">
+      <div className="min-h-screen flex w-full bg-muted/30" dir={dir}>
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <Topbar />
