@@ -48,7 +48,7 @@ const empty: FormState = {
   notes: "",
 };
 
-};
+
 
 const clsColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
