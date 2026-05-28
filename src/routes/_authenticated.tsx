@@ -24,13 +24,13 @@ function measureLabelWidth(
   let max = 0;
   for (const g of groups) {
     ctx.font = `${g.weight} ${g.size}px "Cairo", "Tajawal", system-ui, sans-serif`;
-    // 8% buffer for web-font vs canvas-font discrepancy (Cairo metrics)
-    const w = ctx.measureText(g.text).width * 1.08 + g.indent;
+    // 25% buffer to absorb Cairo web-font vs canvas-fallback metric drift
+    const w = ctx.measureText(g.text).width * 1.25 + g.indent;
     if (w > max) max = w;
   }
-  // icon (20) + gap (10) + side padding (32) + safety (20)
-  const total = Math.ceil(max + 20 + 10 + 32 + 20);
-  return Math.max(280, Math.min(720, total));
+  // icon (22) + gap (12) + side padding (40) + chevron-room (24) + safety (24)
+  const total = Math.ceil(max + 22 + 12 + 40 + 24 + 24);
+  return Math.max(340, Math.min(760, total));
 }
 
 
