@@ -37,7 +37,22 @@ function AssetsPage() {
   const listCat = useServerFn(listCategories);
   const listAcc = useServerFn(listAccounts);
   const create = useServerFn(createAsset);
-  const createCat = useServerFn(createCategory);
+  const getSched = useServerFn(getDepreciationSchedule);
+  const postDep = useServerFn(postDueDepreciation);
+  const postDepMut = useMutation({
+    mutationFn: () => postDep({ data: { companyId: companyId! } }),
+    onSuccess: (r: any) => {
+      qc.invalidateQueries({ queryKey: ["assets"] });
+      qc.invalidateQueries({ queryKey: ["depreciation_schedule"] });
+      if (r?.errors?.length) {
+        toast.warning(`${r.posted} posted, ${r.skipped} skipped`);
+      } else {
+        toast.success(`${r.posted} depreciation entries posted`);
+      }
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const getSched = useServerFn(getDepreciationSchedule);
 
   const [open, setOpen] = useState(false);
