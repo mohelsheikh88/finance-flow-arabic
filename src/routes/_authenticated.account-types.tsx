@@ -773,7 +773,7 @@ export function AccountTypesPage({ embedded = false }: { embedded?: boolean } = 
                 <div className="mt-1 text-xs text-muted-foreground flex items-center gap-2">
                   <span>Bucket:</span>
                   <Badge variant="outline" className={clsColors[form.classification]}>
-                    {t(`accounts.${form.classification}`)}
+                    {bucketName(form.classification, t(`accounts.${form.classification}`))}
                   </Badge>
                 </div>
               )}
