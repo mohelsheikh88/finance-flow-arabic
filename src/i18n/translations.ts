@@ -10,6 +10,7 @@ export const translations = {
       edit: "تعديل",
       create: "إنشاء",
       add: "إضافة",
+      new: "جديد",
       search: "بحث...",
       actions: "الإجراءات",
       yes: "نعم",
