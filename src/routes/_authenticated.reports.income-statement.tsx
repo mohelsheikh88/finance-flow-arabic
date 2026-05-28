@@ -86,30 +86,57 @@ function IncomeStatementPage() {
 
       <Card>
         <div className="p-3 border-b bg-success/5 font-semibold">{t("accounts.income")}</div>
-        {(data?.income ?? []).map((r) => (
-          <div key={r.id} className="flex justify-between px-6 py-1.5 text-xs border-b border-muted/30">
-            <span><span className="font-mono text-muted-foreground me-2">{r.code}</span>{localized(r, "name")}</span>
-            <span className="font-mono">{fmt(r.balance)}</span>
-          </div>
-        ))}
-        {(data?.income.length ?? 0) === 0 && <div className="px-6 py-2 text-xs text-muted-foreground">—</div>}
+        {(data?.incomeGroups ?? []).map((g: any) => {
+          const title = g.classification_id
+            ? localized({ name_ar: g.name_ar, name_en: g.name_en }, "name")
+            : t("accounts.income");
+          return (
+            <div key={g.classification_id ?? `__inc_${g.bucket}`}>
+              <div className="bg-muted/30 px-3 py-2 border-t border-b font-semibold text-sm flex justify-between">
+                <span>{title}</span>
+                <span className="font-mono">{fmt(g.total)}</span>
+              </div>
+              {g.accounts.map((r: any) => (
+                <div key={r.id} className="flex justify-between px-6 py-1.5 text-xs border-b border-muted/30">
+                  <span><span className="font-mono text-muted-foreground me-2">{r.code}</span>{localized(r, "name")}</span>
+                  <span className="font-mono">{fmt(r.balance)}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+        {(data?.incomeGroups?.length ?? 0) === 0 && <div className="px-6 py-2 text-xs text-muted-foreground">—</div>}
         <div className="bg-success/10 px-3 py-2 border-t font-bold flex justify-between">
           <span>{t("reports.totalIncome")}</span>
           <span className="font-mono text-base">{fmt(data?.totals.income ?? 0)}</span>
         </div>
 
         <div className="p-3 border-b bg-warning/5 font-semibold">{t("accounts.expense")}</div>
-        {(data?.expenses ?? []).map((r) => (
-          <div key={r.id} className="flex justify-between px-6 py-1.5 text-xs border-b border-muted/30">
-            <span><span className="font-mono text-muted-foreground me-2">{r.code}</span>{localized(r, "name")}</span>
-            <span className="font-mono">{fmt(r.balance)}</span>
-          </div>
-        ))}
-        {(data?.expenses.length ?? 0) === 0 && <div className="px-6 py-2 text-xs text-muted-foreground">—</div>}
+        {(data?.expenseGroups ?? []).map((g: any) => {
+          const title = g.classification_id
+            ? localized({ name_ar: g.name_ar, name_en: g.name_en }, "name")
+            : t("accounts.expense");
+          return (
+            <div key={g.classification_id ?? `__exp_${g.bucket}`}>
+              <div className="bg-muted/30 px-3 py-2 border-t border-b font-semibold text-sm flex justify-between">
+                <span>{title}</span>
+                <span className="font-mono">{fmt(g.total)}</span>
+              </div>
+              {g.accounts.map((r: any) => (
+                <div key={r.id} className="flex justify-between px-6 py-1.5 text-xs border-b border-muted/30">
+                  <span><span className="font-mono text-muted-foreground me-2">{r.code}</span>{localized(r, "name")}</span>
+                  <span className="font-mono">{fmt(r.balance)}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+        {(data?.expenseGroups?.length ?? 0) === 0 && <div className="px-6 py-2 text-xs text-muted-foreground">—</div>}
         <div className="bg-warning/10 px-3 py-2 border-t font-bold flex justify-between">
           <span>{t("reports.totalExpenses")}</span>
           <span className="font-mono text-base">{fmt(data?.totals.expenses ?? 0)}</span>
         </div>
+
 
         <div className={`px-3 py-3 border-t-2 font-bold flex justify-between text-lg ${net >= 0 ? "bg-success/10" : "bg-destructive/10"}`}>
           <span>{t("reports.netIncome")}</span>
