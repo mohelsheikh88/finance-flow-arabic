@@ -40,7 +40,7 @@ function AccountsPage() {
   const { t } = useI18n();
   return (
     <div className="p-6 space-y-4">
-      <h1 className="page-title">{t("accounts.title")}</h1>
+      <h1 className="page-title">{t("nav.chartOfAccounts")}</h1>
       <Tabs defaultValue="coa" className="w-full">
         <TabsList>
           <TabsTrigger value="coa">{t("accounts.title")}</TabsTrigger>
