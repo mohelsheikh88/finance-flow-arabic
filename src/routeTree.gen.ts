@@ -22,6 +22,7 @@ import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authenticated.fiscal-periods'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated.customers'
 import { Route as AuthenticatedCurrenciesRouteImport } from './routes/_authenticated.currencies'
 import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenticated.cost-centers'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated.companies'
@@ -101,6 +102,11 @@ const AuthenticatedFiscalPeriodsRoute =
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCurrenciesRoute = AuthenticatedCurrenciesRouteImport.update({
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
+  '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/journals': typeof AuthenticatedJournalsRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
+  '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/journals': typeof AuthenticatedJournalsRoute
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/cost-centers': typeof AuthenticatedCostCentersRoute
   '/_authenticated/currencies': typeof AuthenticatedCurrenciesRoute
+  '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/cost-centers'
     | '/currencies'
+    | '/customers'
     | '/dashboard'
     | '/fiscal-periods'
     | '/journals'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/cost-centers'
     | '/currencies'
+    | '/customers'
     | '/dashboard'
     | '/fiscal-periods'
     | '/journals'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/_authenticated/companies'
     | '/_authenticated/cost-centers'
     | '/_authenticated/currencies'
+    | '/_authenticated/customers'
     | '/_authenticated/dashboard'
     | '/_authenticated/fiscal-periods'
     | '/_authenticated/journals'
@@ -455,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/customers': {
+      id: '/_authenticated/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AuthenticatedCustomersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/currencies': {
       id: '/_authenticated/currencies'
       path: '/currencies'
@@ -563,6 +582,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCostCentersRoute: typeof AuthenticatedCostCentersRoute
   AuthenticatedCurrenciesRoute: typeof AuthenticatedCurrenciesRoute
+  AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFiscalPeriodsRoute: typeof AuthenticatedFiscalPeriodsRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
@@ -590,6 +610,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCostCentersRoute: AuthenticatedCostCentersRoute,
   AuthenticatedCurrenciesRoute: AuthenticatedCurrenciesRoute,
+  AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFiscalPeriodsRoute: AuthenticatedFiscalPeriodsRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
