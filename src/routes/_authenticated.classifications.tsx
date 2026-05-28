@@ -6,8 +6,12 @@ import {
   listClassifications,
   upsertClassification,
   deleteClassification,
-  swapClassificationOrder,
+  reorderClassifications,
 } from "@/lib/api/accounting.functions";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableRow } from "@/components/sortable-row";
+
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
