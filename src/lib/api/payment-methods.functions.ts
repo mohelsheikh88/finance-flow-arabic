@@ -20,9 +20,9 @@ const CreateSchema = z.object({
   code: z.string().min(1).max(50),
   name_ar: z.string().min(1).max(255),
   name_en: z.string().min(1).max(255),
-  method_type: z.enum(["cash", "bank_transfer", "cheque", "card", "online", "other"]),
-  bank_account_id: z.string().uuid().optional().nullable(),
   method_type: z.enum(["cash", "bank_transfer", "check", "card", "other"]),
+  bank_account_id: z.string().uuid().optional().nullable(),
+  is_inbound: z.boolean().default(true),
   is_outbound: z.boolean().default(true),
   is_active: z.boolean().default(true),
 });
