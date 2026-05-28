@@ -1,8 +1,10 @@
 import { useState, useMemo, useRef } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAccounts, upsertAccount, deleteAccount, importAccounts } from "@/lib/api/accounting.functions";
+import {
+  listAccounts, upsertAccount, deleteAccount, importAccounts, listAccountTypes,
+} from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -17,7 +19,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Download, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Download, Upload, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -25,15 +27,12 @@ export const Route = createFileRoute("/_authenticated/accounts")({
   component: AccountsPage,
 });
 
-const TYPES = ["asset", "liability", "equity", "income", "expense"] as const;
-type AccType = (typeof TYPES)[number];
-
 type FormState = {
   id?: string;
   code: string;
   name_ar: string;
   name_en: string;
-  account_type: AccType;
+  account_type_id: string;
   parent_id: string;
   currency_code: string;
   is_group: boolean;
@@ -46,7 +45,7 @@ const empty: FormState = {
   code: "",
   name_ar: "",
   name_en: "",
-  account_type: "asset",
+  account_type_id: "",
   parent_id: "",
   currency_code: "",
   is_group: false,
@@ -54,6 +53,7 @@ const empty: FormState = {
   is_reconcilable: false,
   notes: "",
 };
+
 
 function AccountsPage() {
   const { t } = useI18n();
