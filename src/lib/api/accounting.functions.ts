@@ -16,6 +16,69 @@ export const listAccounts = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
+const ACCOUNT_TYPES = ["asset", "liability", "equity", "income", "expense"] as const;
+
+const AccountUpsertSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  code: z.string().trim().min(1).max(50).regex(/^[A-Za-z0-9._-]+$/),
+  name_ar: z.string().trim().min(1).max(255),
+  name_en: z.string().trim().min(1).max(255),
+  account_type: z.enum(ACCOUNT_TYPES),
+  parent_id: z.string().uuid().nullable().optional(),
+  currency_code: z.string().trim().min(1).max(10).nullable().optional(),
+  is_group: z.boolean().optional(),
+  is_active: z.boolean().optional(),
+  is_reconcilable: z.boolean().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+});
+
+export const upsertAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: z.infer<typeof AccountUpsertSchema>) => AccountUpsertSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const payload: any = {
+      company_id: data.company_id,
+      code: data.code,
+      name_ar: data.name_ar,
+      name_en: data.name_en,
+      account_type: data.account_type,
+      parent_id: data.parent_id ?? null,
+      currency_code: data.currency_code || null,
+      is_group: data.is_group ?? false,
+      is_active: data.is_active ?? true,
+      is_reconcilable: data.is_reconcilable ?? false,
+      notes: data.notes ?? null,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("accounts").update(payload).eq("id", data.id).select().single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("accounts").insert(payload).select().single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    // Block delete if account is used in journal lines or as a child parent
+    const [{ count: linesCount }, { count: childCount }] = await Promise.all([
+      context.supabase.from("journal_entry_lines").select("id", { count: "exact", head: true }).eq("account_id", data.id),
+      context.supabase.from("accounts").select("id", { count: "exact", head: true }).eq("parent_id", data.id),
+    ]);
+    if ((linesCount ?? 0) > 0) throw new Error("Account is used in journal entries and cannot be deleted");
+    if ((childCount ?? 0) > 0) throw new Error("Account has child accounts and cannot be deleted");
+    const { error } = await context.supabase.from("accounts").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 export const listPartners = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string }) => i)
