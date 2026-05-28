@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       account_types: {
         Row: {
-          classification: Database["public"]["Enums"]["account_type"]
+          classification: string
           classification_id: string | null
           code: string
           company_id: string
@@ -32,7 +32,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          classification: Database["public"]["Enums"]["account_type"]
+          classification: string
           classification_id?: string | null
           code: string
           company_id: string
@@ -48,7 +48,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          classification?: Database["public"]["Enums"]["account_type"]
+          classification?: string
           classification_id?: string | null
           code?: string
           company_id?: string
@@ -127,7 +127,7 @@ export type Database = {
       }
       accounts: {
         Row: {
-          account_type: Database["public"]["Enums"]["account_type"]
+          account_type: string
           account_type_id: string | null
           code: string
           company_id: string
@@ -144,7 +144,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          account_type: Database["public"]["Enums"]["account_type"]
+          account_type: string
           account_type_id?: string | null
           code: string
           company_id: string
@@ -161,7 +161,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          account_type?: Database["public"]["Enums"]["account_type"]
+          account_type?: string
           account_type_id?: string | null
           code?: string
           company_id?: string
@@ -670,7 +670,7 @@ export type Database = {
       }
       classifications: {
         Row: {
-          bucket: Database["public"]["Enums"]["account_type"]
+          bucket: string
           code: string
           company_id: string
           created_at: string
@@ -685,7 +685,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          bucket: Database["public"]["Enums"]["account_type"]
+          bucket: string
           code: string
           company_id: string
           created_at?: string
@@ -700,7 +700,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          bucket?: Database["public"]["Enums"]["account_type"]
+          bucket?: string
           code?: string
           company_id?: string
           created_at?: string
