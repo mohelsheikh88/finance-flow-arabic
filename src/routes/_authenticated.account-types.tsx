@@ -222,10 +222,10 @@ function AccountTypesPage() {
               <Label>{t("common.code")} *</Label>
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
+            <div>
               <Label>{t("accounts.classification")} *</Label>
-
-              <Label>التصنيف الأساسي *</Label>
               <Select value={form.classification} onValueChange={(v) => setForm({ ...form, classification: v as Cls })}>
+
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {CLASSIFICATIONS.map((c) => (
