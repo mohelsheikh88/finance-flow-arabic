@@ -530,6 +530,7 @@ export const translations = {
       requests: "طلبات الاعتماد",
       noWorkflows: "لا توجد مسارات اعتماد بعد",
       docType: "نوع المستند",
+      journalType: "نوع اليومية",
       minAmount: "الحد الأدنى",
       maxAmount: "الحد الأقصى",
       steps: "خطوات الاعتماد",
@@ -537,8 +538,10 @@ export const translations = {
       step: "الخطوة",
       document: "المستند",
       reference: "المرجع",
+      approval: "الاعتماد",
       actionDone: "تم تنفيذ الإجراء",
       doc: { journal_entry: "قيد يومي", invoice: "فاتورة", payment: "دفعة", asset_disposal: "استبعاد أصل" },
+      jt: { sales: "مبيعات", purchase: "مشتريات", bank: "بنك", cash: "صندوق", misc: "متنوعة" },
       status: { pending: "قيد الاعتماد", approved: "معتمد", rejected: "مرفوض", cancelled: "ملغي", all: "الكل" },
     },
     assets: {
