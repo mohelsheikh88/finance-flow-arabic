@@ -427,7 +427,7 @@ function ChartOfAccountsPanel() {
       const buf = await f.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      if (!ws) { toast.error("Empty workbook | الملف فارغ"); return; }
+      if (!ws) { toast.error(t("common.emptyWorkbook")); return; }
       const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
 
       // ----- Schema validation -----
@@ -439,16 +439,16 @@ function ChartOfAccountsPanel() {
 
       const header = (XLSX.utils.sheet_to_json<any>(ws, { header: 1 })[0] as any[] | undefined) ?? [];
       const headerCols = header.map((h) => String(h ?? "").trim()).filter(Boolean);
-      if (!headerCols.length) { toast.error("Sheet has no header row | الورقة لا تحتوي على صف عناوين"); return; }
+      if (!headerCols.length) { toast.error(t("common.noHeaderRow")); return; }
 
       const missing = REQUIRED.filter((c) => !headerCols.includes(c));
       if (missing.length) {
-        toast.error(`Missing required columns: ${missing.join(", ")} | أعمدة مطلوبة ناقصة`);
+        toast.error(`${t("common.missingColumns")}: ${missing.join(", ")}`);
         return;
       }
       const unknown = headerCols.filter((c) => !EXPECTED.includes(c));
       if (unknown.length) {
-        toast.error(`Unexpected columns: ${unknown.join(", ")} | أعمدة غير متوقعة`);
+        toast.error(`${t("common.unexpectedColumns")}: ${unknown.join(", ")}`);
         return;
       }
 
