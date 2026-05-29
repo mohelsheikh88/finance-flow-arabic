@@ -158,8 +158,8 @@ function ApprovalsPage() {
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {activeRoles.map((r: any) => (
+                            <SelectItem key={r.code} value={r.code}>
                               {locale === "ar" ? r.name_ar : r.name_en}
-                              {t("locale") === "ar" ? r.name_ar : r.name_en}
                             </SelectItem>
                           ))}
                         </SelectContent>
