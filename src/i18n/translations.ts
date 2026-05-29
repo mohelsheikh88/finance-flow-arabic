@@ -658,6 +658,9 @@ export const translations = {
       uploaded: "تم رفع المرفق",
       deleteConfirm: "هل تريد حذف هذا المرفق؟",
     },
+    viewChangeHistory: "عرض سجل التغييرات",
+    afterPostingOnly: "متاح بعد الترحيل فقط",
+    cannotPrintBeforePost: "لا يمكن إصدار الفاتورة الضريبية إلا بعد الترحيل (POST)",
 
     payments: {
       title: "المدفوعات والتحصيلات",
@@ -1428,6 +1431,9 @@ export const translations = {
       uploaded: "Attachment uploaded",
       deleteConfirm: "Delete this attachment?",
     },
+    viewChangeHistory: "View Change History",
+    afterPostingOnly: "Available after posting only",
+    cannotPrintBeforePost: "Tax invoice can only be issued after posting",
 
     payments: {
       title: "Payments & Collections",

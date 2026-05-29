@@ -60,11 +60,7 @@ export function InvoiceDetailDialog({
   const handlePrint = async () => {
     if (!inv) return;
     if (!isPosted) {
-      toast.error(
-        locale === "ar"
-          ? "لا يمكن إصدار الفاتورة الضريبية إلا بعد الترحيل (POST)"
-          : "Tax invoice can only be issued after posting"
-      );
+      toast.error(t("invoices.cannotPrintBeforePost"));
       return;
     }
     try {
@@ -230,7 +226,7 @@ export function InvoiceDetailDialog({
                 <Button variant="outline" size="sm" className="w-full justify-between">
                   <span className="flex items-center gap-2">
                     <History className="h-4 w-4" />
-                    {locale === "ar" ? "عرض سجل التغييرات" : "View Change History"}
+                    {t("invoices.viewChangeHistory")}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${showHistory ? "rotate-180" : ""}`} />
                 </Button>
@@ -244,7 +240,7 @@ export function InvoiceDetailDialog({
 
         <DialogFooter className="gap-2">
           {inv && (
-            <Button variant="default" onClick={handlePrint} disabled={!isPosted} title={!isPosted ? (locale === "ar" ? "متاح بعد الترحيل فقط" : "Available after posting only") : undefined}>
+            <Button variant="default" onClick={handlePrint} disabled={!isPosted} title={!isPosted ? t("invoices.afterPostingOnly") : undefined}>
               <Printer className="h-4 w-4 me-1" />
               {t("invoices.printTax") || "طباعة فاتورة ضريبية"}
             </Button>
