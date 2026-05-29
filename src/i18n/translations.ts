@@ -587,6 +587,15 @@ export const translations = {
       noTax: "بدون ضريبة",
       posted: "تم الترحيل بنجاح",
       saveAndPost: "حفظ وترحيل",
+      edit: "تعديل",
+      editTitle: "تعديل الفاتورة",
+      saveChanges: "حفظ التعديلات",
+      resetToDraft: "إرجاع لمسودة",
+      resetConfirm: "هل أنت متأكد من إرجاع الفاتورة إلى مسودة؟ سيتم حذف القيد المحاسبي المرتبط بها.",
+      resetSuccess: "تم إرجاع الفاتورة إلى مسودة",
+      updated: "تم حفظ التعديلات",
+      noResetPermission: "ليس لديك صلاحية إرجاع هذه الفاتورة إلى مسودة",
+      hasPayments: "لا يمكن الإرجاع: توجد دفعات مرتبطة بالفاتورة",
     },
 
     payments: {
@@ -1285,6 +1294,15 @@ export const translations = {
       noTax: "No Tax",
       posted: "Posted successfully",
       saveAndPost: "Save & Post",
+      edit: "Edit",
+      editTitle: "Edit Invoice",
+      saveChanges: "Save Changes",
+      resetToDraft: "Reset to Draft",
+      resetConfirm: "Are you sure you want to reset this invoice to draft? The linked journal entry will be deleted.",
+      resetSuccess: "Invoice reset to draft",
+      updated: "Changes saved",
+      noResetPermission: "You don't have permission to reset this invoice to draft",
+      hasPayments: "Cannot reset: invoice has linked payments",
     },
 
     payments: {

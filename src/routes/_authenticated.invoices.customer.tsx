@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createInvoice, listInvoices, postInvoice } from "@/lib/api/invoices.functions";
+import { createInvoice, listInvoices, postInvoice, getInvoice, updateInvoice, resetInvoiceToDraft, canResetInvoice } from "@/lib/api/invoices.functions";
 import { listAccounts, listPartners } from "@/lib/api/accounting.functions";
 import { listTaxes } from "@/lib/api/vat.functions";
 import { listPaymentTerms } from "@/lib/api/payment-terms.functions";
@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Trash2, FileText, Check } from "lucide-react";
+import { Plus, Trash2, FileText, Check, Pencil, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { formatLockError } from "@/lib/lock-error";
 
@@ -52,6 +52,9 @@ function CustomerInvoicesPage() {
   const list = useServerFn(listInvoices);
   const create = useServerFn(createInvoice);
   const post = useServerFn(postInvoice);
+  const update = useServerFn(updateInvoice);
+  const getInv = useServerFn(getInvoice);
+  const resetFn = useServerFn(resetInvoiceToDraft);
   const accFn = useServerFn(listAccounts);
   const partFn = useServerFn(listPartners);
   const taxFn = useServerFn(listTaxes);
@@ -72,6 +75,7 @@ function CustomerInvoicesPage() {
   const salesTaxes = taxes.filter((tx: any) => tx.tax_type === "sale");
 
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [header, setHeader] = useState({
     partner_id: "",
     invoice_date: new Date().toISOString().slice(0, 10),
@@ -104,10 +108,39 @@ function CustomerInvoicesPage() {
   }, [lines]);
 
   const reset = () => {
+    setEditingId(null);
     setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", payment_term_id: "", reference: "" });
     setLines([{ description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 }]);
   };
 
+  const openEdit = async (id: string) => {
+    try {
+      const inv: any = await getInv({ data: { id } });
+      if (inv.status !== "draft") {
+        toast.error(t("invoices.editTitle"));
+        return;
+      }
+      setEditingId(id);
+      setHeader({
+        partner_id: inv.partner_id,
+        invoice_date: inv.invoice_date,
+        due_date: inv.due_date || "",
+        payment_term_id: "",
+        reference: inv.reference || "",
+      });
+      setLines((inv.invoice_lines || []).map((l: any) => ({
+        description: l.description || "",
+        account_id: l.account_id,
+        quantity: Number(l.quantity),
+        unit_price: Number(l.unit_price),
+        tax_id: l.tax_id || "",
+        tax_rate: Number(l.tax_rate || 0),
+      })));
+      setOpen(true);
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
 
   const createMut = useMutation({
     mutationFn: (status: "draft" | "posted") => create({ data: {
@@ -137,6 +170,31 @@ function CustomerInvoicesPage() {
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
+  const updateMut = useMutation({
+    mutationFn: () => update({ data: {
+      id: editingId!,
+      partner_id: header.partner_id,
+      invoice_date: header.invoice_date,
+      due_date: header.due_date || null,
+      reference: header.reference || null,
+      lines: lines.map((l) => ({
+        description: l.description || null,
+        account_id: l.account_id,
+        quantity: l.quantity,
+        unit_price: l.unit_price,
+        tax_id: l.tax_id || null,
+        tax_rate: l.tax_rate,
+      })),
+    } as any }),
+    onSuccess: () => {
+      toast.success(t("invoices.updated"));
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      setOpen(false);
+      reset();
+    },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+
   const postMut = useMutation({
     mutationFn: (id: string) => post({ data: { id } }),
     onSuccess: () => {
@@ -145,6 +203,20 @@ function CustomerInvoicesPage() {
     },
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
+
+  const resetMut = useMutation({
+    mutationFn: (id: string) => resetFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success(t("invoices.resetSuccess"));
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+    },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+
+  const handleResetClick = (id: string) => {
+    if (!window.confirm(t("invoices.resetConfirm"))) return;
+    resetMut.mutate(id);
+  };
 
   const canSave = header.partner_id && header.invoice_date && lines.every((l) => l.account_id && l.quantity > 0);
 
@@ -155,12 +227,12 @@ function CustomerInvoicesPage() {
           <h1 className="page-title">{t("nav.customerInvoices")}</h1>
           <p className="text-sm text-muted-foreground">{invoices.length} {t("invoices.count")}</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 me-1" />{t("invoices.new")}</Button>
+            <Button onClick={() => reset()}><Plus className="h-4 w-4 me-1" />{t("invoices.new")}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{t("invoices.new")} — {t("nav.customerInvoices")}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editingId ? t("invoices.editTitle") : t("invoices.new")} — {t("nav.customerInvoices")}</DialogTitle></DialogHeader>
 
             <div className="grid grid-cols-4 gap-3">
               <div className="col-span-2">
@@ -265,9 +337,17 @@ function CustomerInvoicesPage() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-              <Button variant="secondary" onClick={() => createMut.mutate("draft")} disabled={createMut.isPending || !canSave}>{t("je.saveDraft")}</Button>
-              <Button onClick={() => createMut.mutate("posted")} disabled={createMut.isPending || !canSave}><Check className="h-4 w-4 me-1" />{t("invoices.saveAndPost")}</Button>
+              <Button variant="outline" onClick={() => { setOpen(false); reset(); }}>{t("common.cancel")}</Button>
+              {editingId ? (
+                <Button onClick={() => updateMut.mutate()} disabled={updateMut.isPending || !canSave}>
+                  <Check className="h-4 w-4 me-1" />{t("invoices.saveChanges")}
+                </Button>
+              ) : (
+                <>
+                  <Button variant="secondary" onClick={() => createMut.mutate("draft")} disabled={createMut.isPending || !canSave}>{t("je.saveDraft")}</Button>
+                  <Button onClick={() => createMut.mutate("posted")} disabled={createMut.isPending || !canSave}><Check className="h-4 w-4 me-1" />{t("invoices.saveAndPost")}</Button>
+                </>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -300,11 +380,21 @@ function CustomerInvoicesPage() {
                 <td className="p-3">{statusBadge(inv.status, t)}</td>
                 <td className="p-3 text-center"><ApprovalCell documentType="invoice" documentId={inv.id} /></td>
                 <td className="p-3 text-end">
-                  {inv.status === "draft" && (
-                    <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
-                      <Check className="h-3 w-3 me-1" />{t("je.post")}
-                    </Button>
-                  )}
+                  <div className="inline-flex gap-1">
+                    {inv.status === "draft" && (
+                      <>
+                        <Button size="sm" variant="outline" onClick={() => openEdit(inv.id)}>
+                          <Pencil className="h-3 w-3 me-1" />{t("invoices.edit")}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
+                          <Check className="h-3 w-3 me-1" />{t("je.post")}
+                        </Button>
+                      </>
+                    )}
+                    {inv.status === "posted" && Number(inv.amount_paid || 0) === 0 && (
+                      <ResetToDraftButton invoiceId={inv.id} onConfirm={handleResetClick} pending={resetMut.isPending} />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -313,5 +403,21 @@ function CustomerInvoicesPage() {
         </table>
       </Card>
     </div>
+  );
+}
+
+function ResetToDraftButton({ invoiceId, onConfirm, pending }: { invoiceId: string; onConfirm: (id: string) => void; pending: boolean }) {
+  const { t } = useI18n();
+  const canFn = useServerFn(canResetInvoice);
+  const { data } = useQuery({
+    queryKey: ["can-reset-invoice", invoiceId],
+    queryFn: () => canFn({ data: { id: invoiceId } }),
+    staleTime: 30_000,
+  });
+  if (!data?.allowed) return null;
+  return (
+    <Button size="sm" variant="outline" onClick={() => onConfirm(invoiceId)} disabled={pending}>
+      <RotateCcw className="h-3 w-3 me-1" />{t("invoices.resetToDraft")}
+    </Button>
   );
 }
