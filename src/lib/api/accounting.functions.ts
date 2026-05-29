@@ -696,6 +696,14 @@ export const importAccounts = createServerFn({ method: "POST" })
     const codeToId = new Map<string, string>();
     (existing ?? []).forEach((r: any) => codeToId.set(r.code, r.id));
 
+    // Load account types for resolving account_type_code -> account_type_id
+    const { data: types } = await context.supabase
+      .from("account_types")
+      .select("id, code, classification")
+      .eq("company_id", data.companyId);
+    const typeByCode = new Map<string, any>();
+    (types ?? []).forEach((tp: any) => typeByCode.set(String(tp.code).toLowerCase(), tp));
+
     // Sort: parents (no parent_code) first so parent_id can resolve
     const sorted = [...data.rows].sort(
       (a, b) => (a.parent_code ? 1 : 0) - (b.parent_code ? 1 : 0) || a.code.localeCompare(b.code),
@@ -711,12 +719,13 @@ export const importAccounts = createServerFn({ method: "POST" })
         errors.push({ code: r.code, error: `Parent code "${r.parent_code}" not found` });
         continue;
       }
+      const tp = r.account_type_code ? typeByCode.get(String(r.account_type_code).toLowerCase()) : null;
       const payload: any = {
         company_id: data.companyId,
         code: r.code,
         name_ar: r.name_ar,
         name_en: r.name_en,
-        account_type: r.account_type,
+        account_type: tp?.classification ?? r.account_type,
         parent_id,
         currency_code: r.currency_code || null,
         is_group: r.is_group ?? false,
@@ -724,6 +733,8 @@ export const importAccounts = createServerFn({ method: "POST" })
         is_reconcilable: r.is_reconcilable ?? false,
         notes: r.notes || null,
       };
+      if (tp?.id) payload.account_type_id = tp.id;
+
       const existingId = codeToId.get(r.code);
       if (existingId) {
         const { error } = await context.supabase
