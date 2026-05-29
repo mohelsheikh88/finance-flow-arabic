@@ -1041,7 +1041,8 @@ function ChartOfAccountsTree({
   const kindBadge = (n: TreeNode) => {
     if (n.kind === "bucket") return t("accounts.accountingBucket");
     if (n.kind === "classification") return t("accounts.coreClassification") || "Core Classification";
-    if (n.kind === "account_type") return t("accounts.accountTypesNav");
+
+
     return n.data?.is_group ? (t("common.group") || "Group") : (t("common.leaf") || "Leaf");
   };
 
