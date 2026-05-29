@@ -110,7 +110,6 @@ function MultiSelect({
             <div className="border-t p-2">
               <Button variant="ghost" size="sm" className="w-full h-7 text-xs" onClick={() => onChange([])}>
                 <X className="h-3 w-3 me-1" />
-                {emptyText === "" ? "Clear" : ""}
                 <span>Clear all</span>
               </Button>
             </div>
