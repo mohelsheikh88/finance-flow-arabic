@@ -181,8 +181,29 @@ function ApprovalsPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={() => createWfMut.mutate()} disabled={createWfMut.isPending}>{t("common.save")}</Button>
+              <Button
+                onClick={() => {
+                  if (!wfForm.name_ar.trim() || !wfForm.name_en.trim()) {
+                    toast.error(locale === "ar" ? "من فضلك أدخل اسم الـ Workflow بالعربي والإنجليزي" : "Please enter the workflow name in both Arabic and English");
+                    return;
+                  }
+                  if (steps.length === 0) {
+                    toast.error(locale === "ar" ? "أضف خطوة واحدة على الأقل" : "Add at least one approval step");
+                    return;
+                  }
+                  const badStep = steps.findIndex((s) => !s.step_name_ar.trim() || !s.step_name_en.trim() || !s.required_role);
+                  if (badStep !== -1) {
+                    toast.error(locale === "ar" ? `أكمل بيانات الخطوة رقم ${badStep + 1}` : `Complete step #${badStep + 1} fields`);
+                    return;
+                  }
+                  createWfMut.mutate();
+                }}
+                disabled={createWfMut.isPending}
+              >
+                {t("common.save")}
+              </Button>
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
       </div>
