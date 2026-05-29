@@ -367,6 +367,16 @@ function CustomersPage() {
 
               {/* 11. Credit Limit */}
               <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
+
+              {/* Attachments */}
+              <div className="col-span-2 pt-2 border-t">
+                <Label className="mb-2 block">{t("customers.attachments")}</Label>
+                {form.id ? (
+                  <PartnerAttachments partnerId={form.id} />
+                ) : (
+                  <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>
+                )}
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
