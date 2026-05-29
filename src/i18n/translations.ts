@@ -485,6 +485,10 @@ export const translations = {
       phone: "الهاتف",
       customerType: "نوع العميل",
       manageTypes: "إدارة أنواع العملاء",
+      nationalAddress: "العنوان الوطني",
+      contacts: "بيانات الاتصال",
+      contactName: "اسم جهة الاتصال",
+      addContact: "إضافة جهة اتصال",
     },
     tb: {
       title: "ميزان المراجعة",
