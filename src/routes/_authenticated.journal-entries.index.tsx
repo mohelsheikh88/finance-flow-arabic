@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { StatusBadge } from "@/routes/_authenticated.dashboard";
 import { ApprovalCell } from "@/components/approval-cell";
+import { JEDetailDialog } from "@/components/je-detail-dialog";
 
 export const Route = createFileRoute("/_authenticated/journal-entries/")({
   component: JEListPage,
@@ -24,6 +26,7 @@ function JEListPage() {
     queryFn: () => fn({ data: { branchId: branchId!, limit: 200 } }),
     enabled: !!branchId,
   });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fmt = (n: number) => new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", { minimumFractionDigits: 2 }).format(n);
 
@@ -64,7 +67,7 @@ function JEListPage() {
           </thead>
           <tbody>
             {entries.map((e: any) => (
-              <tr key={e.id} className="border-t hover:bg-muted/30">
+              <tr key={e.id} onClick={() => setSelectedId(e.id)} className="border-t hover:bg-muted/30 cursor-pointer">
                 <td className="p-3 font-mono">{e.entry_number}</td>
                 <td className="p-3">{e.entry_date}</td>
                 <td className="p-3">{e.journals ? localized(e.journals, "name") : "—"}</td>
@@ -73,13 +76,14 @@ function JEListPage() {
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_debit))}</td>
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_credit))}</td>
                 <td className="p-3 text-center"><StatusBadge status={e.status} /></td>
-                <td className="p-3 text-center"><ApprovalCell documentType="journal_entry" documentId={e.id} /></td>
+                <td className="p-3 text-center" onClick={(ev) => ev.stopPropagation()}><ApprovalCell documentType="journal_entry" documentId={e.id} /></td>
               </tr>
             ))}
             {entries.length === 0 && <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
+      <JEDetailDialog entryId={selectedId} onClose={() => setSelectedId(null)} />
     </div>
   );
 }

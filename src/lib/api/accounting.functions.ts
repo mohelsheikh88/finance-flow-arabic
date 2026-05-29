@@ -1114,6 +1114,87 @@ export const createJournalEntry = createServerFn({ method: "POST" })
     return je;
   });
 
+export const getJournalEntry = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: je, error } = await context.supabase
+      .from("journal_entries")
+      .select("*, journals(code, name_ar, name_en)")
+      .eq("id", data.id)
+      .single();
+    if (error || !je) throw new Error(error?.message ?? "Entry not found");
+    const { data: lines, error: lErr } = await context.supabase
+      .from("journal_entry_lines")
+      .select("*, accounts(code, name_ar, name_en), partners(code, name_ar, name_en)")
+      .eq("entry_id", data.id)
+      .order("line_number");
+    if (lErr) throw new Error(lErr.message);
+    return { ...je, lines: lines ?? [] } as any;
+  });
+
+const UpdateJESchema = z.object({
+  id: z.string().uuid(),
+  entry_date: z.string(),
+  reference: z.string().max(100).optional().nullable(),
+  description: z.string().max(500).optional().nullable(),
+  lines: z.array(JELineSchema).min(2),
+});
+
+export const updateJournalEntry = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => UpdateJESchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: existing, error: exErr } = await context.supabase
+      .from("journal_entries")
+      .select("id, company_id, branch_id, status, source_type, entry_date")
+      .eq("id", data.id)
+      .single();
+    if (exErr || !existing) throw new Error(exErr?.message ?? "Entry not found");
+    if (existing.status !== "draft") throw new Error("Only draft entries can be edited");
+    if ((existing.source_type ?? "manual") !== "manual")
+      throw new Error("Only manual entries can be edited from this screen");
+
+    await assertNotLocked(context.supabase, existing.company_id, existing.branch_id, existing.entry_date);
+    await assertNotLocked(context.supabase, existing.company_id, existing.branch_id, data.entry_date);
+
+    const totalDebit = data.lines.reduce((s, l) => s + l.debit, 0);
+    const totalCredit = data.lines.reduce((s, l) => s + l.credit, 0);
+    if (Math.abs(totalDebit - totalCredit) > 0.001)
+      throw new Error(`Entry not balanced: D=${totalDebit} C=${totalCredit}`);
+    for (const l of data.lines) {
+      if (l.debit > 0 && l.credit > 0) throw new Error("A line cannot have both debit and credit");
+      if (l.debit === 0 && l.credit === 0) throw new Error("A line must have debit or credit");
+    }
+
+    const { error: upErr } = await context.supabase
+      .from("journal_entries")
+      .update({
+        entry_date: data.entry_date,
+        reference: data.reference,
+        description: data.description,
+        total_debit: totalDebit,
+        total_credit: totalCredit,
+      })
+      .eq("id", data.id);
+    if (upErr) throw new Error(upErr.message);
+
+    await context.supabase.from("journal_entry_lines").delete().eq("entry_id", data.id);
+    const lineRows = data.lines.map((l, idx) => ({
+      entry_id: data.id,
+      line_number: idx + 1,
+      account_id: l.account_id,
+      partner_id: l.partner_id || null,
+      cost_center_id: l.cost_center_id || null,
+      description: l.description || null,
+      debit: l.debit,
+      credit: l.credit,
+    }));
+    const { error: linesErr } = await context.supabase.from("journal_entry_lines").insert(lineRows);
+    if (linesErr) throw new Error(linesErr.message);
+    return { ok: true };
+  });
+
 export const getTrialBalance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string; asOfDate: string; dateFrom?: string | null }) => i)

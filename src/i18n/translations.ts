@@ -388,6 +388,11 @@ export const translations = {
       sourceFixedAssets: "الأصول الثابتة",
       sourceLoans: "إدارة القروض",
       sourceManual: "قيد يدوي",
+      details: "تفاصيل القيد",
+      edit: "تعديل القيد",
+      reference: "المرجع",
+      description: "الوصف",
+      readOnlyNotice: "لا يمكن التعديل: هذا القيد ليس مانوال أو ليس في حالة مسودة",
     },
     journals: {
       allowManualEntries: "السماح بإنشاء قيود يدوية من هذا الدفتر",
@@ -1108,6 +1113,11 @@ export const translations = {
       sourceFixedAssets: "Fixed Assets",
       sourceLoans: "Loans Management",
       sourceManual: "Manual Entry",
+      details: "Entry Details",
+      edit: "Edit Entry",
+      reference: "Reference",
+      description: "Description",
+      readOnlyNotice: "Read-only: this entry is not manual or not in draft status",
     },
     journals: {
       allowManualEntries: "Allow manual entries from this journal",
