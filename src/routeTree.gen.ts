@@ -21,6 +21,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
+import { Route as AuthenticatedPaymentTermsRouteImport } from './routes/_authenticated.payment-terms'
 import { Route as AuthenticatedPaymentMethodsRouteImport } from './routes/_authenticated.payment-methods'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
@@ -121,6 +122,12 @@ const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPaymentTermsRoute =
+  AuthenticatedPaymentTermsRouteImport.update({
+    id: '/payment-terms',
+    path: '/payment-terms',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPaymentMethodsRoute =
   AuthenticatedPaymentMethodsRouteImport.update({
     id: '/payment-methods',
@@ -366,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/loans': typeof AuthenticatedLoansRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
+  '/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
@@ -418,6 +426,7 @@ export interface FileRoutesByTo {
   '/loans': typeof AuthenticatedLoansRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
+  '/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
@@ -472,6 +481,7 @@ export interface FileRoutesById {
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
   '/_authenticated/payment-methods': typeof AuthenticatedPaymentMethodsRoute
+  '/_authenticated/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
@@ -526,6 +536,7 @@ export interface FileRouteTypes {
     | '/loans'
     | '/partners'
     | '/payment-methods'
+    | '/payment-terms'
     | '/payments'
     | '/purchase'
     | '/receipts'
@@ -578,6 +589,7 @@ export interface FileRouteTypes {
     | '/loans'
     | '/partners'
     | '/payment-methods'
+    | '/payment-terms'
     | '/payments'
     | '/purchase'
     | '/receipts'
@@ -631,6 +643,7 @@ export interface FileRouteTypes {
     | '/_authenticated/loans'
     | '/_authenticated/partners'
     | '/_authenticated/payment-methods'
+    | '/_authenticated/payment-terms'
     | '/_authenticated/payments'
     | '/_authenticated/purchase'
     | '/_authenticated/receipts'
@@ -749,6 +762,13 @@ declare module '@tanstack/react-router' {
       path: '/payments'
       fullPath: '/payments'
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/payment-terms': {
+      id: '/_authenticated/payment-terms'
+      path: '/payment-terms'
+      fullPath: '/payment-terms'
+      preLoaderRoute: typeof AuthenticatedPaymentTermsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/payment-methods': {
@@ -1051,6 +1071,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
   AuthenticatedPaymentMethodsRoute: typeof AuthenticatedPaymentMethodsRoute
+  AuthenticatedPaymentTermsRoute: typeof AuthenticatedPaymentTermsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
@@ -1101,6 +1122,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
   AuthenticatedPaymentMethodsRoute: AuthenticatedPaymentMethodsRoute,
+  AuthenticatedPaymentTermsRoute: AuthenticatedPaymentTermsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
