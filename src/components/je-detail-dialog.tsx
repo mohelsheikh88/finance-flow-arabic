@@ -15,6 +15,7 @@ import { getJournalEntry, updateJournalEntry, listAccounts, listPartners } from 
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { formatLockError } from "@/lib/lock-error";
+import { HistoryLog } from "@/components/history-log";
 
 type Line = { account_id: string; partner_id?: string | null; description: string; debit: number; credit: number };
 
@@ -273,6 +274,8 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
                 <Plus className="h-4 w-4 me-1" /> {t("je.addLine")}
               </Button>
             )}
+
+            <HistoryLog table="journal_entries" recordId={entry.id} />
           </div>
         )}
 
