@@ -179,6 +179,7 @@ export async function postPaymentCore(
     const res = await maybeRequestApproval(supabase, userId, {
       companyId: pay.company_id,
       branchId: pay.branch_id,
+      journalId: pay.journal_id ?? null,
       documentType: "payment",
       documentId: pay.id,
       documentReference: pay.payment_number,

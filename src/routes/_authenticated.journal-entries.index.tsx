@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { StatusBadge } from "@/routes/_authenticated.dashboard";
+import { ApprovalCell } from "@/components/approval-cell";
 
 export const Route = createFileRoute("/_authenticated/journal-entries/")({
   component: JEListPage,
@@ -43,6 +44,7 @@ function JEListPage() {
               <th className="text-end p-3 font-mono">{t("je.debit")}</th>
               <th className="text-end p-3 font-mono">{t("je.credit")}</th>
               <th className="text-center p-3">{t("common.status")}</th>
+              <th className="text-center p-3">{t("approvals.approval")}</th>
             </tr>
           </thead>
           <tbody>
@@ -55,9 +57,10 @@ function JEListPage() {
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_debit))}</td>
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_credit))}</td>
                 <td className="p-3 text-center"><StatusBadge status={e.status} /></td>
+                <td className="p-3 text-center"><ApprovalCell documentType="journal_entry" documentId={e.id} /></td>
               </tr>
             ))}
-            {entries.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {entries.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>

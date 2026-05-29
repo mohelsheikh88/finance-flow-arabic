@@ -364,9 +364,10 @@ export type Database = {
           company_id: string
           created_at: string
           currency_code: string
-          document_type: Database["public"]["Enums"]["approval_doc_type"]
+          document_type: Database["public"]["Enums"]["approval_doc_type"] | null
           id: string
           is_active: boolean
+          journal_type: string | null
           max_amount: number | null
           min_amount: number
           name_ar: string
@@ -377,9 +378,12 @@ export type Database = {
           company_id: string
           created_at?: string
           currency_code?: string
-          document_type: Database["public"]["Enums"]["approval_doc_type"]
+          document_type?:
+            | Database["public"]["Enums"]["approval_doc_type"]
+            | null
           id?: string
           is_active?: boolean
+          journal_type?: string | null
           max_amount?: number | null
           min_amount?: number
           name_ar: string
@@ -390,9 +394,12 @@ export type Database = {
           company_id?: string
           created_at?: string
           currency_code?: string
-          document_type?: Database["public"]["Enums"]["approval_doc_type"]
+          document_type?:
+            | Database["public"]["Enums"]["approval_doc_type"]
+            | null
           id?: string
           is_active?: boolean
+          journal_type?: string | null
           max_amount?: number | null
           min_amount?: number
           name_ar?: string

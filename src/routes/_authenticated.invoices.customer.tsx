@@ -9,6 +9,7 @@ import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ApprovalCell } from "@/components/approval-cell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -250,6 +251,7 @@ function CustomerInvoicesPage() {
               <th className="text-end p-3 font-medium font-mono">{t("invoices.paid")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("invoices.due")}</th>
               <th className="text-start p-3 font-medium">{t("common.status")}</th>
+              <th className="text-center p-3 font-medium">{t("approvals.approval")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
@@ -263,6 +265,7 @@ function CustomerInvoicesPage() {
                 <td className="p-3 text-end font-mono text-success">{fmt(inv.amount_paid)}</td>
                 <td className="p-3 text-end font-mono font-semibold">{fmt(inv.amount_due)}</td>
                 <td className="p-3">{statusBadge(inv.status, t)}</td>
+                <td className="p-3 text-center"><ApprovalCell documentType="invoice" documentId={inv.id} /></td>
                 <td className="p-3 text-end">
                   {inv.status === "draft" && (
                     <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
@@ -272,7 +275,7 @@ function CustomerInvoicesPage() {
                 </td>
               </tr>
             ))}
-            {invoices.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {invoices.length === 0 && <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>

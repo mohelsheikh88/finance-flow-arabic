@@ -17,6 +17,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { ApprovalCell } from "@/components/approval-cell";
 import { toast } from "sonner";
 
 function fmt(n: number) {
@@ -232,6 +233,7 @@ export function PaymentsView({
               <th className="text-start p-3 font-medium">{t("payments.bank")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("common.amount")}</th>
               <th className="text-start p-3 font-medium">{t("common.status")}</th>
+              <th className="text-center p-3 font-medium">{t("approvals.approval")}</th>
             </tr>
           </thead>
           <tbody>
@@ -247,9 +249,10 @@ export function PaymentsView({
                     {t(`je.${p.status}`) || p.status}
                   </Badge>
                 </td>
+                <td className="p-3 text-center"><ApprovalCell documentType="payment" documentId={p.id} /></td>
               </tr>
             ))}
-            {payments.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {payments.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
