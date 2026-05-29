@@ -47,6 +47,7 @@ import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedJournalEntriesIndexRouteImport } from './routes/_authenticated.journal-entries.index'
 import { Route as AuthenticatedReportsVatRouteImport } from './routes/_authenticated.reports.vat'
 import { Route as AuthenticatedReportsIncomeStatementRouteImport } from './routes/_authenticated.reports.income-statement'
+import { Route as AuthenticatedReportsExecutiveSummaryRouteImport } from './routes/_authenticated.reports.executive-summary'
 import { Route as AuthenticatedReportsCashFlowRouteImport } from './routes/_authenticated.reports.cash-flow'
 import { Route as AuthenticatedReportsBalanceSheetRouteImport } from './routes/_authenticated.reports.balance-sheet'
 import { Route as AuthenticatedReportsAgingRouteImport } from './routes/_authenticated.reports.aging'
@@ -260,6 +261,12 @@ const AuthenticatedReportsIncomeStatementRoute =
     path: '/reports/income-statement',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedReportsExecutiveSummaryRoute =
+  AuthenticatedReportsExecutiveSummaryRouteImport.update({
+    id: '/reports/executive-summary',
+    path: '/reports/executive-summary',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedReportsCashFlowRoute =
   AuthenticatedReportsCashFlowRouteImport.update({
     id: '/reports/cash-flow',
@@ -379,6 +386,7 @@ export interface FileRoutesByFullPath {
   '/reports/aging': typeof AuthenticatedReportsAgingRoute
   '/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
   '/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
+  '/reports/executive-summary': typeof AuthenticatedReportsExecutiveSummaryRoute
   '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
   '/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
@@ -430,6 +438,7 @@ export interface FileRoutesByTo {
   '/reports/aging': typeof AuthenticatedReportsAgingRoute
   '/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
   '/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
+  '/reports/executive-summary': typeof AuthenticatedReportsExecutiveSummaryRoute
   '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
   '/journal-entries': typeof AuthenticatedJournalEntriesIndexRoute
@@ -483,6 +492,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/aging': typeof AuthenticatedReportsAgingRoute
   '/_authenticated/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
   '/_authenticated/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
+  '/_authenticated/reports/executive-summary': typeof AuthenticatedReportsExecutiveSummaryRoute
   '/_authenticated/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
   '/_authenticated/reports/vat': typeof AuthenticatedReportsVatRoute
   '/_authenticated/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
@@ -536,6 +546,7 @@ export interface FileRouteTypes {
     | '/reports/aging'
     | '/reports/balance-sheet'
     | '/reports/cash-flow'
+    | '/reports/executive-summary'
     | '/reports/income-statement'
     | '/reports/vat'
     | '/journal-entries/'
@@ -587,6 +598,7 @@ export interface FileRouteTypes {
     | '/reports/aging'
     | '/reports/balance-sheet'
     | '/reports/cash-flow'
+    | '/reports/executive-summary'
     | '/reports/income-statement'
     | '/reports/vat'
     | '/journal-entries'
@@ -639,6 +651,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/aging'
     | '/_authenticated/reports/balance-sheet'
     | '/_authenticated/reports/cash-flow'
+    | '/_authenticated/reports/executive-summary'
     | '/_authenticated/reports/income-statement'
     | '/_authenticated/reports/vat'
     | '/_authenticated/journal-entries/'
@@ -920,6 +933,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsIncomeStatementRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/reports/executive-summary': {
+      id: '/_authenticated/reports/executive-summary'
+      path: '/reports/executive-summary'
+      fullPath: '/reports/executive-summary'
+      preLoaderRoute: typeof AuthenticatedReportsExecutiveSummaryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/reports/cash-flow': {
       id: '/_authenticated/reports/cash-flow'
       path: '/reports/cash-flow'
@@ -1051,6 +1071,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReportsAgingRoute: typeof AuthenticatedReportsAgingRoute
   AuthenticatedReportsBalanceSheetRoute: typeof AuthenticatedReportsBalanceSheetRoute
   AuthenticatedReportsCashFlowRoute: typeof AuthenticatedReportsCashFlowRoute
+  AuthenticatedReportsExecutiveSummaryRoute: typeof AuthenticatedReportsExecutiveSummaryRoute
   AuthenticatedReportsIncomeStatementRoute: typeof AuthenticatedReportsIncomeStatementRoute
   AuthenticatedReportsVatRoute: typeof AuthenticatedReportsVatRoute
   AuthenticatedJournalEntriesIndexRoute: typeof AuthenticatedJournalEntriesIndexRoute
@@ -1101,6 +1122,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedReportsAgingRoute: AuthenticatedReportsAgingRoute,
   AuthenticatedReportsBalanceSheetRoute: AuthenticatedReportsBalanceSheetRoute,
   AuthenticatedReportsCashFlowRoute: AuthenticatedReportsCashFlowRoute,
+  AuthenticatedReportsExecutiveSummaryRoute:
+    AuthenticatedReportsExecutiveSummaryRoute,
   AuthenticatedReportsIncomeStatementRoute:
     AuthenticatedReportsIncomeStatementRoute,
   AuthenticatedReportsVatRoute: AuthenticatedReportsVatRoute,
