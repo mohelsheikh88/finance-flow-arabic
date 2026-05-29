@@ -98,7 +98,7 @@ const empty: FormState = {
 const NONE = "__none__";
 
 function JournalsPage() {
-  const { t, lang } = useI18n();
+  const { t, locale } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
   const qc = useQueryClient();
@@ -123,7 +123,7 @@ function JournalsPage() {
 
   const { data: currencies = [] } = useQuery({
     queryKey: ["currencies"],
-    queryFn: () => currenciesFn({ data: {} }),
+    queryFn: () => currenciesFn(),
   });
 
   const leafAccounts = useMemo(
@@ -255,7 +255,7 @@ function JournalsPage() {
     XLSX.writeFile(wb, `journals_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  const typeLabel = (tp: JournalType) => typeLabels[tp][lang === "ar" ? "ar" : "en"];
+  const typeLabel = (tp: JournalType) => typeLabels[tp][locale === "ar" ? "ar" : "en"];
 
   return (
     <div className="p-6 space-y-4">
