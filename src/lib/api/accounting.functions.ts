@@ -401,21 +401,84 @@ export const deleteAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    // Block delete if account is used in journal lines or as a child parent
-    const [{ count: linesCount }, { count: childCount }] = await Promise.all([
-      context.supabase
-        .from("journal_entry_lines")
-        .select("id", { count: "exact", head: true })
-        .eq("account_id", data.id),
-      context.supabase
-        .from("accounts")
-        .select("id", { count: "exact", head: true })
-        .eq("parent_id", data.id),
+    const sb = context.supabase;
+    // Gather all references so the error message tells the user exactly where
+    // the account is linked.
+    const [children, journalLines, invoiceLines, taxesRef, partnersRecv, partnersPay, banks, journalsDr, journalsCr, assetsAsset, assetsDep, assetsAccDep, catAsset, catDep, catAccDep] = await Promise.all([
+      sb.from("accounts").select("code, name_ar, name_en").eq("parent_id", data.id).limit(5),
+      sb.from("journal_entry_lines").select("id", { count: "exact", head: true }).eq("account_id", data.id),
+      sb.from("invoice_lines").select("id", { count: "exact", head: true }).eq("account_id", data.id),
+      sb.from("taxes").select("code, name_ar, name_en").eq("account_id", data.id).limit(5),
+      sb.from("partners").select("code, name_ar, name_en").eq("receivable_account_id", data.id).limit(5),
+      sb.from("partners").select("code, name_ar, name_en").eq("payable_account_id", data.id).limit(5),
+      sb.from("bank_accounts").select("code, name_ar, name_en").eq("gl_account_id", data.id).limit(5),
+      sb.from("journals").select("code, name_ar, name_en").eq("default_debit_account_id", data.id).limit(5),
+      sb.from("journals").select("code, name_ar, name_en").eq("default_credit_account_id", data.id).limit(5),
+      sb.from("fixed_assets").select("code, name_ar, name_en").eq("asset_account_id", data.id).limit(5),
+      sb.from("fixed_assets").select("code, name_ar, name_en").eq("depreciation_account_id", data.id).limit(5),
+      sb.from("fixed_assets").select("code, name_ar, name_en").eq("accumulated_depreciation_account_id", data.id).limit(5),
+      sb.from("asset_categories").select("code, name_ar, name_en").eq("asset_account_id", data.id).limit(5),
+      sb.from("asset_categories").select("code, name_ar, name_en").eq("depreciation_account_id", data.id).limit(5),
+      sb.from("asset_categories").select("code, name_ar, name_en").eq("accumulated_depreciation_account_id", data.id).limit(5),
     ]);
-    if ((linesCount ?? 0) > 0)
-      throw new Error("Account is used in journal entries and cannot be deleted");
-    if ((childCount ?? 0) > 0) throw new Error("Account has child accounts and cannot be deleted");
-    const { error } = await context.supabase.from("accounts").delete().eq("id", data.id);
+
+    const blocks: string[] = [];
+    const fmt = (rows: Array<{ code: string; name_ar: string; name_en: string }> | null | undefined) =>
+      (rows ?? []).map((r) => `${r.code} — ${r.name_ar || r.name_en}`).join("، ");
+
+    if ((children.data?.length ?? 0) > 0) {
+      blocks.push(`حسابات فرعية (${children.data!.length}): ${fmt(children.data)}`);
+    }
+    if ((journalLines.count ?? 0) > 0) {
+      blocks.push(`قيود محاسبية (${journalLines.count} سطر)`);
+    }
+    if ((invoiceLines.count ?? 0) > 0) {
+      blocks.push(`فواتير (${invoiceLines.count} سطر)`);
+    }
+    if ((taxesRef.data?.length ?? 0) > 0) {
+      blocks.push(`ضرائب: ${fmt(taxesRef.data)}`);
+    }
+    if ((partnersRecv.data?.length ?? 0) > 0) {
+      blocks.push(`عملاء (حساب مدين): ${fmt(partnersRecv.data)}`);
+    }
+    if ((partnersPay.data?.length ?? 0) > 0) {
+      blocks.push(`موردين (حساب دائن): ${fmt(partnersPay.data)}`);
+    }
+    if ((banks.data?.length ?? 0) > 0) {
+      blocks.push(`حسابات بنكية: ${fmt(banks.data)}`);
+    }
+    if ((journalsDr.data?.length ?? 0) > 0) {
+      blocks.push(`دفاتر (مدين افتراضي): ${fmt(journalsDr.data)}`);
+    }
+    if ((journalsCr.data?.length ?? 0) > 0) {
+      blocks.push(`دفاتر (دائن افتراضي): ${fmt(journalsCr.data)}`);
+    }
+    if ((assetsAsset.data?.length ?? 0) > 0) {
+      blocks.push(`أصول ثابتة (حساب الأصل): ${fmt(assetsAsset.data)}`);
+    }
+    if ((assetsDep.data?.length ?? 0) > 0) {
+      blocks.push(`أصول ثابتة (مصروف الإهلاك): ${fmt(assetsDep.data)}`);
+    }
+    if ((assetsAccDep.data?.length ?? 0) > 0) {
+      blocks.push(`أصول ثابتة (مجمع الإهلاك): ${fmt(assetsAccDep.data)}`);
+    }
+    if ((catAsset.data?.length ?? 0) > 0) {
+      blocks.push(`فئات أصول (حساب الأصل): ${fmt(catAsset.data)}`);
+    }
+    if ((catDep.data?.length ?? 0) > 0) {
+      blocks.push(`فئات أصول (مصروف الإهلاك): ${fmt(catDep.data)}`);
+    }
+    if ((catAccDep.data?.length ?? 0) > 0) {
+      blocks.push(`فئات أصول (مجمع الإهلاك): ${fmt(catAccDep.data)}`);
+    }
+
+    if (blocks.length > 0) {
+      throw new Error(
+        `لا يمكن حذف الحساب — مرتبط بـ: ${blocks.join(" | ")}`,
+      );
+    }
+
+    const { error } = await sb.from("accounts").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
