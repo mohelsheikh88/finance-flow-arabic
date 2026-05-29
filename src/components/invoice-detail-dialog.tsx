@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, FileText, Printer } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ExternalLink, FileText, Printer, History, ChevronDown, Paperclip } from "lucide-react";
 import { getInvoice } from "@/lib/api/invoices.functions";
 import { useI18n, useLocalized } from "@/i18n";
 import { HistoryLog } from "@/components/history-log";
@@ -38,6 +40,8 @@ export function InvoiceDetailDialog({
   const { t, locale } = useI18n();
   const localized = useLocalized();
   const getFn = useServerFn(getInvoice);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showAttachments, setShowAttachments] = useState(false);
 
   const { data: inv, isLoading } = useQuery({
     queryKey: ["invoice-detail", invoiceId],
@@ -201,14 +205,40 @@ export function InvoiceDetailDialog({
               </table>
             </div>
 
-            <TransactionAttachments
-              transactionType="invoice"
-              transactionId={(inv as any).id}
-              companyId={(inv as any).company_id}
-              branchId={(inv as any).branch_id}
-            />
+            <Collapsible open={showAttachments} onOpenChange={setShowAttachments}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <Paperclip className="h-4 w-4" />
+                    {t("invoices.attachments.title") || "المرفقات"}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showAttachments ? "rotate-180" : ""}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <TransactionAttachments
+                  transactionType="invoice"
+                  transactionId={(inv as any).id}
+                  companyId={(inv as any).company_id}
+                  branchId={(inv as any).branch_id}
+                />
+              </CollapsibleContent>
+            </Collapsible>
 
-            <HistoryLog table="invoices" recordId={(inv as any).id} />
+            <Collapsible open={showHistory} onOpenChange={setShowHistory}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <History className="h-4 w-4" />
+                    {locale === "ar" ? "عرض سجل التغييرات" : "View Change History"}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showHistory ? "rotate-180" : ""}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <HistoryLog table="invoices" recordId={(inv as any).id} />
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         )}
 
