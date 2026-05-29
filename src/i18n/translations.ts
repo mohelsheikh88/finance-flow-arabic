@@ -483,7 +483,8 @@ export const translations = {
       accountant: "محاسب",
       internal_auditor: "مراجع داخلي",
       branchAccess: "الفروع المتاحة",
-      assignRole: "تعيين دور",
+      assignRole: "إضافة دور",
+      noRoles: "لا توجد أدوار معينة",
     },
     roles: {
       title: "إدارة الأدوار",
