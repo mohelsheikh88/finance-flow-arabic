@@ -136,13 +136,57 @@ function NewJEPage() {
       <Card>
         <CardContent className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <Label>{t("je.journal")}</Label>
-            <Select value={header.journal_id} onValueChange={(v) => setHeader({ ...header, journal_id: v })}>
+            <div className="flex items-center gap-2">
+              <Label>{t("je.journal")}</Label>
+              {!canCreateManual && (
+                <span className="text-[10px] text-warning font-medium">{t("je.permissionNotice")}</span>
+              )}
+            </div>
+            <Select
+              value={header.journal_id}
+              onValueChange={(v) => {
+                const selected = allJournals.find((j: any) => j.id === v);
+                if (selected && !selected.allow_manual_entries) {
+                  toast.error(
+                    `${localized(selected, "name")} — ${t("je.manualDisabledReason")}`
+                  );
+                  return;
+                }
+                setHeader({ ...header, journal_id: v });
+              }}
+            >
               <SelectTrigger className="h-9"><SelectValue placeholder={t("je.journal")} /></SelectTrigger>
               <SelectContent>
-                {journals.map((j: any) => <SelectItem key={j.id} value={j.id}>{j.code} — {localized(j, "name")}</SelectItem>)}
+                {availableJournals.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel>{t("je.balanced")}</SelectLabel>
+                    {availableJournals.map((j: any) => (
+                      <SelectItem key={j.id} value={j.id}>{j.code} — {localized(j, "name")}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+                {unavailableJournals.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel className="text-muted-foreground">{t("je.manualDisabledShort")}</SelectLabel>
+                    {unavailableJournals.map((j: any) => (
+                      <SelectItem key={j.id} value={j.id} disabled>
+                        <span className="text-muted-foreground">{j.code} — {localized(j, "name")}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
               </SelectContent>
             </Select>
+            {unavailableJournals.length > 0 && (
+              <div className="mt-1.5 flex items-start gap-1.5 text-[11px] text-muted-foreground">
+                <Info className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                <span>
+                  {t("je.unavailableJournalsHelp")}{" "}
+                  {unavailableJournals.map((j: any) => `${localized(j, "name")} (${t("je.manualDisabledReason")})`).join("، ")}.
+                  {!canCreateManual && ` ${t("je.permissionNotice")}`}
+                </span>
+              </div>
+            )}
           </div>
           <div><Label>{t("je.entryDate")}</Label><Input type="date" value={header.entry_date} onChange={(e) => setHeader({ ...header, entry_date: e.target.value })} className="h-9" /></div>
           <div><Label>{t("common.reference")}</Label><Input value={header.reference} onChange={(e) => setHeader({ ...header, reference: e.target.value })} className="h-9" /></div>
