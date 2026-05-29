@@ -233,6 +233,7 @@ export function PaymentsView({
               <th className="text-start p-3 font-medium">{t("payments.bank")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("common.amount")}</th>
               <th className="text-start p-3 font-medium">{t("common.status")}</th>
+              <th className="text-center p-3 font-medium">{t("approvals.approval")}</th>
             </tr>
           </thead>
           <tbody>
