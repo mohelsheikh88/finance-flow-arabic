@@ -717,10 +717,7 @@ function ChartOfAccountsPanel() {
                   setForm({
                     ...form,
                     classification_id: v,
-                    account_type_id:
-                      (accountTypes as any[]).find((tp) => tp.classification_id === v && tp.is_active)?.id ??
-                      (accountTypes as any[]).find((tp) => tp.classification_id === v)?.id ??
-                      "",
+                    account_type_id: resolveAccountTypeId(v, form.account_type_id),
                   })
                 }
               >
