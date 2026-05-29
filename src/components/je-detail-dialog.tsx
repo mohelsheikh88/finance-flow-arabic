@@ -159,7 +159,8 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
                 <span className="text-muted-foreground">{t("je.source")}:</span>
                 <span className="font-medium">{sourceLink.label}</span>
                 <Link
-                  to={sourceLink.to}
+                  to={sourceLink.to as any}
+                  search={sourceLink.search as any}
                   onClick={onClose}
                   className="ms-auto inline-flex items-center gap-1 text-primary hover:underline"
                 >
