@@ -17,6 +17,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { ApprovalCell } from "@/components/approval-cell";
 import { toast } from "sonner";
 
 function fmt(n: number) {
