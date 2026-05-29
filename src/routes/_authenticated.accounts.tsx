@@ -1577,9 +1577,9 @@ function AccountingBucketsPanel() {
               </div>
               <div className="space-y-1">
                 <div className="text-xs text-muted-foreground">
-                  {t("accounts.coreClassifications")} · {typesCount}{" "}
-                  {t("accounts.accountTypesNav")}
+                  {t("accounts.coreClassifications")} · {cls.length}
                 </div>
+
                 {cls.length === 0 ? (
                   <div className="text-xs text-muted-foreground italic">
                     {t("common.noData")}
