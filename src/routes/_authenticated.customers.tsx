@@ -55,10 +55,12 @@ function CustomersPage() {
   const update = useServerFn(updatePartner);
   const remove = useServerFn(deletePartner);
   const accountsFn = useServerFn(listAccounts);
+  const typesFn = useServerFn(listCustomerTypes);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [typesOpen, setTypesOpen] = useState(false);
 
   const { data: all = [] } = useQuery({
     queryKey: ["partners", companyId],
