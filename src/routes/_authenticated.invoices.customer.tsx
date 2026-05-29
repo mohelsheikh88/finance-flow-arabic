@@ -214,10 +214,25 @@ function CustomerInvoicesPage() {
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => delFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success(t("common.deleted"));
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+    },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+
   const handleResetClick = (id: string) => {
     if (!window.confirm(t("invoices.resetConfirm"))) return;
     resetMut.mutate(id);
   };
+
+  const handleDeleteClick = (id: string) => {
+    if (!window.confirm(t("invoices.deleteConfirm"))) return;
+    deleteMut.mutate(id);
+  };
+
 
   const canSave = header.partner_id && header.invoice_date && lines.every((l) => l.account_id && l.quantity > 0);
 
