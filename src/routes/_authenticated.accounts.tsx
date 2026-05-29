@@ -24,6 +24,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, FileDown, FileUp, ChevronDown, ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight, FolderTree, FileText } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -140,6 +141,9 @@ function ChartOfAccountsPanel() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const parents = useMemo(() => {
     return (accounts as any[]).filter((a) => a.is_group && a.id !== form.id);
@@ -150,7 +154,7 @@ function ChartOfAccountsPanel() {
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = useState(1);
-  useEffect(() => { setPage(1); }, [search, filterClassification, filterIsGroup, filterStatus]);
+  useEffect(() => { setPage(1); setSelectedIds(new Set()); }, [search, filterClassification, filterIsGroup, filterStatus]);
   const pageSize = 50;
 
 
@@ -268,6 +272,34 @@ function ChartOfAccountsPanel() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const runBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    setBulkDeleting(true);
+    let ok = 0;
+    const errors: string[] = [];
+    for (const id of ids) {
+      try {
+        await remove({ data: { id } });
+        ok++;
+      } catch (e: any) {
+        const acc = (accounts as any[]).find((a) => a.id === id);
+        errors.push(`${acc?.code ?? id}: ${e?.message ?? "error"}`);
+      }
+    }
+    setBulkDeleting(false);
+    setBulkDeleteOpen(false);
+    setSelectedIds(new Set());
+    qc.invalidateQueries({ queryKey: ["accounts"] });
+    if (errors.length) {
+      const shown = errors.slice(0, 5).join("\n");
+      const more = errors.length > 5 ? `\n…+${errors.length - 5}` : "";
+      toast.warning(`Deleted ${ok}/${ids.length}\n${shown}${more}`);
+    } else {
+      toast.success(`Deleted ${ok}`);
+    }
+  };
 
   const typeColors: Record<string, string> = {
     asset: "bg-info/10 text-info border-info/30",
@@ -518,10 +550,50 @@ function ChartOfAccountsPanel() {
         </div>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between gap-3 p-3 rounded-md border bg-muted/40">
+          <div className="text-sm">
+            <span className="font-semibold text-foreground">{selectedIds.size}</span>{" "}
+            {selectedIds.size === 1 ? "حساب محدد" : "حساب محددين"}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
+              إلغاء التحديد
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteOpen(true)}
+              disabled={bulkDeleting}
+            >
+              <Trash2 className="h-4 w-4 me-1" />
+              حذف المحدد ({selectedIds.size})
+            </Button>
+          </div>
+        </div>
+      )}
+
       <ChartOfAccountsTable
         accounts={paginatedAccounts as any[]}
         accountTypes={accountTypes as any[]}
         classifications={classifications as any[]}
+        selectedIds={selectedIds}
+        onToggleSelect={(id: string, v: boolean) =>
+          setSelectedIds((s) => {
+            const next = new Set(s);
+            v ? next.add(id) : next.delete(id);
+            return next;
+          })
+        }
+        onToggleSelectAll={(v: boolean) =>
+          setSelectedIds((s) => {
+            const next = new Set(s);
+            const pageIds = (paginatedAccounts as any[]).map((a) => a.id);
+            if (v) pageIds.forEach((id) => next.add(id));
+            else pageIds.forEach((id) => next.delete(id));
+            return next;
+          })
+        }
         onEdit={openEdit}
         onDelete={setToDelete}
         onToggleGroup={(a: any, v: boolean) =>
@@ -557,6 +629,7 @@ function ChartOfAccountsPanel() {
           })
         }
       />
+
 
       {filteredAccounts.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-2">
@@ -696,6 +769,27 @@ function ChartOfAccountsPanel() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => !bulkDeleting && setBulkDeleteOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف {selectedIds.size} حساب</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف الحسابات المحددة؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); runBulkDelete(); }}
+              disabled={bulkDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkDeleting ? "جارٍ الحذف..." : t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1092,6 +1186,9 @@ function ChartOfAccountsTable({
   accounts,
   accountTypes,
   classifications,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
   onEdit,
   onDelete,
   onToggleReconcilable,
@@ -1100,6 +1197,9 @@ function ChartOfAccountsTable({
   accounts: any[];
   accountTypes: any[];
   classifications: any[];
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string, v: boolean) => void;
+  onToggleSelectAll: (v: boolean) => void;
   onEdit: (a: any) => void;
   onDelete: (a: any) => void;
   onToggleGroup: (a: any, v: boolean) => void;
@@ -1127,11 +1227,22 @@ function ChartOfAccountsTable({
     [accounts],
   );
 
+  const pageSelectedCount = rows.filter((r) => selectedIds.has(r.id)).length;
+  const allSelected = rows.length > 0 && pageSelectedCount === rows.length;
+  const someSelected = pageSelectedCount > 0 && pageSelectedCount < rows.length;
+
   return (
     <Card>
       <table className="w-full text-sm">
         <thead className="bg-muted/50">
           <tr>
+            <th className="p-3 w-10 text-center">
+              <Checkbox
+                checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                onCheckedChange={(v) => onToggleSelectAll(v === true)}
+                aria-label="select all"
+              />
+            </th>
             <th className="text-start p-3 font-medium w-32">{t("common.code")}</th>
             <th className="text-start p-3 font-medium">{t("common.nameEn")}</th>
             <th className="text-start p-3 font-medium">{t("common.nameAr")}</th>
@@ -1147,8 +1258,16 @@ function ChartOfAccountsTable({
           {rows.map((a) => {
             const tp = typeById.get(a.account_type_id);
             const cls = tp ? clsById.get(tp.classification_id) : null;
+            const checked = selectedIds.has(a.id);
             return (
-              <tr key={a.id} className="border-t hover:bg-muted/30">
+              <tr key={a.id} className={`border-t hover:bg-muted/30 ${checked ? "bg-primary/5" : ""}`}>
+                <td className="p-3 text-center">
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => onToggleSelect(a.id, v === true)}
+                    aria-label={`select ${a.code}`}
+                  />
+                </td>
                 <td className="p-3 font-mono">{a.code}</td>
                 <td className="p-3">{a.name_en}</td>
                 <td className="p-3">{a.name_ar}</td>
@@ -1200,7 +1319,7 @@ function ChartOfAccountsTable({
           })}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={9} className="p-8 text-center text-muted-foreground">
+              <td colSpan={10} className="p-8 text-center text-muted-foreground">
                 {t("common.noData")}
               </td>
             </tr>
@@ -1210,6 +1329,7 @@ function ChartOfAccountsTable({
     </Card>
   );
 }
+
 
 const bucketColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
