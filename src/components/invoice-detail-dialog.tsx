@@ -201,15 +201,12 @@ export function InvoiceDetailDialog({
               </table>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <TransactionAttachments
-                transactionType="invoice"
-                transactionId={(inv as any).id}
-                companyId={(inv as any).company_id}
-                branchId={(inv as any).branch_id}
-              />
-              <ApprovalWorkflowTimeline documentType="invoice" documentId={(inv as any).id} />
-            </div>
+            <TransactionAttachments
+              transactionType="invoice"
+              transactionId={(inv as any).id}
+              companyId={(inv as any).company_id}
+              branchId={(inv as any).branch_id}
+            />
 
             <HistoryLog table="invoices" recordId={(inv as any).id} />
           </div>
