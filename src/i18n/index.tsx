@@ -4,9 +4,10 @@ import { translations, type Locale } from "./translations";
 type Ctx = {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (path: string) => string;
+  t: (path: string, vars?: Record<string, string | number>) => string;
   dir: "rtl" | "ltr";
 };
+
 
 const I18nContext = createContext<Ctx | null>(null);
 
