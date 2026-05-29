@@ -87,6 +87,8 @@ type FormState = {
   is_group: boolean;
   is_active: boolean;
   is_reconcilable: boolean;
+  is_receivable: boolean;
+  is_payable: boolean;
   notes: string;
 };
 
