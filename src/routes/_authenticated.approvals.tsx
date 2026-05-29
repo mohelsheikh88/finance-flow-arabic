@@ -41,6 +41,7 @@ function ApprovalsPage() {
   const createWf = useServerFn(createWorkflow);
   const updateWf = useServerFn(updateWorkflow);
   const deleteWf = useServerFn(deleteWorkflow);
+  const setActiveWf = useServerFn(setWorkflowActive);
   const listRolesFn = useServerFn(listRoles);
 
   const { data: rolesData = [] } = useQuery({
