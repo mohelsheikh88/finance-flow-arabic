@@ -457,13 +457,17 @@ export const importAccounts = createServerFn({ method: "POST" })
     const codeToId = new Map<string, string>();
     (existing ?? []).forEach((r: any) => codeToId.set(r.code, r.id));
 
-    // Load account types for resolving account_type_code -> account_type_id
-    const { data: types } = await context.supabase
-      .from("account_types")
-      .select("id, code, classification")
+    // Load classifications for resolving account_type_code / account_type -> classification_id + bucket.
+    const { data: classifications } = await context.supabase
+      .from("classifications")
+      .select("id, code, bucket, name_ar, name_en")
       .eq("company_id", data.companyId);
-    const typeByCode = new Map<string, any>();
-    (types ?? []).forEach((tp: any) => typeByCode.set(String(tp.code).toLowerCase(), tp));
+    const clsByKey = new Map<string, any>();
+    (classifications ?? []).forEach((c: any) => {
+      [c.code, c.bucket, c.name_ar, c.name_en].forEach((k) => {
+        if (k) clsByKey.set(String(k).trim().toLowerCase(), c);
+      });
+    });
 
     // Sort: parents (no parent_code) first so parent_id can resolve
     const sorted = [...data.rows].sort(
@@ -480,13 +484,25 @@ export const importAccounts = createServerFn({ method: "POST" })
         errors.push({ code: r.code, error: `Parent code "${r.parent_code}" not found` });
         continue;
       }
-      const tp = r.account_type_code ? typeByCode.get(String(r.account_type_code).toLowerCase()) : null;
+      const clsLookup =
+        (r.account_type_code && clsByKey.get(String(r.account_type_code).trim().toLowerCase())) ||
+        (r.account_type && clsByKey.get(String(r.account_type).trim().toLowerCase())) ||
+        null;
+      if (!clsLookup) {
+        errors.push({
+          code: r.code,
+          error: `Classification not found for "${r.account_type_code ?? r.account_type}"`,
+        });
+        continue;
+      }
       const payload: any = {
         company_id: data.companyId,
         code: r.code,
         name_ar: r.name_ar,
         name_en: r.name_en,
-        account_type: tp?.classification ?? r.account_type,
+        account_type: clsLookup.bucket,
+        classification_id: clsLookup.id,
+        account_type_id: null,
         parent_id,
         currency_code: r.currency_code || null,
         is_group: r.is_group ?? false,
@@ -494,7 +510,7 @@ export const importAccounts = createServerFn({ method: "POST" })
         is_reconcilable: r.is_reconcilable ?? false,
         notes: r.notes || null,
       };
-      if (tp?.id) payload.account_type_id = tp.id;
+
 
       const existingId = codeToId.get(r.code);
       if (existingId) {
