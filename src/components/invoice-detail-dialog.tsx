@@ -51,8 +51,18 @@ export function InvoiceDetailDialog({
   const taxAmt = lines.reduce((s, l) => s + Number(l.quantity) * Number(l.unit_price) * (Number(l.tax_rate || 0) / 100), 0);
   const total = subtotal + taxAmt;
 
+  const isPosted = ["posted", "paid", "partially_paid"].includes((inv as any)?.status);
+
   const handlePrint = async () => {
     if (!inv) return;
+    if (!isPosted) {
+      toast.error(
+        locale === "ar"
+          ? "لا يمكن إصدار الفاتورة الضريبية إلا بعد الترحيل (POST)"
+          : "Tax invoice can only be issued after posting"
+      );
+      return;
+    }
     try {
       await printTaxInvoice({
         invoice: inv,
@@ -204,7 +214,7 @@ export function InvoiceDetailDialog({
 
         <DialogFooter className="gap-2">
           {inv && (
-            <Button variant="default" onClick={handlePrint}>
+            <Button variant="default" onClick={handlePrint} disabled={!isPosted} title={!isPosted ? (locale === "ar" ? "متاح بعد الترحيل فقط" : "Available after posting only") : undefined}>
               <Printer className="h-4 w-4 me-1" />
               {t("invoices.printTax") || "طباعة فاتورة ضريبية"}
             </Button>
