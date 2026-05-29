@@ -119,7 +119,7 @@ export function InvoiceDetailDialog({
                 <div className="text-[11px] text-muted-foreground mb-0.5">{t("invoices.dueDate")}</div>
                 <div className="font-medium">{(inv as any).due_date || "—"}</div>
               </div>
-              <div className="col-span-2">
+              <div>
                 <div className="text-[11px] text-muted-foreground mb-0.5">
                   {(inv as any).invoice_type === "vendor_bill" || (inv as any).invoice_type === "vendor"
                     ? t("invoices.vendor")
@@ -130,7 +130,7 @@ export function InvoiceDetailDialog({
                 </div>
               </div>
               {(inv as any).reference && (
-                <div className="col-span-2 md:col-span-4">
+                <div>
                   <div className="text-[11px] text-muted-foreground mb-0.5">{t("common.reference")}</div>
                   <div className="font-medium">{(inv as any).reference}</div>
                 </div>
