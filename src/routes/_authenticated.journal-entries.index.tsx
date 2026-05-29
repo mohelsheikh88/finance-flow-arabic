@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { StatusBadge } from "@/routes/_authenticated.dashboard";
 import { ApprovalCell } from "@/components/approval-cell";
+import { JEDetailDialog } from "@/components/je-detail-dialog";
 
 export const Route = createFileRoute("/_authenticated/journal-entries/")({
   component: JEListPage,
