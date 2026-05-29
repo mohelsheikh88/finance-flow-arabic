@@ -393,6 +393,7 @@ export const translations = {
       reference: "المرجع",
       description: "الوصف",
       readOnlyNotice: "لا يمكن التعديل: هذا القيد ليس مانوال أو ليس في حالة مسودة",
+      openSource: "فتح المعاملة في الموديول",
     },
     journals: {
       allowManualEntries: "السماح بإنشاء قيود يدوية من هذا الدفتر",
