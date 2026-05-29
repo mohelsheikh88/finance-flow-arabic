@@ -377,6 +377,8 @@ export const upsertAccount = createServerFn({ method: "POST" })
       is_group: data.is_group ?? false,
       is_active: data.is_active ?? true,
       is_reconcilable: data.is_reconcilable ?? false,
+      is_receivable: data.is_receivable ?? false,
+      is_payable: data.is_payable ?? false,
       notes: data.notes ?? null,
     };
     if (data.id) {
