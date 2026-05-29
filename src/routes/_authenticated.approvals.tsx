@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listWorkflows, createWorkflow, updateWorkflow, deleteWorkflow } from "@/lib/api/approvals.functions";
+import { listWorkflows, createWorkflow, updateWorkflow, deleteWorkflow, setWorkflowActive } from "@/lib/api/approvals.functions";
 import { listRoles } from "@/lib/api/roles.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
