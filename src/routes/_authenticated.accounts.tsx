@@ -303,10 +303,6 @@ function ChartOfAccountsPanel() {
         name_en: a.name_en,
         classification_code: cls?.code ?? "",
         classification_name: cls?.name_en ?? "",
-        account_type_code: tp?.code ?? "",
-        account_type: a.account_type ?? tp?.classification ?? "",
-        parent_code: (accounts as any[]).find((p) => p.id === a.parent_id)?.code ?? "",
-        currency_code: a.currency_code ?? "",
         is_group: a.is_group ? 1 : 0,
         is_active: a.is_active ? 1 : 0,
         is_reconcilable: a.is_reconcilable ? 1 : 0,
@@ -315,9 +311,10 @@ function ChartOfAccountsPanel() {
     });
     const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{
       code: "", name_ar: "", name_en: "",
-      classification_code: "", classification_name: "", account_type_code: "", account_type: "asset",
-      parent_code: "", currency_code: "", is_group: 0, is_active: 1, is_reconcilable: 0, notes: "",
+      classification_code: "", classification_name: "",
+      is_group: 0, is_active: 1, is_reconcilable: 0, notes: "",
     }]);
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "accounts");
     XLSX.writeFile(wb, `chart_of_accounts_${new Date().toISOString().slice(0, 10)}.xlsx`);
