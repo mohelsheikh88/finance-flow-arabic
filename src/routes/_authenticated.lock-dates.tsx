@@ -134,7 +134,6 @@ function Page() {
               <th className="text-start p-3 font-medium">{t("lockDates.lockDate")}</th>
               <th className="text-start p-3 font-medium">{t("lockDates.scope")}</th>
               <th className="text-start p-3 font-medium">{t("common.notes")}</th>
-              <th className="text-center p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -149,17 +148,15 @@ function Page() {
                   )}
                 </td>
                 <td className="p-3 text-muted-foreground">{r.notes ?? "—"}</td>
-                <td className="p-3 text-center">
-                  <Button size="sm" variant="ghost" onClick={() => removeMut.mutate(r.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </td>
               </tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={3} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
     </div>
+  );
+}
+
   );
 }
