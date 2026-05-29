@@ -1,5 +1,55 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+const TaxUpsertSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  code: z.string().min(1).max(32),
+  name_ar: z.string().min(1).max(255),
+  name_en: z.string().min(1).max(255),
+  tax_type: z.enum(["sale", "purchase"]),
+  rate: z.number().min(0).max(100),
+  account_id: z.string().uuid().nullable().optional(),
+  is_active: z.boolean().default(true),
+});
+
+export const upsertTax = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => TaxUpsertSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const payload = { ...data, account_id: data.account_id ?? null };
+    if (data.id) {
+      const { id, ...patch } = payload;
+      const { error } = await context.supabase.from("taxes").update(patch).eq("id", id);
+      if (error) throw new Error(error.message);
+      return { ok: true, id };
+    }
+    const { data: row, error } = await context.supabase
+      .from("taxes").insert(payload).select().single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id };
+  });
+
+export const deleteTax = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => i)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("taxes").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const toggleTaxActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string; is_active: boolean }) => i)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("taxes").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 export const listTaxes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
