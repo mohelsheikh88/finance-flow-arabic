@@ -74,14 +74,6 @@ function Page() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const removeMut = useMutation({
-    mutationFn: (id: string) => remove({ data: { id } }),
-    onSuccess: () => {
-      toast.success(t("common.saved"));
-      qc.invalidateQueries({ queryKey: ["lock_dates"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const canSave = !!form.lock_date;
 
