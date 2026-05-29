@@ -888,7 +888,7 @@ export const createJournalEntry = createServerFn({ method: "POST" })
 
 export const getTrialBalance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { companyId: string; asOfDate: string }) => i)
+  .inputValidator((i: { companyId: string; asOfDate: string; dateFrom?: string | null }) => i)
   .handler(async ({ data, context }) => {
     // Build classification metadata per account so the TB groups can show
     // the user-defined classification name/bucket rather than the legacy enum only.
@@ -925,8 +925,7 @@ export const getTrialBalance = createServerFn({ method: "GET" })
       });
     }
 
-
-    // Get all posted lines up to date
+    // Get all posted lines up to asOfDate (closing) — we'll split into beginning vs period via dateFrom.
     const { data: rows, error } = await context.supabase
       .from("journal_entry_lines")
       .select(
@@ -937,48 +936,42 @@ export const getTrialBalance = createServerFn({ method: "GET" })
       .lte("journal_entries.entry_date", data.asOfDate);
     if (error) throw new Error(error.message);
 
-    const map = new Map<
-      string,
-      {
-        id: string;
-        code: string;
-        name_ar: string;
-        name_en: string;
-        type: string;
-        classification_id: string | null;
-        classification_code: string | null;
-        classification_name_ar: string | null;
-        classification_name_en: string | null;
-        bucket: string;
-        statement: string | null;
-        normal_balance: string | null;
-        debit: number;
-        credit: number;
-      }
-    >();
+    const dateFrom = data.dateFrom || null;
+
+    type TBRow = {
+      id: string; code: string; name_ar: string; name_en: string; type: string;
+      classification_id: string | null; classification_code: string | null;
+      classification_name_ar: string | null; classification_name_en: string | null;
+      bucket: string; statement: string | null; normal_balance: string | null;
+      beginning_debit: number; beginning_credit: number;
+      debit: number; credit: number;
+    };
+    const map = new Map<string, TBRow>();
+
     for (const r of rows ?? []) {
       const acc = (r as any).accounts;
+      const je = (r as any).journal_entries;
       const meta = acctMeta.get(acc.id) ?? {
-        classification_id: null,
-        classification_code: null,
-        classification_name_ar: null,
-        classification_name_en: null,
-        bucket: acc.account_type,
-        statement: null,
-        normal_balance: null,
+        classification_id: null, classification_code: null,
+        classification_name_ar: null, classification_name_en: null,
+        bucket: acc.account_type, statement: null, normal_balance: null,
       };
       const cur = map.get(acc.id) ?? {
-        id: acc.id,
-        code: acc.code,
-        name_ar: acc.name_ar,
-        name_en: acc.name_en,
-        type: acc.account_type,
-        ...meta,
-        debit: 0,
-        credit: 0,
+        id: acc.id, code: acc.code, name_ar: acc.name_ar, name_en: acc.name_en,
+        type: acc.account_type, ...meta,
+        beginning_debit: 0, beginning_credit: 0,
+        debit: 0, credit: 0,
       };
-      cur.debit += Number(r.debit);
-      cur.credit += Number(r.credit);
+      const d = Number(r.debit); const c = Number(r.credit);
+      // Lines strictly BEFORE dateFrom accumulate into beginning balance.
+      // When no dateFrom is provided, treat all lines as period (no beginning).
+      if (dateFrom && je.entry_date < dateFrom) {
+        cur.beginning_debit += d;
+        cur.beginning_credit += c;
+      } else {
+        cur.debit += d;
+        cur.credit += c;
+      }
       map.set(acc.id, cur);
     }
     return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
