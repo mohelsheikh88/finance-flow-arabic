@@ -90,6 +90,9 @@ export function InvoiceDetailDialog({
           <div className="p-8 text-center text-muted-foreground text-sm">{t("common.loading")}</div>
         ) : (
           <div className="space-y-4">
+            <div className="w-full">
+              <ApprovalWorkflowTimeline documentType="invoice" documentId={(inv as any).id} />
+            </div>
             {je && (
               <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/20 rounded p-2.5">
                 <span className="text-muted-foreground">{t("invoices.linkedJE") || "القيد المرتبط"}:</span>
