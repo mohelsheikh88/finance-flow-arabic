@@ -98,7 +98,7 @@ const empty: FormState = {
 const NONE = "__none__";
 
 function JournalsPage() {
-  const { t, lang } = useI18n();
+  const { t, locale } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
   const qc = useQueryClient();
