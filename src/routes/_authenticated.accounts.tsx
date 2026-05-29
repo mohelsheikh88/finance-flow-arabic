@@ -87,6 +87,8 @@ type FormState = {
   is_group: boolean;
   is_active: boolean;
   is_reconcilable: boolean;
+  is_receivable: boolean;
+  is_payable: boolean;
   notes: string;
 };
 
@@ -101,6 +103,8 @@ const empty: FormState = {
   is_group: false,
   is_active: true,
   is_reconcilable: false,
+  is_receivable: false,
+  is_payable: false,
   notes: "",
 };
 
@@ -260,6 +264,8 @@ function ChartOfAccountsPanel() {
       is_group: !!a.is_group,
       is_active: !!a.is_active,
       is_reconcilable: !!a.is_reconcilable,
+      is_receivable: !!a.is_receivable,
+      is_payable: !!a.is_payable,
       notes: a.notes ?? "",
     });
     setOpen(true);
@@ -285,6 +291,8 @@ function ChartOfAccountsPanel() {
           is_group: form.is_group,
           is_active: form.is_active,
           is_reconcilable: form.is_reconcilable,
+          is_receivable: form.is_receivable,
+          is_payable: form.is_payable,
           notes: form.notes.trim() || null,
         },
       });
@@ -829,6 +837,14 @@ function ChartOfAccountsPanel() {
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_reconcilable} onCheckedChange={(v) => setForm({ ...form, is_reconcilable: v })} />
                 <Label>{t("accounts.isReconcilable")}</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_receivable} onCheckedChange={(v) => setForm({ ...form, is_receivable: v })} />
+                <Label>ذمم مدينة (Receivable)</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_payable} onCheckedChange={(v) => setForm({ ...form, is_payable: v })} />
+                <Label>ذمم دائنة (Payable)</Label>
               </div>
             </div>
             <div className="col-span-2">
