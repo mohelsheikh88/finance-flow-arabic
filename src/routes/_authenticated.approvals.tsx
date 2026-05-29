@@ -197,6 +197,7 @@ function ApprovalsPage() {
                 <div>
                   <Label>{t("approvals.maxAmount")}</Label>
                   <Input type="number" value={wfForm.max_amount ?? ""} onChange={(e) => setWfForm({ ...wfForm, max_amount: e.target.value ? Number(e.target.value) : null })} />
+                </div>
               </div>
               {editingId && (
                 <div className="col-span-2 flex items-center gap-2 pt-2">
