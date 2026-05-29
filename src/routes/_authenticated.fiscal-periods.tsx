@@ -239,6 +239,7 @@ function FiscalPeriodsPage() {
     return rows.slice().sort((a, b) => (a.lock_date < b.lock_date ? 1 : -1))[0];
   }, [lockRows]);
 
+  const [ldEditOpen, setLdEditOpen] = useState(false);
   const [ldDate, setLdDate] = useState<string>("");
   const [ldNotes, setLdNotes] = useState<string>("");
 
@@ -265,11 +266,13 @@ function FiscalPeriodsPage() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["lock_dates"] });
+      setLdEditOpen(false);
     },
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
   const canSaveLD = !!ldDate && (ldDate !== (currentLock?.lock_date ?? "") || (ldNotes || "") !== (currentLock?.notes ?? ""));
+
 
 
 
