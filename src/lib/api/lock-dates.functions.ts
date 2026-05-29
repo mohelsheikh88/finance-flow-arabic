@@ -34,6 +34,7 @@ export const createLockDate = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return row;
+  });
 
 const UpdateSchema = z.object({
   id: z.string().uuid(),
