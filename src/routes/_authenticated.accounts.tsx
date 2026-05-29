@@ -275,7 +275,7 @@ function ChartOfAccountsPanel() {
   const saveMut = useMutation({
     mutationFn: () => {
       if (!form.classification_id) {
-        throw new Error("اختر تصنيف الحساب أولاً | Please select an account classification first");
+        throw new Error(t("accounts.selectClassificationFirst"));
       }
       return upsert({
         data: {
