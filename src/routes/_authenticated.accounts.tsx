@@ -289,20 +289,32 @@ function ChartOfAccountsPanel() {
   });
 
   const handleExport = () => {
-    const rows = (accounts as any[]).map((a) => ({
-      code: a.code,
-      name_ar: a.name_ar,
-      name_en: a.name_en,
-      account_type: a.account_type,
-      parent_code: (accounts as any[]).find((p) => p.id === a.parent_id)?.code ?? "",
-      currency_code: a.currency_code ?? "",
-      is_group: a.is_group ? 1 : 0,
-      is_active: a.is_active ? 1 : 0,
-      is_reconcilable: a.is_reconcilable ? 1 : 0,
-      notes: a.notes ?? "",
-    }));
+    const typesById = new Map<string, any>();
+    (accountTypes as any[]).forEach((tp) => typesById.set(tp.id, tp));
+    const clsById = new Map<string, any>();
+    (classifications as any[]).forEach((c) => clsById.set(c.id, c));
+
+    const rows = (accounts as any[]).map((a) => {
+      const tp = typesById.get(a.account_type_id);
+      const cls = tp ? clsById.get(tp.classification_id) : null;
+      return {
+        code: a.code,
+        name_ar: a.name_ar,
+        name_en: a.name_en,
+        classification_code: cls?.code ?? "",
+        account_type_code: tp?.code ?? "",
+        account_type: a.account_type ?? tp?.classification ?? "",
+        parent_code: (accounts as any[]).find((p) => p.id === a.parent_id)?.code ?? "",
+        currency_code: a.currency_code ?? "",
+        is_group: a.is_group ? 1 : 0,
+        is_active: a.is_active ? 1 : 0,
+        is_reconcilable: a.is_reconcilable ? 1 : 0,
+        notes: a.notes ?? "",
+      };
+    });
     const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{
-      code: "", name_ar: "", name_en: "", account_type: "asset",
+      code: "", name_ar: "", name_en: "",
+      classification_code: "", account_type_code: "", account_type: "asset",
       parent_code: "", currency_code: "", is_group: 0, is_active: 1, is_reconcilable: 0, notes: "",
     }]);
     const wb = XLSX.utils.book_new();
@@ -319,25 +331,37 @@ function ChartOfAccountsPanel() {
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
-      const rows = raw.map((r) => ({
-        code: String(r.code ?? "").trim(),
-        name_ar: String(r.name_ar ?? "").trim(),
-        name_en: String(r.name_en ?? "").trim(),
-        account_type: String(r.account_type ?? "").trim().toLowerCase(),
-        parent_code: r.parent_code ? String(r.parent_code).trim() : null,
-        currency_code: r.currency_code ? String(r.currency_code).trim() : null,
-        is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
-        is_active: r.is_active === undefined || r.is_active === "" ? true
-          : r.is_active === true || r.is_active === 1 || String(r.is_active).toLowerCase() === "true",
-        is_reconcilable: r.is_reconcilable === true || r.is_reconcilable === 1 || String(r.is_reconcilable).toLowerCase() === "true",
-        notes: r.notes ? String(r.notes) : null,
-      })).filter((r) => r.code);
+
+      // Resolve account_type from either account_type_code (preferred) or legacy account_type bucket
+      const typeByCode = new Map<string, any>();
+      (accountTypes as any[]).forEach((tp) => typeByCode.set(String(tp.code).toLowerCase(), tp));
+
+      const rows = raw.map((r) => {
+        const tcode = String(r.account_type_code ?? "").trim().toLowerCase();
+        const tp = tcode ? typeByCode.get(tcode) : null;
+        const bucket = String(r.account_type ?? tp?.classification ?? "").trim().toLowerCase();
+        return {
+          code: String(r.code ?? "").trim(),
+          name_ar: String(r.name_ar ?? "").trim(),
+          name_en: String(r.name_en ?? "").trim(),
+          account_type: bucket,
+          account_type_code: tp?.code ?? null,
+          parent_code: r.parent_code ? String(r.parent_code).trim() : null,
+          currency_code: r.currency_code ? String(r.currency_code).trim() : null,
+          is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
+          is_active: r.is_active === undefined || r.is_active === "" ? true
+            : r.is_active === true || r.is_active === 1 || String(r.is_active).toLowerCase() === "true",
+          is_reconcilable: r.is_reconcilable === true || r.is_reconcilable === 1 || String(r.is_reconcilable).toLowerCase() === "true",
+          notes: r.notes ? String(r.notes) : null,
+        };
+      }).filter((r) => r.code);
       if (!rows.length) { toast.error(t("common.noData")); return; }
       importMut.mutate(rows);
     } catch (err: any) {
       toast.error(err.message ?? "Import failed");
     }
   };
+
 
   return (
     <div className="space-y-4">
