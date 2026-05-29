@@ -112,7 +112,6 @@ function ChartOfAccountsPanel() {
   const qc = useQueryClient();
 
   const list = useServerFn(listAccounts);
-  const listTypes = useServerFn(listAccountTypes);
   const listCls = useServerFn(listClassifications);
   const upsert = useServerFn(upsertAccount);
   const remove = useServerFn(deleteAccount);
@@ -123,11 +122,9 @@ function ChartOfAccountsPanel() {
     enabled: !!companyId,
   });
 
-  const { data: accountTypes = [] } = useQuery({
-    queryKey: ["account_types", companyId],
-    queryFn: () => listTypes({ data: { companyId: companyId! } }),
-    enabled: !!companyId,
-  });
+  // Account Types are deprecated — keep an empty stub for legacy lookups below.
+  const accountTypes: any[] = [];
+
 
   const { data: classifications = [] } = useQuery({
     queryKey: ["classifications", companyId],
