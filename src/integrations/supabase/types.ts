@@ -893,6 +893,7 @@ export type Database = {
           name_ar: string
           name_en: string
           notes: string | null
+          receivable_account_id: string | null
           sort_order: number
           updated_at: string
         }
@@ -905,6 +906,7 @@ export type Database = {
           name_ar: string
           name_en: string
           notes?: string | null
+          receivable_account_id?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -917,6 +919,7 @@ export type Database = {
           name_ar?: string
           name_en?: string
           notes?: string | null
+          receivable_account_id?: string | null
           sort_order?: number
           updated_at?: string
         }

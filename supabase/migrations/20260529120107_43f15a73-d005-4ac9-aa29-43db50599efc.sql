@@ -1,0 +1,1 @@
+ALTER TABLE public.customer_types ADD COLUMN IF NOT EXISTS receivable_account_id uuid;
