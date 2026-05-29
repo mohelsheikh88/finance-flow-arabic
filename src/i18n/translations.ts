@@ -1104,6 +1104,7 @@ export const translations = {
       requests: "Approval Requests",
       noWorkflows: "No workflows configured yet",
       docType: "Document Type",
+      journalType: "Journal Type",
       minAmount: "Min Amount",
       maxAmount: "Max Amount",
       steps: "Approval Steps",
@@ -1111,8 +1112,10 @@ export const translations = {
       step: "Step",
       document: "Document",
       reference: "Reference",
+      approval: "Approval",
       actionDone: "Action submitted",
       doc: { journal_entry: "Journal Entry", invoice: "Invoice", payment: "Payment", asset_disposal: "Asset Disposal" },
+      jt: { sales: "Sales", purchase: "Purchase", bank: "Bank", cash: "Cash", misc: "Miscellaneous" },
       status: { pending: "Pending", approved: "Approved", rejected: "Rejected", cancelled: "Cancelled", all: "All" },
     },
     assets: {
