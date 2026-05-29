@@ -251,6 +251,7 @@ function CustomerInvoicesPage() {
               <th className="text-end p-3 font-medium font-mono">{t("invoices.paid")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("invoices.due")}</th>
               <th className="text-start p-3 font-medium">{t("common.status")}</th>
+              <th className="text-center p-3 font-medium">{t("approvals.approval")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
