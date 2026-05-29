@@ -152,8 +152,11 @@ export const createInvoice = createServerFn({ method: "POST" })
       throw new Error(linesErr.message);
     }
 
-    // Bump journal sequence
+    // Bump invoice journal sequence
     await supabase.from("journals").update({ sequence_next: seq + 1 }).eq("id", journalId);
+
+    // Always create the JE (as draft) so it shows in JE screen + trial balance
+    await upsertInvoiceJE(supabase, inv.id, userId!, "draft");
 
     // Post if requested (will route via approval workflow if one matches)
     if (data.status === "posted") {
@@ -164,42 +167,16 @@ export const createInvoice = createServerFn({ method: "POST" })
   });
 
 /**
- * Core posting logic. Routes through approval workflow when one matches
- * (creates an approval_request and returns without posting). Pass
- * `bypassApproval` from the approval-handler to actually post.
+ * Build the JE lines for an invoice. Throws when control / VAT accounts
+ * are not configured.
  */
-export async function postInvoiceCore(
-  supabase: any,
-  userId: string,
-  invoiceId: string,
-  opts: { bypassApproval?: boolean } = {},
-) {
-  // Fetch invoice + partner + lines
+async function buildInvoiceJEPayload(supabase: any, invoiceId: string) {
   const { data: inv } = await supabase
     .from("invoices")
     .select("*, partners(receivable_account_id, payable_account_id), invoice_lines(*, taxes(account_id))")
     .eq("id", invoiceId)
     .single();
   if (!inv) throw new Error("Invoice not found");
-  if (inv.status !== "draft") throw new Error("Only draft invoices can be posted");
-
-  // Approval gate
-  if (!opts.bypassApproval) {
-    const res = await maybeRequestApproval(supabase, userId, {
-      companyId: inv.company_id,
-      branchId: inv.branch_id,
-      journalId: inv.journal_id ?? null,
-      documentType: "invoice",
-      documentId: inv.id,
-      documentReference: inv.invoice_number,
-      amount: Number(inv.total),
-      currencyCode: inv.currency_code,
-    });
-    if (res.created) {
-      return { pendingApproval: true, requestId: res.requestId };
-    }
-  }
-
 
   const isCustomer = inv.invoice_type === "customer";
   const partnerCtrl = isCustomer ? inv.partners?.receivable_account_id : inv.partners?.payable_account_id;
@@ -211,11 +188,8 @@ export async function postInvoiceCore(
     );
   }
 
-  // Build JE lines
   const jeLines: any[] = [];
   let lineNo = 1;
-
-  // Partner control account
   jeLines.push({
     line_number: lineNo++,
     account_id: partnerCtrl,
@@ -224,8 +198,6 @@ export async function postInvoiceCore(
     debit: isCustomer ? inv.total : 0,
     credit: isCustomer ? 0 : inv.total,
   });
-
-  // Revenue / Expense lines (one per invoice line)
   for (const l of inv.invoice_lines) {
     jeLines.push({
       line_number: lineNo++,
@@ -248,11 +220,24 @@ export async function postInvoiceCore(
       throw new Error("Tax line has no VAT account configured. Configure tax.account_id.");
     }
   }
-
   const totalDebit = jeLines.reduce((s, l) => s + Number(l.debit || 0), 0);
   const totalCredit = jeLines.reduce((s, l) => s + Number(l.credit || 0), 0);
+  return { inv, isCustomer, jeLines, totalDebit, totalCredit };
+}
 
-  // Find period
+/**
+ * Create or refresh the journal entry attached to an invoice.
+ * When `targetStatus="posted"` validates that the fiscal period is open.
+ * Sequence is consumed only when a new JE is created.
+ */
+export async function upsertInvoiceJE(
+  supabase: any,
+  invoiceId: string,
+  userId: string,
+  targetStatus: "draft" | "posted",
+) {
+  const { inv, isCustomer, jeLines, totalDebit, totalCredit } = await buildInvoiceJEPayload(supabase, invoiceId);
+
   const { data: period } = await supabase
     .from("fiscal_periods")
     .select("id, status")
@@ -260,65 +245,141 @@ export async function postInvoiceCore(
     .lte("date_from", inv.invoice_date)
     .gte("date_to", inv.invoice_date)
     .maybeSingle();
-  if (period && period.status !== "open") throw new Error("Fiscal period is closed");
-
-  // Get journal sequence for entry
-  const { data: journal } = await supabase
-    .from("journals")
-    .select("sequence_prefix, sequence_next")
-    .eq("id", inv.journal_id)
-    .single();
-  const prefix = journal?.sequence_prefix ?? "JV";
-  const seq = journal?.sequence_next ?? 1;
-  const yr = new Date(inv.invoice_date).getFullYear();
-  const entryNumber = `${prefix}/${yr}/${String(seq).padStart(5, "0")}`;
-
-  const { data: je, error: jeErr } = await supabase
-    .from("journal_entries")
-    .insert({
-      company_id: inv.company_id,
-      branch_id: inv.branch_id,
-      journal_id: inv.journal_id,
-      period_id: period?.id ?? null,
-      entry_number: entryNumber,
-      entry_date: inv.invoice_date,
-      reference: inv.invoice_number,
-      description: `${isCustomer ? "Customer Invoice" : "Vendor Bill"} ${inv.invoice_number}`,
-      status: "posted",
-      total_debit: totalDebit,
-      total_credit: totalCredit,
-      source_type: "invoice",
-      source_id: inv.id,
-      created_by: userId,
-      posted_by: userId,
-      posted_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
-  if (jeErr || !je) throw new Error(jeErr?.message ?? "Failed to create JE");
-
-  const { error: lErr } = await supabase
-    .from("journal_entry_lines")
-    .insert(jeLines.map((l) => ({ ...l, entry_id: je.id })));
-  if (lErr) {
-    await supabase.from("journal_entries").delete().eq("id", je.id);
-    throw new Error(lErr.message);
+  if (targetStatus === "posted" && period && period.status !== "open") {
+    throw new Error("Fiscal period is closed");
   }
 
-  await supabase.from("journals").update({ sequence_next: seq + 1 }).eq("id", inv.journal_id);
+  const description = `${isCustomer ? "Customer Invoice" : "Vendor Bill"} ${inv.invoice_number}`;
+  const postedFields = targetStatus === "posted"
+    ? { posted_by: userId, posted_at: new Date().toISOString() }
+    : { posted_by: null, posted_at: null };
+
+  let jeId: string | null = inv.journal_entry_id ?? null;
+
+  if (jeId) {
+    // Refresh existing JE
+    const { error: ue } = await supabase
+      .from("journal_entries")
+      .update({
+        period_id: period?.id ?? null,
+        entry_date: inv.invoice_date,
+        reference: inv.invoice_number,
+        description,
+        status: targetStatus,
+        total_debit: totalDebit,
+        total_credit: totalCredit,
+        ...postedFields,
+      })
+      .eq("id", jeId);
+    if (ue) throw new Error(ue.message);
+    await supabase.from("journal_entry_lines").delete().eq("entry_id", jeId);
+    const { error: le } = await supabase
+      .from("journal_entry_lines")
+      .insert(jeLines.map((l) => ({ ...l, entry_id: jeId })));
+    if (le) throw new Error(le.message);
+  } else {
+    // New JE — consume journal sequence
+    const { data: journal } = await supabase
+      .from("journals")
+      .select("sequence_prefix, sequence_next")
+      .eq("id", inv.journal_id)
+      .single();
+    const prefix = journal?.sequence_prefix ?? "JV";
+    const seq = journal?.sequence_next ?? 1;
+    const yr = new Date(inv.invoice_date).getFullYear();
+    const entryNumber = `${prefix}/${yr}/${String(seq).padStart(5, "0")}`;
+
+    const { data: je, error: jeErr } = await supabase
+      .from("journal_entries")
+      .insert({
+        company_id: inv.company_id,
+        branch_id: inv.branch_id,
+        journal_id: inv.journal_id,
+        period_id: period?.id ?? null,
+        entry_number: entryNumber,
+        entry_date: inv.invoice_date,
+        reference: inv.invoice_number,
+        description,
+        status: targetStatus,
+        total_debit: totalDebit,
+        total_credit: totalCredit,
+        source_type: "invoice",
+        source_id: inv.id,
+        created_by: userId,
+        ...postedFields,
+      })
+      .select()
+      .single();
+    if (jeErr || !je) throw new Error(jeErr?.message ?? "Failed to create JE");
+
+    const { error: lErr } = await supabase
+      .from("journal_entry_lines")
+      .insert(jeLines.map((l) => ({ ...l, entry_id: je.id })));
+    if (lErr) {
+      await supabase.from("journal_entries").delete().eq("id", je.id);
+      throw new Error(lErr.message);
+    }
+    await supabase.from("journals").update({ sequence_next: seq + 1 }).eq("id", inv.journal_id);
+    jeId = je.id;
+    await supabase.from("invoices").update({ journal_entry_id: jeId }).eq("id", inv.id);
+  }
+
+  return jeId;
+}
+
+
+/**
+ * Core posting logic. Routes through approval workflow when one matches
+ * (creates an approval_request and returns without posting). Pass
+ * `bypassApproval` from the approval-handler to actually post.
+ */
+export async function postInvoiceCore(
+  supabase: any,
+  userId: string,
+  invoiceId: string,
+  opts: { bypassApproval?: boolean } = {},
+) {
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("id, status, company_id, branch_id, journal_id, total, invoice_number, currency_code")
+    .eq("id", invoiceId)
+    .single();
+  if (!inv) throw new Error("Invoice not found");
+  if (inv.status !== "draft") throw new Error("Only draft invoices can be posted");
+
+  // Approval gate
+  if (!opts.bypassApproval) {
+    const res = await maybeRequestApproval(supabase, userId, {
+      companyId: inv.company_id,
+      branchId: inv.branch_id,
+      journalId: inv.journal_id ?? null,
+      documentType: "invoice",
+      documentId: inv.id,
+      documentReference: inv.invoice_number,
+      amount: Number(inv.total),
+      currencyCode: inv.currency_code,
+    });
+    if (res.created) {
+      return { pendingApproval: true, requestId: res.requestId };
+    }
+  }
+
+  // Flip the existing draft JE (or create a fresh one) to posted
+  const jeId = await upsertInvoiceJE(supabase, inv.id, userId, "posted");
 
   await supabase
     .from("invoices")
     .update({
       status: "posted",
-      journal_entry_id: je.id,
+      journal_entry_id: jeId,
       posted_by: userId,
       posted_at: new Date().toISOString(),
     })
     .eq("id", inv.id);
 
-  return je;
+  return { id: jeId };
 }
+
 
 export const postInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -393,8 +454,13 @@ export const updateInvoice = createServerFn({ method: "POST" })
     }));
     const { error: lerr } = await supabase.from("invoice_lines").insert(lineRows);
     if (lerr) throw new Error(lerr.message);
+
+    // Refresh the linked draft JE so it stays in sync with invoice lines
+    await upsertInvoiceJE(supabase, data.id, context.userId!, "draft");
+
     return { ok: true };
   });
+
 
 /**
  * Permission: user can reset a posted invoice to draft if they are admin,
@@ -491,9 +557,12 @@ export const resetInvoiceToDraft = createServerFn({ method: "POST" })
 
     await assertNotLocked(supabase, inv.company_id, inv.branch_id, inv.invoice_date);
 
+    // Flip JE back to draft (keep entry + lines so it still appears in TB/JE list as draft)
     if (inv.journal_entry_id) {
-      await supabase.from("journal_entry_lines").delete().eq("entry_id", inv.journal_entry_id);
-      const { error: jeErr } = await supabase.from("journal_entries").delete().eq("id", inv.journal_entry_id);
+      const { error: jeErr } = await supabase
+        .from("journal_entries")
+        .update({ status: "draft", posted_by: null, posted_at: null })
+        .eq("id", inv.journal_entry_id);
       if (jeErr) throw new Error(jeErr.message);
     }
 
@@ -501,12 +570,12 @@ export const resetInvoiceToDraft = createServerFn({ method: "POST" })
       .from("invoices")
       .update({
         status: "draft",
-        journal_entry_id: null,
         posted_by: null,
         posted_at: null,
       })
       .eq("id", inv.id);
     if (ue) throw new Error(ue.message);
+
 
     await supabase
       .from("approval_requests")
