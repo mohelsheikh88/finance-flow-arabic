@@ -204,6 +204,7 @@ async function buildInvoiceJEPayload(supabase: any, invoiceId: string) {
     jeLines.push({
       line_number: lineNo++,
       account_id: l.account_id,
+      partner_id: inv.partner_id,
       cost_center_id: l.cost_center_id || null,
       description: l.description || `Line ${l.line_number}`,
       debit: isCustomer ? 0 : l.subtotal,
@@ -213,6 +214,7 @@ async function buildInvoiceJEPayload(supabase: any, invoiceId: string) {
       jeLines.push({
         line_number: lineNo++,
         account_id: l.taxes.account_id,
+        partner_id: inv.partner_id,
         tax_id: l.tax_id,
         description: `VAT ${l.tax_rate}%`,
         debit: isCustomer ? 0 : l.tax_amount,
