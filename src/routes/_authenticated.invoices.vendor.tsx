@@ -164,7 +164,25 @@ function VendorBillsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>{t("invoices.date")} *</Label><Input type="date" value={header.invoice_date} onChange={(e) => setHeader({ ...header, invoice_date: e.target.value })} /></div>
+              <div><Label>{t("invoices.date")} *</Label><Input type="date" value={header.invoice_date} onChange={(e) => {
+                const nd = e.target.value;
+                setHeader({ ...header, invoice_date: nd, due_date: header.payment_term_id ? computeDueDate(nd, header.payment_term_id) : header.due_date });
+              }} /></div>
+              <div>
+                <Label>{t("paymentTerms.paymentTerm")}</Label>
+                <Select value={header.payment_term_id || "none"} onValueChange={(v) => {
+                  const termId = v === "none" ? "" : v;
+                  setHeader({ ...header, payment_term_id: termId, due_date: termId ? computeDueDate(header.invoice_date, termId) : header.due_date });
+                }}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">—</SelectItem>
+                    {paymentTerms.filter((tr: any) => tr.is_active).map((tr: any) => (
+                      <SelectItem key={tr.id} value={tr.id}>{localized(tr, "name")} ({tr.days}d)</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label>{t("invoices.dueDate")}</Label><Input type="date" value={header.due_date} onChange={(e) => setHeader({ ...header, due_date: e.target.value })} /></div>
               <div className="col-span-4"><Label>{t("common.reference")}</Label><Input value={header.reference} onChange={(e) => setHeader({ ...header, reference: e.target.value })} /></div>
             </div>
