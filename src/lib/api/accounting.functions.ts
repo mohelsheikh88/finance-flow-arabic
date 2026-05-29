@@ -556,7 +556,7 @@ const AccountUpsertSchema = z.object({
   code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
-  account_type_id: z.string().trim().min(1).max(255),
+  account_type_id: z.string().trim().max(255).optional().nullable(),
   classification_id: z.string().uuid().nullable().optional(),
   parent_id: z.string().uuid().nullable().optional(),
   currency_code: z.string().trim().min(1).max(10).nullable().optional(),
@@ -572,59 +572,35 @@ export const upsertAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof AccountUpsertSchema>) => AccountUpsertSchema.parse(i))
   .handler(async ({ data, context }) => {
-    // Resolve account type even if a legacy UI sends the type name/code instead of its UUID.
-    const accountTypeInput = data.account_type_id.trim();
-    const { data: accountTypes, error: atErr } = await context.supabase
-      .from("account_types")
-      .select("id, code, name_ar, name_en, classification, classification_id")
-      .eq("company_id", data.company_id);
-    if (atErr) throw new Error(atErr.message);
+    // Resolve classification (the only required taxonomy now that Account Types are removed).
     const norm = (value: unknown) => String(value ?? "").trim().toLowerCase();
-    let at: any = UUID_RE.test(accountTypeInput)
-      ? (accountTypes ?? []).find((tp: any) => tp.id === accountTypeInput)
-      : (accountTypes ?? []).find((tp: any) =>
-          [tp.code, tp.name_ar, tp.name_en, tp.classification].map(norm).includes(norm(accountTypeInput)),
-        );
+    const { data: classifications, error: clsErr } = await context.supabase
+      .from("classifications")
+      .select("id, code, name_ar, name_en, bucket")
+      .eq("company_id", data.company_id);
+    if (clsErr) throw new Error(clsErr.message);
 
-    // If still unresolved and we have a classification_id, find/create an account_type for it.
-    if (!at && data.classification_id) {
-      at = (accountTypes ?? []).find((tp: any) => tp.classification_id === data.classification_id);
-      if (!at) {
-        const { data: cls, error: clsErr } = await context.supabase
-          .from("classifications")
-          .select("id, code, name_ar, name_en, bucket")
-          .eq("id", data.classification_id)
-          .eq("company_id", data.company_id)
-          .maybeSingle();
-        if (clsErr) throw new Error(clsErr.message);
-        if (cls) {
-          const { data: newType, error: newErr } = await context.supabase
-            .from("account_types")
-            .insert({
-              company_id: data.company_id,
-              code: cls.code,
-              name_ar: cls.name_ar,
-              name_en: cls.name_en,
-              classification: cls.bucket,
-              classification_id: cls.id,
-              is_active: true,
-            })
-            .select("id, code, name_ar, name_en, classification, classification_id")
-            .single();
-          if (newErr) throw new Error(newErr.message);
-          at = newType;
-        }
-      }
+    const rawInput = (data.account_type_id ?? "").trim();
+    let cls: any = null;
+    if (data.classification_id) {
+      cls = (classifications ?? []).find((c: any) => c.id === data.classification_id);
     }
-    if (!at) throw new Error("Invalid account type | نوع الحساب غير صحيح");
+    if (!cls && rawInput) {
+      cls = UUID_RE.test(rawInput)
+        ? (classifications ?? []).find((c: any) => c.id === rawInput)
+        : (classifications ?? []).find((c: any) =>
+            [c.code, c.name_ar, c.name_en, c.bucket].map(norm).includes(norm(rawInput)),
+          );
+    }
+    if (!cls) throw new Error("اختر تصنيف الحساب أولاً | Please select an account classification first");
 
     const payload: any = {
       company_id: data.company_id,
       code: data.code,
       name_ar: data.name_ar,
       name_en: data.name_en,
-      account_type: at.classification,
-      account_type_id: at.id,
+      account_type: cls.bucket,
+      account_type_id: null,
       parent_id: data.parent_id ?? null,
       currency_code: data.currency_code || null,
       is_group: data.is_group ?? false,
@@ -650,6 +626,7 @@ export const upsertAccount = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 export const deleteAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
