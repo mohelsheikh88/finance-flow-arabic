@@ -492,7 +492,7 @@ function ChartOfAccountsPanel() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-            <Button onClick={() => saveMut.mutate()} disabled={!form.code || !form.name_ar || !form.name_en || !form.account_type_id || !companyId || saveMut.isPending}>{t("common.save")}</Button>
+            <Button onClick={() => saveMut.mutate()} disabled={!form.code || !form.name_ar || !form.name_en || !form.classification_id || !companyId || saveMut.isPending}>{t("common.save")}</Button>
 
           </DialogFooter>
         </DialogContent>
