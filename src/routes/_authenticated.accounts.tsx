@@ -23,7 +23,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, FileDown, FileUp, ChevronDown, ChevronRight, FolderTree, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, FileDown, FileUp, ChevronDown, ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight, FolderTree, FileText } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
