@@ -446,6 +446,7 @@ function ChartOfAccountsPanel() {
       <ChartOfAccountsTable
         accounts={filteredAccounts as any[]}
         accountTypes={accountTypes as any[]}
+        classifications={classifications as any[]}
         onEdit={openEdit}
         onDelete={setToDelete}
         onToggleReconcilable={(a: any, v: boolean) =>
