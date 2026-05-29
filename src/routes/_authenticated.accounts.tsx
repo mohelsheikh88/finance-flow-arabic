@@ -149,6 +149,8 @@ function ChartOfAccountsPanel() {
   const [filterClassification, setFilterClassification] = useState("all");
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
 
 
   const typeById = useMemo(() => {
