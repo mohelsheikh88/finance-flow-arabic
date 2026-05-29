@@ -1294,6 +1294,15 @@ export const translations = {
       noTax: "No Tax",
       posted: "Posted successfully",
       saveAndPost: "Save & Post",
+      edit: "Edit",
+      editTitle: "Edit Invoice",
+      saveChanges: "Save Changes",
+      resetToDraft: "Reset to Draft",
+      resetConfirm: "Are you sure you want to reset this invoice to draft? The linked journal entry will be deleted.",
+      resetSuccess: "Invoice reset to draft",
+      updated: "Changes saved",
+      noResetPermission: "You don't have permission to reset this invoice to draft",
+      hasPayments: "Cannot reset: invoice has linked payments",
     },
 
     payments: {
