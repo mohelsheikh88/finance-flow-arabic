@@ -22,7 +22,8 @@ export const Route = createFileRoute("/_authenticated/trial-balance")({
 function defaultRange() {
   const d = new Date();
   const from = new Date(d.getFullYear(), d.getMonth(), 1);
-  const f = (x: Date) => x.toISOString().slice(0, 10);
+  const f = (x: Date) =>
+    `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
   return { from: f(from), to: f(d) };
 }
 
