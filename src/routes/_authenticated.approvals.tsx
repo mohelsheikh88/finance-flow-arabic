@@ -292,7 +292,15 @@ function ApprovalsPage() {
                     {w.journal_type ? t(`approvals.jt.${w.journal_type}`) : t(`approvals.doc.${w.document_type}`)} • {Number(w.min_amount).toFixed(0)} - {w.max_amount ? Number(w.max_amount).toFixed(0) : "∞"} {w.currency_code}
                   </div>
                 </div>
-                <Badge variant={w.is_active ? "default" : "secondary"}>{w.is_active ? t("common.active") : t("common.inactive")}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={w.is_active ? "default" : "secondary"}>{w.is_active ? t("common.active") : t("common.inactive")}</Badge>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(w)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(w.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {(w.approval_steps_def || []).sort((a: any, b: any) => a.step_order - b.step_order).map((s: any) => (
