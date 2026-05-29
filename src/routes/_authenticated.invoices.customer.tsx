@@ -76,11 +76,22 @@ function CustomerInvoicesPage() {
     partner_id: "",
     invoice_date: new Date().toISOString().slice(0, 10),
     due_date: "",
+    payment_term_id: "",
     reference: "",
   });
   const [lines, setLines] = useState<Line[]>([
     { description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 },
   ]);
+
+  // Auto-compute due date from invoice_date + payment term days
+  const computeDueDate = (dateStr: string, termId: string): string => {
+    if (!dateStr || !termId) return "";
+    const term = paymentTerms.find((tr: any) => tr.id === termId);
+    if (!term) return "";
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + Number(term.days || 0));
+    return d.toISOString().slice(0, 10);
+  };
 
   const totals = useMemo(() => {
     let subtotal = 0, taxAmt = 0;
@@ -93,9 +104,10 @@ function CustomerInvoicesPage() {
   }, [lines]);
 
   const reset = () => {
-    setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", reference: "" });
+    setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", payment_term_id: "", reference: "" });
     setLines([{ description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 }]);
   };
+
 
   const createMut = useMutation({
     mutationFn: (status: "draft" | "posted") => create({ data: {
