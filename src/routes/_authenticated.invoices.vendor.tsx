@@ -51,6 +51,9 @@ function VendorBillsPage() {
   const list = useServerFn(listInvoices);
   const create = useServerFn(createInvoice);
   const post = useServerFn(postInvoice);
+  const update = useServerFn(updateInvoice);
+  const getInv = useServerFn(getInvoice);
+  const resetFn = useServerFn(resetInvoiceToDraft);
   const accFn = useServerFn(listAccounts);
   const partFn = useServerFn(listPartners);
   const taxFn = useServerFn(listTaxes);
