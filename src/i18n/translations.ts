@@ -76,6 +76,12 @@ export const translations = {
       category: "الفئة",
       currencies: "العملات",
       company: "الشركة",
+      account: "حساب",
+      page: "صفحة",
+      of: "من",
+      show: "عرض",
+      rowsPerPage: "صفوف لكل صفحة",
+
     },
 
     auth: {
@@ -597,6 +603,12 @@ export const translations = {
       cost: "Cost",
       category: "Category",
       currencies: "Currencies",
+      account: "account",
+      page: "page",
+      of: "of",
+      show: "Show",
+      rowsPerPage: "Rows per page",
+
     },
 
     auth: {

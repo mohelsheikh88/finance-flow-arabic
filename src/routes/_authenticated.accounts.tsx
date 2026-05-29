@@ -685,12 +685,12 @@ function ChartOfAccountsPanel() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-2">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>
-              <span className="font-medium text-foreground">{filteredAccounts.length}</span> حساب — صفحة{" "}
-              <span className="font-medium text-foreground">{safePage}</span> من{" "}
+              <span className="font-medium text-foreground">{filteredAccounts.length}</span> {t("common.account")} — {t("common.page")}{" "}
+              <span className="font-medium text-foreground">{safePage}</span> {t("common.of")}{" "}
               <span className="font-medium text-foreground">{totalPages}</span>
             </span>
             <div className="flex items-center gap-2">
-              <span>عرض:</span>
+              <span>{t("common.show")}:</span>
               <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
                 <SelectTrigger className="h-8 w-[110px]">
                   <SelectValue />
@@ -700,11 +700,13 @@ function ChartOfAccountsPanel() {
                   <SelectItem value="100">100</SelectItem>
                   <SelectItem value="200">200</SelectItem>
                   <SelectItem value="500">500</SelectItem>
-                  <SelectItem value="0">الكل</SelectItem>
+                  <SelectItem value="0">{t("common.all")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
+
           {pageSize > 0 && totalPages > 1 && (
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1}>
