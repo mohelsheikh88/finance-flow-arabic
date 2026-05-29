@@ -342,6 +342,13 @@ function ApprovalsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={w.is_active ? "default" : "secondary"}>{w.is_active ? t("common.active") : t("common.inactive")}</Badge>
+                  <div className="flex items-center gap-1" title={locale === "ar" ? "تفعيل/تعطيل" : "Enable/Disable"}>
+                    <Switch
+                      checked={!!w.is_active}
+                      disabled={toggleActiveMut.isPending}
+                      onCheckedChange={(v) => toggleActiveMut.mutate({ id: w.id, is_active: v })}
+                    />
+                  </div>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(w)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
