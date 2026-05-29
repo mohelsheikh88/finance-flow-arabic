@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+const JOURNAL_TYPES = ["sales", "purchase", "bank", "cash", "misc"] as const;
+type JournalType = (typeof JOURNAL_TYPES)[number];
+
 const ListInput = z.object({
   companyId: z.string().uuid(),
   branchId: z.string().uuid().nullable(),
@@ -25,6 +28,26 @@ export const listApprovalRequests = createServerFn({ method: "POST" })
     return { requests: rows || [] };
   });
 
+const GetForDoc = z.object({
+  documentType: z.enum(["journal_entry", "invoice", "payment", "asset_disposal"]),
+  documentId: z.string().uuid(),
+});
+
+export const getApprovalForDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => GetForDoc.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: rows } = await supabase
+      .from("approval_requests")
+      .select("*, approval_workflows(*, approval_steps_def(*)), approval_actions(*)")
+      .eq("document_type", data.documentType)
+      .eq("document_id", data.documentId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    return { request: rows?.[0] ?? null };
+  });
+
 const ListWorkflows = z.object({ companyId: z.string().uuid() });
 
 export const listWorkflows = createServerFn({ method: "POST" })
@@ -45,7 +68,7 @@ const CreateWf = z.object({
   companyId: z.string().uuid(),
   name_ar: z.string().min(1),
   name_en: z.string().min(1),
-  document_type: z.enum(["journal_entry", "invoice", "payment", "asset_disposal"]),
+  journal_type: z.enum(JOURNAL_TYPES),
   min_amount: z.number().min(0),
   max_amount: z.number().nullable(),
   steps: z.array(z.object({
@@ -67,7 +90,7 @@ export const createWorkflow = createServerFn({ method: "POST" })
         company_id: data.companyId,
         name_ar: data.name_ar,
         name_en: data.name_en,
-        document_type: data.document_type,
+        journal_type: data.journal_type,
         min_amount: data.min_amount,
         max_amount: data.max_amount,
       })
@@ -82,20 +105,19 @@ export const createWorkflow = createServerFn({ method: "POST" })
   });
 
 /**
- * Internal helper – finds an active workflow matching doc type + amount.
- * Returns the workflow id or null if none applies (no approval needed).
+ * Internal helper – finds an active workflow matching journal_type + amount.
  */
 export async function findMatchingWorkflow(
   supabase: any,
   companyId: string,
-  documentType: "journal_entry" | "invoice" | "payment" | "asset_disposal",
+  journalType: JournalType,
   amount: number,
 ): Promise<string | null> {
   const { data: wfs } = await supabase
     .from("approval_workflows")
     .select("id, min_amount, max_amount")
     .eq("company_id", companyId)
-    .eq("document_type", documentType)
+    .eq("journal_type", journalType)
     .eq("is_active", true);
   if (!wfs || wfs.length === 0) return null;
   const match = wfs.find((w: any) =>
@@ -106,8 +128,8 @@ export async function findMatchingWorkflow(
 }
 
 /**
- * Internal helper – creates an approval_request row for a document.
- * Returns true if a request was created (caller should NOT post yet).
+ * Internal helper – creates an approval_request row for a document, resolved
+ * by the document's journal_type.
  */
 export async function maybeRequestApproval(
   supabase: any,
@@ -115,6 +137,7 @@ export async function maybeRequestApproval(
   args: {
     companyId: string;
     branchId: string;
+    journalId: string | null;
     documentType: "journal_entry" | "invoice" | "payment" | "asset_disposal";
     documentId: string;
     documentReference: string;
@@ -131,14 +154,22 @@ export async function maybeRequestApproval(
     .in("status", ["pending", "approved"])
     .maybeSingle();
   if (existing) {
-    // already approved → allow caller to proceed; pending → block
     return existing.status === "approved" ? { created: false } : { created: true, requestId: existing.id };
   }
+
+  if (!args.journalId) return { created: false };
+
+  const { data: journal } = await supabase
+    .from("journals")
+    .select("journal_type")
+    .eq("id", args.journalId)
+    .maybeSingle();
+  if (!journal?.journal_type) return { created: false };
 
   const workflowId = await findMatchingWorkflow(
     supabase,
     args.companyId,
-    args.documentType,
+    journal.journal_type as JournalType,
     args.amount,
   );
   if (!workflowId) return { created: false };
@@ -209,7 +240,6 @@ export const actOnRequest = createServerFn({ method: "POST" })
         completed_at: new Date().toISOString(),
       }).eq("id", data.requestId);
 
-      // Auto-post the underlying document
       try {
         if (req.document_type === "invoice") {
           const { postInvoiceCore } = await import("./invoices.functions");
@@ -219,7 +249,6 @@ export const actOnRequest = createServerFn({ method: "POST" })
           await postPaymentCore(supabase, userId!, req.document_id, { bypassApproval: true });
         }
       } catch (e: any) {
-        // Posting failure shouldn't reverse the approval; surface via error
         return { success: true, status: "approved", postError: e.message };
       }
       return { success: true, status: "approved" };
