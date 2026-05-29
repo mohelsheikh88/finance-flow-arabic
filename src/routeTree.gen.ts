@@ -23,7 +23,6 @@ import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
 import { Route as AuthenticatedPaymentMethodsRouteImport } from './routes/_authenticated.payment-methods'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
-import { Route as AuthenticatedLockDatesRouteImport } from './routes/_authenticated.lock-dates'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
@@ -129,11 +128,6 @@ const AuthenticatedPaymentMethodsRoute =
 const AuthenticatedPartnersRoute = AuthenticatedPartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedLockDatesRoute = AuthenticatedLockDatesRouteImport.update({
-  id: '/lock-dates',
-  path: '/lock-dates',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
@@ -356,7 +350,6 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
-  '/lock-dates': typeof AuthenticatedLockDatesRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
@@ -407,7 +400,6 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
-  '/lock-dates': typeof AuthenticatedLockDatesRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
@@ -460,7 +452,6 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
-  '/_authenticated/lock-dates': typeof AuthenticatedLockDatesRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
   '/_authenticated/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
@@ -513,7 +504,6 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/journals'
     | '/loans'
-    | '/lock-dates'
     | '/partners'
     | '/payment-methods'
     | '/payments'
@@ -564,7 +554,6 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/journals'
     | '/loans'
-    | '/lock-dates'
     | '/partners'
     | '/payment-methods'
     | '/payments'
@@ -616,7 +605,6 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory'
     | '/_authenticated/journals'
     | '/_authenticated/loans'
-    | '/_authenticated/lock-dates'
     | '/_authenticated/partners'
     | '/_authenticated/payment-methods'
     | '/_authenticated/payments'
@@ -749,13 +737,6 @@ declare module '@tanstack/react-router' {
       path: '/partners'
       fullPath: '/partners'
       preLoaderRoute: typeof AuthenticatedPartnersRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/lock-dates': {
-      id: '/_authenticated/lock-dates'
-      path: '/lock-dates'
-      fullPath: '/lock-dates'
-      preLoaderRoute: typeof AuthenticatedLockDatesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/loans': {
@@ -1028,7 +1009,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
-  AuthenticatedLockDatesRoute: typeof AuthenticatedLockDatesRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
   AuthenticatedPaymentMethodsRoute: typeof AuthenticatedPaymentMethodsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
@@ -1077,7 +1057,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
-  AuthenticatedLockDatesRoute: AuthenticatedLockDatesRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
   AuthenticatedPaymentMethodsRoute: AuthenticatedPaymentMethodsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
