@@ -343,6 +343,7 @@ function CustomersPage() {
         open={typesOpen}
         onClose={() => setTypesOpen(false)}
         types={customerTypes as any[]}
+        arAccounts={arAccounts}
         companyId={companyId!}
       />
     </div>
