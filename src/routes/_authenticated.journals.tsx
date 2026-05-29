@@ -521,7 +521,7 @@ function JournalsPage() {
             </div>
 
             <div className="col-span-2">
-              <Label>Default Debit Account</Label>
+              <Label>{t("common.defaultDebitAccount")}</Label>
               <Select
                 value={form.default_debit_account_id || NONE}
                 onValueChange={(v) =>
