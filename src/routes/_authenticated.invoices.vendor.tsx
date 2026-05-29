@@ -21,6 +21,7 @@ import {
 import { Plus, Trash2, Check, Pencil, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { formatLockError } from "@/lib/lock-error";
+import { HistoryLog } from "@/components/history-log";
 
 export const Route = createFileRoute("/_authenticated/invoices/vendor")({
   component: VendorBillsPage,
@@ -329,6 +330,12 @@ function VendorBillsPage() {
                 </table>
               </div>
             </div>
+
+            {editingId && (
+              <div className="mt-4">
+                <HistoryLog table="invoices" recordId={editingId} />
+              </div>
+            )}
 
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => { setOpen(false); reset(); }}>{t("common.cancel")}</Button>

@@ -339,6 +339,18 @@ export const translations = {
       notAuthorized: "ليس لديك صلاحية إنشاء قيود يدوية. تواصل مع مسؤول النظام لمنحك الصلاحية.",
       journalNotFound: "الدفتر المحدد غير موجود. حدّث الصفحة وحاول مجدداً.",
     },
+    history: {
+      title: "سجل التغييرات",
+      entries: "حركة",
+      empty: "لا توجد تغييرات مسجلة بعد",
+      system: "النظام",
+      created: "إنشاء",
+      updated: "تعديل",
+      deleted: "حذف",
+      line: "سطر",
+      more: "تغييرات إضافية",
+      view: "عرض السجل",
+    },
 
     dashboard: {
       title: "لوحة المحاسبة العامة",
@@ -1073,6 +1085,18 @@ export const translations = {
       manualNotAllowed: "Journal \"{journal}\" does not allow manual entries. Pick another journal or enable \"Allow manual entries\" in Journals settings.",
       notAuthorized: "You are not authorized to create manual journal entries. Contact your administrator to grant access.",
       journalNotFound: "The selected journal was not found. Refresh the page and try again.",
+    },
+    history: {
+      title: "Change History",
+      entries: "events",
+      empty: "No changes recorded yet",
+      system: "System",
+      created: "Created",
+      updated: "Updated",
+      deleted: "Deleted",
+      line: "line",
+      more: "more changes",
+      view: "View history",
     },
 
     dashboard: {
