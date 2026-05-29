@@ -375,20 +375,21 @@ table td, table th {
 
 /* === Hierarchy: Grandparent > Parent > Child === */
 
-/* Grandparent (top-level group) label — biggest, normal case, magenta underline */
+/* Grandparent (top-level group) label — warm magenta-white, biggest */
 .sidebar-grandparent > [data-sidebar="group-label"] {
   font-size: 17px;
   line-height: 1.2;
   font-weight: 800;
   text-transform: none;
   letter-spacing: 0;
-  color: hsl(0 0% 100%) !important;
+  color: hsl(327 75% 88%) !important;
   padding-block: 0.75rem;
   text-shadow: 0 1px 0 hsl(265 80% 6% / 0.45);
 }
 .sidebar-grandparent > [data-sidebar="group-label"] svg {
   width: 20px !important;
   height: 20px !important;
+  color: hsl(327 85% 72%) !important;
 }
 .sidebar-grandparent > [data-sidebar="group-label"]::after {
   content: "";
@@ -398,30 +399,32 @@ table td, table th {
   background: linear-gradient(90deg, hsl(327 92% 60% / 0.7), hsl(285 80% 50% / 0.25) 60%, transparent);
 }
 
-/* Parent (subgroup) label — medium, capitalized, slightly muted */
+/* Parent (subgroup) label — soft lavender-white, medium */
 .sidebar-parent > [data-sidebar="group-label"] {
   font-size: 14.5px;
   line-height: 1.25;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: hsl(300 35% 96% / 0.92) !important;
+  color: hsl(285 35% 93% / 0.92) !important;
   padding-block: 0.55rem;
 }
 .sidebar-parent > [data-sidebar="group-label"] svg {
   width: 17px !important;
   height: 17px !important;
+  color: hsl(285 55% 72% / 0.9) !important;
 }
 
-/* Child (menu-button) — smallest, comfortable reading */
+/* Child (menu-button) — cool muted grey-purple, smallest */
 [data-sidebar="menu-button"] {
   font-size: 13px !important;
   font-weight: 500;
   letter-spacing: 0.005em;
-  color: hsl(300 20% 92% / 0.85);
+  color: hsl(280 18% 85% / 0.85);
 }
 [data-sidebar="menu-button"] svg {
   width: 15px !important;
   height: 15px !important;
+  color: hsl(280 25% 72% / 0.75) !important;
 }
 
 
