@@ -95,7 +95,8 @@ export function ApprovalWorkflowTimeline({
 
             return (
               <div className="w-full overflow-x-auto pb-2">
-                <ol className="flex items-start justify-between gap-0 min-w-full px-2" dir={dir}>
+                <ol className="flex items-start justify-center gap-0 mx-auto px-1 max-w-2xl" dir={dir}>
+
                   {nodes.map((step: any, idx: number) => {
                     const action = (req.approval_actions || []).find(
                       (a: any) => a.step_order === step.step_order,
@@ -132,8 +133,9 @@ export function ApprovalWorkflowTimeline({
                     return (
                       <li
                         key={step.id}
-                        className="flex-1 flex flex-col items-center relative min-w-[64px]"
+                        className="flex-1 flex flex-col items-center relative min-w-[56px] max-w-[110px]"
                       >
+
                         <div className="flex items-center w-full">
                           {idx > 0 && (
                             <div
