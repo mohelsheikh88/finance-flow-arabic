@@ -253,11 +253,9 @@ function ChartOfAccountsPanel() {
 
   const saveMut = useMutation({
     mutationFn: () => {
-      const selectedCls = (classifications as any[]).find((c) => c.id === form.classification_id);
       const resolvedTypeId = resolveAccountTypeId(form.classification_id, form.account_type_id);
-      if (!resolvedTypeId) {
-        const name = selectedCls ? (selectedCls.name_ar || selectedCls.name_en || selectedCls.code) : "";
-        throw new Error(`لا يوجد نوع حساب مرتبط بالتصنيف "${name}". افتح "Account Types" واربط نوع حساب بهذا التصنيف أولاً.`);
+      if (!form.classification_id && !resolvedTypeId) {
+        throw new Error("اختر تصنيف الحساب أولاً | Please select an account classification first");
       }
       return upsert({
         data: {
@@ -266,7 +264,9 @@ function ChartOfAccountsPanel() {
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          account_type_id: resolvedTypeId,
+          // Fall back to classification_id so the backend can auto-create a matching account type.
+          account_type_id: resolvedTypeId || form.classification_id,
+          classification_id: form.classification_id || null,
           parent_id: form.parent_id || null,
           currency_code: form.currency_code.trim() || null,
           is_group: form.is_group,
@@ -276,6 +276,7 @@ function ChartOfAccountsPanel() {
         },
       });
     },
+
 
     onSuccess: () => {
       toast.success(t("common.saved"));
