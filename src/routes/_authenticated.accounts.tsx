@@ -710,10 +710,10 @@ function ChartOfAccountsPanel() {
           {pageSize > 0 && totalPages > 1 && (
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1}>
-                <ChevronsLeft className="h-4 w-4" />
+                <ChevronsLeft className="h-4 w-4 rtl-flip" />
               </Button>
               <Button variant="outline" size="sm" onClick={() => setPage(safePage - 1)} disabled={safePage <= 1}>
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 rtl-flip" />
               </Button>
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 2)
@@ -733,10 +733,10 @@ function ChartOfAccountsPanel() {
                   </Fragment>
                 ))}
               <Button variant="outline" size="sm" onClick={() => setPage(safePage + 1)} disabled={safePage >= totalPages}>
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 rtl-flip" />
               </Button>
               <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage >= totalPages}>
-                <ChevronsRight className="h-4 w-4" />
+                <ChevronsRight className="h-4 w-4 rtl-flip" />
               </Button>
             </div>
           )}
@@ -1154,7 +1154,7 @@ function ChartOfAccountsTree({
                             {isOpen ? (
                               <ChevronDown className="h-3.5 w-3.5" />
                             ) : (
-                              <ChevronRight className="h-3.5 w-3.5" />
+                              <ChevronRight className="h-3.5 w-3.5 rtl-flip" />
                             )}
                           </button>
                         ) : (
