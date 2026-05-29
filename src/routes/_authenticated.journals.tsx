@@ -409,7 +409,7 @@ function JournalsPage() {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={11} className="p-8 text-center text-muted-foreground">
+                <td colSpan={12} className="p-8 text-center text-muted-foreground">
                   {t("common.noData")}
                 </td>
               </tr>
