@@ -899,6 +899,7 @@ export const upsertJournal = createServerFn({ method: "POST" })
     default_debit_account_id: string | null;
     default_credit_account_id: string | null;
     is_active: boolean;
+    allow_manual_entries: boolean;
   }) =>
     z
       .object({
@@ -914,6 +915,7 @@ export const upsertJournal = createServerFn({ method: "POST" })
         default_debit_account_id: z.string().uuid().nullable(),
         default_credit_account_id: z.string().uuid().nullable(),
         is_active: z.boolean(),
+        allow_manual_entries: z.boolean(),
       })
       .parse(i),
   )
@@ -930,6 +932,7 @@ export const upsertJournal = createServerFn({ method: "POST" })
       default_debit_account_id: data.default_debit_account_id,
       default_credit_account_id: data.default_credit_account_id,
       is_active: data.is_active,
+      allow_manual_entries: data.allow_manual_entries,
     };
     if (data.id) {
       const { data: row, error } = await context.supabase
