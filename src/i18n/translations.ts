@@ -710,6 +710,13 @@ export const translations = {
       profit: "Profit",
       loss: "Loss",
       isSubtitle: "Income statement for the period",
+      bsSubtitle: "Balance sheet as of the selected date",
+      totalAssets: "Total Assets",
+      totalLiabEquity: "Total Liabilities & Equity",
+      retainedEarnings: "Retained Earnings",
+      liabAndEquity: "Liabilities & Equity",
+      balanced: "Balanced",
+      notBalanced: "Out of Balance",
     },
 
     nav: {
