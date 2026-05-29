@@ -15,7 +15,7 @@ const Schema = z.object({
 
 // Lookup branch_id of the parent record so we can authorize via has_branch_access
 async function getBranchId(table: string, id: string): Promise<string | null> {
-  const { data } = await supabaseAdmin
+  const { data } = await (supabaseAdmin as any)
     .from(table)
     .select("branch_id")
     .eq("id", id)
@@ -49,7 +49,7 @@ export const getRecordHistory = createServerFn({ method: "GET" })
     const child = CHILD_MAP[data.table];
     let childIds: string[] = [];
     if (child) {
-      const { data: kids } = await supabaseAdmin
+      const { data: kids } = await (supabaseAdmin as any)
         .from(child.table)
         .select("id")
         .eq(child.parentField, data.recordId);
