@@ -159,7 +159,6 @@ function NewJEPage() {
               <SelectContent>
                 {availableJournals.length > 0 && (
                   <SelectGroup>
-                    <SelectLabel>{t("je.balanced")}</SelectLabel>
                     {availableJournals.map((j: any) => (
                       <SelectItem key={j.id} value={j.id}>{j.code} — {localized(j, "name")}</SelectItem>
                     ))}
