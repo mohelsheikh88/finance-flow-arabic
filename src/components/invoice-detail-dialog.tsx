@@ -201,42 +201,41 @@ export function InvoiceDetailDialog({
               </table>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Collapsible open={showAttachments} onOpenChange={setShowAttachments}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full justify-between">
-                    <span className="flex items-center gap-2">
-                      <Paperclip className="h-4 w-4" />
-                      {t("invoices.attachments.title")}
-                    </span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAttachments ? "rotate-180" : ""}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2 sm:col-span-2">
-                  <TransactionAttachments
-                    transactionType="invoice"
-                    transactionId={(inv as any).id}
-                    companyId={(inv as any).company_id}
-                    branchId={(inv as any).branch_id}
-                  />
-                </CollapsibleContent>
-              </Collapsible>
+            <Collapsible open={showAttachments} onOpenChange={setShowAttachments}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <Paperclip className="h-4 w-4" />
+                    {t("invoices.attachments.title")}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showAttachments ? "rotate-180" : ""}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <TransactionAttachments
+                  transactionType="invoice"
+                  transactionId={(inv as any).id}
+                  companyId={(inv as any).company_id}
+                  branchId={(inv as any).branch_id}
+                />
+              </CollapsibleContent>
+            </Collapsible>
 
-              <Collapsible open={showHistory} onOpenChange={setShowHistory}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full justify-between">
-                    <span className="flex items-center gap-2">
-                      <History className="h-4 w-4" />
-                      {t("invoices.viewChangeHistory")}
-                    </span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showHistory ? "rotate-180" : ""}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2 sm:col-span-2">
-                  <HistoryLog table="invoices" recordId={(inv as any).id} />
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
+            <Collapsible open={showHistory} onOpenChange={setShowHistory}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <History className="h-4 w-4" />
+                    {t("invoices.viewChangeHistory")}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showHistory ? "rotate-180" : ""}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <HistoryLog table="invoices" recordId={(inv as any).id} />
+              </CollapsibleContent>
+            </Collapsible>
+
 
           </div>
         )}
