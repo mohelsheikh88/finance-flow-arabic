@@ -50,6 +50,9 @@ function ApprovalsPage() {
   const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
 
   const [wfOpen, setWfOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState(true);
 
   const { data: wfData } = useQuery({
     queryKey: ["workflows", companyId],
