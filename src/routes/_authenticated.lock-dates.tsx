@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Lock, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { formatLockError } from "@/lib/lock-error";
 
 export const Route = createFileRoute("/_authenticated/lock-dates")({
   component: Page,
@@ -91,7 +92,7 @@ function Page() {
       setEditingId(null);
       setForm(empty);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
   const removeMut = useMutation({
@@ -101,7 +102,7 @@ function Page() {
       qc.invalidateQueries({ queryKey: ["lock_dates"] });
       setDeleteId(null);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
   const canSave = !!form.lock_date;

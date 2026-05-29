@@ -4,9 +4,10 @@ import { translations, type Locale } from "./translations";
 type Ctx = {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (path: string) => string;
+  t: (path: string, vars?: Record<string, string | number>) => string;
   dir: "rtl" | "ltr";
 };
+
 
 const I18nContext = createContext<Ctx | null>(null);
 
@@ -46,7 +47,16 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     } catch {}
   };
 
-  const t = (path: string) => resolve(translations[locale], path);
+  const t = (path: string, vars?: Record<string, string | number>) => {
+    let s = resolve(translations[locale], path);
+    if (vars) {
+      for (const [k, v] of Object.entries(vars)) {
+        s = s.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+      }
+    }
+    return s;
+  };
+
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
