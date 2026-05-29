@@ -6,6 +6,7 @@ import {
   createPartner, listPartners, updatePartner, deletePartner, listAccounts,
   listCustomerTypes, upsertCustomerType, deleteCustomerType,
   listPartnerContacts, savePartnerContacts,
+  listPartnerAttachments, uploadPartnerAttachment, deletePartnerAttachment, getPartnerAttachmentUrl,
 } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
