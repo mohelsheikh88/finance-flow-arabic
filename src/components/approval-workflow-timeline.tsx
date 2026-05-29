@@ -93,7 +93,6 @@ export function ApprovalWorkflowTimeline({
               .slice()
               .sort((a: any, b: any) => a.step_order - b.step_order);
 
-            const { dir } = useI18n();
             return (
               <div className="w-full overflow-x-auto pb-2">
                 <ol className="flex items-start justify-between gap-0 min-w-full px-2" dir={dir}>
