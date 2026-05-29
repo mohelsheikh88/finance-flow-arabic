@@ -634,6 +634,7 @@ const CreatePartnerSchema = z.object({
   credit_limit: z.number().min(0).default(0),
   receivable_account_id: z.string().uuid().optional().nullable(),
   payable_account_id: z.string().uuid().optional().nullable(),
+  customer_type_id: z.string().uuid().optional().nullable(),
 });
 
 export const createPartner = createServerFn({ method: "POST" })
