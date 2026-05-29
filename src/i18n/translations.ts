@@ -1147,6 +1147,10 @@ export const translations = {
       title: "Customers",
       totalReceivable: "Total Receivables",
       activeCustomers: "Active Customers",
+      receivableAccount: "Accounts Receivable (GL)",
+      receivableAccountShort: "AR Account (GL)",
+      defaultFromJournal: "— Default from journal —",
+      phone: "Phone",
     },
     tb: {
       title: "Trial Balance",
