@@ -85,18 +85,9 @@ export function ApprovalWorkflowTimeline({
 
           {/* Horizontal journey stepper */}
           {(() => {
-            const steps = (req.approval_workflows?.approval_steps_def || [])
+            const nodes = (req.approval_workflows?.approval_steps_def || [])
               .slice()
               .sort((a: any, b: any) => a.step_order - b.step_order);
-            const submitter = {
-              id: "__submitter__",
-              step_order: 0,
-              step_name: "مقدم الطلب",
-              step_name_en: "Submitter",
-              required_role: "requester",
-              __submitter: true,
-            };
-            const nodes = [submitter, ...steps];
 
             return (
               <div className="w-full overflow-x-auto pb-2">
