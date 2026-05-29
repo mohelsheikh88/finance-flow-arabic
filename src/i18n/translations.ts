@@ -927,6 +927,7 @@ export const translations = {
       crNumber: "Commercial Registration",
       address: "Address",
       done: "Created successfully",
+      fyStartMonth: "FY Start Month",
     },
     je: {
       title: "Journal Entries",
