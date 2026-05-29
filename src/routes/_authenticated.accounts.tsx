@@ -164,6 +164,35 @@ function ChartOfAccountsPanel() {
     return m;
   }, [accountTypes]);
 
+  const isUuid = (value?: string | null) =>
+    !!value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
+  const norm = (value?: string | null) => String(value ?? "").trim().toLowerCase();
+
+  const resolveAccountTypeId = (classificationId: string, preferredTypeId = "") => {
+    if (!classificationId) return "";
+    const types = accountTypes as any[];
+    const cls = (classifications as any[]).find((c) => c.id === classificationId);
+    const preferred = isUuid(preferredTypeId) ? types.find((tp) => tp.id === preferredTypeId) : null;
+    if (preferred?.classification_id === classificationId) return preferred.id;
+
+    const exact =
+      types.find((tp) => tp.classification_id === classificationId && tp.is_active) ??
+      types.find((tp) => tp.classification_id === classificationId);
+    if (exact?.id) return exact.id;
+
+    const clsKeys = [cls?.code, cls?.name_ar, cls?.name_en].map(norm).filter(Boolean);
+    const byName =
+      types.find(
+        (tp) =>
+          tp.is_active &&
+          [tp.code, tp.name_ar, tp.name_en].map(norm).some((key) => clsKeys.includes(key)),
+      ) ??
+      types.find((tp) => [tp.code, tp.name_ar, tp.name_en].map(norm).some((key) => clsKeys.includes(key)));
+
+    return byName?.id ?? "";
+  };
+
   const filteredAccounts = useMemo(() => {
     const text = search.trim().toLowerCase();
     return (accounts as any[]).filter((a) => {
@@ -197,18 +226,19 @@ function ChartOfAccountsPanel() {
   }, [filteredAccounts, safePage]);
 
   const openNew = () => {
-    const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
+    const def = (accountTypes as any[]).find((t) => t.is_active && t.classification_id) ?? (accountTypes as any[])[0];
     setForm({ ...empty, account_type_id: def?.id ?? "", classification_id: def?.classification_id ?? "" });
     setOpen(true);
   };
   const openEdit = (a: any) => {
-    const at = (accountTypes as any[]).find((t) => t.id === a.account_type_id);
+    const currentTypeId = isUuid(a.account_type_id) ? a.account_type_id : "";
+    const at = (accountTypes as any[]).find((t) => t.id === currentTypeId);
     setForm({
       id: a.id,
       code: a.code ?? "",
       name_ar: a.name_ar ?? "",
       name_en: a.name_en ?? "",
-      account_type_id: a.account_type_id ?? (accountTypes as any[]).find((t) => t.classification === a.account_type)?.id ?? "",
+      account_type_id: currentTypeId,
       classification_id: at?.classification_id ?? "",
       parent_id: a.parent_id ?? "",
       currency_code: a.currency_code ?? "",
@@ -224,16 +254,7 @@ function ChartOfAccountsPanel() {
   const saveMut = useMutation({
     mutationFn: () => {
       const selectedCls = (classifications as any[]).find((c) => c.id === form.classification_id);
-      const bucket = selectedCls?.bucket;
-      const resolvedTypeId =
-        form.account_type_id ||
-        (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id && tp.is_active)?.id ||
-        (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id)?.id ||
-        (bucket
-          ? (accountTypes as any[]).find((tp) => tp.classification === bucket && tp.is_active)?.id ??
-            (accountTypes as any[]).find((tp) => tp.classification === bucket)?.id
-          : undefined) ||
-        "";
+      const resolvedTypeId = resolveAccountTypeId(form.classification_id, form.account_type_id);
       if (!resolvedTypeId) {
         const name = selectedCls ? (selectedCls.name_ar || selectedCls.name_en || selectedCls.code) : "";
         throw new Error(`لا يوجد نوع حساب مرتبط بالتصنيف "${name}". افتح "Account Types" واربط نوع حساب بهذا التصنيف أولاً.`);
@@ -696,10 +717,7 @@ function ChartOfAccountsPanel() {
                   setForm({
                     ...form,
                     classification_id: v,
-                    account_type_id:
-                      (accountTypes as any[]).find((tp) => tp.classification_id === v && tp.is_active)?.id ??
-                      (accountTypes as any[]).find((tp) => tp.classification_id === v)?.id ??
-                      "",
+                    account_type_id: resolveAccountTypeId(v, form.account_type_id),
                   })
                 }
               >
