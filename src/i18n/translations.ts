@@ -150,6 +150,7 @@ export const translations = {
       reports: "التقارير المالية",
       balanceSheet: "الميزانية العمومية",
       incomeStatement: "قائمة الدخل",
+      cashFlow: "قائمة التدفقات النقدية",
       aging: "تقرير الأعمار",
       vatReport: "تقرير ضريبة القيمة المضافة",
       partnerStatement: "كشف حساب الشريك",
