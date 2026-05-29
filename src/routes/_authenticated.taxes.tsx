@@ -69,7 +69,8 @@ const EMPTY: FormState = {
 };
 
 function TaxesPage() {
-  const { t, lang } = useI18n();
+  const { t, locale } = useI18n();
+  const isRtl = locale === "ar";
   const localized = useLocalized();
   const { companyId } = useBranch();
   const qc = useQueryClient();
@@ -182,7 +183,6 @@ function TaxesPage() {
   const taxAccounts = (accounts as Array<{ id: string; code: string; name_ar: string; name_en: string; is_group: boolean }>)
     .filter((a) => !a.is_group);
 
-  const isRtl = lang === "ar";
 
   return (
     <div className="p-6 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
@@ -297,7 +297,7 @@ function TaxesPage() {
                   <TableRow key={r.id}>
                     <TableCell className="font-mono">{r.code}</TableCell>
                     <TableCell className="font-medium">
-                      {localized({ ar: r.name_ar, en: r.name_en })}
+                      {localized(r, "name")}
                     </TableCell>
                     <TableCell>
                       <Badge variant={r.tax_type === "sale" ? "default" : "secondary"} className="gap-1">
@@ -313,7 +313,7 @@ function TaxesPage() {
                       {Number(r.rate).toFixed(2)}%
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {acc ? `${acc.code} — ${localized({ ar: acc.name_ar, en: acc.name_en })}` : "—"}
+                      {acc ? `${acc.code} — ${localized(acc, "name")}` : "—"}
                     </TableCell>
                     <TableCell className="text-center">
                       <Switch
@@ -409,7 +409,7 @@ function TaxesPage() {
                   <SelectItem value="__none__">{isRtl ? "بدون" : "None"}</SelectItem>
                   {taxAccounts.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
-                      {a.code} — {localized({ ar: a.name_ar, en: a.name_en })}
+                      {a.code} — {localized(a, "name")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -454,8 +454,8 @@ function TaxesPage() {
             <AlertDialogTitle>{isRtl ? "حذف الضريبة؟" : "Delete tax?"}</AlertDialogTitle>
             <AlertDialogDescription>
               {isRtl
-                ? `سيتم حذف "${confirmDel ? localized({ ar: confirmDel.name_ar, en: confirmDel.name_en }) : ""}" نهائياً. لا يمكن الحذف إذا كانت الضريبة مستخدمة في فواتير أو قيود.`
-                : `"${confirmDel ? localized({ ar: confirmDel.name_ar, en: confirmDel.name_en }) : ""}" will be permanently deleted. Cannot delete if used in invoices or journals.`}
+                ? `سيتم حذف "${confirmDel ? localized(confirmDel, "name") : ""}" نهائياً. لا يمكن الحذف إذا كانت الضريبة مستخدمة في فواتير أو قيود.`
+                : `"${confirmDel ? localized(confirmDel, "name") : ""}" will be permanently deleted. Cannot delete if used in invoices or journals.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
