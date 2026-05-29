@@ -92,7 +92,7 @@ export function InvoiceDetailDialog({
           </div>
         )}
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 flex-wrap">
+          <DialogTitle className="flex items-center gap-3 flex-wrap pl-10">
             <FileText className="h-5 w-5 text-primary" />
             <span>{t("invoices.detailsTitle") || "تفاصيل الفاتورة"}</span>
             {inv && <span className="font-mono text-sm text-muted-foreground">{(inv as any).invoice_number}</span>}
