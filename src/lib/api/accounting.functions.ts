@@ -1234,3 +1234,68 @@ export const deleteCostCenter = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------------- Customer Types ----------------
+
+export const listCustomerTypes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) =>
+    z.object({ companyId: z.string().uuid() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await (context.supabase as any)
+      .from("customer_types")
+      .select("*")
+      .eq("company_id", data.companyId)
+      .order("sort_order", { ascending: true })
+      .order("name_en", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const CustomerTypeSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  code: z.string().min(1).max(50),
+  name_ar: z.string().min(1).max(255),
+  name_en: z.string().min(1).max(255),
+  notes: z.string().max(500).optional().nullable(),
+  is_active: z.boolean().default(true),
+  sort_order: z.number().int().min(0).default(0),
+});
+
+export const upsertCustomerType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => CustomerTypeSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const { id, ...patch } = data;
+    if (id) {
+      const { data: row, error } = await (context.supabase as any)
+        .from("customer_types")
+        .update(patch)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await (context.supabase as any)
+      .from("customer_types")
+      .insert(patch)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteCustomerType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase as any)
+      .from("customer_types")
+      .delete()
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
