@@ -215,10 +215,10 @@ function VendorBillsPage() {
           <h1 className="page-title">{t("nav.vendorBills")}</h1>
           <p className="text-sm text-muted-foreground">{invoices.length}</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 me-1" />{t("invoices.new")}</Button></DialogTrigger>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
+          <DialogTrigger asChild><Button onClick={() => reset()}><Plus className="h-4 w-4 me-1" />{t("invoices.new")}</Button></DialogTrigger>
           <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{t("invoices.new")} — {t("nav.vendorBills")}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editingId ? t("invoices.editTitle") : t("invoices.new")} — {t("nav.vendorBills")}</DialogTitle></DialogHeader>
 
             <div className="grid grid-cols-4 gap-3">
               <div className="col-span-2">
