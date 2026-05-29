@@ -68,9 +68,9 @@ function CustomersPage() {
     enabled: !!companyId,
   });
 
-  // Receivable accounts are assets (typically AR control accounts)
+  // Show only accounts marked as Receivable in the Chart of Accounts
   const arAccounts = (accounts as any[]).filter(
-    (a) => a.is_active && !a.is_group && a.account_type === "asset",
+    (a) => a.is_active && !a.is_group && a.is_receivable,
   );
 
   const customers = all.filter((p: any) => p.is_customer);
