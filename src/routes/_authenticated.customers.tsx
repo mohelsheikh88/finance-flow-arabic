@@ -106,6 +106,21 @@ function CustomersPage() {
   };
 
 
+  const computeNextCode = (typeId: string): string => {
+    const ct = (customerTypes as any[]).find((x) => x.id === typeId);
+    if (!ct) return "";
+    const prefix = String(ct.code);
+    const re = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-(\\d+)$`);
+    const nums = customers
+      .filter((p: any) => p.customer_type_id === typeId)
+      .map((p: any) => {
+        const m = String(p.code ?? "").match(re);
+        return m ? parseInt(m[1], 10) : 0;
+      });
+    const next = (nums.length ? Math.max(...nums) : 0) + 1;
+    return `${prefix}-${String(next).padStart(4, "0")}`;
+  };
+
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: any) => {
     setForm({
@@ -174,7 +189,15 @@ function CustomersPage() {
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{t("customers.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>{t("common.code")} *</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
+              <div>
+                <Label>{t("common.code")} *</Label>
+                <Input
+                  value={form.code}
+                  onChange={(e) => setForm({ ...form, code: e.target.value })}
+                  readOnly={!isEdit && !!form.customer_type_id}
+                  className={!isEdit && !!form.customer_type_id ? "bg-muted" : undefined}
+                />
+              </div>
               <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
               <div><Label>{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
@@ -202,7 +225,14 @@ function CustomersPage() {
                 <Label>{t("customers.customerType")}</Label>
                 <Select
                   value={form.customer_type_id ?? "__none__"}
-                  onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}
+                  onValueChange={(v) => {
+                    const newTypeId = v === "__none__" ? null : v;
+                    setForm((prev) => ({
+                      ...prev,
+                      customer_type_id: newTypeId,
+                      code: !prev.id && newTypeId ? computeNextCode(newTypeId) : (!newTypeId && !prev.id ? "" : prev.code),
+                    }));
+                  }}
                 >
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
