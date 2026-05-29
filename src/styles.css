@@ -375,28 +375,28 @@ table td, table th {
 
 /* === Hierarchy: Grandparent > Parent > Child === */
 
-/* Grandparent (top-level group) label — warm magenta-white, biggest */
+/* Grandparent (top-level group) label — soft rose-gold, distinct yet harmonious */
 .sidebar-grandparent > [data-sidebar="group-label"] {
   font-size: 17px;
   line-height: 1.2;
   font-weight: 800;
   text-transform: none;
   letter-spacing: 0;
-  color: hsl(327 75% 88%) !important;
+  color: hsl(340 70% 88%) !important;
   padding-block: 0.75rem;
   text-shadow: 0 1px 0 hsl(265 80% 6% / 0.45);
 }
 .sidebar-grandparent > [data-sidebar="group-label"] svg {
   width: 20px !important;
   height: 20px !important;
-  color: hsl(327 85% 72%) !important;
+  color: hsl(340 80% 76%) !important;
 }
 .sidebar-grandparent > [data-sidebar="group-label"]::after {
   content: "";
   display: block;
   height: 1px;
   margin-top: 10px;
-  background: linear-gradient(90deg, hsl(327 92% 60% / 0.7), hsl(285 80% 50% / 0.25) 60%, transparent);
+  background: linear-gradient(90deg, hsl(340 80% 65% / 0.8), hsl(285 70% 50% / 0.25) 60%, transparent);
 }
 
 /* Parent (subgroup) label — soft lavender-white, medium */
