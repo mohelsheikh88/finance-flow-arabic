@@ -56,12 +56,13 @@ export const getInvoice = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { data: inv, error } = await context.supabase
       .from("invoices")
-      .select("*, partners(code, name_ar, name_en, vat_number), invoice_lines(*, accounts(code, name_ar, name_en))")
+      .select("*, partners(code, name_ar, name_en, vat_number), invoice_lines(*, accounts(code, name_ar, name_en)), journal_entries(id, entry_number, status, entry_date)")
       .eq("id", data.id)
       .single();
     if (error) throw new Error(error.message);
     return inv;
   });
+
 
 export const createInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { createInvoice, listInvoices, postInvoice, getInvoice, updateInvoice, resetInvoiceToDraft, canResetInvoice, deleteInvoice } from "@/lib/api/invoices.functions";
 import { listAccounts, listPartners } from "@/lib/api/accounting.functions";
 import { listTaxes } from "@/lib/api/vat.functions";
@@ -22,8 +24,14 @@ import { Plus, Trash2, FileText, Check, Pencil, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { formatLockError } from "@/lib/lock-error";
 import { HistoryLog } from "@/components/history-log";
+import { InvoiceDetailDialog } from "@/components/invoice-detail-dialog";
+
+const searchSchema = z.object({
+  openInvoiceId: fallback(z.string().uuid().optional(), undefined),
+});
 
 export const Route = createFileRoute("/_authenticated/invoices/customer")({
+  validateSearch: zodValidator(searchSchema),
   component: CustomerInvoicesPage,
 });
 
@@ -78,6 +86,14 @@ function CustomerInvoicesPage() {
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const { openInvoiceId } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  useEffect(() => { if (openInvoiceId) setDetailId(openInvoiceId); }, [openInvoiceId]);
+  const closeDetail = () => {
+    setDetailId(null);
+    if (openInvoiceId) navigate({ search: (prev: any) => ({ ...prev, openInvoiceId: undefined }) });
+  };
   const [header, setHeader] = useState({
     partner_id: "",
     invoice_date: new Date().toISOString().slice(0, 10),

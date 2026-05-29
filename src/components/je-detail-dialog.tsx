@@ -48,15 +48,23 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
 
   const isManualDraft = entry && entry.status === "draft" && (entry.source_type ?? "manual") === "manual";
 
-  const sourceLink: { to: string; label: string } | null = (() => {
+  const sourceLink: { to: string; label: string; search?: Record<string, any> } | null = (() => {
     if (!entry) return null;
     const st = entry.source_type;
     if (!st || st === "manual") return null;
     if (st === "invoice") {
       const isVendor = entry.source_invoice_type === "vendor_bill" || entry.source_invoice_type === "vendor";
-      return { to: isVendor ? "/invoices/vendor" : "/invoices/customer", label: isVendor ? t("je.sourceAP") : t("je.sourceAR") };
+      return {
+        to: isVendor ? "/invoices/vendor" : "/invoices/customer",
+        label: isVendor ? t("je.sourceAP") : t("je.sourceAR"),
+        search: entry.source_id ? { openInvoiceId: entry.source_id } : undefined,
+      };
     }
-    if (st === "payment") return { to: "/payments", label: t("je.sourceTreasury") };
+    if (st === "payment") return {
+      to: "/payments",
+      label: t("je.sourceTreasury"),
+      search: entry.source_id ? { openPaymentId: entry.source_id } : undefined,
+    };
     if (["depreciation", "asset_disposal", "asset_acquisition", "fixed_asset"].includes(st)) return { to: "/assets", label: t("je.sourceFixedAssets") };
     if (["loan", "loan_payment", "loan_disbursement"].includes(st)) return { to: "/loans", label: t("je.sourceLoans") };
     return null;
@@ -151,7 +159,8 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
                 <span className="text-muted-foreground">{t("je.source")}:</span>
                 <span className="font-medium">{sourceLink.label}</span>
                 <Link
-                  to={sourceLink.to}
+                  to={sourceLink.to as any}
+                  search={sourceLink.search as any}
                   onClick={onClose}
                   className="ms-auto inline-flex items-center gap-1 text-primary hover:underline"
                 >
