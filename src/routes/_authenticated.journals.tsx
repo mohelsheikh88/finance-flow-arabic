@@ -381,6 +381,9 @@ function JournalsPage() {
                 <td className="p-3 text-center">
                   {r.is_active ? t("common.active") : t("common.inactive")}
                 </td>
+                <td className="p-3 text-center">
+                  {r.allow_manual_entries !== false ? "✓" : "—"}
+                </td>
                 <td className="p-3">
                   <div className="flex items-center gap-1 justify-end">
                     <Button
