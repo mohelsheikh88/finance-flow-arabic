@@ -666,6 +666,22 @@ function CustomerTypesDialog({
 const DOC_TYPES = ["cr", "vat", "national_address", "contract", "other"] as const;
 type DocType = (typeof DOC_TYPES)[number];
 
+function AttachmentsCount({ partnerId }: { partnerId: string }) {
+  const listFn = useServerFn(listPartnerAttachments);
+  const { data: attachments = [] } = useQuery({
+    queryKey: ["partner_attachments", partnerId],
+    queryFn: () => listFn({ data: { partnerId } }),
+  });
+  const count = (attachments as any[]).length;
+  return (
+    <span className="inline-flex items-center gap-1 text-muted-foreground">
+      <Paperclip className="h-3.5 w-3.5" />
+      <span className="font-mono text-xs">{count}</span>
+    </span>
+  );
+}
+
+
 function PartnerAttachments({ partnerId }: { partnerId: string }) {
   const { t } = useI18n();
   const qc = useQueryClient();
