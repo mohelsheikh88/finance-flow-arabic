@@ -198,6 +198,23 @@ function CustomersPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>{t("customers.customerType")}</Label>
+                <Select
+                  value={form.customer_type_id ?? "__none__"}
+                  onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— {t("common.none")} —</SelectItem>
+                    {activeTypes.map((ct) => (
+                      <SelectItem key={ct.id} value={ct.id}>
+                        {ct.code} — {localized(ct, "name")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="col-span-2"><Label>{t("setup.address")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
             </div>
             <DialogFooter>
