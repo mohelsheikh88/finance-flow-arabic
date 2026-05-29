@@ -160,6 +160,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
             { url: "/fiscal-positions", icon: Scale, title: t("nav.fiscalPositions") },
             { url: "/fiscal-periods", icon: CalendarRange, title: t("nav.fiscalPeriods") },
             { url: "/payment-methods", icon: CreditCard, title: t("nav.paymentMethods") },
+            { url: "/payment-terms", icon: CreditCard, title: t("nav.paymentTerms") },
             { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
           ],
         },
