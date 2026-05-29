@@ -796,7 +796,7 @@ function ChartOfAccountsPanel() {
               </Select>
               {!form.classification_id && (
                 <p className="mt-1 text-xs text-destructive">
-                  اختر تصنيف الحساب أولاً — لا يمكن الحفظ بدون تصنيف.
+                  {t("accounts.selectClassificationHint")}
                 </p>
               )}
             </div>
