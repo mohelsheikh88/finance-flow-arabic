@@ -222,8 +222,7 @@ function FiscalPeriodsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // ---------- Lock Dates ----------
-  const localized = useLocalized();
+  // ---------- Lock Date (single, company-wide) ----------
   const listLD = useServerFn(listLockDates);
   const createLD = useServerFn(createLockDate);
   const updateLD = useServerFn(updateLockDate);
@@ -234,60 +233,47 @@ function FiscalPeriodsPage() {
     queryFn: () => listLD({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
-  const { data: companyBranches = [] } = useQuery({
-    queryKey: ["branches", companyId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("branches")
-        .select("id, code, name_ar, name_en")
-        .eq("company_id", companyId!)
-        .order("code");
-      if (error) throw error;
-      return data ?? [];
-    },
-    enabled: !!companyId,
-  });
 
-  type LDForm = { branch_id: string; lock_date: string; notes: string };
-  const LD_EMPTY: LDForm = { branch_id: "__all__", lock_date: "", notes: "" };
-  const [ldOpen, setLdOpen] = useState(false);
-  const [ldEditingId, setLdEditingId] = useState<string | null>(null);
-  const [ldForm, setLdForm] = useState<LDForm>(LD_EMPTY);
-  const [ldDelId, setLdDelId] = useState<string | null>(null);
+  // The single company-wide lock row (branch_id null). Pick the latest if multiple exist.
+  const currentLock = useMemo(() => {
+    const rows = (lockRows as any[]).filter((r) => !r.branch_id);
+    if (rows.length === 0) return null;
+    return rows.slice().sort((a, b) => (a.lock_date < b.lock_date ? 1 : -1))[0];
+  }, [lockRows]);
 
-  const openLDCreate = () => { setLdEditingId(null); setLdForm(LD_EMPTY); setLdOpen(true); };
-  const openLDEdit = (r: any) => {
-    setLdEditingId(r.id);
-    setLdForm({ branch_id: r.branch_id ?? "__all__", lock_date: r.lock_date, notes: r.notes ?? "" });
-    setLdOpen(true);
-  };
+  const [ldDate, setLdDate] = useState<string>("");
+  const [ldNotes, setLdNotes] = useState<string>("");
+
+  // Keep inputs in sync with current value when it loads/changes
+  useMemo(() => {
+    setLdDate(currentLock?.lock_date ?? "");
+    setLdNotes(currentLock?.notes ?? "");
+  }, [currentLock?.id]);
 
   const ldSaveMut = useMutation({
-    mutationFn: () => {
-      const branch_id = ldForm.branch_id === "__all__" ? null : ldForm.branch_id;
-      if (ldEditingId) {
-        return updateLD({ data: { id: ldEditingId, branch_id, lock_date: ldForm.lock_date, notes: ldForm.notes || null } });
+    mutationFn: async () => {
+      // Cleanup: delete any extra company-wide rows so only one remains
+      const extras = (lockRows as any[]).filter(
+        (r) => !r.branch_id && r.id !== currentLock?.id,
+      );
+      for (const r of extras) {
+        await removeLD({ data: { id: r.id } });
       }
-      return createLD({ data: { company_id: companyId!, branch_id, lock_date: ldForm.lock_date, notes: ldForm.notes || null } });
+      if (currentLock) {
+        return updateLD({ data: { id: currentLock.id, branch_id: null, lock_date: ldDate, notes: ldNotes || null } });
+      }
+      return createLD({ data: { company_id: companyId!, branch_id: null, lock_date: ldDate, notes: ldNotes || null } });
     },
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["lock_dates"] });
-      setLdOpen(false); setLdEditingId(null); setLdForm(LD_EMPTY);
     },
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
-  const ldRemoveMut = useMutation({
-    mutationFn: (id: string) => removeLD({ data: { id } }),
-    onSuccess: () => {
-      toast.success(t("common.saved"));
-      qc.invalidateQueries({ queryKey: ["lock_dates"] });
-      setLdDelId(null);
-    },
-    onError: (e: Error) => toast.error(formatLockError(e, t)),
-  });
-  const canSaveLD = !!ldForm.lock_date;
+  const canSaveLD = !!ldDate && (ldDate !== (currentLock?.lock_date ?? "") || (ldNotes || "") !== (currentLock?.notes ?? ""));
+
+
 
 
   const canSave = !!(form.name && form.date_from && form.date_to && companyId);
