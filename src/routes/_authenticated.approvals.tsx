@@ -216,9 +216,27 @@ function ApprovalsPage() {
               </div>
               <div className="space-y-2">
                 {steps.map((s, i) => (
-                  <div key={i} className="grid grid-cols-12 gap-2 items-end">
-                    <div className="col-span-1 text-center font-bold pt-5">{i + 1}</div>
-                    <div className="col-span-4">
+                  <div
+                    key={i}
+                    className="grid grid-cols-12 gap-2 items-end rounded-md border border-transparent hover:border-border transition-colors p-1"
+                    draggable
+                    onDragStart={(e) => { e.dataTransfer.setData("text/plain", String(i)); e.dataTransfer.effectAllowed = "move"; }}
+                    onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const from = Number(e.dataTransfer.getData("text/plain"));
+                      if (Number.isNaN(from) || from === i) return;
+                      const c = [...steps];
+                      const [moved] = c.splice(from, 1);
+                      c.splice(i, 0, moved);
+                      setSteps(c.map((x, idx) => ({ ...x, step_order: idx + 1 })));
+                    }}
+                  >
+                    <div className="col-span-1 flex items-center justify-center gap-1 pt-5">
+                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab active:cursor-grabbing" />
+                      <span className="font-bold">{i + 1}</span>
+                    </div>
+                    <div className="col-span-3">
                       <Label className="text-[10px]">{t("approvals.role")}</Label>
                       <Select value={s.required_role} onValueChange={(v) => { const c = [...steps]; c[i].required_role = v; setSteps(c); }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -239,12 +257,25 @@ function ApprovalsPage() {
                       <Label className="text-[10px]">{t("common.nameEn")}</Label>
                       <Input value={s.step_name_en} onChange={(e) => { const c = [...steps]; c[i].step_name_en = e.target.value; setSteps(c); }} />
                     </div>
-                    <Button size="icon" variant="ghost" className="col-span-1" onClick={() => setSteps(steps.filter((_, j) => j !== i))}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <div className="col-span-2 flex items-center justify-end gap-1">
+                      <Button size="icon" variant="ghost" disabled={i === 0} onClick={() => {
+                        const c = [...steps];
+                        [c[i - 1], c[i]] = [c[i], c[i - 1]];
+                        setSteps(c.map((x, idx) => ({ ...x, step_order: idx + 1 })));
+                      }}>↑</Button>
+                      <Button size="icon" variant="ghost" disabled={i === steps.length - 1} onClick={() => {
+                        const c = [...steps];
+                        [c[i + 1], c[i]] = [c[i], c[i + 1]];
+                        setSteps(c.map((x, idx) => ({ ...x, step_order: idx + 1 })));
+                      }}>↓</Button>
+                      <Button size="icon" variant="ghost" onClick={() => setSteps(steps.filter((_, j) => j !== i).map((x, idx) => ({ ...x, step_order: idx + 1 })))}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
+            </div>
             </div>
             <DialogFooter>
               <Button
