@@ -676,6 +676,74 @@ export const deletePartner = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ---------------- Partner Contacts ----------------
+
+export const listPartnerContacts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { partnerId: string }) =>
+    z.object({ partnerId: z.string().uuid() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await (context.supabase as any)
+      .from("partner_contacts")
+      .select("*")
+      .eq("partner_id", data.partnerId)
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const ContactSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(255),
+  mobile: z.string().max(50).optional().nullable(),
+  email: z.string().email().max(255).optional().nullable().or(z.literal("")),
+  notes: z.string().max(500).optional().nullable(),
+});
+
+export const savePartnerContacts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      partnerId: z.string().uuid(),
+      contacts: z.array(ContactSchema).max(50),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: existing, error: e1 } = await sb
+      .from("partner_contacts")
+      .select("id")
+      .eq("partner_id", data.partnerId);
+    if (e1) throw new Error(e1.message);
+
+    const keepIds = new Set(data.contacts.filter((c) => c.id).map((c) => c.id!));
+    const toDelete = (existing ?? []).filter((r: any) => !keepIds.has(r.id)).map((r: any) => r.id);
+
+    if (toDelete.length > 0) {
+      const { error } = await sb.from("partner_contacts").delete().in("id", toDelete);
+      if (error) throw new Error(error.message);
+    }
+
+    for (const c of data.contacts) {
+      const payload = {
+        partner_id: data.partnerId,
+        name: c.name,
+        mobile: c.mobile || null,
+        email: c.email || null,
+        notes: c.notes || null,
+      };
+      if (c.id) {
+        const { error } = await sb.from("partner_contacts").update(payload).eq("id", c.id);
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await sb.from("partner_contacts").insert(payload);
+        if (error) throw new Error(error.message);
+      }
+    }
+    return { ok: true };
+  });
+
 export const listJournals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string }) => i)
