@@ -1501,6 +1501,8 @@ export const translations = {
       document: "Document",
       reference: "Reference",
       approval: "Approval",
+      workflow: "Approval Workflow",
+      noWorkflow: "No approval workflow is configured for this document",
       actionDone: "Action submitted",
       doc: { journal_entry: "Journal Entry", invoice: "Invoice", payment: "Payment", asset_disposal: "Asset Disposal" },
       jt: { sales: "Sales", purchase: "Purchase", bank: "Bank", cash: "Cash", misc: "Miscellaneous" },
