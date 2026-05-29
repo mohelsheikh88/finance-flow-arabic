@@ -381,6 +381,13 @@ export const translations = {
       cancelled: "ملغي",
       post: "ترحيل",
       saveDraft: "حفظ كمسودة",
+      source: "مصدر القيد",
+      sourceAR: "حسابات العملاء",
+      sourceAP: "حسابات الموردين",
+      sourceTreasury: "الخزينة والبنوك",
+      sourceFixedAssets: "الأصول الثابتة",
+      sourceLoans: "إدارة القروض",
+      sourceManual: "قيد يدوي",
     },
     accounts: {
       title: "Chart of Accounts",
