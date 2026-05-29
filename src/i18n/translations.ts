@@ -120,8 +120,11 @@ export const translations = {
     },
     reports: {
       totalIncome: "إجمالي الإيرادات",
+      totalCosts: "إجمالي التكاليف",
+      grossProfit: "مجمل الربح",
       totalExpenses: "إجمالي المصروفات",
       netIncome: "صافي الربح",
+      costs: "التكاليف",
       cfSubtitle: "قائمة التدفقات النقدية حسب نوع النشاط",
       cfOperating: "التدفقات النقدية من الأنشطة التشغيلية",
       cfInvesting: "التدفقات النقدية من الأنشطة الاستثمارية",
