@@ -1086,6 +1086,18 @@ export const translations = {
       notAuthorized: "You are not authorized to create manual journal entries. Contact your administrator to grant access.",
       journalNotFound: "The selected journal was not found. Refresh the page and try again.",
     },
+    history: {
+      title: "Change History",
+      entries: "events",
+      empty: "No changes recorded yet",
+      system: "System",
+      created: "Created",
+      updated: "Updated",
+      deleted: "Deleted",
+      line: "line",
+      more: "more changes",
+      view: "View history",
+    },
 
     dashboard: {
       title: "Accounting Dashboard",
