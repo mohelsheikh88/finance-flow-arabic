@@ -274,7 +274,6 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
               <SidebarGroup className="sidebar-grandparent">
                 <SidebarGroupLabel asChild>
                   <CollapsibleTrigger
-                    data-active={groupActive}
                     className="nav-pill group/trigger flex h-auto w-full cursor-pointer items-center gap-2.5 px-2 py-2 text-sidebar-foreground/85"
                   >
                     <g.icon className="h-[18px] w-[18px] shrink-0 text-[hsl(327,92%,72%)]" />
@@ -294,7 +293,6 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                           <SidebarGroup className="sidebar-parent p-0">
                             <SidebarGroupLabel asChild>
                               <CollapsibleTrigger
-                                data-active={subActive}
                                 className="nav-pill flex h-auto w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-sidebar-foreground/80"
                               >
                                 <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
