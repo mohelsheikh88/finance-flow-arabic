@@ -200,8 +200,10 @@ function ChartOfAccountsPanel() {
       }
       if (filterClassification !== "all") {
         const at = typeById.get(a.account_type_id);
-        if ((at?.classification_id ?? null) !== filterClassification) return false;
+        const clsId = a.classification_id ?? at?.classification_id ?? null;
+        if (clsId !== filterClassification) return false;
       }
+
 
       if (filterIsGroup !== "all") {
         const isGroup = filterIsGroup === "group";
@@ -382,7 +384,10 @@ function ChartOfAccountsPanel() {
 
     const rows = (accounts as any[]).map((a) => {
       const tp = typesById.get(a.account_type_id);
-      const cls = tp ? clsById.get(tp.classification_id) : null;
+      const cls =
+        (a.classification_id ? clsById.get(a.classification_id) : null) ??
+        (tp ? clsById.get(tp.classification_id) : null);
+
       return {
         code: a.code,
         name_ar: a.name_ar,
@@ -1339,7 +1344,10 @@ function ChartOfAccountsTable({
         <tbody>
           {rows.map((a) => {
             const tp = typeById.get(a.account_type_id);
-            const cls = tp ? clsById.get(tp.classification_id) : null;
+            const cls =
+              (a.classification_id ? clsById.get(a.classification_id) : null) ??
+              (tp ? clsById.get(tp.classification_id) : null);
+
             const checked = selectedIds.has(a.id);
             return (
               <tr key={a.id} className={`border-t hover:bg-muted/30 ${checked ? "bg-primary/5" : ""}`}>
