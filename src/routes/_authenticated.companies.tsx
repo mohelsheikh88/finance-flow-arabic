@@ -469,14 +469,14 @@ function Page() {
             <Field label={t("common.code")} required value={coForm.code} onChange={(v) => setCoForm({ ...coForm, code: v })} />
             <Field label={t("common.name") + " (AR)"} required value={coForm.name_ar} onChange={(v) => setCoForm({ ...coForm, name_ar: v })} />
             <Field label={t("common.name") + " (EN)"} required value={coForm.name_en} onChange={(v) => setCoForm({ ...coForm, name_en: v })} dir="ltr" />
-            <Field label="Currency" value={coForm.default_currency} onChange={(v) => setCoForm({ ...coForm, default_currency: v.toUpperCase() })} dir="ltr" />
+            <Field label={t("common.currency")} value={coForm.default_currency} onChange={(v) => setCoForm({ ...coForm, default_currency: v.toUpperCase() })} dir="ltr" />
             <Field label={t("setup.vatNumber")} value={coForm.vat_number} onChange={(v) => setCoForm({ ...coForm, vat_number: v })} dir="ltr" />
             <Field label={t("setup.crNumber")} value={coForm.cr_number} onChange={(v) => setCoForm({ ...coForm, cr_number: v })} dir="ltr" />
-            <Field label="Email" type="email" value={coForm.email} onChange={(v) => setCoForm({ ...coForm, email: v })} dir="ltr" />
-            <Field label="Phone" value={coForm.phone} onChange={(v) => setCoForm({ ...coForm, phone: v })} dir="ltr" />
-            <Field label="Website" value={coForm.website} onChange={(v) => setCoForm({ ...coForm, website: v })} dir="ltr" />
+            <Field label={t("common.email")} type="email" value={coForm.email} onChange={(v) => setCoForm({ ...coForm, email: v })} dir="ltr" />
+            <Field label={t("common.phone")} value={coForm.phone} onChange={(v) => setCoForm({ ...coForm, phone: v })} dir="ltr" />
+            <Field label={t("common.website")} value={coForm.website} onChange={(v) => setCoForm({ ...coForm, website: v })} dir="ltr" />
             <div>
-              <Label className="text-xs">FY Start Month</Label>
+              <Label className="text-xs">{t("setup.fyStartMonth")}</Label>
               <Select
                 value={String(coForm.fiscal_year_start_month)}
                 onValueChange={(v) => setCoForm({ ...coForm, fiscal_year_start_month: Number(v) })}
