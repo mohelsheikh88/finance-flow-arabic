@@ -106,6 +106,21 @@ function CustomersPage() {
   };
 
 
+  const computeNextCode = (typeId: string): string => {
+    const ct = (customerTypes as any[]).find((x) => x.id === typeId);
+    if (!ct) return "";
+    const prefix = String(ct.code);
+    const re = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-(\\d+)$`);
+    const nums = customers
+      .filter((p: any) => p.customer_type_id === typeId)
+      .map((p: any) => {
+        const m = String(p.code ?? "").match(re);
+        return m ? parseInt(m[1], 10) : 0;
+      });
+    const next = (nums.length ? Math.max(...nums) : 0) + 1;
+    return `${prefix}-${String(next).padStart(4, "0")}`;
+  };
+
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: any) => {
     setForm({
