@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createJournalEntry, listAccounts, listJournals, listPartners } from "@/lib/api/accounting.functions";
+import { getUserContext } from "@/lib/api/context.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Save, Check } from "lucide-react";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Trash2, Save, Check, Info } from "lucide-react";
 import { toast } from "sonner";
 import { formatLockError } from "@/lib/lock-error";
 
@@ -35,9 +36,21 @@ function NewJEPage() {
   const partnersFn = useServerFn(listPartners);
   const createFn = useServerFn(createJournalEntry);
 
-  const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accountsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
-  const { data: journals = [] } = useQuery({ queryKey: ["journals", companyId, "manual"], queryFn: () => journalsFn({ data: { companyId: companyId!, manualOnly: true } }), enabled: !!companyId });
-  const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partnersFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const accountsQ = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accountsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const journalsQ = useQuery({ queryKey: ["journals", companyId], queryFn: () => journalsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const partnersQ = useQuery({ queryKey: ["partners", companyId], queryFn: () => partnersFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+
+  const accounts = accountsQ.data ?? [];
+  const allJournals = journalsQ.data ?? [];
+  const partners = partnersQ.data ?? [];
+
+  const availableJournals = allJournals.filter((j: any) => j.allow_manual_entries === true);
+  const unavailableJournals = allJournals.filter((j: any) => j.allow_manual_entries !== true);
+
+  const ctxData = qc.getQueryData<any>(["user-context"]);
+  const accountingRoles = ["admin", "finance_manager", "accounting_manager", "chief_accountant", "accountant"];
+  const userRoles = (ctxData?.roles ?? []) as string[];
+  const canCreateManual = userRoles.some((r) => accountingRoles.includes(r));
 
   const postableAccounts = accounts.filter((a: any) => !a.is_group);
 
@@ -94,7 +107,7 @@ function NewJEPage() {
       if (msg.startsWith("NOT_AUTHORIZED_MANUAL_JE")) return toast.error(t("jeErrors.notAuthorized"));
       if (msg.startsWith("JOURNAL_NOT_FOUND")) return toast.error(t("jeErrors.journalNotFound"));
       if (msg.startsWith("MANUAL_NOT_ALLOWED")) {
-        const j = journals.find((x: any) => x.id === header.journal_id);
+        const j = allJournals.find((x: any) => x.id === header.journal_id);
         const label = j ? `${j.code} — ${localized(j, "name")}` : "";
         return toast.error(t("jeErrors.manualNotAllowed", { journal: label }));
       }
@@ -123,13 +136,56 @@ function NewJEPage() {
       <Card>
         <CardContent className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <Label>{t("je.journal")}</Label>
-            <Select value={header.journal_id} onValueChange={(v) => setHeader({ ...header, journal_id: v })}>
+            <div className="flex items-center gap-2">
+              <Label>{t("je.journal")}</Label>
+              {!canCreateManual && (
+                <span className="text-[10px] text-warning font-medium">{t("je.permissionNotice")}</span>
+              )}
+            </div>
+            <Select
+              value={header.journal_id}
+              onValueChange={(v) => {
+                const selected = allJournals.find((j: any) => j.id === v);
+                if (selected && !selected.allow_manual_entries) {
+                  toast.error(
+                    `${localized(selected, "name")} — ${t("je.manualDisabledReason")}`
+                  );
+                  return;
+                }
+                setHeader({ ...header, journal_id: v });
+              }}
+            >
               <SelectTrigger className="h-9"><SelectValue placeholder={t("je.journal")} /></SelectTrigger>
               <SelectContent>
-                {journals.map((j: any) => <SelectItem key={j.id} value={j.id}>{j.code} — {localized(j, "name")}</SelectItem>)}
+                {availableJournals.length > 0 && (
+                  <SelectGroup>
+                    {availableJournals.map((j: any) => (
+                      <SelectItem key={j.id} value={j.id}>{j.code} — {localized(j, "name")}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+                {unavailableJournals.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel className="text-muted-foreground">{t("je.manualDisabledShort")}</SelectLabel>
+                    {unavailableJournals.map((j: any) => (
+                      <SelectItem key={j.id} value={j.id} disabled>
+                        <span className="text-muted-foreground">{j.code} — {localized(j, "name")}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
               </SelectContent>
             </Select>
+            {unavailableJournals.length > 0 && (
+              <div className="mt-1.5 flex items-start gap-1.5 text-[11px] text-muted-foreground">
+                <Info className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                <span>
+                  {t("je.unavailableJournalsHelp")}{" "}
+                  {unavailableJournals.map((j: any) => `${localized(j, "name")} (${t("je.manualDisabledReason")})`).join("، ")}.
+                  {!canCreateManual && ` ${t("je.permissionNotice")}`}
+                </span>
+              </div>
+            )}
           </div>
           <div><Label>{t("je.entryDate")}</Label><Input type="date" value={header.entry_date} onChange={(e) => setHeader({ ...header, entry_date: e.target.value })} className="h-9" /></div>
           <div><Label>{t("common.reference")}</Label><Input value={header.reference} onChange={(e) => setHeader({ ...header, reference: e.target.value })} className="h-9" /></div>
