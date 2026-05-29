@@ -964,24 +964,34 @@ function ChartOfAccountsTree({
 function ChartOfAccountsTable({
   accounts,
   accountTypes,
+  classifications,
   onEdit,
   onDelete,
   onToggleReconcilable,
 }: {
   accounts: any[];
   accountTypes: any[];
+  classifications: any[];
   onEdit: (a: any) => void;
   onDelete: (a: any) => void;
   onToggleReconcilable: (a: any, v: boolean) => void;
 }) {
   const { t } = useI18n();
   const localized = useLocalized();
+  const { companyId } = useBranch();
+  const { bucketName } = useAccountingBuckets(companyId ?? undefined);
 
   const typeById = useMemo(() => {
     const m = new Map<string, any>();
     accountTypes.forEach((tp) => m.set(tp.id, tp));
     return m;
   }, [accountTypes]);
+
+  const clsById = useMemo(() => {
+    const m = new Map<string, any>();
+    classifications.forEach((c) => m.set(c.id, c));
+    return m;
+  }, [classifications]);
 
   const rows = useMemo(
     () => [...accounts].sort((a, b) => String(a.code).localeCompare(String(b.code))),
@@ -993,25 +1003,40 @@ function ChartOfAccountsTable({
       <table className="w-full text-sm">
         <thead className="bg-muted/50">
           <tr>
-            <th className="text-start p-3 font-medium w-40">{t("common.code")}</th>
-            <th className="text-start p-3 font-medium">{t("accounts.title")}</th>
-            <th className="text-start p-3 font-medium w-56">{t("common.type") || "Type"}</th>
-            <th className="text-center p-3 font-medium w-48">{t("accounts.isReconcilable")}</th>
-            <th className="text-center p-3 font-medium w-28">{t("common.status")}</th>
-            <th className="text-end p-3 font-medium w-32">{t("common.actions")}</th>
+            <th className="text-start p-3 font-medium w-32">{t("common.code")}</th>
+            <th className="text-start p-3 font-medium">{t("common.nameEn")}</th>
+            <th className="text-start p-3 font-medium">{t("common.nameAr")}</th>
+            <th className="text-start p-3 font-medium w-48">{t("accounts.classification")}</th>
+            <th className="text-start p-3 font-medium w-44">{t("accounts.accountingBucket")}</th>
+            <th className="text-center p-3 font-medium w-28">{t("accounts.isGroup")}</th>
+            <th className="text-center p-3 font-medium w-40">{t("accounts.isReconcilable")}</th>
+            <th className="text-center p-3 font-medium w-24">{t("common.status")}</th>
+            <th className="text-end p-3 font-medium w-28">{t("common.actions")}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((a) => {
             const tp = typeById.get(a.account_type_id);
+            const cls = tp ? clsById.get(tp.classification_id) : null;
             return (
               <tr key={a.id} className="border-t hover:bg-muted/30">
                 <td className="p-3 font-mono">{a.code}</td>
-                <td className="p-3">
-                  <span className={a.is_group ? "font-semibold" : ""}>{localized(a, "name")}</span>
+                <td className="p-3">{a.name_en}</td>
+                <td className="p-3">{a.name_ar}</td>
+                <td className="p-3 text-muted-foreground">
+                  {cls ? `${cls.code} — ${localized(cls, "name")}` : "—"}
                 </td>
                 <td className="p-3 text-muted-foreground">
-                  {tp ? localized(tp, "name") : "—"}
+                  {cls ? bucketName(cls.bucket, t(`accounts.${cls.bucket}`)) : "—"}
+                </td>
+                <td className="p-3 text-center">
+                  {a.is_group ? (
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+                      {t("accounts.isGroup")}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">—</span>
+                  )}
                 </td>
                 <td className="p-3 text-center">
                   <Switch
@@ -1049,7 +1074,7 @@ function ChartOfAccountsTable({
           })}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={6} className="p-8 text-center text-muted-foreground">
+              <td colSpan={9} className="p-8 text-center text-muted-foreground">
                 {t("common.noData")}
               </td>
             </tr>
