@@ -719,7 +719,9 @@ function ChartOfAccountsPanel() {
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
             <div>
-              <Label>{t("accounts.classification")} *</Label>
+              <Label>
+                {t("accounts.classification")} <span className="text-destructive">*</span>
+              </Label>
               <Select
                 value={form.classification_id}
                 onValueChange={(v) =>
@@ -730,7 +732,12 @@ function ChartOfAccountsPanel() {
                   })
                 }
               >
-                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectTrigger
+                  aria-invalid={!form.classification_id}
+                  className={!form.classification_id ? "border-destructive focus-visible:ring-destructive" : ""}
+                >
+                  <SelectValue placeholder="—" />
+                </SelectTrigger>
                 <SelectContent>
                   {(classifications as any[]).filter((c) => c.is_active).map((c: any) => (
                     <SelectItem key={c.id} value={c.id}>
@@ -739,7 +746,13 @@ function ChartOfAccountsPanel() {
                   ))}
                 </SelectContent>
               </Select>
+              {!form.classification_id && (
+                <p className="mt-1 text-xs text-destructive">
+                  اختر تصنيف الحساب أولاً — لا يمكن الحفظ بدون تصنيف.
+                </p>
+              )}
             </div>
+
 
 
             <div>
