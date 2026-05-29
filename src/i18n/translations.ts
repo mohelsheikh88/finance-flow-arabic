@@ -483,6 +483,8 @@ export const translations = {
       receivableAccountShort: "حساب الذمم (GL)",
       defaultFromJournal: "— الافتراضي من اليومية —",
       phone: "الهاتف",
+      customerType: "نوع العميل",
+      manageTypes: "إدارة أنواع العملاء",
     },
     tb: {
       title: "ميزان المراجعة",
