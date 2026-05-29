@@ -227,10 +227,16 @@ function CustomersPage() {
                   value={form.customer_type_id ?? "__none__"}
                   onValueChange={(v) => {
                     const newTypeId = v === "__none__" ? null : v;
+                    const ct = newTypeId
+                      ? (customerTypes as any[]).find((x) => x.id === newTypeId)
+                      : null;
                     setForm((prev) => ({
                       ...prev,
                       customer_type_id: newTypeId,
                       code: !prev.id && newTypeId ? computeNextCode(newTypeId) : (!newTypeId && !prev.id ? "" : prev.code),
+                      receivable_account_id: ct?.receivable_account_id
+                        ? ct.receivable_account_id
+                        : prev.receivable_account_id,
                     }));
                   }}
                 >
