@@ -360,9 +360,12 @@ function ChartOfAccountsPanel() {
           notes: r.notes ? String(r.notes) : null,
         };
       }).filter((r) => r.code);
-
+      if (!rows.length) { toast.error(t("common.noData")); return; }
+      importMut.mutate(rows);
+    } catch (err: any) {
       toast.error(err.message ?? "Import failed");
     }
+
   };
 
 
