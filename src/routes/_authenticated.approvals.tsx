@@ -146,9 +146,26 @@ function ApprovalsPage() {
       setDeleteId(null);
     },
     onError: (e: any) => {
-      toast.error(e.message);
+      const msg = e.message === "HAS_REQUESTS"
+        ? (locale === "ar"
+            ? "لا يمكن حذف هذا الـ Workflow لوجود طلبات اعتماد مرتبطة به. قم بتعطيله بدلاً من الحذف."
+            : "Cannot delete this workflow because it has linked approval requests. Deactivate it instead.")
+        : e.message;
+      toast.error(msg);
       setDeleteId(null);
     },
+  });
+
+  const toggleActiveMut = useMutation({
+    mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
+      setActiveWf({ data: { id, is_active } }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["workflows"] });
+      toast.success(v.is_active
+        ? (locale === "ar" ? "تم تفعيل الـ Workflow" : "Workflow activated")
+        : (locale === "ar" ? "تم تعطيل الـ Workflow" : "Workflow deactivated"));
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const saveMut = editingId ? updateWfMut : createWfMut;
