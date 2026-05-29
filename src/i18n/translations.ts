@@ -1208,6 +1208,9 @@ export const translations = {
       totalNbv: "Total NBV",
       status: { draft: "Draft", active: "Active", fully_depreciated: "Fully Depreciated", disposed: "Disposed" },
     },
+    costCenters: {
+      hint: "Groups can have children; only leaves can be selected on transactions.",
+    },
   },
 };
 
