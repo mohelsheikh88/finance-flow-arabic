@@ -200,8 +200,10 @@ function ChartOfAccountsPanel() {
       }
       if (filterClassification !== "all") {
         const at = typeById.get(a.account_type_id);
-        if ((at?.classification_id ?? null) !== filterClassification) return false;
+        const clsId = a.classification_id ?? at?.classification_id ?? null;
+        if (clsId !== filterClassification) return false;
       }
+
 
       if (filterIsGroup !== "all") {
         const isGroup = filterIsGroup === "group";
