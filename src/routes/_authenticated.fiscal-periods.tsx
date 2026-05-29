@@ -323,12 +323,15 @@ function FiscalPeriodsPage() {
           {isAr ? "أدوات مرتبطة" : "Related Tools"}
         </p>
         <div className="flex flex-wrap gap-2">
-          <Link to="/lock-dates">
-            <Button variant="outline" size="sm">
-              <Lock className="h-4 w-4 me-1" />
-              {isAr ? "تواريخ الإقفال" : "Lock Dates"}
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => document.getElementById("lock-dates-section")?.scrollIntoView({ behavior: "smooth" })}
+          >
+            <Lock className="h-4 w-4 me-1" />
+            {isAr ? "تواريخ الإقفال" : "Lock Dates"}
+          </Button>
+
           <Link to="/companies">
             <Button variant="outline" size="sm">
               <CalendarRange className="h-4 w-4 me-1" />
