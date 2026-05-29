@@ -55,6 +55,7 @@ function CustomerInvoicesPage() {
   const accFn = useServerFn(listAccounts);
   const partFn = useServerFn(listPartners);
   const taxFn = useServerFn(listTaxes);
+  const termsFn = useServerFn(listPaymentTerms);
 
   const { data: invoices = [] } = useQuery({
     queryKey: ["invoices", branchId, "customer"],
@@ -64,6 +65,7 @@ function CustomerInvoicesPage() {
   const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accFn({ data: { companyId: companyId! } }), enabled: !!companyId });
   const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partFn({ data: { companyId: companyId! } }), enabled: !!companyId });
   const { data: taxes = [] } = useQuery({ queryKey: ["taxes", companyId], queryFn: () => taxFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const { data: paymentTerms = [] } = useQuery({ queryKey: ["payment-terms", companyId], queryFn: () => termsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
 
   const customers = partners.filter((p: any) => p.is_customer);
   const incomeAccounts = accounts.filter((a: any) => !a.is_group && a.account_type === "income");
