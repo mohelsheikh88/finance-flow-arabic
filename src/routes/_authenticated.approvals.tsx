@@ -262,9 +262,9 @@ function ApprovalsPage() {
                     toast.error(locale === "ar" ? `أكمل بيانات الخطوة رقم ${badStep + 1}` : `Complete step #${badStep + 1} fields`);
                     return;
                   }
-                  createWfMut.mutate();
+                  saveMut.mutate();
                 }}
-                disabled={createWfMut.isPending}
+                disabled={saveMut.isPending}
               >
                 {t("common.save")}
               </Button>
