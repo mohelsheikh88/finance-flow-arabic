@@ -293,6 +293,10 @@ function ApprovalsPage() {
             </Card>
           ))}
         </TabsContent>
+
+        <TabsContent value="roles">
+          <RolesManagement />
+        </TabsContent>
       </Tabs>
     </div>
   );
