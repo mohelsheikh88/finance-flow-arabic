@@ -253,6 +253,27 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
 
   const canSave = form.code && form.name_ar && form.name_en && !!companyId;
 
+  const handleExport = () => {
+    const data = (filteredRows as any[]).map((r) => ({
+      code: r.code,
+      name_ar: r.name_ar,
+      name_en: r.name_en,
+      bucket: r.bucket,
+      statement: r.statement,
+      normal_balance: r.normal_balance,
+      is_active: r.is_active ? 1 : 0,
+      sort_order: r.sort_order ?? "",
+      notes: r.notes ?? "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(data.length ? data : [{
+      code: "", name_ar: "", name_en: "", bucket: "", statement: "",
+      normal_balance: "", is_active: 1, sort_order: "", notes: "",
+    }]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "classifications");
+    XLSX.writeFile(wb, `accounts_classifications_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   return (
     <div className={embedded ? "space-y-4" : "p-6 space-y-4"}>
       {!embedded && (
@@ -263,19 +284,28 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
             </Button>
             <h1 className="page-title">{t("accounts.classificationsTitle")}</h1>
           </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleExport} disabled={!companyId}>
+              <Download className="h-4 w-4 me-1" />Export
+            </Button>
+            <Button onClick={openNew} disabled={!companyId}>
+              <Plus className="h-4 w-4 me-1" />{t("common.new")}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {embedded && (
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="outline" onClick={handleExport} disabled={!companyId}>
+            <Download className="h-4 w-4 me-1" />Export
+          </Button>
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
           </Button>
         </div>
       )}
 
-      {embedded && (
-        <div className="flex items-center justify-end">
-          <Button onClick={openNew} disabled={!companyId}>
-            <Plus className="h-4 w-4 me-1" />{t("common.new")}
-          </Button>
-        </div>
-      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">{t("common.search")}</Label>
