@@ -152,6 +152,11 @@
     font-family: var(--font-inter);
   }
 
+  /* RTL helpers — flip directional glyphs when document is RTL */
+  html[dir="rtl"] .rtl-flip {
+    transform: scaleX(-1);
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
