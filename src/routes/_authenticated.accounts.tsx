@@ -330,22 +330,29 @@ function ChartOfAccountsPanel() {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
 
-      // Resolve account_type from either account_type_code (preferred) or legacy account_type bucket
-      const typeByCode = new Map<string, any>();
-      (accountTypes as any[]).forEach((tp) => typeByCode.set(String(tp.code).toLowerCase(), tp));
+      // Resolve account_type from classification_code (matches export format)
+      const clsByCode = new Map<string, any>();
+      (classifications as any[]).forEach((c) => clsByCode.set(String(c.code).toLowerCase(), c));
+      const typeByClassificationId = new Map<string, any>();
+      (accountTypes as any[]).forEach((tp) => {
+        if (tp.classification_id && !typeByClassificationId.has(tp.classification_id)) {
+          typeByClassificationId.set(tp.classification_id, tp);
+        }
+      });
 
       const rows = raw.map((r) => {
-        const tcode = String(r.account_type_code ?? "").trim().toLowerCase();
-        const tp = tcode ? typeByCode.get(tcode) : null;
-        const bucket = String(r.account_type ?? tp?.classification ?? "").trim().toLowerCase();
+        const ccode = String(r.classification_code ?? "").trim().toLowerCase();
+        const cls = ccode ? clsByCode.get(ccode) : null;
+        const tp = cls ? typeByClassificationId.get(cls.id) : null;
+        const bucket = String(cls?.bucket ?? tp?.classification ?? "").trim().toLowerCase();
         return {
           code: String(r.code ?? "").trim(),
           name_ar: String(r.name_ar ?? "").trim(),
           name_en: String(r.name_en ?? "").trim(),
           account_type: bucket,
           account_type_code: tp?.code ?? null,
-          parent_code: r.parent_code ? String(r.parent_code).trim() : null,
-          currency_code: r.currency_code ? String(r.currency_code).trim() : null,
+          parent_code: null,
+          currency_code: null,
           is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
           is_active: r.is_active === undefined || r.is_active === "" ? true
             : r.is_active === true || r.is_active === 1 || String(r.is_active).toLowerCase() === "true",
@@ -353,9 +360,7 @@ function ChartOfAccountsPanel() {
           notes: r.notes ? String(r.notes) : null,
         };
       }).filter((r) => r.code);
-      if (!rows.length) { toast.error(t("common.noData")); return; }
-      importMut.mutate(rows);
-    } catch (err: any) {
+
       toast.error(err.message ?? "Import failed");
     }
   };
