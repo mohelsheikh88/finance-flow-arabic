@@ -479,6 +479,10 @@ export const translations = {
       title: "العملاء",
       totalReceivable: "إجمالي المستحقات",
       activeCustomers: "العملاء النشطين",
+      receivableAccount: "حساب الذمم المدينة (GL)",
+      receivableAccountShort: "حساب الذمم (GL)",
+      defaultFromJournal: "— الافتراضي من اليومية —",
+      phone: "الهاتف",
     },
     tb: {
       title: "ميزان المراجعة",
