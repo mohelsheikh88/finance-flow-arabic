@@ -233,7 +233,10 @@ function ChartOfAccountsPanel() {
     setOpen(true);
   };
   const openEdit = (a: any) => {
-    // Derive classification from the account_type bucket text since Account Types may not exist.
+    // Prefer the persisted classification_id; fall back to legacy account_type/bucket mapping.
+    const clsDirect = a.classification_id
+      ? (classifications as any[]).find((c) => c.id === a.classification_id)
+      : null;
     const at = (accountTypes as any[]).find((t) => t.id === a.account_type_id);
     const clsFromType = at?.classification_id
       ? (classifications as any[]).find((c) => c.id === at.classification_id)
@@ -241,7 +244,8 @@ function ChartOfAccountsPanel() {
     const clsFromBucket = (classifications as any[]).find(
       (c) => norm(c.bucket) === norm(a.account_type),
     );
-    const cls = clsFromType ?? clsFromBucket;
+    const cls = clsDirect ?? clsFromType ?? clsFromBucket;
+
     setForm({
       id: a.id,
       code: a.code ?? "",
