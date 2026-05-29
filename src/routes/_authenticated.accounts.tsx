@@ -81,6 +81,7 @@ type FormState = {
   name_ar: string;
   name_en: string;
   account_type_id: string;
+  classification_id: string;
   parent_id: string;
   currency_code: string;
   is_group: boolean;
@@ -94,6 +95,7 @@ const empty: FormState = {
   name_ar: "",
   name_en: "",
   account_type_id: "",
+  classification_id: "",
   parent_id: "",
   currency_code: "",
   is_group: false,
@@ -101,6 +103,7 @@ const empty: FormState = {
   is_reconcilable: false,
   notes: "",
 };
+
 
 
 function ChartOfAccountsPanel() {
