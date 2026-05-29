@@ -433,18 +433,31 @@ function ChartOfAccountsPanel() {
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
             <div>
-              <Label>{t("accounts.type")} *</Label>
-              <Select value={form.account_type_id} onValueChange={(v) => setForm({ ...form, account_type_id: v })}>
+              <Label>{t("accounts.classification")} *</Label>
+              <Select
+                value={form.classification_id}
+                onValueChange={(v) =>
+                  setForm({
+                    ...form,
+                    classification_id: v,
+                    account_type_id:
+                      (accountTypes as any[]).find((tp) => tp.classification_id === v && tp.is_active)?.id ??
+                      (accountTypes as any[]).find((tp) => tp.classification_id === v)?.id ??
+                      "",
+                  })
+                }
+              >
                 <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
-                  {(accountTypes as any[]).filter((tp) => tp.is_active).map((tp: any) => (
-                    <SelectItem key={tp.id} value={tp.id}>
-                      {tp.code} — {localized(tp, "name")} ({t(`accounts.${tp.classification}`)})
+                  {(classifications as any[]).filter((c) => c.is_active).map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code} — {localized(c, "name")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
 
             <div>
               <Label>{t("common.nameAr")} *</Label>
