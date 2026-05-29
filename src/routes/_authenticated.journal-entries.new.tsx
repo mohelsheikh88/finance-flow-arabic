@@ -107,7 +107,7 @@ function NewJEPage() {
       if (msg.startsWith("NOT_AUTHORIZED_MANUAL_JE")) return toast.error(t("jeErrors.notAuthorized"));
       if (msg.startsWith("JOURNAL_NOT_FOUND")) return toast.error(t("jeErrors.journalNotFound"));
       if (msg.startsWith("MANUAL_NOT_ALLOWED")) {
-        const j = journals.find((x: any) => x.id === header.journal_id);
+        const j = allJournals.find((x: any) => x.id === header.journal_id);
         const label = j ? `${j.code} — ${localized(j, "name")}` : "";
         return toast.error(t("jeErrors.manualNotAllowed", { journal: label }));
       }
