@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Trash2, FileText, Check } from "lucide-react";
 import { toast } from "sonner";
+import { formatLockError } from "@/lib/lock-error";
 
 export const Route = createFileRoute("/_authenticated/invoices/customer")({
   component: CustomerInvoicesPage,
@@ -117,7 +118,7 @@ function CustomerInvoicesPage() {
       setOpen(false);
       reset();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
   const postMut = useMutation({
@@ -126,7 +127,7 @@ function CustomerInvoicesPage() {
       toast.success(t("invoices.posted"));
       qc.invalidateQueries({ queryKey: ["invoices"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
   const canSave = header.partner_id && header.invoice_date && lines.every((l) => l.account_id && l.quantity > 0);
