@@ -706,6 +706,17 @@ export const translations = {
       nextPage: "Next page",
       lastPage: "Last page",
       logout: "Logout",
+      email: "Email",
+      phone: "Phone",
+      website: "Website",
+      pin: "Pin",
+      unpin: "Unpin",
+      sortOrder: "Sort Order",
+      mainBranch: "Main Branch",
+      prefix: "Prefix",
+      sequencePrefix: "Sequence Prefix",
+      defaultDebitAccount: "Default Debit Account",
+      defaultCreditAccount: "Default Credit Account",
     },
 
     auth: {
