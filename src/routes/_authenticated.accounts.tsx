@@ -1725,7 +1725,7 @@ function AccountingBucketsPanel() {
               </Select>
             </div>
             <div>
-              <Label>Sort order</Label>
+              <Label>{t("common.sortOrder")}</Label>
               <Input
                 type="number"
                 value={form.sort_order}

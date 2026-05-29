@@ -220,8 +220,8 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   variant="ghost"
                   size="icon"
                   onClick={onTogglePin}
-                  aria-label={pinned ? "Unpin sidebar" : "Pin sidebar"}
-                  title={pinned ? "Unpin" : "Pin"}
+                  aria-label={pinned ? t("common.unpin") : t("common.pin")}
+                  title={pinned ? t("common.unpin") : t("common.pin")}
                   className={
                     "h-8 w-8 shrink-0 rounded-md transition-all " +
                     (pinned
@@ -365,8 +365,8 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
           variant="ghost"
           onClick={() => signOut()}
           className="w-full justify-start gap-2.5 h-10 rounded-md text-sidebar-foreground/80 hover:text-white hover:bg-gradient-to-r hover:from-[hsl(327,80%,40%)]/40 hover:to-[hsl(263,60%,26%)]/40"
-          aria-label="Logout"
-          title="Logout"
+          aria-label={t("auth.signOut")}
+          title={t("auth.signOut")}
         >
           <LogOut className="h-[17px] w-[17px] shrink-0" />
           {!collapsed && <span className="whitespace-nowrap text-[13.5px] font-medium">{t("auth.signOut") || "Logout"}</span>}

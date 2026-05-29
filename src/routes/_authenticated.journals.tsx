@@ -337,14 +337,14 @@ function JournalsPage() {
           <thead className="bg-muted/50">
             <tr>
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
-              <th className="text-start p-3 font-medium">Name (EN)</th>
-              <th className="text-start p-3 font-medium">Name (AR)</th>
+              <th className="text-start p-3 font-medium">{t("common.nameEn")}</th>
+              <th className="text-start p-3 font-medium">{t("common.nameAr")}</th>
               <th className="text-start p-3 font-medium">{t("common.type")}</th>
-              <th className="text-start p-3 font-medium">Prefix</th>
-              <th className="text-center p-3 font-medium">Next #</th>
+              <th className="text-start p-3 font-medium">{t("common.prefix")}</th>
+              <th className="text-center p-3 font-medium">#</th>
               <th className="text-start p-3 font-medium">{t("common.currency")}</th>
-              <th className="text-start p-3 font-medium">Default Debit</th>
-              <th className="text-start p-3 font-medium">Default Credit</th>
+              <th className="text-start p-3 font-medium">{t("common.defaultDebitAccount")}</th>
+              <th className="text-start p-3 font-medium">{t("common.defaultCreditAccount")}</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
@@ -471,7 +471,7 @@ function JournalsPage() {
             </div>
 
             <div>
-              <Label>Sequence Prefix</Label>
+              <Label>{t("common.sequencePrefix")}</Label>
               <Input
                 value={form.sequence_prefix}
                 onChange={(e) => setForm({ ...form, sequence_prefix: e.target.value })}
@@ -480,7 +480,7 @@ function JournalsPage() {
               />
             </div>
             <div>
-              <Label>Next Sequence #</Label>
+              <Label>#</Label>
               <Input
                 type="number"
                 min={1}
@@ -521,7 +521,7 @@ function JournalsPage() {
             </div>
 
             <div className="col-span-2">
-              <Label>Default Debit Account</Label>
+              <Label>{t("common.defaultDebitAccount")}</Label>
               <Select
                 value={form.default_debit_account_id || NONE}
                 onValueChange={(v) =>
@@ -543,7 +543,7 @@ function JournalsPage() {
             </div>
 
             <div className="col-span-2">
-              <Label>Default Credit Account</Label>
+              <Label>{t("common.defaultCreditAccount")}</Label>
               <Select
                 value={form.default_credit_account_id || NONE}
                 onValueChange={(v) =>
