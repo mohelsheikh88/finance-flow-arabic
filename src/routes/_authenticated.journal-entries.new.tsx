@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Save, Check } from "lucide-react";
 import { toast } from "sonner";
+import { formatLockError } from "@/lib/lock-error";
+
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/journal-entries/new")({
