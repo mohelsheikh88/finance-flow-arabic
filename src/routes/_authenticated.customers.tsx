@@ -99,6 +99,12 @@ function CustomersPage() {
     const a = (accounts as any[]).find((x) => x.id === id);
     return a ? `${a.code} — ${localized(a, "name")}` : "—";
   };
+  const typeLabel = (id?: string | null) => {
+    if (!id) return "—";
+    const ct = (customerTypes as any[]).find((x) => x.id === id);
+    return ct ? localized(ct, "name") : "—";
+  };
+
 
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: any) => {
