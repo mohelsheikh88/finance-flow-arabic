@@ -767,7 +767,10 @@ export const translations = {
       scope: "Scope",
       allBranches: "All Branches",
       description: "No financial transactions can be entered or posted on or before this date.",
+      errorWithSuggestion: "Date {date} is locked — you can't save on or before it. Try a date from {next} onward.",
+      errorGeneric: "This date falls inside a locked period and cannot be saved.",
     },
+
     dashboard: {
       title: "Accounting Dashboard",
       subtitle: "Comprehensive view of company financial position",
