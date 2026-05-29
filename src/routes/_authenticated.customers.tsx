@@ -162,10 +162,15 @@ function CustomersPage() {
           <h1 className="page-title">{t("customers.title")}</h1>
           <p className="text-sm text-muted-foreground">{customers.length} {t("customers.activeCustomers")}</p>
         </div>
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(emptyForm); }}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setTypesOpen(true)}>
+            <Settings2 className="h-4 w-4 me-1" />
+            {t("customers.manageTypes")}
+          </Button>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(emptyForm); }}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{t("customers.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
