@@ -12,6 +12,7 @@ export const translations = {
       add: "إضافة",
       new: "جديد",
       search: "بحث...",
+      remove: "إزالة",
       actions: "الإجراءات",
       yes: "نعم",
       no: "لا",
@@ -483,7 +484,8 @@ export const translations = {
       accountant: "محاسب",
       internal_auditor: "مراجع داخلي",
       branchAccess: "الفروع المتاحة",
-      assignRole: "تعيين دور",
+      assignRole: "إضافة دور",
+      noRoles: "لا توجد أدوار معينة",
     },
     roles: {
       title: "إدارة الأدوار",
@@ -658,6 +660,7 @@ export const translations = {
       add: "Add",
       new: "New",
       search: "Search...",
+      remove: "Remove",
       actions: "Actions",
       yes: "Yes",
       no: "No",
@@ -1129,6 +1132,7 @@ export const translations = {
       internal_auditor: "Internal Auditor",
       branchAccess: "Branch Access",
       assignRole: "Assign Role",
+      noRoles: "No roles assigned",
     },
     roles: {
       title: "Roles Management",

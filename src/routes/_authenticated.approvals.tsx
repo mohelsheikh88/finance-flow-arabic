@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ShieldCheck, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { RolesManagement } from "@/components/roles-management";
+import { UserRolesManagement } from "@/components/user-roles-management";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
   component: ApprovalsPage,
@@ -190,6 +191,7 @@ function ApprovalsPage() {
         <TabsList>
           <TabsTrigger value="workflows">{t("approvals.workflows")} ({workflows.length})</TabsTrigger>
           <TabsTrigger value="roles">{t("roles.title")}</TabsTrigger>
+          <TabsTrigger value="user_roles">{t("users.title")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="workflows" className="space-y-2">
@@ -219,6 +221,10 @@ function ApprovalsPage() {
 
         <TabsContent value="roles">
           <RolesManagement />
+        </TabsContent>
+
+        <TabsContent value="user_roles">
+          <UserRolesManagement />
         </TabsContent>
       </Tabs>
     </div>
