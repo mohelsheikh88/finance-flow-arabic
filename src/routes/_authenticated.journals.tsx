@@ -123,7 +123,7 @@ function JournalsPage() {
 
   const { data: currencies = [] } = useQuery({
     queryKey: ["currencies"],
-    queryFn: () => currenciesFn({ data: {} }),
+    queryFn: () => currenciesFn(),
   });
 
   const leafAccounts = useMemo(
