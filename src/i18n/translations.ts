@@ -676,6 +676,12 @@ export const translations = {
       signInWithGoogle: "Continue with Google",
       loginSubtitle: "Enter your credentials to access the accounting dashboard",
       signupSubtitle: "Create your account to start using the system",
+      signOut: "Sign out",
+    },
+    reports: {
+      totalIncome: "Total Income",
+      totalExpenses: "Total Expenses",
+      netIncome: "Net Income",
     },
     nav: {
       dashboard: "Dashboard",
