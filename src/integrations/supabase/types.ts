@@ -325,7 +325,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          required_role: Database["public"]["Enums"]["app_role"]
+          required_role: string
           step_name_ar: string
           step_name_en: string
           step_order: number
@@ -334,7 +334,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          required_role: Database["public"]["Enums"]["app_role"]
+          required_role: string
           step_name_ar: string
           step_name_en: string
           step_order: number
@@ -343,7 +343,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          required_role?: Database["public"]["Enums"]["app_role"]
+          required_role?: string
           step_name_ar?: string
           step_name_en?: string
           step_order?: number
