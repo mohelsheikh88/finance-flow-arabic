@@ -538,7 +538,7 @@ function Page() {
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={brForm.is_main} onCheckedChange={(v) => setBrForm({ ...brForm, is_main: v })} />
-              <Label>Main Branch</Label>
+              <Label>{t("common.mainBranch")}</Label>
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={brForm.is_active} onCheckedChange={(v) => setBrForm({ ...brForm, is_active: v })} />
