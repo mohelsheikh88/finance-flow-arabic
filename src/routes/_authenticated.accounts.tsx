@@ -481,7 +481,7 @@ function ChartOfAccountsPanel() {
           name_ar,
           name_en,
           account_type: bucket,
-          account_type_code: tp?.code ?? null,
+          account_type_code: cls.code,
           parent_code: null,
           currency_code: null,
           is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
