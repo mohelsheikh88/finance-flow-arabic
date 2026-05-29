@@ -417,7 +417,16 @@ export const translations = {
       selectAll: "تحديد الكل",
       confirmBulkChangeTitle: "تأكيد التغيير الجماعي",
       confirmBulkChangeMessage: "سيتم تغيير تصنيف الحسابات المحددة إلى:",
-
+      isReceivable: "ذمم مدينة",
+      isPayable: "ذمم دائنة",
+      selectClassificationFirst: "اختر تصنيف الحساب أولاً",
+      selectClassificationHint: "اختر تصنيف الحساب أولاً — لا يمكن الحفظ بدون تصنيف.",
+      selectedSingular: "حساب محدد",
+      selectedPlural: "حساب محددين",
+      clearSelection: "إلغاء التحديد",
+      deleteSelected: "حذف المحدد",
+      bulkDeleteTitle: "حذف {count} حساب",
+      bulkDeleteMessage: "هل أنت متأكد من حذف الحسابات المحددة؟ لا يمكن التراجع عن هذا الإجراء.",
     },
 
     partners: {
