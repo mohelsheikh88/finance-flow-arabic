@@ -597,6 +597,7 @@ export const translations = {
     approvals: {
       title: "الموافقات الهرمية",
       newWorkflow: "مسار اعتماد جديد",
+      editWorkflow: "تعديل مسار الاعتماد",
       workflows: "مسارات الاعتماد",
       requests: "طلبات الاعتماد",
       noWorkflows: "لا توجد مسارات اعتماد بعد",
