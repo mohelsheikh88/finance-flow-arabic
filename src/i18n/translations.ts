@@ -596,6 +596,7 @@ export const translations = {
       updated: "تم حفظ التعديلات",
       noResetPermission: "ليس لديك صلاحية إرجاع هذه الفاتورة إلى مسودة",
       hasPayments: "لا يمكن الإرجاع: توجد دفعات مرتبطة بالفاتورة",
+      periodClosed: "لا يمكن الإرجاع: الفترة المالية لتاريخ الفاتورة مغلقة",
     },
 
     payments: {
@@ -1303,6 +1304,7 @@ export const translations = {
       updated: "Changes saved",
       noResetPermission: "You don't have permission to reset this invoice to draft",
       hasPayments: "Cannot reset: invoice has linked payments",
+      periodClosed: "Cannot reset: fiscal period for the invoice date is closed",
     },
 
     payments: {
