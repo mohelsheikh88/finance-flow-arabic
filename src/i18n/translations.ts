@@ -650,17 +650,18 @@ export const translations = {
       linkedJE: "القيد المرتبط",
       openJE: "فتح القيد",
       printTax: "طباعة فاتورة ضريبية",
+      attachments: {
+        title: "المرفقات",
+        upload: "رفع مرفق",
+        empty: "لا توجد مرفقات",
+        uploaded: "تم رفع المرفق",
+        deleteConfirm: "هل تريد حذف هذا المرفق؟",
+      },
+      viewChangeHistory: "عرض سجل التغييرات",
+      afterPostingOnly: "متاح بعد الترحيل فقط",
+      cannotPrintBeforePost: "لا يمكن إصدار الفاتورة الضريبية إلا بعد الترحيل (POST)",
     },
-    attachments: {
-      title: "المرفقات",
-      upload: "رفع مرفق",
-      empty: "لا توجد مرفقات",
-      uploaded: "تم رفع المرفق",
-      deleteConfirm: "هل تريد حذف هذا المرفق؟",
-    },
-    viewChangeHistory: "عرض سجل التغييرات",
-    afterPostingOnly: "متاح بعد الترحيل فقط",
-    cannotPrintBeforePost: "لا يمكن إصدار الفاتورة الضريبية إلا بعد الترحيل (POST)",
+
 
     payments: {
       title: "المدفوعات والتحصيلات",
@@ -1423,17 +1424,18 @@ export const translations = {
       linkedJE: "Linked Journal Entry",
       openJE: "Open Entry",
       printTax: "Print Tax Invoice",
+      attachments: {
+        title: "Attachments",
+        upload: "Upload Attachment",
+        empty: "No attachments yet",
+        uploaded: "Attachment uploaded",
+        deleteConfirm: "Delete this attachment?",
+      },
+      viewChangeHistory: "View Change History",
+      afterPostingOnly: "Available after posting only",
+      cannotPrintBeforePost: "Tax invoice can only be issued after posting",
     },
-    attachments: {
-      title: "Attachments",
-      upload: "Upload Attachment",
-      empty: "No attachments yet",
-      uploaded: "Attachment uploaded",
-      deleteConfirm: "Delete this attachment?",
-    },
-    viewChangeHistory: "View Change History",
-    afterPostingOnly: "Available after posting only",
-    cannotPrintBeforePost: "Tax invoice can only be issued after posting",
+
 
     payments: {
       title: "Payments & Collections",
