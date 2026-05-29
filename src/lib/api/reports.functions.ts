@@ -90,7 +90,7 @@ async function getAccountBalances(
     .select(
       "debit, credit, accounts!inner(id, code, name_ar, name_en, account_type, company_id, is_group), journal_entries!inner(entry_date, status, company_id)",
     )
-    .eq("journal_entries.status", "posted")
+    .in("journal_entries.status", ["draft", "posted"])
     .eq("journal_entries.company_id", companyId)
     .eq("accounts.is_group", false)
     .lte("journal_entries.entry_date", dateTo);
