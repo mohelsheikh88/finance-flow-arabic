@@ -481,9 +481,19 @@ function ChartOfAccountsPanel() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="col-span-2 flex items-center gap-2">
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-              <Label>{t("common.active")}</Label>
+            <div className="col-span-2 flex flex-wrap items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_group} onCheckedChange={(v) => setForm({ ...form, is_group: v })} />
+                <Label>{t("accounts.isGroup")}</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
+                <Label>{t("common.active")}</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_reconcilable} onCheckedChange={(v) => setForm({ ...form, is_reconcilable: v })} />
+                <Label>{t("accounts.isReconcilable")}</Label>
+              </div>
             </div>
             <div className="col-span-2">
               <Label>{t("common.notes")}</Label>
