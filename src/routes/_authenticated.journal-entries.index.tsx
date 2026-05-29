@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { listJournalEntries } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -12,7 +14,12 @@ import { StatusBadge } from "@/routes/_authenticated.dashboard";
 import { ApprovalCell } from "@/components/approval-cell";
 import { JEDetailDialog } from "@/components/je-detail-dialog";
 
+const searchSchema = z.object({
+  openEntryId: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_authenticated/journal-entries/")({
+  validateSearch: zodValidator(searchSchema),
   component: JEListPage,
 });
 
@@ -21,12 +28,24 @@ function JEListPage() {
   const localized = useLocalized();
   const { branchId } = useBranch();
   const fn = useServerFn(listJournalEntries);
+  const { openEntryId } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const { data: entries = [] } = useQuery({
     queryKey: ["je-list", branchId],
     queryFn: () => fn({ data: { branchId: branchId!, limit: 200 } }),
     enabled: !!branchId,
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Sync deep link → open dialog
+  useEffect(() => {
+    if (openEntryId) setSelectedId(openEntryId);
+  }, [openEntryId]);
+
+  const closeDialog = () => {
+    setSelectedId(null);
+    if (openEntryId) navigate({ search: (prev) => ({ ...prev, openEntryId: undefined }) });
+  };
 
   const fmt = (n: number) => new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", { minimumFractionDigits: 2 }).format(n);
 
@@ -83,7 +102,7 @@ function JEListPage() {
           </tbody>
         </table>
       </Card>
-      <JEDetailDialog entryId={selectedId} onClose={() => setSelectedId(null)} />
+      <JEDetailDialog entryId={selectedId} onClose={closeDialog} />
     </div>
   );
 }
