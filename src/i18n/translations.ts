@@ -12,6 +12,7 @@ export const translations = {
       add: "إضافة",
       new: "جديد",
       search: "بحث...",
+      remove: "إزالة",
       actions: "الإجراءات",
       yes: "نعم",
       no: "لا",
