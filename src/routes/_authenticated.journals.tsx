@@ -350,6 +350,7 @@ function JournalsPage() {
               <th className="text-start p-3 font-medium">{t("common.defaultDebitAccount")}</th>
               <th className="text-start p-3 font-medium">{t("common.defaultCreditAccount")}</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
+              <th className="text-center p-3 font-medium">{t("journals.manualShort")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
