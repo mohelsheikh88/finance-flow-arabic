@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type Bucket = "asset" | "liability" | "equity" | "income" | "expense";
+type Bucket = "asset" | "liability" | "equity" | "income" | "expense" | "COGS";
 type Statement = "balance_sheet" | "income_statement";
 type NormalBalance = "debit" | "credit";
 
