@@ -281,6 +281,8 @@ function ChartOfAccountsPanel() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounts"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
+
       setOpen(false);
       setForm(empty);
     },
