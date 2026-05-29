@@ -223,9 +223,10 @@ function CustomersPage() {
             <DialogTrigger asChild>
               <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
             </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{t("customers.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
+              {/* 1. Code */}
               <div>
                 <Label>{t("common.code")} *</Label>
                 <Input
@@ -235,28 +236,13 @@ function CustomersPage() {
                   className={!isEdit && !!form.customer_type_id ? "bg-muted" : undefined}
                 />
               </div>
-              <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
+              <div /> {/* spacer to keep Code on its own row visually */}
+
+              {/* 2. Name (Ar) - 3. Name (En) */}
               <div><Label>{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-              <div><Label>{t("common.email")}</Label><Input dir="ltr" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-              <div><Label>{t("common.phone")}</Label><Input dir="ltr" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-              <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
-              <div>
-                <Label>{t("customers.receivableAccount")}</Label>
-                <Input
-                  readOnly
-                  className="bg-muted"
-                  value={
-                    form.receivable_account_id
-                      ? (() => {
-                          const a = (accounts as any[]).find((x) => x.id === form.receivable_account_id);
-                          return a ? `${a.code} — ${localized(a, "name")}` : "—";
-                        })()
-                      : ""
-                  }
-                  placeholder={t("customers.defaultFromJournal")}
-                />
-              </div>
+
+              {/* 4. Customer Type */}
               <div>
                 <Label>{t("customers.customerType")}</Label>
                 <Select
@@ -287,7 +273,99 @@ function CustomersPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2"><Label>{t("setup.address")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
+
+              {/* 5. AR (GL) */}
+              <div>
+                <Label>{t("customers.receivableAccount")}</Label>
+                <Input
+                  readOnly
+                  className="bg-muted"
+                  value={
+                    form.receivable_account_id
+                      ? (() => {
+                          const a = (accounts as any[]).find((x) => x.id === form.receivable_account_id);
+                          return a ? `${a.code} — ${localized(a, "name")}` : "—";
+                        })()
+                      : ""
+                  }
+                  placeholder={t("customers.defaultFromJournal")}
+                />
+              </div>
+
+              {/* 6. VAT - 7. National Address */}
+              <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
+              <div><Label>{t("customers.nationalAddress")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
+
+              {/* 8-10. Contacts (Name, Email, Phone) — repeatable */}
+              <div className="col-span-2 space-y-2 pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <Label>{t("customers.contacts")}</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setForm({ ...form, contacts: [...form.contacts, emptyContact()] })}
+                  >
+                    <Plus className="h-3.5 w-3.5 me-1" />{t("customers.addContact")}
+                  </Button>
+                </div>
+                {form.contacts.map((c, idx) => (
+                  <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+                    <div>
+                      {idx === 0 && <Label className="text-xs">{t("customers.contactName")}</Label>}
+                      <Input
+                        value={c.name}
+                        onChange={(e) => {
+                          const next = [...form.contacts];
+                          next[idx] = { ...c, name: e.target.value };
+                          setForm({ ...form, contacts: next });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      {idx === 0 && <Label className="text-xs">{t("common.email")}</Label>}
+                      <Input
+                        dir="ltr"
+                        type="email"
+                        value={c.email}
+                        onChange={(e) => {
+                          const next = [...form.contacts];
+                          next[idx] = { ...c, email: e.target.value };
+                          setForm({ ...form, contacts: next });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      {idx === 0 && <Label className="text-xs">{t("common.phone")}</Label>}
+                      <Input
+                        dir="ltr"
+                        value={c.mobile}
+                        onChange={(e) => {
+                          const next = [...form.contacts];
+                          next[idx] = { ...c, mobile: e.target.value };
+                          setForm({ ...form, contacts: next });
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-9 w-9 text-destructive"
+                      disabled={form.contacts.length === 1}
+                      onClick={() => {
+                        const next = form.contacts.filter((_, i) => i !== idx);
+                        setForm({ ...form, contacts: next.length ? next : [emptyContact()] });
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* 11. Credit Limit */}
+              <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
