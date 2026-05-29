@@ -173,17 +173,19 @@ export const createInvoice = createServerFn({ method: "POST" })
 async function buildInvoiceJEPayload(supabase: any, invoiceId: string) {
   const { data: inv } = await supabase
     .from("invoices")
-    .select("*, partners(receivable_account_id, payable_account_id), invoice_lines(*, taxes(account_id))")
+    .select("*, partners(receivable_account_id, payable_account_id, customer_type_id, customer_types(receivable_account_id)), invoice_lines(*, taxes(account_id))")
     .eq("id", invoiceId)
     .single();
   if (!inv) throw new Error("Invoice not found");
 
   const isCustomer = inv.invoice_type === "customer";
-  const partnerCtrl = isCustomer ? inv.partners?.receivable_account_id : inv.partners?.payable_account_id;
+  const partnerCtrl = isCustomer
+    ? (inv.partners?.receivable_account_id || inv.partners?.customer_types?.receivable_account_id)
+    : inv.partners?.payable_account_id;
   if (!partnerCtrl) {
     throw new Error(
       isCustomer
-        ? "Customer has no receivable account configured"
+        ? "Customer has no receivable account configured (set it on the customer or on the customer type)"
         : "Vendor has no payable account configured",
     );
   }
