@@ -741,8 +741,11 @@ export const translations = {
     },
     reports: {
       totalIncome: "Total Income",
+      totalCosts: "Total Costs",
+      grossProfit: "Gross Profit",
       totalExpenses: "Total Expenses",
       netIncome: "Net Income",
+      costs: "Costs",
       cfSubtitle: "Cash Flow Statement by activity type",
       cfOperating: "Cash Flows from Operating Activities",
       cfInvesting: "Cash Flows from Investing Activities",
