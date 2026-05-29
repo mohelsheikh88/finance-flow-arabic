@@ -422,6 +422,9 @@ function CustomersPage() {
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
               <th className="text-start p-3 font-medium">{t("customers.customerType")}</th>
+              <th className="text-start p-3 font-medium">{t("customers.contactName")}</th>
+              <th className="text-start p-3 font-medium">{t("customers.phone")}</th>
+              <th className="text-start p-3 font-medium">{t("customers.email")}</th>
               <th className="text-center p-3 font-medium">{t("customers.attachments")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("partners.creditLimit")}</th>
               <th className="text-end p-3 font-medium w-24">{t("common.actions") || ""}</th>
@@ -429,14 +432,19 @@ function CustomersPage() {
           </thead>
           <tbody>
             {filtered.map((p: any) => (
-              <tr key={p.id} className="border-t hover:bg-muted/30">
+              <tr
+                key={p.id}
+                className="border-t hover:bg-muted/30 cursor-pointer"
+                onClick={() => setPreviewId(p.id)}
+              >
                 <td className="p-3 font-mono">{p.code}</td>
                 <td className="p-3 font-medium">{localized(p, "name")}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.vat_number || "—"}</td>
                 <td className="p-3 text-muted-foreground">{typeLabel(p.customer_type_id)}</td>
-                <td className="p-3 text-center"><AttachmentsCount partnerId={p.id} /></td>
+                <FirstContactCells partnerId={p.id} fallbackEmail={p.email} fallbackPhone={p.phone} />
+                <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><AttachmentsCount partnerId={p.id} /></td>
                 <td className="p-3 text-end font-mono">{Number(p.credit_limit ?? 0).toLocaleString()}</td>
-                <td className="p-3 text-end">
+                <td className="p-3 text-end" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
                     <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(p)}>
                       <Pencil className="h-3.5 w-3.5" />
@@ -448,11 +456,21 @@ function CustomersPage() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan={10} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
 
           </tbody>
         </table>
       </Card>
+
+      <CustomerPreviewDialog
+        partnerId={previewId}
+        onClose={() => setPreviewId(null)}
+        partner={previewId ? customers.find((c: any) => c.id === previewId) : null}
+        typeLabel={typeLabel}
+        accountLabel={accountLabel}
+        localized={localized}
+      />
+
 
       <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <AlertDialogContent>
