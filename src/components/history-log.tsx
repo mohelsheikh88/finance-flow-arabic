@@ -299,7 +299,7 @@ function EventRow({ r, isLast }: { r: any; isLast: boolean }) {
           <table className="w-full text-[11px]">
             <thead className="bg-muted/60 text-muted-foreground">
               <tr>
-                <th className="text-start px-2 py-1.5 font-medium">{t("accounts.fieldsTitle") ?? "Field"}</th>
+                <th className="text-start px-2 py-1.5 font-medium">{locale === "ar" ? "الحقل" : "Field"}</th>
                 {action === "UPDATE" && <th className="text-start px-2 py-1.5 font-medium">{t("history.before")}</th>}
                 <th className="text-start px-2 py-1.5 font-medium">{t("history.after")}</th>
               </tr>
