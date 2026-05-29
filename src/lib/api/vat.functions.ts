@@ -18,7 +18,6 @@ export const upsertTax = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => TaxUpsertSchema.parse(i))
   .handler(async ({ data, context }) => {
-  .handler(async ({ data, context }) => {
     const payload = { ...data, account_id: data.account_id ?? null };
     if (data.id) {
       const { id, ...patch } = payload;
