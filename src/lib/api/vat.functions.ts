@@ -18,17 +18,20 @@ export const upsertTax = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => TaxUpsertSchema.parse(i))
   .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }) => {
     const payload = { ...data, account_id: data.account_id ?? null };
     if (data.id) {
       const { id, ...patch } = payload;
-      const { error } = await context.supabase.from("taxes").update(patch).eq("id", id);
+      const { error } = await context.supabase.from("taxes").update(patch).eq("id", id as string);
       if (error) throw new Error(error.message);
-      return { ok: true, id };
+      return { ok: true, id: id as string };
     }
+    const { id: _omit, ...insertPayload } = payload;
     const { data: row, error } = await context.supabase
-      .from("taxes").insert(payload).select().single();
+      .from("taxes").insert(insertPayload).select().single();
     if (error) throw new Error(error.message);
     return { ok: true, id: row.id };
+  });
   });
 
 export const deleteTax = createServerFn({ method: "POST" })
