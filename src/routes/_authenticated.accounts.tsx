@@ -368,7 +368,7 @@ function ChartOfAccountsPanel() {
       <div className="flex items-center justify-end gap-2">
         <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
         <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-          <Download className="h-4 w-4 me-1" />Export
+          <FileDown className="h-4 w-4 me-1" />Export
         </Button>
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
           <Upload className="h-4 w-4 me-1" />Import
