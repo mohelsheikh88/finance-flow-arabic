@@ -437,6 +437,23 @@ function CustomerTypesDialog({
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               <Label className="text-xs">{t("common.active")}</Label>
             </div>
+            <div className="col-span-6">
+              <Label className="text-xs">{t("customers.receivableAccount")}</Label>
+              <Select
+                value={form.receivable_account_id ?? "__none__"}
+                onValueChange={(v) => setForm({ ...form, receivable_account_id: v === "__none__" ? null : v })}
+              >
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— {t("common.none")} —</SelectItem>
+                  {arAccounts.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.code} — {localized(a, "name")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="col-span-6 flex justify-end gap-2">
               {form.id && (
                 <Button variant="outline" size="sm" onClick={() => setForm(ctEmpty)}>
