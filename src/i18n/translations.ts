@@ -172,6 +172,7 @@ export const translations = {
       balanceSheet: "الميزانية العمومية",
       incomeStatement: "قائمة الدخل",
       cashFlow: "قائمة التدفقات النقدية",
+      executiveSummary: "الملخص التنفيذي",
       aging: "تقرير الأعمار",
       vatReport: "تقرير ضريبة القيمة المضافة",
       partnerStatement: "كشف حساب الشريك",
