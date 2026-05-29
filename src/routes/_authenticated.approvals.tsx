@@ -39,6 +39,8 @@ function ApprovalsPage() {
   const qc = useQueryClient();
   const listWf = useServerFn(listWorkflows);
   const createWf = useServerFn(createWorkflow);
+  const updateWf = useServerFn(updateWorkflow);
+  const deleteWf = useServerFn(deleteWorkflow);
   const listRolesFn = useServerFn(listRoles);
 
   const { data: rolesData = [] } = useQuery({
