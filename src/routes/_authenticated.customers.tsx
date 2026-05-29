@@ -31,19 +31,25 @@ export const Route = createFileRoute("/_authenticated/customers")({
   component: CustomersPage,
 });
 
+type ContactRow = { id?: string; name: string; email: string; mobile: string };
+
 type FormState = {
   id?: string;
   code: string; name_ar: string; name_en: string; vat_number: string;
-  email: string; phone: string; credit_limit: number; address_ar: string;
+  credit_limit: number; address_ar: string;
   receivable_account_id: string | null;
   customer_type_id: string | null;
+  contacts: ContactRow[];
 };
+
+const emptyContact = (): ContactRow => ({ name: "", email: "", mobile: "" });
 
 const emptyForm: FormState = {
   code: "", name_ar: "", name_en: "", vat_number: "",
-  email: "", phone: "", credit_limit: 0, address_ar: "",
+  credit_limit: 0, address_ar: "",
   receivable_account_id: null,
   customer_type_id: null,
+  contacts: [emptyContact()],
 };
 
 function CustomersPage() {
