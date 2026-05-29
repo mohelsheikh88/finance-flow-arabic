@@ -646,6 +646,17 @@ export const translations = {
       noResetPermission: "ليس لديك صلاحية إرجاع هذه الفاتورة إلى مسودة",
       hasPayments: "لا يمكن الإرجاع: توجد دفعات مرتبطة بالفاتورة",
       periodClosed: "لا يمكن الإرجاع: الفترة المالية لتاريخ الفاتورة مغلقة",
+      detailsTitle: "تفاصيل الفاتورة",
+      linkedJE: "القيد المرتبط",
+      openJE: "فتح القيد",
+      printTax: "طباعة فاتورة ضريبية",
+    },
+    attachments: {
+      title: "المرفقات",
+      upload: "رفع مرفق",
+      empty: "لا توجد مرفقات",
+      uploaded: "تم رفع المرفق",
+      deleteConfirm: "هل تريد حذف هذا المرفق؟",
     },
 
     payments: {
