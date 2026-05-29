@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listLockDates, createLockDate, deleteLockDate } from "@/lib/api/lock-dates.functions";
+import { listLockDates, createLockDate } from "@/lib/api/lock-dates.functions";
+
 import { useBranch } from "@/lib/branch-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, useLocalized } from "@/i18n";
