@@ -417,10 +417,15 @@ table td, table th {
   transition: background-color .2s ease, color .2s ease, transform .15s ease, box-shadow .25s ease;
 }
 [data-sidebar="menu-button"]:hover {
-  background: linear-gradient(90deg, hsl(285 70% 38% / 0.55), hsl(263 60% 26% / 0.3)) !important;
-  color: hsl(300 30% 98%) !important;
+  background: linear-gradient(90deg, hsl(327 80% 50% / 0.35), hsl(285 70% 42% / 0.55) 60%, hsl(263 60% 28% / 0.35)) !important;
+  color: hsl(0 0% 100%) !important;
+  border: 1px solid hsl(327 92% 60% / 0.45);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.08),
+    0 4px 14px -6px hsl(327 92% 55% / 0.5);
   transform: translateX(-2px);
 }
+
 
 /* ===== Active item — strong RTL-aware glow ===== */
 @keyframes sidebar-active-glow {
