@@ -89,7 +89,17 @@ function NewJEPage() {
       qc.invalidateQueries();
       navigate({ to: "/journal-entries" });
     },
-    onError: (e: Error) => toast.error(formatLockError(e, t)),
+    onError: (e: Error) => {
+      const msg = e?.message ?? "";
+      if (msg.startsWith("NOT_AUTHORIZED_MANUAL_JE")) return toast.error(t("jeErrors.notAuthorized"));
+      if (msg.startsWith("JOURNAL_NOT_FOUND")) return toast.error(t("jeErrors.journalNotFound"));
+      if (msg.startsWith("MANUAL_NOT_ALLOWED")) {
+        const j = journals.find((x: any) => x.id === header.journal_id);
+        const label = j ? `${j.code} — ${localized(j, "name")}` : "";
+        return toast.error(t("jeErrors.manualNotAllowed", { journal: label }));
+      }
+      toast.error(formatLockError(e, t));
+    },
 
   });
 

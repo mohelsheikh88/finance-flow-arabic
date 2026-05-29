@@ -334,6 +334,11 @@ export const translations = {
       errorWithSuggestion: "التاريخ {date} مُغلق ولا يمكن الحفظ فيه أو قبله. جرّب تاريخاً ابتداءً من {next}.",
       errorGeneric: "هذا التاريخ ضمن فترة مُغلقة، لا يمكن الحفظ فيه.",
     },
+    jeErrors: {
+      manualNotAllowed: "الدفتر \"{journal}\" لا يسمح بالقيود اليدوية. اختر دفتراً آخر أو فعّل خيار \"السماح بالقيود اليدوية\" من إعدادات الدفاتر.",
+      notAuthorized: "ليس لديك صلاحية إنشاء قيود يدوية. تواصل مع مسؤول النظام لمنحك الصلاحية.",
+      journalNotFound: "الدفتر المحدد غير موجود. حدّث الصفحة وحاول مجدداً.",
+    },
 
     dashboard: {
       title: "لوحة المحاسبة العامة",
@@ -1059,6 +1064,11 @@ export const translations = {
       description: "No financial transactions can be entered or posted on or before this date.",
       errorWithSuggestion: "Date {date} is locked — you can't save on or before it. Try a date from {next} onward.",
       errorGeneric: "This date falls inside a locked period and cannot be saved.",
+    },
+    jeErrors: {
+      manualNotAllowed: "Journal \"{journal}\" does not allow manual entries. Pick another journal or enable \"Allow manual entries\" in Journals settings.",
+      notAuthorized: "You are not authorized to create manual journal entries. Contact your administrator to grant access.",
+      journalNotFound: "The selected journal was not found. Refresh the page and try again.",
     },
 
     dashboard: {

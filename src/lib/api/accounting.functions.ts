@@ -1039,17 +1039,30 @@ export const createJournalEntry = createServerFn({ method: "POST" })
       if (l.debit === 0 && l.credit === 0) throw new Error("A line must have debit or credit");
     }
 
-    // Generate entry number — and check that this journal allows manual entries
-    const { data: journal } = await context.supabase
-      .from("journals")
-      .select("sequence_prefix, sequence_next, allow_manual_entries")
-      .eq("id", data.journal_id)
-      .single();
-    if (journal && journal.allow_manual_entries === false) {
-      throw new Error("This journal does not allow manual entries");
+    // Authorization: only accounting roles may create manual journal entries
+    const { data: authorized, error: authErr } = await context.supabase.rpc("has_any_role", {
+      _user_id: context.userId,
+      _roles: ["admin", "finance_manager", "accounting_manager", "chief_accountant", "accountant"],
+    });
+    if (authErr) throw new Error(authErr.message);
+    if (!authorized) {
+      throw new Error("NOT_AUTHORIZED_MANUAL_JE: You are not authorized to create manual journal entries");
     }
-    const prefix = journal?.sequence_prefix ?? "JV";
-    const seq = journal?.sequence_next ?? 1;
+
+    // Validate journal exists and allows manual entries
+    const { data: journal, error: jErr } = await context.supabase
+      .from("journals")
+      .select("code, name_ar, name_en, sequence_prefix, sequence_next, allow_manual_entries")
+      .eq("id", data.journal_id)
+      .maybeSingle();
+    if (jErr) throw new Error(jErr.message);
+    if (!journal) throw new Error("JOURNAL_NOT_FOUND: Selected journal was not found");
+    if (journal.allow_manual_entries === false) {
+      const label = `${journal.code} — ${journal.name_en ?? journal.name_ar ?? ""}`.trim();
+      throw new Error(`MANUAL_NOT_ALLOWED: Journal "${label}" does not allow manual entries`);
+    }
+    const prefix = journal.sequence_prefix ?? "JV";
+    const seq = journal.sequence_next ?? 1;
     const yr = new Date(data.entry_date).getFullYear();
     const entryNumber = `${prefix}/${yr}/${String(seq).padStart(5, "0")}`;
 
