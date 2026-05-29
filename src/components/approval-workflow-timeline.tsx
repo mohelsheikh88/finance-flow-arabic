@@ -85,33 +85,21 @@ export function ApprovalWorkflowTimeline({
 
           {/* Horizontal journey stepper */}
           {(() => {
-            const steps = (req.approval_workflows?.approval_steps_def || [])
+            const nodes = (req.approval_workflows?.approval_steps_def || [])
               .slice()
               .sort((a: any, b: any) => a.step_order - b.step_order);
-            const submitter = {
-              id: "__submitter__",
-              step_order: 0,
-              step_name: "مقدم الطلب",
-              step_name_en: "Submitter",
-              required_role: "requester",
-              __submitter: true,
-            };
-            const nodes = [submitter, ...steps];
 
             return (
               <div className="w-full overflow-x-auto pb-2">
                 <ol className="flex items-start justify-between gap-0 min-w-full px-2" dir="rtl">
                   {nodes.map((step: any, idx: number) => {
-                    const action = step.__submitter
-                      ? { acted_at: req.created_at, action: "approved" }
-                      : (req.approval_actions || []).find((a: any) => a.step_order === step.step_order);
+                    const action = (req.approval_actions || []).find(
+                      (a: any) => a.step_order === step.step_order,
+                    );
                     const done = action != null;
                     const isCurrent =
-                      !step.__submitter &&
-                      req.status === "pending" &&
-                      step.step_order === req.current_step;
+                      req.status === "pending" && step.step_order === req.current_step;
                     const rejected = action?.action === "rejected";
-                    const isPending = !done && !isCurrent;
 
                     let circleCls = "bg-background border-muted text-muted-foreground";
                     let icon: any = <span className="text-xs font-semibold">{idx + 1}</span>;
@@ -161,15 +149,11 @@ export function ApprovalWorkflowTimeline({
                           {isLast && <div className="flex-1" />}
                         </div>
                         <div className={`mt-2 text-xs text-center px-1 ${labelCls}`}>
-                          {step.__submitter
-                            ? (t("approvals.submitter") || "مقدم الطلب")
-                            : localized(step, "step_name")}
+                          {localized(step, "step_name")}
                         </div>
-                        {!step.__submitter && (
-                          <div className="text-[10px] text-muted-foreground mt-0.5 text-center">
-                            {t(`users.${step.required_role}`) || step.required_role}
-                          </div>
-                        )}
+                        <div className="text-[10px] text-muted-foreground mt-0.5 text-center">
+                          {t(`users.${step.required_role}`) || step.required_role}
+                        </div>
                         {action?.acted_at && (
                           <div className="text-[9px] text-muted-foreground/70 mt-0.5 font-mono">
                             {new Date(action.acted_at).toLocaleDateString()}
