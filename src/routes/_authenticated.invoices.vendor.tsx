@@ -54,6 +54,7 @@ function VendorBillsPage() {
   const accFn = useServerFn(listAccounts);
   const partFn = useServerFn(listPartners);
   const taxFn = useServerFn(listTaxes);
+  const termsFn = useServerFn(listPaymentTerms);
 
   const { data: invoices = [] } = useQuery({
     queryKey: ["invoices", branchId, "vendor"],
@@ -63,6 +64,7 @@ function VendorBillsPage() {
   const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accFn({ data: { companyId: companyId! } }), enabled: !!companyId });
   const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partFn({ data: { companyId: companyId! } }), enabled: !!companyId });
   const { data: taxes = [] } = useQuery({ queryKey: ["taxes", companyId], queryFn: () => taxFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const { data: paymentTerms = [] } = useQuery({ queryKey: ["payment-terms", companyId], queryFn: () => termsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
 
   const vendors = partners.filter((p: any) => p.is_vendor);
   const expenseAccounts = accounts.filter((a: any) => !a.is_group && (a.account_type === "expense" || a.account_type === "asset"));
@@ -73,11 +75,21 @@ function VendorBillsPage() {
     partner_id: "",
     invoice_date: new Date().toISOString().slice(0, 10),
     due_date: "",
+    payment_term_id: "",
     reference: "",
   });
   const [lines, setLines] = useState<Line[]>([
     { description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 },
   ]);
+
+  const computeDueDate = (dateStr: string, termId: string): string => {
+    if (!dateStr || !termId) return "";
+    const term = paymentTerms.find((tr: any) => tr.id === termId);
+    if (!term) return "";
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + Number(term.days || 0));
+    return d.toISOString().slice(0, 10);
+  };
 
   const totals = useMemo(() => {
     let subtotal = 0, taxAmt = 0;
@@ -89,9 +101,10 @@ function VendorBillsPage() {
   }, [lines]);
 
   const reset = () => {
-    setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", reference: "" });
+    setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", payment_term_id: "", reference: "" });
     setLines([{ description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 }]);
   };
+
 
   const createMut = useMutation({
     mutationFn: (status: "draft" | "posted") => create({ data: {
