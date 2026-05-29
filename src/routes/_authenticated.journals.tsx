@@ -255,7 +255,7 @@ function JournalsPage() {
     XLSX.writeFile(wb, `journals_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  const typeLabel = (tp: JournalType) => typeLabels[tp][lang === "ar" ? "ar" : "en"];
+  const typeLabel = (tp: JournalType) => typeLabels[tp][locale === "ar" ? "ar" : "en"];
 
   return (
     <div className="p-6 space-y-4">
