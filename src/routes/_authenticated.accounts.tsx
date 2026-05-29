@@ -883,9 +883,9 @@ function ChartOfAccountsPanel() {
       <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => !bulkDeleting && setBulkDeleteOpen(o)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف {selectedIds.size} حساب</AlertDialogTitle>
+            <AlertDialogTitle>{t("accounts.bulkDeleteTitle", { count: selectedIds.size })}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف الحسابات المحددة؟ لا يمكن التراجع عن هذا الإجراء.
+              {t("accounts.bulkDeleteMessage")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -895,7 +895,7 @@ function ChartOfAccountsPanel() {
               disabled={bulkDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {bulkDeleting ? "جارٍ الحذف..." : t("common.delete")}
+              {bulkDeleting ? t("common.deleting") : t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
