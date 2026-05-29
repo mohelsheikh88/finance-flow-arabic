@@ -1301,6 +1301,7 @@ export const translations = {
       saveChanges: "Save Changes",
       resetToDraft: "Reset to Draft",
       resetConfirm: "Are you sure you want to reset this invoice to draft? The linked journal entry will be deleted.",
+      deleteConfirm: "Permanently delete this invoice? The linked journal entry will also be deleted.",
       resetSuccess: "Invoice reset to draft",
       updated: "Changes saved",
       noResetPermission: "You don't have permission to reset this invoice to draft",
