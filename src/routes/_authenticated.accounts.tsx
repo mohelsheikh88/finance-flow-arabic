@@ -208,15 +208,20 @@ function ChartOfAccountsPanel() {
 
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      upsert({
+    mutationFn: () => {
+      const resolvedTypeId =
+        form.account_type_id ||
+        (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id && tp.is_active)?.id ||
+        (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id)?.id ||
+        "";
+      return upsert({
         data: {
           id: form.id,
           company_id: companyId!,
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          account_type_id: form.account_type_id,
+          account_type_id: resolvedTypeId,
           parent_id: form.parent_id || null,
           currency_code: form.currency_code.trim() || null,
           is_group: form.is_group,
@@ -224,7 +229,9 @@ function ChartOfAccountsPanel() {
           is_reconcilable: form.is_reconcilable,
           notes: form.notes.trim() || null,
         },
-      }),
+      });
+    },
+
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounts"] });
