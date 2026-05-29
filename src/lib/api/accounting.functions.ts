@@ -978,7 +978,25 @@ export const listJournalEntries = createServerFn({ method: "GET" })
       .order("entry_date", { ascending: false })
       .limit(data.limit ?? 50);
     if (error) throw new Error(error.message);
-    return rows ?? [];
+    const list = rows ?? [];
+
+    // Enrich invoice-sourced entries with invoice_type so UI can show AR vs AP
+    const invoiceIds = list
+      .filter((r: any) => r.source_type === "invoice" && r.source_id)
+      .map((r: any) => r.source_id);
+    if (invoiceIds.length) {
+      const { data: invs } = await context.supabase
+        .from("invoices")
+        .select("id, invoice_type")
+        .in("id", invoiceIds);
+      const map = new Map((invs ?? []).map((i: any) => [i.id, i.invoice_type]));
+      for (const r of list) {
+        if ((r as any).source_type === "invoice" && (r as any).source_id) {
+          (r as any).source_invoice_type = map.get((r as any).source_id) ?? null;
+        }
+      }
+    }
+    return list;
   });
 
 const JELineSchema = z.object({
@@ -1054,6 +1072,7 @@ export const createJournalEntry = createServerFn({ method: "POST" })
         status: data.status,
         total_debit: totalDebit,
         total_credit: totalCredit,
+        source_type: "manual",
         created_by: context.userId,
         posted_by: data.status === "posted" ? context.userId : null,
         posted_at: data.status === "posted" ? new Date().toISOString() : null,
