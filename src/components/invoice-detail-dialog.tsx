@@ -57,6 +57,13 @@ export function InvoiceDetailDialog({
 
   const isPosted = ["posted", "paid", "partially_paid"].includes((inv as any)?.status);
 
+  const amountPaid = Number((inv as any)?.amount_paid || 0);
+  const payRibbon = !inv ? null : (amountPaid <= 0
+    ? { label: locale === "ar" ? "غير مدفوع" : "Not Paid", cls: "bg-destructive text-destructive-foreground" }
+    : amountPaid + 0.001 < total
+      ? { label: locale === "ar" ? "مدفوع جزئياً" : "Partial Paid", cls: "bg-warning text-warning-foreground" }
+      : { label: locale === "ar" ? "مدفوع بالكامل" : "Full Paid", cls: "bg-success text-success-foreground" });
+
   const handlePrint = async () => {
     if (!inv) return;
     if (!isPosted) {
