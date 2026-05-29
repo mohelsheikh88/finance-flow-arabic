@@ -555,6 +555,139 @@ function FiscalPeriodsPage() {
         </div>
       </Card>
 
+      {/* ---------- Lock Dates section ---------- */}
+      <Card className="p-4" id="lock-dates-section">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Lock className="h-4 w-4" />
+              {isAr ? "تواريخ الإقفال" : "Lock Dates"}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isAr
+                ? "تمنع أي إدخال أو تعديل في تواريخ المعاملات قبل أو يوم تاريخ الإقفال — على مستوى الشركة كلها أو فرع محدد."
+                : "Block any entry or change to transactions on or before the lock date — company-wide or for a specific branch."}
+            </p>
+          </div>
+          <Button onClick={openLDCreate} size="sm">
+            <Plus className="h-4 w-4 me-1" />
+            {isAr ? "تاريخ إقفال جديد" : "New Lock Date"}
+          </Button>
+        </div>
+
+        <div className="rounded-md border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{isAr ? "تاريخ الإقفال" : "Lock Date"}</TableHead>
+                <TableHead>{isAr ? "النطاق" : "Scope"}</TableHead>
+                <TableHead>{t("common.notes")}</TableHead>
+                <TableHead className="text-end">{t("common.actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {lockRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                    {t("common.noData")}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                lockRows.map((r: any) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-mono text-xs">{r.lock_date}</TableCell>
+                    <TableCell>
+                      {r.branches ? (
+                        <Badge variant="outline">{r.branches.code} — {localized(r.branches, "name")}</Badge>
+                      ) : (
+                        <Badge>{isAr ? "كل الفروع" : "All Branches"}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{r.notes ?? "—"}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button size="sm" variant="ghost" onClick={() => openLDEdit(r)} title={t("common.edit")}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setLdDelId(r.id)}
+                          className="text-destructive hover:text-destructive"
+                          title={t("common.delete")}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+
+      {/* Lock Date dialog */}
+      <Dialog open={ldOpen} onOpenChange={(o) => { setLdOpen(o); if (!o) { setLdEditingId(null); setLdForm(LD_EMPTY); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {ldEditingId
+                ? (isAr ? "تعديل تاريخ إقفال" : "Edit Lock Date")
+                : (isAr ? "تاريخ إقفال جديد" : "New Lock Date")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>{isAr ? "النطاق" : "Scope"}</Label>
+              <Select value={ldForm.branch_id} onValueChange={(v) => setLdForm({ ...ldForm, branch_id: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">{isAr ? "كل الفروع" : "All Branches"}</SelectItem>
+                  {companyBranches.map((b: any) => (
+                    <SelectItem key={b.id} value={b.id}>{b.code} — {localized(b, "name")}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>{isAr ? "تاريخ الإقفال" : "Lock Date"} *</Label>
+              <Input type="date" value={ldForm.lock_date} onChange={(e) => setLdForm({ ...ldForm, lock_date: e.target.value })} />
+            </div>
+            <div>
+              <Label>{t("common.notes")}</Label>
+              <Textarea value={ldForm.notes} onChange={(e) => setLdForm({ ...ldForm, notes: e.target.value })} rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLdOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={() => ldSaveMut.mutate()} disabled={!canSaveLD || ldSaveMut.isPending}>{t("common.save")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!ldDelId} onOpenChange={(o) => !o && setLdDelId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{isAr ? "تأكيد الحذف" : "Confirm Delete"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isAr ? "سيتم حذف تاريخ الإقفال نهائياً." : "This lock date will be permanently deleted."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => ldDelId && ldRemoveMut.mutate(ldDelId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       {/* Create / Edit dialog */}
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(EMPTY_FORM); }}>
         <DialogContent className="max-w-lg">
