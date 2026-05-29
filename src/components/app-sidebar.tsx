@@ -270,9 +270,12 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
             >
               <SidebarGroup className="sidebar-grandparent">
                 <SidebarGroupLabel asChild>
-                  <CollapsibleTrigger className="group/trigger flex h-auto w-full cursor-pointer items-center gap-2.5 rounded-md px-2 transition-colors hover:bg-sidebar-accent/50">
+                  <CollapsibleTrigger
+                    data-active={groupActive}
+                    className="nav-pill group/trigger flex h-auto w-full cursor-pointer items-center gap-2.5 px-2 py-2 text-sidebar-foreground/85"
+                  >
                     <g.icon className="h-[18px] w-[18px] shrink-0 text-[hsl(327,92%,72%)]" />
-                    <span className="flex-1 whitespace-nowrap text-start">{g.label}</span>
+                    <span className="flex-1 whitespace-nowrap text-start font-medium">{g.label}</span>
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-visible data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
@@ -287,7 +290,10 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                           />
                           <SidebarGroup className="sidebar-parent p-0">
                             <SidebarGroupLabel asChild>
-                              <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-sidebar-accent/40">
+                              <CollapsibleTrigger
+                                data-active={subActive}
+                                className="nav-pill flex h-auto w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-sidebar-foreground/80"
+                              >
                                 <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
                                 <span className="flex-1 whitespace-nowrap text-start">{sg.label}</span>
                               </CollapsibleTrigger>
@@ -305,7 +311,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                                         asChild
                                         isActive={isActive(item.url)}
                                         tooltip={item.title}
-                                        className="h-9 gap-2.5 text-[13.5px]"
+                                        className="nav-pill h-9 gap-2.5 text-[13.5px]"
                                       >
                                         <Link to={item.url} className="flex items-center gap-2.5">
                                           <item.icon className="h-[15px] w-[15px] shrink-0 text-sidebar-foreground/70" />
@@ -333,7 +339,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                               asChild
                               isActive={isActive(item.url)}
                               tooltip={item.title}
-                              className="h-9 gap-2.5 text-[13.5px]"
+                              className="nav-pill h-9 gap-2.5 text-[13.5px]"
                             >
                               <Link to={item.url} className="flex items-center gap-2.5">
                                 <item.icon className="h-[15px] w-[15px] shrink-0 text-sidebar-foreground/70" />
