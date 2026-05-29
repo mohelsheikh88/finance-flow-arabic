@@ -184,16 +184,18 @@ function ChartOfAccountsPanel() {
 
   const openNew = () => {
     const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
-    setForm({ ...empty, account_type_id: def?.id ?? "" });
+    setForm({ ...empty, account_type_id: def?.id ?? "", classification_id: def?.classification_id ?? "" });
     setOpen(true);
   };
   const openEdit = (a: any) => {
+    const at = (accountTypes as any[]).find((t) => t.id === a.account_type_id);
     setForm({
       id: a.id,
       code: a.code ?? "",
       name_ar: a.name_ar ?? "",
       name_en: a.name_en ?? "",
       account_type_id: a.account_type_id ?? (accountTypes as any[]).find((t) => t.classification === a.account_type)?.id ?? "",
+      classification_id: at?.classification_id ?? "",
       parent_id: a.parent_id ?? "",
       currency_code: a.currency_code ?? "",
       is_group: !!a.is_group,
@@ -203,6 +205,7 @@ function ChartOfAccountsPanel() {
     });
     setOpen(true);
   };
+
 
   const saveMut = useMutation({
     mutationFn: () =>
