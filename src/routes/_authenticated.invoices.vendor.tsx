@@ -318,9 +318,17 @@ function VendorBillsPage() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-              <Button variant="secondary" onClick={() => createMut.mutate("draft")} disabled={createMut.isPending || !canSave}>{t("je.saveDraft")}</Button>
-              <Button onClick={() => createMut.mutate("posted")} disabled={createMut.isPending || !canSave}><Check className="h-4 w-4 me-1" />{t("invoices.saveAndPost")}</Button>
+              <Button variant="outline" onClick={() => { setOpen(false); reset(); }}>{t("common.cancel")}</Button>
+              {editingId ? (
+                <Button onClick={() => updateMut.mutate()} disabled={updateMut.isPending || !canSave}>
+                  <Check className="h-4 w-4 me-1" />{t("invoices.saveChanges")}
+                </Button>
+              ) : (
+                <>
+                  <Button variant="secondary" onClick={() => createMut.mutate("draft")} disabled={createMut.isPending || !canSave}>{t("je.saveDraft")}</Button>
+                  <Button onClick={() => createMut.mutate("posted")} disabled={createMut.isPending || !canSave}><Check className="h-4 w-4 me-1" />{t("invoices.saveAndPost")}</Button>
+                </>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -353,11 +361,21 @@ function VendorBillsPage() {
                 <td className="p-3">{statusBadge(inv.status, t)}</td>
                 <td className="p-3 text-center"><ApprovalCell documentType="invoice" documentId={inv.id} /></td>
                 <td className="p-3 text-end">
-                  {inv.status === "draft" && (
-                    <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
-                      <Check className="h-3 w-3 me-1" />{t("je.post")}
-                    </Button>
-                  )}
+                  <div className="inline-flex gap-1">
+                    {inv.status === "draft" && (
+                      <>
+                        <Button size="sm" variant="outline" onClick={() => openEdit(inv.id)}>
+                          <Pencil className="h-3 w-3 me-1" />{t("invoices.edit")}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
+                          <Check className="h-3 w-3 me-1" />{t("je.post")}
+                        </Button>
+                      </>
+                    )}
+                    {inv.status === "posted" && Number(inv.amount_paid || 0) === 0 && (
+                      <ResetToDraftButton invoiceId={inv.id} onConfirm={handleResetClick} pending={resetMut.isPending} />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -366,5 +384,21 @@ function VendorBillsPage() {
         </table>
       </Card>
     </div>
+  );
+}
+
+function ResetToDraftButton({ invoiceId, onConfirm, pending }: { invoiceId: string; onConfirm: (id: string) => void; pending: boolean }) {
+  const { t } = useI18n();
+  const canFn = useServerFn(canResetInvoice);
+  const { data } = useQuery({
+    queryKey: ["can-reset-invoice", invoiceId],
+    queryFn: () => canFn({ data: { id: invoiceId } }),
+    staleTime: 30_000,
+  });
+  if (!data?.allowed) return null;
+  return (
+    <Button size="sm" variant="outline" onClick={() => onConfirm(invoiceId)} disabled={pending}>
+      <RotateCcw className="h-3 w-3 me-1" />{t("invoices.resetToDraft")}
+    </Button>
   );
 }
