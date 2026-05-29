@@ -321,6 +321,28 @@ function ApprovalsPage() {
           <UserRolesManagement />
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("common.confirm")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {locale === "ar"
+                ? "هل أنت متأكد من حذف هذا الـ Workflow؟ لا يمكن التراجع عن هذا الإجراء."
+                : "Are you sure you want to delete this workflow? This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{locale === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteId && deleteWfMut.mutate(deleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {locale === "ar" ? "حذف" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
