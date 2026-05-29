@@ -587,6 +587,15 @@ export const translations = {
       noTax: "بدون ضريبة",
       posted: "تم الترحيل بنجاح",
       saveAndPost: "حفظ وترحيل",
+      edit: "تعديل",
+      editTitle: "تعديل الفاتورة",
+      saveChanges: "حفظ التعديلات",
+      resetToDraft: "إرجاع لمسودة",
+      resetConfirm: "هل أنت متأكد من إرجاع الفاتورة إلى مسودة؟ سيتم حذف القيد المحاسبي المرتبط بها.",
+      resetSuccess: "تم إرجاع الفاتورة إلى مسودة",
+      updated: "تم حفظ التعديلات",
+      noResetPermission: "ليس لديك صلاحية إرجاع هذه الفاتورة إلى مسودة",
+      hasPayments: "لا يمكن الإرجاع: توجد دفعات مرتبطة بالفاتورة",
     },
 
     payments: {
