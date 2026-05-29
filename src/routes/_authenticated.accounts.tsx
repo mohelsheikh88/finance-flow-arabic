@@ -149,8 +149,9 @@ function ChartOfAccountsPanel() {
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = useState(1);
-  useEffect(() => { setPage(1); setSelectedIds(new Set()); }, [search, filterClassification, filterIsGroup, filterStatus]);
-  const pageSize = 50;
+  const [pageSize, setPageSize] = useState<number>(50); // 0 = الكل
+  useEffect(() => { setPage(1); setSelectedIds(new Set()); }, [search, filterClassification, filterIsGroup, filterStatus, pageSize]);
+
 
 
   const typeById = useMemo(() => {
