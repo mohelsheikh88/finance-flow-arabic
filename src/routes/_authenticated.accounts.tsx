@@ -1032,11 +1032,10 @@ function ChartOfAccountsTable({
                   {cls ? bucketName(cls.bucket, t(`accounts.${cls.bucket}`)) : "—"}
                 </td>
                 <td className="p-3 text-center">
-                  {a.is_group ? (
-                    <span className="text-sm">{t("accounts.isGroup")}</span>
-                  ) : (
-                    <span className="text-muted-foreground text-xs">—</span>
-                  )}
+                  <Switch
+                    checked={!!a.is_group}
+                    onCheckedChange={(v) => onToggleGroup(a, v)}
+                  />
                 </td>
                 <td className="p-3 text-center">
                   <Switch
