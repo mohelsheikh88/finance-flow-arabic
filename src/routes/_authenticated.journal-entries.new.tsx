@@ -36,9 +36,21 @@ function NewJEPage() {
   const partnersFn = useServerFn(listPartners);
   const createFn = useServerFn(createJournalEntry);
 
-  const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accountsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
-  const { data: journals = [] } = useQuery({ queryKey: ["journals", companyId, "manual"], queryFn: () => journalsFn({ data: { companyId: companyId!, manualOnly: true } }), enabled: !!companyId });
-  const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partnersFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const accountsQ = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accountsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const journalsQ = useQuery({ queryKey: ["journals", companyId], queryFn: () => journalsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const partnersQ = useQuery({ queryKey: ["partners", companyId], queryFn: () => partnersFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+
+  const accounts = accountsQ.data ?? [];
+  const allJournals = journalsQ.data ?? [];
+  const partners = partnersQ.data ?? [];
+
+  const availableJournals = allJournals.filter((j: any) => j.allow_manual_entries === true);
+  const unavailableJournals = allJournals.filter((j: any) => j.allow_manual_entries !== true);
+
+  const ctxData = qc.getQueryData<any>(["user-context"]);
+  const accountingRoles = ["admin", "finance_manager", "accounting_manager", "chief_accountant", "accountant"];
+  const userRoles = (ctxData?.roles ?? []) as string[];
+  const canCreateManual = userRoles.some((r) => accountingRoles.includes(r));
 
   const postableAccounts = accounts.filter((a: any) => !a.is_group);
 
