@@ -36,6 +36,29 @@ export const createLockDate = createServerFn({ method: "POST" })
     return row;
   });
 
+const UpdateSchema = z.object({
+  id: z.string().uuid(),
+  branch_id: z.string().uuid().optional().nullable(),
+  lock_date: z.string(),
+  notes: z.string().max(500).optional().nullable(),
+});
+
+export const updateLockDate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => UpdateSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const { id, ...rest } = data;
+    const { data: row, error } = await context.supabase
+      .from("lock_dates")
+      .update({ ...rest, branch_id: rest.branch_id || null })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+
 export const deleteLockDate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => i)
