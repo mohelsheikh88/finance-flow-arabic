@@ -81,6 +81,7 @@ type FormState = {
   name_ar: string;
   name_en: string;
   account_type_id: string;
+  classification_id: string;
   parent_id: string;
   currency_code: string;
   is_group: boolean;
@@ -94,6 +95,7 @@ const empty: FormState = {
   name_ar: "",
   name_en: "",
   account_type_id: "",
+  classification_id: "",
   parent_id: "",
   currency_code: "",
   is_group: false,
@@ -101,6 +103,7 @@ const empty: FormState = {
   is_reconcilable: false,
   notes: "",
 };
+
 
 
 function ChartOfAccountsPanel() {
@@ -181,16 +184,18 @@ function ChartOfAccountsPanel() {
 
   const openNew = () => {
     const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
-    setForm({ ...empty, account_type_id: def?.id ?? "" });
+    setForm({ ...empty, account_type_id: def?.id ?? "", classification_id: def?.classification_id ?? "" });
     setOpen(true);
   };
   const openEdit = (a: any) => {
+    const at = (accountTypes as any[]).find((t) => t.id === a.account_type_id);
     setForm({
       id: a.id,
       code: a.code ?? "",
       name_ar: a.name_ar ?? "",
       name_en: a.name_en ?? "",
       account_type_id: a.account_type_id ?? (accountTypes as any[]).find((t) => t.classification === a.account_type)?.id ?? "",
+      classification_id: at?.classification_id ?? "",
       parent_id: a.parent_id ?? "",
       currency_code: a.currency_code ?? "",
       is_group: !!a.is_group,
@@ -201,16 +206,22 @@ function ChartOfAccountsPanel() {
     setOpen(true);
   };
 
+
   const saveMut = useMutation({
-    mutationFn: () =>
-      upsert({
+    mutationFn: () => {
+      const resolvedTypeId =
+        form.account_type_id ||
+        (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id && tp.is_active)?.id ||
+        (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id)?.id ||
+        "";
+      return upsert({
         data: {
           id: form.id,
           company_id: companyId!,
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          account_type_id: form.account_type_id,
+          account_type_id: resolvedTypeId,
           parent_id: form.parent_id || null,
           currency_code: form.currency_code.trim() || null,
           is_group: form.is_group,
@@ -218,7 +229,9 @@ function ChartOfAccountsPanel() {
           is_reconcilable: form.is_reconcilable,
           notes: form.notes.trim() || null,
         },
-      }),
+      });
+    },
+
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounts"] });
@@ -420,18 +433,31 @@ function ChartOfAccountsPanel() {
               <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} maxLength={50} />
             </div>
             <div>
-              <Label>{t("accounts.type")} *</Label>
-              <Select value={form.account_type_id} onValueChange={(v) => setForm({ ...form, account_type_id: v })}>
+              <Label>{t("accounts.classification")} *</Label>
+              <Select
+                value={form.classification_id}
+                onValueChange={(v) =>
+                  setForm({
+                    ...form,
+                    classification_id: v,
+                    account_type_id:
+                      (accountTypes as any[]).find((tp) => tp.classification_id === v && tp.is_active)?.id ??
+                      (accountTypes as any[]).find((tp) => tp.classification_id === v)?.id ??
+                      "",
+                  })
+                }
+              >
                 <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
-                  {(accountTypes as any[]).filter((tp) => tp.is_active).map((tp: any) => (
-                    <SelectItem key={tp.id} value={tp.id}>
-                      {tp.code} — {localized(tp, "name")} ({t(`accounts.${tp.classification}`)})
+                  {(classifications as any[]).filter((c) => c.is_active).map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code} — {localized(c, "name")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
 
             <div>
               <Label>{t("common.nameAr")} *</Label>
@@ -466,7 +492,7 @@ function ChartOfAccountsPanel() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-            <Button onClick={() => saveMut.mutate()} disabled={!form.code || !form.name_ar || !form.name_en || !form.account_type_id || !companyId || saveMut.isPending}>{t("common.save")}</Button>
+            <Button onClick={() => saveMut.mutate()} disabled={!form.code || !form.name_ar || !form.name_en || !form.classification_id || !companyId || saveMut.isPending}>{t("common.save")}</Button>
 
           </DialogFooter>
         </DialogContent>
