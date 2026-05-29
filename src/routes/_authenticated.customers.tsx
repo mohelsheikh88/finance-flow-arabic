@@ -354,9 +354,11 @@ type CTFormState = {
   id?: string;
   code: string; name_ar: string; name_en: string; notes: string;
   is_active: boolean; sort_order: number;
+  receivable_account_id: string | null;
 };
 const ctEmpty: CTFormState = {
   code: "", name_ar: "", name_en: "", notes: "", is_active: true, sort_order: 0,
+  receivable_account_id: null,
 };
 
 function CustomerTypesDialog({
