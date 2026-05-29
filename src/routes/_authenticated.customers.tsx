@@ -271,6 +271,7 @@ function CustomersPage() {
                 <td className="p-3 font-mono">{p.code}</td>
                 <td className="p-3 font-medium">{localized(p, "name")}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.vat_number || "—"}</td>
+                <td className="p-3 text-muted-foreground">{typeLabel(p.customer_type_id)}</td>
                 <td className="p-3 font-mono text-muted-foreground">{accountLabel(p.receivable_account_id)}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.phone || "—"}</td>
                 <td className="p-3 text-end font-mono">{Number(p.credit_limit ?? 0).toLocaleString()}</td>
