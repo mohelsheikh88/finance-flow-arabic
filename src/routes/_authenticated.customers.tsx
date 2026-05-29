@@ -6,6 +6,7 @@ import {
   createPartner, listPartners, updatePartner, deletePartner, listAccounts,
   listCustomerTypes, upsertCustomerType, deleteCustomerType,
   listPartnerContacts, savePartnerContacts,
+  listPartnerAttachments, uploadPartnerAttachment, deletePartnerAttachment, getPartnerAttachmentUrl,
 } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -24,7 +25,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Plus, Search, Settings2, Trash2, Users, X } from "lucide-react";
+import { Download, Paperclip, Pencil, Plus, Search, Settings2, Trash2, Upload, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/customers")({
@@ -366,6 +367,16 @@ function CustomersPage() {
 
               {/* 11. Credit Limit */}
               <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
+
+              {/* Attachments */}
+              <div className="col-span-2 pt-2 border-t">
+                <Label className="mb-2 block">{t("customers.attachments")}</Label>
+                {form.id ? (
+                  <PartnerAttachments partnerId={form.id} />
+                ) : (
+                  <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>
+                )}
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
@@ -652,3 +663,129 @@ function CustomerTypesDialog({
     </>
   );
 }
+
+const DOC_TYPES = ["cr", "vat", "national_address", "contract", "other"] as const;
+type DocType = (typeof DOC_TYPES)[number];
+
+function PartnerAttachments({ partnerId }: { partnerId: string }) {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const listFn = useServerFn(listPartnerAttachments);
+  const uploadFn = useServerFn(uploadPartnerAttachment);
+  const deleteFn = useServerFn(deletePartnerAttachment);
+  const urlFn = useServerFn(getPartnerAttachmentUrl);
+  const [docType, setDocType] = useState<DocType>("cr");
+  const [uploading, setUploading] = useState(false);
+
+  const { data: attachments = [] } = useQuery({
+    queryKey: ["partner_attachments", partnerId],
+    queryFn: () => listFn({ data: { partnerId } }),
+  });
+
+  const onFile = async (file: File) => {
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Max 20MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const buf = await file.arrayBuffer();
+      let binary = "";
+      const bytes = new Uint8Array(buf);
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      const contentBase64 = btoa(binary);
+      await uploadFn({ data: {
+        partnerId, docType, fileName: file.name,
+        mimeType: file.type || null, fileSize: file.size, contentBase64,
+      } });
+      toast.success(t("common.saved"));
+      qc.invalidateQueries({ queryKey: ["partner_attachments", partnerId] });
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onDownload = async (id: string) => {
+    try {
+      const { url, fileName } = await urlFn({ data: { id } });
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const onDelete = async (id: string) => {
+    try {
+      await deleteFn({ data: { id } });
+      qc.invalidateQueries({ queryKey: ["partner_attachments", partnerId] });
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-end gap-2">
+        <div className="flex-1">
+          <Label className="text-xs">{t("customers.attachments")}</Label>
+          <Select value={docType} onValueChange={(v) => setDocType(v as DocType)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {DOC_TYPES.map((d) => (
+                <SelectItem key={d} value={d}>{t(`customers.doc_${d}`)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <label className="cursor-pointer">
+          <input
+            type="file"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFile(f);
+              e.target.value = "";
+            }}
+          />
+          <span className="inline-flex items-center gap-1 h-9 px-3 rounded-md border bg-background text-sm hover:bg-muted">
+            <Upload className="h-4 w-4" />
+            {uploading ? "…" : t("customers.uploadFile")}
+          </span>
+        </label>
+      </div>
+      <div className="space-y-1">
+        {(attachments as any[]).length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t("common.noData")}</p>
+        ) : (
+          (attachments as any[]).map((a) => (
+            <div key={a.id} className="flex items-center gap-2 p-2 rounded border text-sm">
+              <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground w-32 shrink-0">{t(`customers.doc_${a.doc_type as DocType}`)}</span>
+              <span className="flex-1 truncate" title={a.file_name}>{a.file_name}</span>
+              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => onDownload(a.id)}>
+                <Download className="h-3.5 w-3.5" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => onDelete(a.id)}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
