@@ -612,11 +612,11 @@ function ChartOfAccountsPanel() {
         <div className="flex items-center justify-between gap-3 p-3 rounded-md border bg-muted/40">
           <div className="text-sm">
             <span className="font-semibold text-foreground">{selectedIds.size}</span>{" "}
-            {selectedIds.size === 1 ? "حساب محدد" : "حساب محددين"}
+            {selectedIds.size === 1 ? t("accounts.selectedSingular") : t("accounts.selectedPlural")}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
-              إلغاء التحديد
+              {t("accounts.clearSelection")}
             </Button>
             <Button
               variant="destructive"
@@ -625,7 +625,7 @@ function ChartOfAccountsPanel() {
               disabled={bulkDeleting}
             >
               <Trash2 className="h-4 w-4 me-1" />
-              حذف المحدد ({selectedIds.size})
+              {t("accounts.deleteSelected")} ({selectedIds.size})
             </Button>
           </div>
         </div>
