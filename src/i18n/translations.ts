@@ -77,10 +77,15 @@ export const translations = {
       currencies: "العملات",
       company: "الشركة",
       account: "حساب",
+      accounts: "حسابات",
       page: "صفحة",
       of: "من",
       show: "عرض",
       rowsPerPage: "صفوف لكل صفحة",
+      firstPage: "الصفحة الأولى",
+      prevPage: "الصفحة السابقة",
+      nextPage: "الصفحة التالية",
+      lastPage: "الصفحة الأخيرة",
 
     },
 
