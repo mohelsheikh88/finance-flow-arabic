@@ -55,6 +55,7 @@ function CustomerInvoicesPage() {
   const update = useServerFn(updateInvoice);
   const getInv = useServerFn(getInvoice);
   const resetFn = useServerFn(resetInvoiceToDraft);
+  const delFn = useServerFn(deleteInvoice);
   const accFn = useServerFn(listAccounts);
   const partFn = useServerFn(listPartners);
   const taxFn = useServerFn(listTaxes);
