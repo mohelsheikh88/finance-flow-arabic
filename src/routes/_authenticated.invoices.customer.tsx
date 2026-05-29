@@ -75,6 +75,7 @@ function CustomerInvoicesPage() {
   const salesTaxes = taxes.filter((tx: any) => tx.tax_type === "sale");
 
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [header, setHeader] = useState({
     partner_id: "",
     invoice_date: new Date().toISOString().slice(0, 10),
@@ -107,10 +108,39 @@ function CustomerInvoicesPage() {
   }, [lines]);
 
   const reset = () => {
+    setEditingId(null);
     setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", payment_term_id: "", reference: "" });
     setLines([{ description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 }]);
   };
 
+  const openEdit = async (id: string) => {
+    try {
+      const inv: any = await getInv({ data: { id } });
+      if (inv.status !== "draft") {
+        toast.error(t("invoices.editTitle"));
+        return;
+      }
+      setEditingId(id);
+      setHeader({
+        partner_id: inv.partner_id,
+        invoice_date: inv.invoice_date,
+        due_date: inv.due_date || "",
+        payment_term_id: "",
+        reference: inv.reference || "",
+      });
+      setLines((inv.invoice_lines || []).map((l: any) => ({
+        description: l.description || "",
+        account_id: l.account_id,
+        quantity: Number(l.quantity),
+        unit_price: Number(l.unit_price),
+        tax_id: l.tax_id || "",
+        tax_rate: Number(l.tax_rate || 0),
+      })));
+      setOpen(true);
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
 
   const createMut = useMutation({
     mutationFn: (status: "draft" | "posted") => create({ data: {
@@ -140,6 +170,31 @@ function CustomerInvoicesPage() {
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
+  const updateMut = useMutation({
+    mutationFn: () => update({ data: {
+      id: editingId!,
+      partner_id: header.partner_id,
+      invoice_date: header.invoice_date,
+      due_date: header.due_date || null,
+      reference: header.reference || null,
+      lines: lines.map((l) => ({
+        description: l.description || null,
+        account_id: l.account_id,
+        quantity: l.quantity,
+        unit_price: l.unit_price,
+        tax_id: l.tax_id || null,
+        tax_rate: l.tax_rate,
+      })),
+    } as any }),
+    onSuccess: () => {
+      toast.success(t("invoices.updated"));
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      setOpen(false);
+      reset();
+    },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+
   const postMut = useMutation({
     mutationFn: (id: string) => post({ data: { id } }),
     onSuccess: () => {
@@ -148,6 +203,20 @@ function CustomerInvoicesPage() {
     },
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
+
+  const resetMut = useMutation({
+    mutationFn: (id: string) => resetFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success(t("invoices.resetSuccess"));
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+    },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+
+  const handleResetClick = (id: string) => {
+    if (!window.confirm(t("invoices.resetConfirm"))) return;
+    resetMut.mutate(id);
+  };
 
   const canSave = header.partner_id && header.invoice_date && lines.every((l) => l.account_id && l.quantity > 0);
 
