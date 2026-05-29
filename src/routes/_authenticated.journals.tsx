@@ -196,6 +196,7 @@ function JournalsPage() {
           default_debit_account_id: form.default_debit_account_id || null,
           default_credit_account_id: form.default_credit_account_id || null,
           is_active: form.is_active,
+          allow_manual_entries: form.allow_manual_entries,
         },
       }),
     onSuccess: () => {
