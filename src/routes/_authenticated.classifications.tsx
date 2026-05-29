@@ -230,7 +230,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
 
   const moveByOne = (id: string, dir: -1 | 1) => {
     if (hasFilters) {
-      toast.error("Clear filters before reordering | امسح الفلاتر قبل إعادة الترتيب");
+      toast.error(t("common.clearFiltersFirst"));
       return;
     }
     const prev = qc.getQueryData<any[]>(["classifications", companyId]);
