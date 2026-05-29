@@ -50,38 +50,42 @@ export function ApprovalWorkflowTimeline({
   });
 
   return (
-    <div className="border rounded-lg p-3 bg-muted/20">
-      <div className="flex items-center gap-2 text-sm font-semibold mb-2">
-        <ShieldCheck className="h-4 w-4 text-primary" />
-        <span>{t("approvals.workflow") || "مسار الاعتماد"}</span>
+    <div className="border rounded-md px-3 py-2 bg-muted/20">
+      <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+          <span>{t("approvals.workflow") || "مسار الاعتماد"}</span>
+          {req?.approval_workflows && (
+            <span className="text-[10px] text-muted-foreground font-normal">
+              — {localized(req.approval_workflows, "name")}
+            </span>
+          )}
+        </div>
+        {req && (
+          <Badge
+            variant={
+              req.status === "approved"
+                ? "default"
+                : req.status === "rejected"
+                  ? "destructive"
+                  : "secondary"
+            }
+            className="text-[9px] h-5 px-1.5"
+          >
+            {req.status === "pending" && <Clock className="h-2.5 w-2.5 me-1" />}
+            {req.status === "approved" && <CheckCircle2 className="h-2.5 w-2.5 me-1" />}
+            {req.status === "rejected" && <XCircle className="h-2.5 w-2.5 me-1" />}
+            {t(`approvals.status.${req.status}`)}
+          </Badge>
+        )}
       </div>
 
       {!req ? (
-        <div className="text-[11px] text-muted-foreground text-center py-3">
+        <div className="text-[10px] text-muted-foreground text-center py-2">
           {t("approvals.noWorkflow") || "لا يوجد مسار اعتماد مطبق على هذه العملية"}
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-xs font-medium">
-              {req.approval_workflows ? localized(req.approval_workflows, "name") : "—"}
-            </span>
-            <Badge
-              variant={
-                req.status === "approved"
-                  ? "default"
-                  : req.status === "rejected"
-                    ? "destructive"
-                    : "secondary"
-              }
-              className="text-[10px]"
-            >
-              {req.status === "pending" && <Clock className="h-3 w-3 me-1" />}
-              {req.status === "approved" && <CheckCircle2 className="h-3 w-3 me-1" />}
-              {req.status === "rejected" && <XCircle className="h-3 w-3 me-1" />}
-              {t(`approvals.status.${req.status}`)}
-            </Badge>
-          </div>
 
           {/* Horizontal journey stepper */}
           {(() => {
@@ -102,24 +106,24 @@ export function ApprovalWorkflowTimeline({
                     const rejected = action?.action === "rejected";
 
                     let circleCls = "bg-background border-muted text-muted-foreground";
-                    let icon: any = <span className="text-xs font-semibold">{idx + 1}</span>;
+                    let icon: any = <span className="text-[10px] font-semibold">{idx + 1}</span>;
                     let labelCls = "text-muted-foreground";
                     let connectorCls = "bg-muted";
 
                     if (done && rejected) {
                       circleCls = "bg-destructive border-destructive text-destructive-foreground";
-                      icon = <XCircle className="h-5 w-5" />;
+                      icon = <XCircle className="h-3.5 w-3.5" />;
                       labelCls = "text-destructive font-semibold";
                       connectorCls = "bg-destructive";
                     } else if (done) {
                       circleCls = "bg-success border-success text-success-foreground";
-                      icon = <CheckCircle2 className="h-5 w-5" />;
+                      icon = <CheckCircle2 className="h-3.5 w-3.5" />;
                       labelCls = "text-success font-semibold";
                       connectorCls = "bg-success";
                     } else if (isCurrent) {
                       circleCls =
-                        "bg-primary border-primary text-primary-foreground ring-4 ring-primary/20 animate-pulse";
-                      icon = <Clock className="h-5 w-5" />;
+                        "bg-primary border-primary text-primary-foreground ring-2 ring-primary/20 animate-pulse";
+                      icon = <Clock className="h-3.5 w-3.5" />;
                       labelCls = "text-primary font-bold";
                     }
 
@@ -128,10 +132,9 @@ export function ApprovalWorkflowTimeline({
                     return (
                       <li
                         key={step.id}
-                        className="flex-1 flex flex-col items-center relative min-w-[80px]"
+                        className="flex-1 flex flex-col items-center relative min-w-[64px]"
                       >
                         <div className="flex items-center w-full">
-                          {/* Connector to previous (right side in RTL) */}
                           {idx > 0 && (
                             <div
                               className={`h-0.5 flex-1 ${
@@ -141,24 +144,19 @@ export function ApprovalWorkflowTimeline({
                           )}
                           {idx === 0 && <div className="flex-1" />}
                           <div
-                            className={`h-10 w-10 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${circleCls}`}
+                            className={`h-7 w-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${circleCls}`}
                           >
                             {icon}
                           </div>
                           {!isLast && <div className="h-0.5 flex-1 bg-muted" />}
                           {isLast && <div className="flex-1" />}
                         </div>
-                        <div className={`mt-2 text-xs text-center px-1 ${labelCls}`}>
+                        <div className={`mt-1 text-[10px] leading-tight text-center px-0.5 ${labelCls}`}>
                           {localized(step, "step_name")}
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5 text-center">
+                        <div className="text-[9px] text-muted-foreground/80 text-center leading-tight">
                           {t(`users.${step.required_role}`) || step.required_role}
                         </div>
-                        {action?.acted_at && (
-                          <div className="text-[9px] text-muted-foreground/70 mt-0.5 font-mono">
-                            {new Date(action.acted_at).toLocaleDateString()}
-                          </div>
-                        )}
                       </li>
                     );
                   })}
@@ -168,24 +166,24 @@ export function ApprovalWorkflowTimeline({
           })()}
 
           {req.status === "pending" && (
-            <div className="flex gap-2 border-t mt-3 pt-3">
+            <div className="flex gap-2 border-t mt-2 pt-2">
               <Button
                 size="sm"
-                className="flex-1"
+                className="flex-1 h-7 text-xs"
                 onClick={() => actMut.mutate("approved")}
                 disabled={actMut.isPending}
               >
-                <CheckCircle2 className="h-3.5 w-3.5 me-1" />
+                <CheckCircle2 className="h-3 w-3 me-1" />
                 {t("approvals.status.approved")}
               </Button>
               <Button
                 size="sm"
                 variant="destructive"
-                className="flex-1"
+                className="flex-1 h-7 text-xs"
                 onClick={() => actMut.mutate("rejected")}
                 disabled={actMut.isPending}
               >
-                <XCircle className="h-3.5 w-3.5 me-1" />
+                <XCircle className="h-3 w-3 me-1" />
                 {t("approvals.status.rejected")}
               </Button>
             </div>
