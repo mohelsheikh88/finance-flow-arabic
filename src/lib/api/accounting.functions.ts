@@ -852,14 +852,15 @@ export const getPartnerAttachmentUrl = createServerFn({ method: "POST" })
 
 export const listJournals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { companyId: string }) => i)
+  .inputValidator((i: { companyId: string; manualOnly?: boolean }) => i)
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase
+    let q = context.supabase
       .from("journals")
       .select("*")
       .eq("company_id", data.companyId)
-      .eq("is_active", true)
-      .order("code");
+      .eq("is_active", true);
+    if (data.manualOnly) q = q.eq("allow_manual_entries", true);
+    const { data: rows, error } = await q.order("code");
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
