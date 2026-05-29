@@ -420,8 +420,7 @@ function CustomersPage() {
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
               <th className="text-start p-3 font-medium">{t("customers.customerType")}</th>
-              <th className="text-start p-3 font-medium">{t("customers.receivableAccountShort")}</th>
-              <th className="text-start p-3 font-medium">{t("customers.phone")}</th>
+              <th className="text-center p-3 font-medium">{t("customers.attachments")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("partners.creditLimit")}</th>
               <th className="text-end p-3 font-medium w-24">{t("common.actions") || ""}</th>
             </tr>
@@ -433,8 +432,7 @@ function CustomersPage() {
                 <td className="p-3 font-medium">{localized(p, "name")}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.vat_number || "—"}</td>
                 <td className="p-3 text-muted-foreground">{typeLabel(p.customer_type_id)}</td>
-                <td className="p-3 font-mono text-muted-foreground">{accountLabel(p.receivable_account_id)}</td>
-                <td className="p-3 font-mono text-muted-foreground">{p.phone || "—"}</td>
+                <td className="p-3 text-center"><AttachmentsCount partnerId={p.id} /></td>
                 <td className="p-3 text-end font-mono">{Number(p.credit_limit ?? 0).toLocaleString()}</td>
                 <td className="p-3 text-end">
                   <div className="flex items-center justify-end gap-1">
@@ -448,7 +446,8 @@ function CustomersPage() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+
           </tbody>
         </table>
       </Card>
