@@ -1153,6 +1153,8 @@ export const translations = {
       receivableAccountShort: "AR Account (GL)",
       defaultFromJournal: "— Default from journal —",
       phone: "Phone",
+      customerType: "Customer Type",
+      manageTypes: "Manage Customer Types",
     },
     tb: {
       title: "Trial Balance",
