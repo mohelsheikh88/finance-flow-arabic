@@ -226,20 +226,29 @@ function ChartOfAccountsPanel() {
   }, [filteredAccounts, safePage]);
 
   const openNew = () => {
-    const def = (accountTypes as any[]).find((t) => t.is_active && t.classification_id) ?? (accountTypes as any[])[0];
-    setForm({ ...empty, account_type_id: def?.id ?? "", classification_id: def?.classification_id ?? "" });
+    const defCls =
+      (classifications as any[]).find((c) => c.is_active) ??
+      (classifications as any[])[0];
+    setForm({ ...empty, account_type_id: "", classification_id: defCls?.id ?? "" });
     setOpen(true);
   };
   const openEdit = (a: any) => {
-    const currentTypeId = isUuid(a.account_type_id) ? a.account_type_id : "";
-    const at = (accountTypes as any[]).find((t) => t.id === currentTypeId);
+    // Derive classification from the account_type bucket text since Account Types may not exist.
+    const at = (accountTypes as any[]).find((t) => t.id === a.account_type_id);
+    const clsFromType = at?.classification_id
+      ? (classifications as any[]).find((c) => c.id === at.classification_id)
+      : null;
+    const clsFromBucket = (classifications as any[]).find(
+      (c) => norm(c.bucket) === norm(a.account_type),
+    );
+    const cls = clsFromType ?? clsFromBucket;
     setForm({
       id: a.id,
       code: a.code ?? "",
       name_ar: a.name_ar ?? "",
       name_en: a.name_en ?? "",
-      account_type_id: currentTypeId,
-      classification_id: at?.classification_id ?? "",
+      account_type_id: "",
+      classification_id: cls?.id ?? "",
       parent_id: a.parent_id ?? "",
       currency_code: a.currency_code ?? "",
       is_group: !!a.is_group,
@@ -253,8 +262,7 @@ function ChartOfAccountsPanel() {
 
   const saveMut = useMutation({
     mutationFn: () => {
-      const resolvedTypeId = resolveAccountTypeId(form.classification_id, form.account_type_id);
-      if (!form.classification_id && !resolvedTypeId) {
+      if (!form.classification_id) {
         throw new Error("اختر تصنيف الحساب أولاً | Please select an account classification first");
       }
       return upsert({
@@ -264,9 +272,8 @@ function ChartOfAccountsPanel() {
           code: form.code.trim(),
           name_ar: form.name_ar.trim(),
           name_en: form.name_en.trim(),
-          // Fall back to classification_id so the backend can auto-create a matching account type.
-          account_type_id: resolvedTypeId || form.classification_id,
-          classification_id: form.classification_id || null,
+          account_type_id: null,
+          classification_id: form.classification_id,
           parent_id: form.parent_id || null,
           currency_code: form.currency_code.trim() || null,
           is_group: form.is_group,
@@ -276,7 +283,6 @@ function ChartOfAccountsPanel() {
         },
       });
     },
-
 
     onSuccess: () => {
       toast.success(t("common.saved"));
