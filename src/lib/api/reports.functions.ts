@@ -249,22 +249,29 @@ export const getIncomeStatement = createServerFn({ method: "GET" })
 
     const isRows = rows.filter((r) => r.statement === "income_statement");
     const income = isRows.filter((r) => r.bucket === "income");
+    const costs = isRows.filter((r) => r.bucket === "COGS");
     const expenses = isRows.filter((r) => r.bucket === "expense");
 
     const totalIncome = income.reduce((s, r) => s + r.balance, 0);
+    const totalCosts = costs.reduce((s, r) => s + r.balance, 0);
     const totalExpenses = expenses.reduce((s, r) => s + r.balance, 0);
+    const grossProfit = totalIncome - totalCosts;
 
     return {
       dateFrom: data.dateFrom,
       dateTo: data.dateTo,
       income,
+      costs,
       expenses,
       incomeGroups: groupByClassification(isRows, ["income"], classifications),
+      costGroups: groupByClassification(isRows, ["COGS"], classifications),
       expenseGroups: groupByClassification(isRows, ["expense"], classifications),
       totals: {
         income: totalIncome,
+        costs: totalCosts,
+        grossProfit,
         expenses: totalExpenses,
-        netIncome: totalIncome - totalExpenses,
+        netIncome: grossProfit - totalExpenses,
       },
     };
   });
