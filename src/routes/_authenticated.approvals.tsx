@@ -47,13 +47,13 @@ function ApprovalsPage() {
   const { data: rolesData = [] } = useQuery({
     queryKey: ["roles_active"],
     queryFn: () => listRolesFn(),
+  });
   const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
   const roleLabel = (code: string) => {
     const r = (rolesData as any[]).find((x) => x.code === code);
     if (r) return locale === "ar" ? r.name_ar : r.name_en;
     return t(`users.${code}`) || code;
   };
-  const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
 
   const [wfOpen, setWfOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
