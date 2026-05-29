@@ -36,6 +36,14 @@ function ApprovalsPage() {
   const listWf = useServerFn(listWorkflows);
   const createWf = useServerFn(createWorkflow);
   const act = useServerFn(actOnRequest);
+  const listRolesFn = useServerFn(listRoles);
+
+  const { data: rolesData = [] } = useQuery({
+    queryKey: ["roles_active"],
+    queryFn: () => listRolesFn(),
+  });
+  const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
+
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [wfOpen, setWfOpen] = useState(false);
 
@@ -149,7 +157,11 @@ function ApprovalsPage() {
                       <Select value={s.required_role} onValueChange={(v) => { const c = [...steps]; c[i].required_role = v; setSteps(c); }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {ROLES.map((r) => <SelectItem key={r} value={r}>{t(`users.${r}`)}</SelectItem>)}
+                          {activeRoles.map((r: any) => (
+                            <SelectItem key={r.code} value={r.code}>
+                              {t("locale") === "ar" ? r.name_ar : r.name_en}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
