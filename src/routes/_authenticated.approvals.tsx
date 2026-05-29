@@ -161,12 +161,16 @@ function ApprovalsPage() {
           <ShieldCheck className="h-5 w-5 text-primary" />
           <h1 className="page-title">{t("approvals.title")}</h1>
         </div>
-        <Dialog open={wfOpen} onOpenChange={setWfOpen}>
+        <Dialog open={wfOpen} onOpenChange={(o) => { setWfOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 me-1" />{t("approvals.newWorkflow")}</Button>
+            <Button size="sm" onClick={() => resetForm()}><Plus className="h-4 w-4 me-1" />{t("approvals.newWorkflow")}</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>{t("approvals.newWorkflow")}</DialogTitle></DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingId ? (t("approvals.editWorkflow") || t("common.edit")) : t("approvals.newWorkflow")}
+              </DialogTitle>
+            </DialogHeader>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("common.nameAr")}</Label>
