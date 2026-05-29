@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createInvoice, listInvoices, postInvoice } from "@/lib/api/invoices.functions";
 import { listAccounts, listPartners } from "@/lib/api/accounting.functions";
 import { listTaxes } from "@/lib/api/vat.functions";
+import { listPaymentTerms } from "@/lib/api/payment-terms.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -53,6 +54,7 @@ function VendorBillsPage() {
   const accFn = useServerFn(listAccounts);
   const partFn = useServerFn(listPartners);
   const taxFn = useServerFn(listTaxes);
+  const termsFn = useServerFn(listPaymentTerms);
 
   const { data: invoices = [] } = useQuery({
     queryKey: ["invoices", branchId, "vendor"],
@@ -62,6 +64,7 @@ function VendorBillsPage() {
   const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accFn({ data: { companyId: companyId! } }), enabled: !!companyId });
   const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partFn({ data: { companyId: companyId! } }), enabled: !!companyId });
   const { data: taxes = [] } = useQuery({ queryKey: ["taxes", companyId], queryFn: () => taxFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const { data: paymentTerms = [] } = useQuery({ queryKey: ["payment-terms", companyId], queryFn: () => termsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
 
   const vendors = partners.filter((p: any) => p.is_vendor);
   const expenseAccounts = accounts.filter((a: any) => !a.is_group && (a.account_type === "expense" || a.account_type === "asset"));
@@ -72,11 +75,21 @@ function VendorBillsPage() {
     partner_id: "",
     invoice_date: new Date().toISOString().slice(0, 10),
     due_date: "",
+    payment_term_id: "",
     reference: "",
   });
   const [lines, setLines] = useState<Line[]>([
     { description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 },
   ]);
+
+  const computeDueDate = (dateStr: string, termId: string): string => {
+    if (!dateStr || !termId) return "";
+    const term = paymentTerms.find((tr: any) => tr.id === termId);
+    if (!term) return "";
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + Number(term.days || 0));
+    return d.toISOString().slice(0, 10);
+  };
 
   const totals = useMemo(() => {
     let subtotal = 0, taxAmt = 0;
@@ -88,9 +101,10 @@ function VendorBillsPage() {
   }, [lines]);
 
   const reset = () => {
-    setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", reference: "" });
+    setHeader({ partner_id: "", invoice_date: new Date().toISOString().slice(0, 10), due_date: "", payment_term_id: "", reference: "" });
     setLines([{ description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 }]);
   };
+
 
   const createMut = useMutation({
     mutationFn: (status: "draft" | "posted") => create({ data: {
@@ -150,7 +164,25 @@ function VendorBillsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>{t("invoices.date")} *</Label><Input type="date" value={header.invoice_date} onChange={(e) => setHeader({ ...header, invoice_date: e.target.value })} /></div>
+              <div><Label>{t("invoices.date")} *</Label><Input type="date" value={header.invoice_date} onChange={(e) => {
+                const nd = e.target.value;
+                setHeader({ ...header, invoice_date: nd, due_date: header.payment_term_id ? computeDueDate(nd, header.payment_term_id) : header.due_date });
+              }} /></div>
+              <div>
+                <Label>{t("paymentTerms.paymentTerm")}</Label>
+                <Select value={header.payment_term_id || "none"} onValueChange={(v) => {
+                  const termId = v === "none" ? "" : v;
+                  setHeader({ ...header, payment_term_id: termId, due_date: termId ? computeDueDate(header.invoice_date, termId) : header.due_date });
+                }}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">—</SelectItem>
+                    {paymentTerms.filter((tr: any) => tr.is_active).map((tr: any) => (
+                      <SelectItem key={tr.id} value={tr.id}>{localized(tr, "name")} ({tr.days}d)</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label>{t("invoices.dueDate")}</Label><Input type="date" value={header.due_date} onChange={(e) => setHeader({ ...header, due_date: e.target.value })} /></div>
               <div className="col-span-4"><Label>{t("common.reference")}</Label><Input value={header.reference} onChange={(e) => setHeader({ ...header, reference: e.target.value })} /></div>
             </div>

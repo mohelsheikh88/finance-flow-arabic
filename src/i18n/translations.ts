@@ -284,6 +284,19 @@ export const translations = {
         other: "أخرى",
       },
     },
+    paymentTerms: {
+      new: "شرط دفع جديد",
+      edit: "تعديل شرط الدفع",
+      days: "عدد الأيام",
+      seed: "إضافة شروط جاهزة",
+      seedTitle: "شروط الدفع الجاهزة",
+      seedDesc: "اختر الشروط اللي تحتاجها، وهنضيف بس اللي مش موجود.",
+      seeded: "تمت إضافة {count} شرط",
+      deleteConfirm: "حذف شرط الدفع؟ لا يمكن التراجع.",
+      paymentTerm: "شرط الدفع",
+    },
+
+
 
     currencies: {
       title: "العملات",
@@ -969,6 +982,19 @@ export const translations = {
         other: "Other",
       },
     },
+    paymentTerms: {
+      new: "New Payment Term",
+      edit: "Edit Payment Term",
+      days: "Days",
+      seed: "Add Presets",
+      seedTitle: "Preset Payment Terms",
+      seedDesc: "Pick the terms you need — only missing ones will be added.",
+      seeded: "Added {count} term(s)",
+      deleteConfirm: "Delete this payment term? This cannot be undone.",
+      paymentTerm: "Payment Term",
+    },
+
+
 
     currencies: {
       title: "Currencies",
