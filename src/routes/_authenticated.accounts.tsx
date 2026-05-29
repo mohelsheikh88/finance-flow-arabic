@@ -968,12 +968,14 @@ function ChartOfAccountsTable({
   onEdit,
   onDelete,
   onToggleReconcilable,
+  onToggleGroup,
 }: {
   accounts: any[];
   accountTypes: any[];
   classifications: any[];
   onEdit: (a: any) => void;
   onDelete: (a: any) => void;
+  onToggleGroup: (a: any, v: boolean) => void;
   onToggleReconcilable: (a: any, v: boolean) => void;
 }) {
   const { t } = useI18n();
