@@ -22,12 +22,12 @@ type AcctRow = {
 };
 
 /**
- * Build a map of account_id -> classification metadata (statement, normal_balance, bucket)
- * by resolving accounts -> account_types -> classifications. Falls back to the legacy
- * account_type enum when an account has no classification linkage yet.
+ * Build a map of account_id -> classification metadata (statement, normal_balance, bucket).
+ * Resolves directly via accounts.classification_id, falling back to the legacy account_type
+ * bucket text when an older account has no classification linkage yet.
  */
 async function buildAccountClassificationMap(supabase: any, companyId: string) {
-  const [{ data: classifications }, { data: accountTypes }, { data: accounts }] = await Promise.all([
+  const [{ data: classifications }, { data: accounts }] = await Promise.all([
     supabase
       .from("classifications")
       .select("id, code, name_ar, name_en, statement, normal_balance, bucket, sort_order, is_active")
@@ -35,12 +35,8 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
       .order("sort_order", { ascending: true })
       .order("code", { ascending: true }),
     supabase
-      .from("account_types")
-      .select("id, classification_id, classification")
-      .eq("company_id", companyId),
-    supabase
       .from("accounts")
-      .select("id, account_type_id, account_type")
+      .select("id, classification_id, account_type")
       .eq("company_id", companyId),
   ]);
 
@@ -54,17 +50,10 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
     if (!clsByBucket.has(c.bucket)) clsByBucket.set(c.bucket, c);
   });
 
-  const typeById = new Map<string, any>();
-  (accountTypes ?? []).forEach((t: any) => typeById.set(t.id, t));
-
   const accountInfo = new Map<string, any>();
   for (const a of accounts ?? []) {
     let cls: any = null;
-    if (a.account_type_id) {
-      const at = typeById.get(a.account_type_id);
-      if (at?.classification_id) cls = clsById.get(at.classification_id) ?? null;
-      if (!cls && at?.classification) cls = clsByBucket.get(at.classification as Bucket) ?? null;
-    }
+    if (a.classification_id) cls = clsById.get(a.classification_id) ?? null;
     if (!cls) cls = clsByBucket.get(a.account_type as Bucket) ?? null;
 
     const bucket: Bucket = (cls?.bucket ?? a.account_type) as Bucket;
@@ -85,6 +74,7 @@ async function buildAccountClassificationMap(supabase: any, companyId: string) {
   }
   return { accountInfo, classifications: clsList };
 }
+
 
 
 async function getAccountBalances(

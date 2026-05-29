@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  listAccounts, upsertAccount, deleteAccount, importAccounts, listAccountTypes, listClassifications,
+  listAccounts, upsertAccount, deleteAccount, importAccounts, listClassifications,
+
   listAccountingBuckets, upsertAccountingBucket, deleteAccountingBucket,
 } from "@/lib/api/accounting.functions";
 
@@ -29,8 +30,8 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 import { ClassificationsPage } from "./_authenticated.classifications";
-import { AccountClassificationsPage } from "./_authenticated.account-classifications";
 import { CostCentersPage } from "./_authenticated.cost-centers";
+
 
 
 export const Route = createFileRoute("/_authenticated/accounts")({
@@ -47,7 +48,6 @@ function AccountsPage() {
           <TabsTrigger value="coa">{t("accounts.title")}</TabsTrigger>
           <TabsTrigger value="classifications">{t("accounts.coreClassifications")}</TabsTrigger>
           <TabsTrigger value="buckets">{t("accounts.accountingBucket")}</TabsTrigger>
-          <TabsTrigger value="mapping">{t("accounts.classificationMapping")}</TabsTrigger>
           <TabsTrigger value="cost-centers">{t("nav.costCenters")}</TabsTrigger>
 
         </TabsList>
@@ -60,9 +60,7 @@ function AccountsPage() {
         <TabsContent value="buckets" className="mt-4">
           <AccountingBucketsPanel />
         </TabsContent>
-        <TabsContent value="mapping" className="mt-4">
-          <AccountClassificationsPage embedded />
-        </TabsContent>
+
         <TabsContent value="cost-centers" className="mt-4">
           <CostCentersPage embedded />
         </TabsContent>
@@ -114,7 +112,6 @@ function ChartOfAccountsPanel() {
   const qc = useQueryClient();
 
   const list = useServerFn(listAccounts);
-  const listTypes = useServerFn(listAccountTypes);
   const listCls = useServerFn(listClassifications);
   const upsert = useServerFn(upsertAccount);
   const remove = useServerFn(deleteAccount);
@@ -125,11 +122,9 @@ function ChartOfAccountsPanel() {
     enabled: !!companyId,
   });
 
-  const { data: accountTypes = [] } = useQuery({
-    queryKey: ["account_types", companyId],
-    queryFn: () => listTypes({ data: { companyId: companyId! } }),
-    enabled: !!companyId,
-  });
+  // Account Types are deprecated — keep an empty stub for legacy lookups below.
+  const accountTypes: any[] = [];
+
 
   const { data: classifications = [] } = useQuery({
     queryKey: ["classifications", companyId],
@@ -524,7 +519,8 @@ function ChartOfAccountsPanel() {
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
           <FileDown className="h-4 w-4 me-1" />Import
         </Button>
-        <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
+        <Button onClick={openNew} disabled={!companyId}>
+
           <Plus className="h-4 w-4 me-1" />{t("common.new")}
         </Button>
       </div>
@@ -1046,7 +1042,8 @@ function ChartOfAccountsTree({
   const kindBadge = (n: TreeNode) => {
     if (n.kind === "bucket") return t("accounts.accountingBucket");
     if (n.kind === "classification") return t("accounts.coreClassification") || "Core Classification";
-    if (n.kind === "account_type") return t("accounts.accountTypesNav");
+
+
     return n.data?.is_group ? (t("common.group") || "Group") : (t("common.leaf") || "Leaf");
   };
 
@@ -1403,7 +1400,6 @@ function AccountingBucketsPanel() {
   const upsert = useServerFn(upsertAccountingBucket);
   const remove = useServerFn(deleteAccountingBucket);
   const listCls = useServerFn(listClassifications);
-  const listTypes = useServerFn(listAccountTypes);
 
   const { data: buckets = [] } = useQuery({
     queryKey: ["accounting_buckets", companyId],
@@ -1415,11 +1411,9 @@ function AccountingBucketsPanel() {
     queryFn: () => listCls({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
-  const { data: accountTypes = [] } = useQuery({
-    queryKey: ["account_types", companyId],
-    queryFn: () => listTypes({ data: { companyId: companyId! } }),
-    enabled: !!companyId,
-  });
+  // Account Types are deprecated.
+  const accountTypes: any[] = [];
+
 
   type BForm = {
     id?: string;
@@ -1525,9 +1519,7 @@ function AccountingBucketsPanel() {
           const cls = (classifications as any[]).filter(
             (c) => c.bucket === b.code && c.is_active,
           );
-          const typesCount = (accountTypes as any[]).filter(
-            (at) => at.classification === b.code,
-          ).length;
+
           const swatch =
             bucketColors[b.code] ?? "bg-muted text-foreground border-border";
           return (
@@ -1587,9 +1579,9 @@ function AccountingBucketsPanel() {
               </div>
               <div className="space-y-1">
                 <div className="text-xs text-muted-foreground">
-                  {t("accounts.coreClassifications")} · {typesCount}{" "}
-                  {t("accounts.accountTypesNav")}
+                  {t("accounts.coreClassifications")} · {cls.length}
                 </div>
+
                 {cls.length === 0 ? (
                   <div className="text-xs text-muted-foreground italic">
                     {t("common.noData")}

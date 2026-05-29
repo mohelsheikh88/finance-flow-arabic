@@ -18,245 +18,11 @@ export const listAccounts = createServerFn({ method: "GET" })
 
 const ACCOUNT_TYPES = ["asset", "liability", "equity", "income", "expense"] as const;
 
-// ---------------- Account Types (customizable per company) ----------------
+// ---------------- Account Types: REMOVED ----------------
+// The Account Types layer has been removed. Accounts now reference classifications
+// directly via accounts.classification_id. Any legacy references should migrate to
+// listClassifications / upsertAccount instead.
 
-export const listAccountTypes = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: { companyId: string }) => i)
-  .handler(async ({ data, context }) => {
-    const { data: rows, error } = await (context.supabase as any)
-      .from("account_types")
-      .select("*")
-      .eq("company_id", data.companyId)
-      .order("classification")
-      .order("sort_order", { ascending: true })
-      .order("code");
-    if (error) throw new Error(error.message);
-    return rows ?? [];
-  });
-
-export const moveAccountType = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: { id: string; direction: "up" | "down" }) =>
-    z.object({ id: z.string().uuid(), direction: z.enum(["up", "down"]) }).parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as any;
-    const { data: cur, error: e1 } = await sb
-      .from("account_types")
-      .select("id, company_id, parent_id, classification, sort_order, code")
-      .eq("id", data.id)
-      .single();
-    if (e1 || !cur) throw new Error(e1?.message || "Not found");
-
-    let q = sb
-      .from("account_types")
-      .select("id, sort_order, code")
-      .eq("company_id", cur.company_id)
-      .eq("classification", cur.classification);
-    q = cur.parent_id ? q.eq("parent_id", cur.parent_id) : q.is("parent_id", null);
-    const { data: siblings, error: e2 } = await q;
-    if (e2) throw new Error(e2.message);
-
-    const sorted = (siblings ?? [])
-      .slice()
-      .sort(
-        (a: any, b: any) =>
-          (a.sort_order ?? 0) - (b.sort_order ?? 0) || String(a.code).localeCompare(String(b.code)),
-      );
-    const idx = sorted.findIndex((r: any) => r.id === cur.id);
-    const swapIdx = data.direction === "up" ? idx - 1 : idx + 1;
-    if (idx < 0 || swapIdx < 0 || swapIdx >= sorted.length) return { ok: true, moved: false };
-
-    // Normalize sort_order across siblings to guarantee distinct values, then swap.
-    for (let i = 0; i < sorted.length; i++) {
-      const desired = (i + 1) * 10;
-      if ((sorted[i].sort_order ?? -1) !== desired) {
-        const u = await sb
-          .from("account_types")
-          .update({ sort_order: desired })
-          .eq("id", sorted[i].id);
-        if (u.error) throw new Error(u.error.message);
-        sorted[i].sort_order = desired;
-      }
-    }
-    const a = sorted[idx],
-      b = sorted[swapIdx];
-    const aOrder = a.sort_order as number;
-    const bOrder = b.sort_order as number;
-    const tmp = -(aOrder + bOrder + 1);
-    let r = await sb.from("account_types").update({ sort_order: tmp }).eq("id", a.id);
-    if (r.error) throw new Error(r.error.message);
-    r = await sb.from("account_types").update({ sort_order: aOrder }).eq("id", b.id);
-    if (r.error) throw new Error(r.error.message);
-    r = await sb.from("account_types").update({ sort_order: bOrder }).eq("id", a.id);
-    if (r.error) throw new Error(r.error.message);
-    return { ok: true, moved: true };
-  });
-
-// Reorder a sibling group. Root account types can move across classifications;
-// child account types must stay within the same parent classification.
-export const reorderAccountTypes = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: { companyId: string; orderedIds: string[] }) =>
-    z
-      .object({
-        companyId: z.string().uuid(),
-        orderedIds: z.array(z.string().uuid()).min(1).max(2000),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as any;
-    // Verify all belong to same company + parent. Children must also share classification.
-    const { data: rows, error } = await sb
-      .from("account_types")
-      .select("id, company_id, parent_id, classification")
-      .in("id", data.orderedIds);
-    if (error) throw new Error(error.message);
-    if (!rows || rows.length !== data.orderedIds.length) throw new Error("Some items not found");
-    const first = rows[0];
-    for (const r of rows) {
-      if (r.company_id !== data.companyId) throw new Error("Cross-company reorder denied");
-      if ((r.parent_id ?? null) !== (first.parent_id ?? null)) {
-        throw new Error("All items must be siblings (same parent)");
-      }
-      if (first.parent_id && r.classification !== first.classification) {
-        throw new Error("Child items must stay within the same classification");
-      }
-    }
-    // First pass: bump to negative temp to avoid uniqueness conflicts (none here, but safe).
-    for (let i = 0; i < data.orderedIds.length; i++) {
-      const u = await sb
-        .from("account_types")
-        .update({ sort_order: -(i + 1) })
-        .eq("id", data.orderedIds[i]);
-      if (u.error) throw new Error(u.error.message);
-    }
-    for (let i = 0; i < data.orderedIds.length; i++) {
-      const u = await sb
-        .from("account_types")
-        .update({ sort_order: (i + 1) * 10 })
-        .eq("id", data.orderedIds[i]);
-      if (u.error) throw new Error(u.error.message);
-    }
-    return { ok: true };
-  });
-
-const AccountTypeUpsertSchema = z.object({
-  id: z.string().uuid().optional(),
-  company_id: z.string().uuid(),
-  code: z.string().trim().min(1).max(50),
-  name_ar: z.string().trim().min(1).max(255),
-  name_en: z.string().trim().min(1).max(255),
-  classification: z.string().trim().min(1).max(50),
-  classification_id: z.string().uuid().nullable().optional(),
-  parent_id: z.string().uuid().nullable().optional(),
-  is_group: z.boolean().optional(),
-  is_active: z.boolean().optional(),
-  notes: z.string().max(2000).nullable().optional(),
-});
-
-export const upsertAccountType = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof AccountTypeUpsertSchema>) => AccountTypeUpsertSchema.parse(i))
-  .handler(async ({ data, context }) => {
-    let classification = data.classification;
-    // Validate classification_id relationship if provided
-    if (data.classification_id) {
-      const { data: cls, error: clsErr } = await context.supabase
-        .from("classifications")
-        .select("id, company_id, is_active, bucket")
-        .eq("id", data.classification_id)
-        .maybeSingle();
-      if (clsErr) throw new Error(clsErr.message);
-      if (!cls) throw new Error("Selected classification not found | التصنيف المحدد غير موجود");
-      if (cls.company_id !== data.company_id) {
-        throw new Error("Classification belongs to another company | التصنيف يخص شركة أخرى");
-      }
-      if (!cls.is_active) {
-        throw new Error("Selected classification is inactive | التصنيف المحدد غير مفعل");
-      }
-      classification = cls.bucket as any;
-    }
-
-    // Prevent changing bucket on a type already used by accounts of a different bucket
-    if (data.id) {
-      const { data: existing } = await context.supabase
-        .from("account_types")
-        .select("classification")
-        .eq("id", data.id)
-        .maybeSingle();
-      if (existing && existing.classification !== classification) {
-        const { count } = await context.supabase
-          .from("accounts")
-          .select("id", { count: "exact", head: true })
-          .eq("account_type_id", data.id);
-        if ((count ?? 0) > 0) {
-          throw new Error(
-            "Cannot change bucket: type is used by existing accounts | لا يمكن تغيير التصنيف الأساسي لأن النوع مستخدم في حسابات قائمة",
-          );
-        }
-      }
-    }
-
-    const payload: any = {
-      company_id: data.company_id,
-      code: data.code,
-      name_ar: data.name_ar,
-      name_en: data.name_en,
-      classification,
-      classification_id: data.classification_id ?? null,
-      parent_id: data.parent_id ?? null,
-      is_group: data.is_group ?? false,
-      is_active: data.is_active ?? true,
-      notes: data.notes ?? null,
-    };
-    if (data.id) {
-      const { data: row, error } = await context.supabase
-        .from("account_types")
-        .update(payload)
-        .eq("id", data.id)
-        .select()
-        .single();
-      if (error) throw new Error(error.message);
-      return row;
-    }
-    const { data: row, error } = await context.supabase
-      .from("account_types")
-      .insert(payload)
-      .select()
-      .single();
-    if (error) throw new Error(error.message);
-    return row;
-  });
-
-export const deleteAccountType = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
-  .handler(async ({ data, context }) => {
-    const { count: childCount } = await context.supabase
-      .from("account_types")
-      .select("id", { count: "exact", head: true })
-      .eq("parent_id", data.id);
-    if ((childCount ?? 0) > 0)
-      throw new Error(
-        "This type has children and cannot be deleted | هذا النوع يحتوي على أنواع فرعية ولا يمكن حذفه",
-      );
-
-    const { count } = await context.supabase
-      .from("accounts")
-      .select("id", { count: "exact", head: true })
-      .eq("account_type_id", data.id);
-    if ((count ?? 0) > 0)
-      throw new Error(
-        "This type is used by accounts and cannot be deleted | هذا النوع مستخدم في حسابات ولا يمكن حذفه",
-      );
-
-    const { error } = await context.supabase.from("account_types").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
 
 // ---------------- Classifications (core, customizable per company) ----------------
 
@@ -334,13 +100,14 @@ export const deleteClassification = createServerFn({ method: "POST" })
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { count } = await (context.supabase as any)
-      .from("account_types")
+      .from("accounts")
       .select("id", { count: "exact", head: true })
       .eq("classification_id", data.id);
     if ((count ?? 0) > 0)
       throw new Error(
-        "This classification is linked to account types and cannot be deleted | هذا التصنيف مرتبط بأنواع حسابات ولا يمكن حذفه",
+        "This classification is used by accounts and cannot be deleted | هذا التصنيف مستخدم في حسابات ولا يمكن حذفه",
       );
+
 
     const { error } = await (context.supabase as any)
       .from("classifications")
@@ -653,36 +420,9 @@ export const deleteAccount = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// Bulk reassign accounts to a different account_type (which drives classification via DB trigger).
-export const bulkUpdateAccountType = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: { companyId: string; accountIds: string[]; accountTypeId: string }) =>
-    z
-      .object({
-        companyId: z.string().uuid(),
-        accountIds: z.array(z.string().uuid()).min(1).max(2000),
-        accountTypeId: z.string().uuid(),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const { data: at, error: atErr } = await context.supabase
-      .from("account_types")
-      .select("classification, company_id")
-      .eq("id", data.accountTypeId)
-      .single();
-    if (atErr || !at) throw new Error("Invalid account type");
-    if (at.company_id !== data.companyId)
-      throw new Error("Account type does not belong to this company");
+// bulkUpdateAccountType has been removed alongside Account Types.
+// Use upsertAccount or a future bulk classification reassignment endpoint instead.
 
-    const { error } = await context.supabase
-      .from("accounts")
-      .update({ account_type_id: data.accountTypeId, account_type: at.classification })
-      .in("id", data.accountIds)
-      .eq("company_id", data.companyId);
-    if (error) throw new Error(error.message);
-    return { ok: true, updated: data.accountIds.length };
-  });
 
 const ImportRowSchema = z.object({
   code: z.string().trim().min(1).max(50),
@@ -717,13 +457,17 @@ export const importAccounts = createServerFn({ method: "POST" })
     const codeToId = new Map<string, string>();
     (existing ?? []).forEach((r: any) => codeToId.set(r.code, r.id));
 
-    // Load account types for resolving account_type_code -> account_type_id
-    const { data: types } = await context.supabase
-      .from("account_types")
-      .select("id, code, classification")
+    // Load classifications for resolving account_type_code / account_type -> classification_id + bucket.
+    const { data: classifications } = await context.supabase
+      .from("classifications")
+      .select("id, code, bucket, name_ar, name_en")
       .eq("company_id", data.companyId);
-    const typeByCode = new Map<string, any>();
-    (types ?? []).forEach((tp: any) => typeByCode.set(String(tp.code).toLowerCase(), tp));
+    const clsByKey = new Map<string, any>();
+    (classifications ?? []).forEach((c: any) => {
+      [c.code, c.bucket, c.name_ar, c.name_en].forEach((k) => {
+        if (k) clsByKey.set(String(k).trim().toLowerCase(), c);
+      });
+    });
 
     // Sort: parents (no parent_code) first so parent_id can resolve
     const sorted = [...data.rows].sort(
@@ -740,13 +484,25 @@ export const importAccounts = createServerFn({ method: "POST" })
         errors.push({ code: r.code, error: `Parent code "${r.parent_code}" not found` });
         continue;
       }
-      const tp = r.account_type_code ? typeByCode.get(String(r.account_type_code).toLowerCase()) : null;
+      const clsLookup =
+        (r.account_type_code && clsByKey.get(String(r.account_type_code).trim().toLowerCase())) ||
+        (r.account_type && clsByKey.get(String(r.account_type).trim().toLowerCase())) ||
+        null;
+      if (!clsLookup) {
+        errors.push({
+          code: r.code,
+          error: `Classification not found for "${r.account_type_code ?? r.account_type}"`,
+        });
+        continue;
+      }
       const payload: any = {
         company_id: data.companyId,
         code: r.code,
         name_ar: r.name_ar,
         name_en: r.name_en,
-        account_type: tp?.classification ?? r.account_type,
+        account_type: clsLookup.bucket,
+        classification_id: clsLookup.id,
+        account_type_id: null,
         parent_id,
         currency_code: r.currency_code || null,
         is_group: r.is_group ?? false,
@@ -754,7 +510,7 @@ export const importAccounts = createServerFn({ method: "POST" })
         is_reconcilable: r.is_reconcilable ?? false,
         notes: r.notes || null,
       };
-      if (tp?.id) payload.account_type_id = tp.id;
+
 
       const existingId = codeToId.get(r.code);
       if (existingId) {
@@ -1073,19 +829,15 @@ export const getTrialBalance = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     // Build classification metadata per account so the TB groups can show
     // the user-defined classification name/bucket rather than the legacy enum only.
-    const [{ data: classifications }, { data: accountTypes }, { data: accountsList }] =
+    const [{ data: classifications }, { data: accountsList }] =
       await Promise.all([
         context.supabase
           .from("classifications")
           .select("id, code, name_ar, name_en, statement, normal_balance, bucket")
           .eq("company_id", data.companyId),
         context.supabase
-          .from("account_types")
-          .select("id, classification_id, classification")
-          .eq("company_id", data.companyId),
-        context.supabase
           .from("accounts")
-          .select("id, account_type_id, account_type")
+          .select("id, classification_id, account_type")
           .eq("company_id", data.companyId),
       ]);
     const clsById = new Map<string, any>();
@@ -1094,16 +846,10 @@ export const getTrialBalance = createServerFn({ method: "GET" })
     (classifications ?? []).forEach((c: any) => {
       if (!clsByBucket.has(c.bucket)) clsByBucket.set(c.bucket, c);
     });
-    const typeById = new Map<string, any>();
-    (accountTypes ?? []).forEach((t: any) => typeById.set(t.id, t));
     const acctMeta = new Map<string, any>();
     for (const a of accountsList ?? []) {
       let cls: any = null;
-      if (a.account_type_id) {
-        const at = typeById.get(a.account_type_id);
-        if (at?.classification_id) cls = clsById.get(at.classification_id) ?? null;
-        if (!cls && at?.classification) cls = clsByBucket.get(at.classification) ?? null;
-      }
+      if (a.classification_id) cls = clsById.get(a.classification_id) ?? null;
       if (!cls) cls = clsByBucket.get(a.account_type) ?? null;
       acctMeta.set(a.id, {
         classification_id: cls?.id ?? null,
@@ -1115,6 +861,7 @@ export const getTrialBalance = createServerFn({ method: "GET" })
         normal_balance: cls?.normal_balance ?? null,
       });
     }
+
 
     // Get all posted lines up to date
     const { data: rows, error } = await context.supabase
