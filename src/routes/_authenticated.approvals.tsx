@@ -359,13 +359,15 @@ function ApprovalsPage() {
                   </Button>
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(w.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(w.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
-                    {s.step_order}. {localized(s, "step_name")} ({roleLabel(s.required_role)})
+                </div>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {(w.approval_steps_def || []).sort((a: any, b: any) => a.step_order - b.step_order).map((s: any) => (
                   <Badge key={s.id} variant="outline" className="font-mono text-[10px]">
-                    {s.step_order}. {localized(s, "step_name")} ({t(`users.${s.required_role}`)})
+                    {s.step_order}. {localized(s, "step_name")} ({roleLabel(s.required_role)})
                   </Badge>
                 ))}
               </div>
