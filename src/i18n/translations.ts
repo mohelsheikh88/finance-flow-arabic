@@ -309,6 +309,7 @@ export const translations = {
       crNumber: "السجل التجاري",
       address: "العنوان",
       done: "تم الإنشاء بنجاح",
+      fyStartMonth: "شهر بداية السنة المالية",
     },
     je: {
       title: "القيود اليومية",
