@@ -530,7 +530,7 @@ function Page() {
               </Select>
             </div>
             <Field label={t("common.code")} required value={brForm.code} onChange={(v) => setBrForm({ ...brForm, code: v })} />
-            <Field label="Phone" value={brForm.phone ?? ""} onChange={(v) => setBrForm({ ...brForm, phone: v })} dir="ltr" />
+            <Field label={t("common.phone")} value={brForm.phone ?? ""} onChange={(v) => setBrForm({ ...brForm, phone: v })} dir="ltr" />
             <Field label={t("common.name") + " (AR)"} required value={brForm.name_ar} onChange={(v) => setBrForm({ ...brForm, name_ar: v })} />
             <Field label={t("common.name") + " (EN)"} required value={brForm.name_en} onChange={(v) => setBrForm({ ...brForm, name_en: v })} dir="ltr" />
             <div className="col-span-2">
