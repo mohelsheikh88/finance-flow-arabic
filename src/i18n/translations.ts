@@ -348,9 +348,19 @@ export const translations = {
       updated: "تعديل",
       deleted: "حذف",
       line: "سطر",
+      lineNum: "السطر #{n}",
+      header: "الرأس",
       more: "تغييرات إضافية",
       view: "عرض السجل",
+      noChanges: "تم الحفظ بدون تعديل قيم",
+      changesCount: "{n} حقل",
+      showDetails: "عرض التفاصيل",
+      hideDetails: "إخفاء التفاصيل",
+      before: "قبل",
+      after: "بعد",
+      empty_value: "—",
     },
+
 
     dashboard: {
       title: "لوحة المحاسبة العامة",
@@ -1095,9 +1105,19 @@ export const translations = {
       updated: "Updated",
       deleted: "Deleted",
       line: "line",
+      lineNum: "Line #{n}",
+      header: "Header",
       more: "more changes",
       view: "View history",
+      noChanges: "Saved without value changes",
+      changesCount: "{n} field(s)",
+      showDetails: "Show details",
+      hideDetails: "Hide details",
+      before: "Before",
+      after: "After",
+      empty_value: "—",
     },
+
 
     dashboard: {
       title: "Accounting Dashboard",
