@@ -23,7 +23,7 @@ export function ApprovalWorkflowTimeline({
   documentType: DocType;
   documentId: string;
 }) {
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
   const localized = useLocalized();
   const qc = useQueryClient();
   const getFn = useServerFn(getApprovalForDocument);
