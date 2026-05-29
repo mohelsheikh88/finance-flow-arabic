@@ -386,6 +386,7 @@ function CustomerTypesDialog({
           notes: form.notes.trim() || null,
           is_active: form.is_active,
           sort_order: Number(form.sort_order) || 0,
+          receivable_account_id: form.receivable_account_id || null,
         } as any,
       }),
     onSuccess: () => {
