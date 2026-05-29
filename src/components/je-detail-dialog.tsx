@@ -145,6 +145,20 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
                 {t("je.readOnlyNotice")}
               </div>
             )}
+            {sourceLink && (
+              <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/20 rounded p-2">
+                <span className="text-muted-foreground">{t("je.source")}:</span>
+                <span className="font-medium">{sourceLink.label}</span>
+                <Link
+                  to={sourceLink.to}
+                  onClick={onClose}
+                  className="ms-auto inline-flex items-center gap-1 text-primary hover:underline"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  {t("je.openSource")}
+                </Link>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
