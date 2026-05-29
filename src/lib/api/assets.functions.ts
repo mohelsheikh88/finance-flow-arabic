@@ -180,7 +180,7 @@ export async function postDueDepreciationCore(
     .select(`
       id, period_date, depreciation_amount, accumulated_depreciation, book_value, asset_id,
       fixed_assets!inner(
-        id, company_id, branch_id, code, name_ar, name_en,
+        id, company_id, branch_id, code, name_ar, name_en, partner_id,
         depreciation_account_id, accumulated_depreciation_account_id,
         acquisition_cost, useful_life_months
       )
