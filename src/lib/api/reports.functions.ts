@@ -420,3 +420,134 @@ export const getCashFlowStatement = createServerFn({ method: "GET" })
     };
   });
 
+// =====================================================
+// Executive Summary — KPI dashboard combining cash, P&L,
+// balance-sheet position, and working-capital performance.
+// =====================================================
+
+export const getExecutiveSummary = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; dateFrom: string; dateTo: string }) => i)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { companyId, dateFrom, dateTo } = data;
+
+    // Days in selected period (inclusive). Min 1 to avoid divide-by-zero.
+    const days = Math.max(
+      1,
+      Math.round((new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / 86_400_000) + 1,
+    );
+
+    // ----- 1) Cash position (sum of all bank GL accounts up to dateTo) -----
+    const { data: bankRows } = await supabase
+      .from("bank_accounts")
+      .select("gl_account_id")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
+    const cashIds = (bankRows ?? []).map((b: any) => b.gl_account_id).filter(Boolean) as string[];
+
+    const sumBalance = async (
+      accountIds: string[],
+      opts: { from?: string | null; to?: string } = {},
+    ): Promise<number> => {
+      if (accountIds.length === 0) return 0;
+      let q = supabase
+        .from("journal_entry_lines")
+        .select("debit, credit, journal_entries!inner(entry_date, status, company_id)")
+        .in("account_id", accountIds)
+        .eq("journal_entries.status", "posted")
+        .eq("journal_entries.company_id", companyId);
+      if (opts.to) q = q.lte("journal_entries.entry_date", opts.to);
+      if (opts.from) q = q.gte("journal_entries.entry_date", opts.from);
+      const { data: lines, error } = await q;
+      if (error) throw new Error(error.message);
+      return (lines ?? []).reduce((s, l: any) => s + Number(l.debit || 0) - Number(l.credit || 0), 0);
+    };
+
+    const cashPosition = await sumBalance(cashIds, { to: dateTo });
+
+    // ----- 2) AR / AP (reconcilable assets / liabilities) -----
+    const [{ data: arAccts }, { data: apAccts }] = await Promise.all([
+      supabase.from("accounts").select("id").eq("company_id", companyId).eq("account_type", "asset").eq("is_reconcilable", true),
+      supabase.from("accounts").select("id").eq("company_id", companyId).eq("account_type", "liability").eq("is_reconcilable", true),
+    ]);
+    const arIds = (arAccts ?? []).map((a: any) => a.id);
+    const apIds = (apAccts ?? []).map((a: any) => a.id);
+
+    const arBalance = await sumBalance(arIds, { to: dateTo });
+    const apBalance = -(await sumBalance(apIds, { to: dateTo })); // payables natural credit
+
+    // ----- 3) P&L for the period (income/COGS/expense via classifications) -----
+    const { rows: periodRows } = await getAccountBalances(supabase, companyId, dateFrom, dateTo);
+    const isRows = periodRows.filter((r) => r.statement === "income_statement");
+    const totalRevenue = isRows.filter((r) => r.bucket === "income").reduce((s, r) => s + r.balance, 0);
+    const totalCosts = isRows.filter((r) => r.bucket === "COGS").reduce((s, r) => s + r.balance, 0);
+    const totalExpenses = isRows.filter((r) => r.bucket === "expense").reduce((s, r) => s + r.balance, 0);
+    const grossProfit = totalRevenue - totalCosts;
+    const netIncome = grossProfit - totalExpenses;
+
+    // ----- 4) Balance sheet position as of dateTo (current vs non-current via classification codes) -----
+    const { rows: bsAsOf } = await getAccountBalances(supabase, companyId, null, dateTo);
+    const isCurrent = (r: any) =>
+      (r.classification_code ?? "").startsWith("12") || (r.classification_code ?? "").startsWith("22");
+
+    const assets = bsAsOf.filter((r) => r.bucket === "asset");
+    const liabilities = bsAsOf.filter((r) => r.bucket === "liability");
+    const totalAssets = assets.reduce((s, r) => s + r.balance, 0);
+    const totalLiabilities = liabilities.reduce((s, r) => s + r.balance, 0);
+    const currentAssets = assets.filter(isCurrent).reduce((s, r) => s + r.balance, 0);
+    const currentLiabilities = liabilities.filter(isCurrent).reduce((s, r) => s + r.balance, 0);
+
+    // ----- 5) Performance ratios -----
+    const safeDiv = (a: number, b: number) => (b === 0 ? null : a / b);
+    const dso = totalRevenue > 0 ? (arBalance / totalRevenue) * days : null;
+    const purchasesBase = totalCosts + totalExpenses;
+    const dpo = purchasesBase > 0 ? (apBalance / purchasesBase) * days : null;
+    const currentRatio = safeDiv(currentAssets, currentLiabilities);
+    const quickRatio = safeDiv(currentAssets - 0 /* no inventory tracked */, currentLiabilities);
+    const grossMargin = safeDiv(grossProfit, totalRevenue);
+    const netMargin = safeDiv(netIncome, totalRevenue);
+    const returnOnAssets = safeDiv(netIncome, totalAssets);
+
+    // Short-term cash forecast (next 30 days, simple working-capital model)
+    const dailyRevenue = totalRevenue / days;
+    const dailyPurchases = purchasesBase / days;
+    const forecastInflow30 = arBalance + dailyRevenue * 30;
+    const forecastOutflow30 = apBalance + dailyPurchases * 30;
+    const shortTermForecast = cashPosition + forecastInflow30 - forecastOutflow30;
+
+    return {
+      dateFrom,
+      dateTo,
+      days,
+      cash: { position: cashPosition, ar: arBalance, ap: apBalance },
+      profitability: {
+        revenue: totalRevenue,
+        costs: totalCosts,
+        grossProfit,
+        expenses: totalExpenses,
+        netIncome,
+        grossMargin,
+        netMargin,
+      },
+      position: {
+        totalAssets,
+        totalLiabilities,
+        currentAssets,
+        currentLiabilities,
+        workingCapital: currentAssets - currentLiabilities,
+        currentRatio,
+        quickRatio,
+        debtToAssets: safeDiv(totalLiabilities, totalAssets),
+      },
+      performance: {
+        dso,
+        dpo,
+        returnOnAssets,
+        shortTermForecast,
+        forecastInflow30,
+        forecastOutflow30,
+      },
+    };
+  });
+
