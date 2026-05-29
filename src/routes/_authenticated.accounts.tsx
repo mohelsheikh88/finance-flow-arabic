@@ -141,6 +141,9 @@ function ChartOfAccountsPanel() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(empty);
   const [toDelete, setToDelete] = useState<any | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const parents = useMemo(() => {
     return (accounts as any[]).filter((a) => a.is_group && a.id !== form.id);
