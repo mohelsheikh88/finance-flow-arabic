@@ -1585,6 +1585,7 @@ export type Database = {
       }
       journals: {
         Row: {
+          allow_manual_entries: boolean
           code: string
           company_id: string
           created_at: string
@@ -1601,6 +1602,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allow_manual_entries?: boolean
           code: string
           company_id: string
           created_at?: string
@@ -1617,6 +1619,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allow_manual_entries?: boolean
           code?: string
           company_id?: string
           created_at?: string
