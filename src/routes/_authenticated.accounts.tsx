@@ -706,7 +706,7 @@ function ChartOfAccountsPanel() {
             </div>
           </div>
 
-          </div>
+
           {pageSize > 0 && totalPages > 1 && (
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1}>
