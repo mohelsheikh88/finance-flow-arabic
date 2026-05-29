@@ -220,8 +220,8 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   variant="ghost"
                   size="icon"
                   onClick={onTogglePin}
-                  aria-label={pinned ? "Unpin sidebar" : "Pin sidebar"}
-                  title={pinned ? "Unpin" : "Pin"}
+                  aria-label={pinned ? t("common.unpin") : t("common.pin")}
+                  title={pinned ? t("common.unpin") : t("common.pin")}
                   className={
                     "h-8 w-8 shrink-0 rounded-md transition-all " +
                     (pinned
