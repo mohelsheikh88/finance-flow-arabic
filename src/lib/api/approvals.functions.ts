@@ -104,6 +104,72 @@ export const createWorkflow = createServerFn({ method: "POST" })
     return { workflow: wf };
   });
 
+const UpdateWf = z.object({
+  id: z.string().uuid(),
+  name_ar: z.string().min(1),
+  name_en: z.string().min(1),
+  journal_type: z.enum(JOURNAL_TYPES),
+  min_amount: z.number().min(0),
+  max_amount: z.number().nullable(),
+  is_active: z.boolean().optional(),
+  steps: z.array(z.object({
+    step_order: z.number().int().min(1),
+    required_role: z.string(),
+    step_name_ar: z.string(),
+    step_name_en: z.string(),
+  })).min(1),
+});
+
+export const updateWorkflow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => UpdateWf.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error: ue } = await supabase
+      .from("approval_workflows")
+      .update({
+        name_ar: data.name_ar,
+        name_en: data.name_en,
+        journal_type: data.journal_type,
+        min_amount: data.min_amount,
+        max_amount: data.max_amount,
+        ...(data.is_active !== undefined ? { is_active: data.is_active } : {}),
+      })
+      .eq("id", data.id);
+    if (ue) throw new Error(ue.message);
+
+    const { error: de } = await supabase
+      .from("approval_steps_def")
+      .delete()
+      .eq("workflow_id", data.id);
+    if (de) throw new Error(de.message);
+
+    const { error: ie } = await supabase
+      .from("approval_steps_def")
+      .insert(data.steps.map((s) => ({ ...s, workflow_id: data.id, required_role: s.required_role as any })));
+    if (ie) throw new Error(ie.message);
+    return { ok: true };
+  });
+
+export const deleteWorkflow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { count } = await supabase
+      .from("approval_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("workflow_id", data.id);
+    if ((count ?? 0) > 0) {
+      throw new Error("Cannot delete workflow with existing approval requests. Deactivate it instead.");
+    }
+    await supabase.from("approval_steps_def").delete().eq("workflow_id", data.id);
+    const { error } = await supabase.from("approval_workflows").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 /**
  * Internal helper – finds an active workflow matching journal_type + amount.
  */
