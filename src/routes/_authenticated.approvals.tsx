@@ -359,8 +359,6 @@ function ApprovalsPage() {
                   </Button>
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(w.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(w.id)}>
-                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
