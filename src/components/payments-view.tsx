@@ -236,6 +236,7 @@ export function PaymentsView({
               <th className="text-end p-3 font-medium font-mono">{t("common.amount")}</th>
               <th className="text-start p-3 font-medium">{t("common.status")}</th>
               <th className="text-center p-3 font-medium">{t("approvals.approval")}</th>
+              <th className="w-10 p-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -252,12 +253,26 @@ export function PaymentsView({
                   </Badge>
                 </td>
                 <td className="p-3 text-center"><ApprovalCell documentType="payment" documentId={p.id} /></td>
+                <td className="p-3 text-center">
+                  <Button size="icon" variant="ghost" className="h-7 w-7" title={t("history.view")} onClick={() => setHistoryId(p.id)}>
+                    <History className="h-3.5 w-3.5" />
+                  </Button>
+                </td>
               </tr>
             ))}
-            {payments.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {payments.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
+
+      <Dialog open={!!historyId} onOpenChange={(o) => !o && setHistoryId(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("history.title")}</DialogTitle>
+          </DialogHeader>
+          {historyId && <HistoryLog table="payments" recordId={historyId} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
