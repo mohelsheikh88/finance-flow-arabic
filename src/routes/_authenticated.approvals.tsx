@@ -69,6 +69,39 @@ function ApprovalsPage() {
     { step_order: 2, required_role: "finance_manager", step_name_ar: "اعتماد المدير المالي", step_name_en: "Finance Manager Approval" },
   ]);
 
+  const resetForm = () => {
+    setEditingId(null);
+    setIsActive(true);
+    setWfForm({ name_ar: "", name_en: "", journal_type: "sales", min_amount: 0, max_amount: null });
+    setSteps([
+      { step_order: 1, required_role: "chief_accountant", step_name_ar: "مراجعة رئيس الحسابات", step_name_en: "Chief Accountant Review" },
+      { step_order: 2, required_role: "finance_manager", step_name_ar: "اعتماد المدير المالي", step_name_en: "Finance Manager Approval" },
+    ]);
+  };
+
+  const openEdit = (w: any) => {
+    setEditingId(w.id);
+    setIsActive(!!w.is_active);
+    setWfForm({
+      name_ar: w.name_ar || "",
+      name_en: w.name_en || "",
+      journal_type: (w.journal_type || "sales") as typeof JOURNAL_TYPES[number],
+      min_amount: Number(w.min_amount) || 0,
+      max_amount: w.max_amount != null ? Number(w.max_amount) : null,
+    });
+    const ss = (w.approval_steps_def || [])
+      .slice()
+      .sort((a: any, b: any) => a.step_order - b.step_order)
+      .map((s: any, i: number) => ({
+        step_order: i + 1,
+        required_role: s.required_role,
+        step_name_ar: s.step_name_ar || "",
+        step_name_en: s.step_name_en || "",
+      }));
+    setSteps(ss.length ? ss : [{ step_order: 1, required_role: "accountant", step_name_ar: "", step_name_en: "" }]);
+    setWfOpen(true);
+  };
+
   const createWfMut = useMutation({
     mutationFn: () => createWf({
       data: {
@@ -81,10 +114,43 @@ function ApprovalsPage() {
       qc.invalidateQueries({ queryKey: ["workflows"] });
       toast.success(t("common.saved"));
       setWfOpen(false);
-      setWfForm({ name_ar: "", name_en: "", journal_type: "sales", min_amount: 0, max_amount: null });
+      resetForm();
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  const updateWfMut = useMutation({
+    mutationFn: () => updateWf({
+      data: {
+        id: editingId!,
+        ...wfForm,
+        is_active: isActive,
+        steps: steps.map((s, i) => ({ ...s, step_order: i + 1 })),
+      },
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workflows"] });
+      toast.success(t("common.saved"));
+      setWfOpen(false);
+      resetForm();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteWfMut = useMutation({
+    mutationFn: (id: string) => deleteWf({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workflows"] });
+      toast.success(t("common.deleted") || t("common.saved"));
+      setDeleteId(null);
+    },
+    onError: (e: any) => {
+      toast.error(e.message);
+      setDeleteId(null);
+    },
+  });
+
+  const saveMut = editingId ? updateWfMut : createWfMut;
 
   const workflows = wfData?.workflows || [];
 
