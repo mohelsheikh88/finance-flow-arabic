@@ -276,7 +276,6 @@ function ApprovalsPage() {
                 ))}
               </div>
             </div>
-            </div>
             <DialogFooter>
               <Button
                 onClick={() => {
