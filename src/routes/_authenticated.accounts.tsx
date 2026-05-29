@@ -264,6 +264,8 @@ function ChartOfAccountsPanel() {
       is_group: !!a.is_group,
       is_active: !!a.is_active,
       is_reconcilable: !!a.is_reconcilable,
+      is_receivable: !!a.is_receivable,
+      is_payable: !!a.is_payable,
       notes: a.notes ?? "",
     });
     setOpen(true);
