@@ -602,6 +602,9 @@ export const translations = {
       totalNbv: "إجمالي القيمة الدفترية",
       status: { draft: "مسودة", active: "نشط", fully_depreciated: "مهلك بالكامل", disposed: "مستبعد" },
     },
+    costCenters: {
+      hint: "المجموعات يمكن أن تحتوي أبناء؛ يمكن اختيار الأوراق فقط في المعاملات.",
+    },
   },
   en: {
     common: {
