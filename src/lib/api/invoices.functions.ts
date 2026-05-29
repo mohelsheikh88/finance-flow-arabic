@@ -557,9 +557,12 @@ export const resetInvoiceToDraft = createServerFn({ method: "POST" })
 
     await assertNotLocked(supabase, inv.company_id, inv.branch_id, inv.invoice_date);
 
+    // Flip JE back to draft (keep entry + lines so it still appears in TB/JE list as draft)
     if (inv.journal_entry_id) {
-      await supabase.from("journal_entry_lines").delete().eq("entry_id", inv.journal_entry_id);
-      const { error: jeErr } = await supabase.from("journal_entries").delete().eq("id", inv.journal_entry_id);
+      const { error: jeErr } = await supabase
+        .from("journal_entries")
+        .update({ status: "draft", posted_by: null, posted_at: null })
+        .eq("id", inv.journal_entry_id);
       if (jeErr) throw new Error(jeErr.message);
     }
 
@@ -567,12 +570,12 @@ export const resetInvoiceToDraft = createServerFn({ method: "POST" })
       .from("invoices")
       .update({
         status: "draft",
-        journal_entry_id: null,
         posted_by: null,
         posted_at: null,
       })
       .eq("id", inv.id);
     if (ue) throw new Error(ue.message);
+
 
     await supabase
       .from("approval_requests")
