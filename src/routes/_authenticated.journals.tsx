@@ -543,7 +543,7 @@ function JournalsPage() {
             </div>
 
             <div className="col-span-2">
-              <Label>Default Credit Account</Label>
+              <Label>{t("common.defaultCreditAccount")}</Label>
               <Select
                 value={form.default_credit_account_id || NONE}
                 onValueChange={(v) =>
