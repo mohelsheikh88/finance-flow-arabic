@@ -241,6 +241,14 @@ function ChartOfAccountsPanel() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const inlineUpsertMut = useMutation({
+    mutationFn: (data: any) => upsert({ data }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["accounts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
