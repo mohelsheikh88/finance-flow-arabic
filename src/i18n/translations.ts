@@ -646,6 +646,17 @@ export const translations = {
       noResetPermission: "ليس لديك صلاحية إرجاع هذه الفاتورة إلى مسودة",
       hasPayments: "لا يمكن الإرجاع: توجد دفعات مرتبطة بالفاتورة",
       periodClosed: "لا يمكن الإرجاع: الفترة المالية لتاريخ الفاتورة مغلقة",
+      detailsTitle: "تفاصيل الفاتورة",
+      linkedJE: "القيد المرتبط",
+      openJE: "فتح القيد",
+      printTax: "طباعة فاتورة ضريبية",
+    },
+    attachments: {
+      title: "المرفقات",
+      upload: "رفع مرفق",
+      empty: "لا توجد مرفقات",
+      uploaded: "تم رفع المرفق",
+      deleteConfirm: "هل تريد حذف هذا المرفق؟",
     },
 
     payments: {
@@ -720,6 +731,8 @@ export const translations = {
       document: "المستند",
       reference: "المرجع",
       approval: "الاعتماد",
+      workflow: "مسار الاعتماد",
+      noWorkflow: "لا يوجد مسار اعتماد مطبق على هذا المستند",
       actionDone: "تم تنفيذ الإجراء",
       doc: { journal_entry: "قيد يومي", invoice: "فاتورة", payment: "دفعة", asset_disposal: "استبعاد أصل" },
       jt: { sales: "مبيعات", purchase: "مشتريات", bank: "بنك", cash: "صندوق", misc: "متنوعة" },
@@ -1403,6 +1416,17 @@ export const translations = {
       noResetPermission: "You don't have permission to reset this invoice to draft",
       hasPayments: "Cannot reset: invoice has linked payments",
       periodClosed: "Cannot reset: fiscal period for the invoice date is closed",
+      detailsTitle: "Invoice Details",
+      linkedJE: "Linked Journal Entry",
+      openJE: "Open Entry",
+      printTax: "Print Tax Invoice",
+    },
+    attachments: {
+      title: "Attachments",
+      upload: "Upload Attachment",
+      empty: "No attachments yet",
+      uploaded: "Attachment uploaded",
+      deleteConfirm: "Delete this attachment?",
     },
 
     payments: {
@@ -1477,6 +1501,8 @@ export const translations = {
       document: "Document",
       reference: "Reference",
       approval: "Approval",
+      workflow: "Approval Workflow",
+      noWorkflow: "No approval workflow is configured for this document",
       actionDone: "Action submitted",
       doc: { journal_entry: "Journal Entry", invoice: "Invoice", payment: "Payment", asset_disposal: "Asset Disposal" },
       jt: { sales: "Sales", purchase: "Purchase", bank: "Bank", cash: "Cash", misc: "Miscellaneous" },
