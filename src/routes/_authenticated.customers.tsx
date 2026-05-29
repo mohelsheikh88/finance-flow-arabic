@@ -206,20 +206,19 @@ function CustomersPage() {
               <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
               <div>
                 <Label>{t("customers.receivableAccount")}</Label>
-                <Select
-                  value={form.receivable_account_id ?? "__none__"}
-                  onValueChange={(v) => setForm({ ...form, receivable_account_id: v === "__none__" ? null : v })}
-                >
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">{t("customers.defaultFromJournal")}</SelectItem>
-                    {arAccounts.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.code} — {localized(a, "name")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  readOnly
+                  className="bg-muted"
+                  value={
+                    form.receivable_account_id
+                      ? (() => {
+                          const a = (accounts as any[]).find((x) => x.id === form.receivable_account_id);
+                          return a ? `${a.code} — ${localized(a, "name")}` : "—";
+                        })()
+                      : ""
+                  }
+                  placeholder={t("customers.defaultFromJournal")}
+                />
               </div>
               <div>
                 <Label>{t("customers.customerType")}</Label>
