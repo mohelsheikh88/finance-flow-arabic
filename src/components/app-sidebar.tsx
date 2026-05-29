@@ -290,7 +290,10 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                           />
                           <SidebarGroup className="sidebar-parent p-0">
                             <SidebarGroupLabel asChild>
-                              <CollapsibleTrigger className="flex h-auto w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-sidebar-accent/40">
+                              <CollapsibleTrigger
+                                data-active={subActive}
+                                className="nav-pill flex h-auto w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-sidebar-foreground/80"
+                              >
                                 <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
                                 <span className="flex-1 whitespace-nowrap text-start">{sg.label}</span>
                               </CollapsibleTrigger>
