@@ -47,6 +47,20 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
 
   const isManualDraft = entry && entry.status === "draft" && (entry.source_type ?? "manual") === "manual";
 
+  const sourceLink: { to: string; label: string } | null = (() => {
+    if (!entry) return null;
+    const st = entry.source_type;
+    if (!st || st === "manual") return null;
+    if (st === "invoice") {
+      const isVendor = entry.source_invoice_type === "vendor_bill" || entry.source_invoice_type === "vendor";
+      return { to: isVendor ? "/invoices/vendor" : "/invoices/customer", label: isVendor ? t("je.sourceAP") : t("je.sourceAR") };
+    }
+    if (st === "payment") return { to: "/payments", label: t("je.sourceTreasury") };
+    if (["depreciation", "asset_disposal", "asset_acquisition", "fixed_asset"].includes(st)) return { to: "/assets", label: t("je.sourceFixedAssets") };
+    if (["loan", "loan_payment", "loan_disbursement"].includes(st)) return { to: "/loans", label: t("je.sourceLoans") };
+    return null;
+  })();
+
   const [editing, setEditing] = useState(false);
   const [header, setHeader] = useState({ entry_date: "", reference: "", description: "" });
   const [lines, setLines] = useState<Line[]>([]);
