@@ -226,7 +226,7 @@ export function InvoiceDetailDialog({
                 <Button variant="outline" size="sm" className="w-full justify-between">
                   <span className="flex items-center gap-2">
                     <History className="h-4 w-4" />
-                    {locale === "ar" ? "عرض سجل التغييرات" : "View Change History"}
+                    {t("invoices.viewChangeHistory")}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${showHistory ? "rotate-180" : ""}`} />
                 </Button>
