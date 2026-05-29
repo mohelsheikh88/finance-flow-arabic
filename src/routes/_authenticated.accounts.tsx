@@ -1,4 +1,5 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, Fragment } from "react";
+
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -149,8 +150,9 @@ function ChartOfAccountsPanel() {
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = useState(1);
-  useEffect(() => { setPage(1); setSelectedIds(new Set()); }, [search, filterClassification, filterIsGroup, filterStatus]);
-  const pageSize = 50;
+  const [pageSize, setPageSize] = useState<number>(50); // 0 = الكل
+  useEffect(() => { setPage(1); setSelectedIds(new Set()); }, [search, filterClassification, filterIsGroup, filterStatus, pageSize]);
+
 
 
   const typeById = useMemo(() => {
@@ -213,12 +215,15 @@ function ChartOfAccountsPanel() {
     });
   }, [accounts, search, filterClassification, filterIsGroup, filterStatus, localized, typeById]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / pageSize));
+  const effectivePageSize = pageSize > 0 ? pageSize : Math.max(filteredAccounts.length, 1);
+  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / effectivePageSize));
   const safePage = Math.min(Math.max(1, page), totalPages);
   const paginatedAccounts = useMemo(() => {
+    if (pageSize === 0) return filteredAccounts;
     const start = (safePage - 1) * pageSize;
     return filteredAccounts.slice(start, start + pageSize);
-  }, [filteredAccounts, safePage]);
+  }, [filteredAccounts, safePage, pageSize]);
+
 
   const openNew = () => {
     const defCls =
@@ -673,38 +678,64 @@ function ChartOfAccountsPanel() {
 
       {filteredAccounts.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-2">
-          <div className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">{filteredAccounts.length}</span> حساب — صفحة{" "}
-            <span className="font-medium text-foreground">{safePage}</span> من{" "}
-            <span className="font-medium text-foreground">{totalPages}</span>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span>
+              <span className="font-medium text-foreground">{filteredAccounts.length}</span> حساب — صفحة{" "}
+              <span className="font-medium text-foreground">{safePage}</span> من{" "}
+              <span className="font-medium text-foreground">{totalPages}</span>
+            </span>
+            <div className="flex items-center gap-2">
+              <span>عرض:</span>
+              <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                <SelectTrigger className="h-8 w-[110px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                  <SelectItem value="200">200</SelectItem>
+                  <SelectItem value="500">500</SelectItem>
+                  <SelectItem value="0">الكل</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1}>
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(safePage - 1)} disabled={safePage <= 1}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <Button
-                key={p}
-                variant={p === safePage ? "default" : "outline"}
-                size="sm"
-                onClick={() => setPage(p)}
-                className="min-w-[2.25rem] px-2"
-              >
-                {p}
+          {pageSize > 0 && totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1}>
+                <ChevronsLeft className="h-4 w-4" />
               </Button>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => setPage(safePage + 1)} disabled={safePage >= totalPages}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage >= totalPages}>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
+              <Button variant="outline" size="sm" onClick={() => setPage(safePage - 1)} disabled={safePage <= 1}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 2)
+                .map((p, idx, arr) => (
+                  <Fragment key={p}>
+                    {idx > 0 && p - arr[idx - 1] > 1 && (
+                      <span className="px-1 text-muted-foreground">…</span>
+                    )}
+                    <Button
+                      variant={p === safePage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setPage(p)}
+                      className="min-w-[2.25rem] px-2"
+                    >
+                      {p}
+                    </Button>
+                  </Fragment>
+                ))}
+              <Button variant="outline" size="sm" onClick={() => setPage(safePage + 1)} disabled={safePage >= totalPages}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage >= totalPages}>
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
+
 
 
 
