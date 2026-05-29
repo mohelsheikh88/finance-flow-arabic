@@ -411,6 +411,7 @@ function CustomerTypesDialog({
   const startEdit = (ct: any) => setForm({
     id: ct.id, code: ct.code, name_ar: ct.name_ar, name_en: ct.name_en,
     notes: ct.notes ?? "", is_active: !!ct.is_active, sort_order: ct.sort_order ?? 0,
+    receivable_account_id: ct.receivable_account_id ?? null,
   });
 
   return (
