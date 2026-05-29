@@ -16,6 +16,7 @@ import {
   CalendarRange,
   Wallet,
   TrendingUp,
+  Activity,
   ShieldCheck,
   Lock,
   History,
