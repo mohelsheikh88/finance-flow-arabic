@@ -83,6 +83,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
           label: t("nav.reports"),
           icon: BarChart3,
           items: [
+            { url: "/reports/executive-summary", icon: Activity, title: t("nav.executiveSummary") },
             { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
             { url: "/reports/income-statement", icon: TrendingUp, title: t("nav.incomeStatement") },
             { url: "/reports/cash-flow", icon: Wallet, title: t("nav.cashFlow") },
