@@ -657,6 +657,9 @@ export const translations = {
       empty: "لا توجد مرفقات",
       uploaded: "تم رفع المرفق",
       deleteConfirm: "هل تريد حذف هذا المرفق؟",
+      viewChangeHistory: "عرض سجل التغييرات",
+      afterPostingOnly: "متاح بعد الترحيل فقط",
+      cannotPrintBeforePost: "لا يمكن إصدار الفاتورة الضريبية إلا بعد الترحيل (POST)",
     },
 
     payments: {
