@@ -2,7 +2,9 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createPartner, listPartners } from "@/lib/api/accounting.functions";
+import {
+  createPartner, listPartners, updatePartner, deletePartner, listAccounts,
+} from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -12,12 +14,32 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, Users } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Pencil, Plus, Search, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   component: CustomersPage,
 });
+
+type FormState = {
+  id?: string;
+  code: string; name_ar: string; name_en: string; vat_number: string;
+  email: string; phone: string; credit_limit: number; address_ar: string;
+  receivable_account_id: string | null;
+};
+
+const emptyForm: FormState = {
+  code: "", name_ar: "", name_en: "", vat_number: "",
+  email: "", phone: "", credit_limit: 0, address_ar: "",
+  receivable_account_id: null,
+};
 
 function CustomersPage() {
   const { t } = useI18n();
@@ -26,8 +48,13 @@ function CustomersPage() {
   const qc = useQueryClient();
   const list = useServerFn(listPartners);
   const create = useServerFn(createPartner);
+  const update = useServerFn(updatePartner);
+  const remove = useServerFn(deletePartner);
+  const accountsFn = useServerFn(listAccounts);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<FormState>(emptyForm);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: all = [] } = useQuery({
     queryKey: ["partners", companyId],
@@ -35,26 +62,73 @@ function CustomersPage() {
     enabled: !!companyId,
   });
 
+  const { data: accounts = [] } = useQuery({
+    queryKey: ["accounts", companyId],
+    queryFn: () => accountsFn({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+  // Receivable accounts are assets (typically AR control accounts)
+  const arAccounts = (accounts as any[]).filter(
+    (a) => a.is_active && !a.is_group && a.account_type === "asset",
+  );
+
   const customers = all.filter((p: any) => p.is_customer);
   const filtered = customers.filter((p: any) =>
     !q || p.code.includes(q) || p.name_ar?.includes(q) || p.name_en?.toLowerCase().includes(q.toLowerCase())
   );
   const totalCredit = customers.reduce((s: number, p: any) => s + Number(p.credit_limit ?? 0), 0);
 
-  const [form, setForm] = useState({
-    code: "", name_ar: "", name_en: "", vat_number: "",
-    email: "", phone: "", credit_limit: 0, address_ar: "",
-  });
+  const isEdit = !!form.id;
+  const accountLabel = (id?: string | null) => {
+    if (!id) return "—";
+    const a = (accounts as any[]).find((x) => x.id === id);
+    return a ? `${a.code} — ${localized(a, "name")}` : "—";
+  };
 
-  const mut = useMutation({
-    mutationFn: () => create({ data: {
-      ...form, is_customer: true, is_vendor: false, company_id: companyId!,
-    } as any }),
+  const openCreate = () => { setForm(emptyForm); setOpen(true); };
+  const openEdit = (p: any) => {
+    setForm({
+      id: p.id, code: p.code, name_ar: p.name_ar, name_en: p.name_en,
+      vat_number: p.vat_number ?? "", email: p.email ?? "", phone: p.phone ?? "",
+      credit_limit: Number(p.credit_limit ?? 0), address_ar: p.address_ar ?? "",
+      receivable_account_id: p.receivable_account_id ?? null,
+    });
+    setOpen(true);
+  };
+
+  const saveMut = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        code: form.code, name_ar: form.name_ar, name_en: form.name_en,
+        vat_number: form.vat_number || null,
+        email: form.email || null, phone: form.phone || null,
+        credit_limit: Number(form.credit_limit) || 0,
+        address_ar: form.address_ar || null,
+        receivable_account_id: form.receivable_account_id || null,
+      };
+      if (form.id) {
+        return update({ data: { id: form.id, ...payload } as any });
+      }
+      return create({ data: {
+        ...payload, is_customer: true, is_vendor: false, company_id: companyId!,
+      } as any });
+    },
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["partners"] });
       setOpen(false);
-      setForm({ code: "", name_ar: "", name_en: "", vat_number: "", email: "", phone: "", credit_limit: 0, address_ar: "" });
+      setForm(emptyForm);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: () => remove({ data: { id: deleteId! } }),
+    onSuccess: () => {
+      toast.success(t("common.deleted") || "Deleted");
+      qc.invalidateQueries({ queryKey: ["partners"] });
+      setDeleteId(null);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -66,12 +140,12 @@ function CustomersPage() {
           <h1 className="page-title">{t("customers.title")}</h1>
           <p className="text-sm text-muted-foreground">{customers.length} {t("customers.activeCustomers")}</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(emptyForm); }}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
+            <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{t("customers.title")} — {t("common.add")}</DialogTitle></DialogHeader>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>{t("customers.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>{t("common.code")} *</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
               <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
@@ -80,11 +154,28 @@ function CustomersPage() {
               <div><Label>{t("common.email")}</Label><Input dir="ltr" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
               <div><Label>{t("common.phone")}</Label><Input dir="ltr" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
               <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
+              <div>
+                <Label>حساب الذمم المدينة (GL)</Label>
+                <Select
+                  value={form.receivable_account_id ?? "__none__"}
+                  onValueChange={(v) => setForm({ ...form, receivable_account_id: v === "__none__" ? null : v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— (الافتراضي من اليومية) —</SelectItem>
+                    {arAccounts.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.code} — {localized(a, "name")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="col-span-2"><Label>{t("setup.address")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-              <Button onClick={() => mut.mutate()} disabled={mut.isPending || !form.code || !form.name_ar || !form.name_en}>{t("common.save")}</Button>
+              <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en}>{t("common.save")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -122,9 +213,10 @@ function CustomersPage() {
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
-              <th className="text-start p-3 font-medium">Email</th>
+              <th className="text-start p-3 font-medium">حساب الذمم (GL)</th>
               <th className="text-start p-3 font-medium">Phone</th>
               <th className="text-end p-3 font-medium font-mono">{t("partners.creditLimit")}</th>
+              <th className="text-end p-3 font-medium w-24">{t("common.actions") || ""}</th>
             </tr>
           </thead>
           <tbody>
@@ -133,15 +225,42 @@ function CustomersPage() {
                 <td className="p-3 font-mono">{p.code}</td>
                 <td className="p-3 font-medium">{localized(p, "name")}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.vat_number || "—"}</td>
-                <td className="p-3 text-muted-foreground">{p.email || "—"}</td>
+                <td className="p-3 font-mono text-muted-foreground">{accountLabel(p.receivable_account_id)}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.phone || "—"}</td>
                 <td className="p-3 text-end font-mono">{Number(p.credit_limit ?? 0).toLocaleString()}</td>
+                <td className="p-3 text-end">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(p)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(p.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("common.confirmDelete") || "تأكيد الحذف"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("common.deleteWarning") || "لا يمكن التراجع عن هذا الإجراء."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteMut.mutate()} disabled={deleteMut.isPending}>
+              {t("common.delete") || "حذف"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
