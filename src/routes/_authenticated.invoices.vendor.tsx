@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Trash2, Check } from "lucide-react";
+import { Plus, Trash2, Check, Pencil, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { formatLockError } from "@/lib/lock-error";
 
