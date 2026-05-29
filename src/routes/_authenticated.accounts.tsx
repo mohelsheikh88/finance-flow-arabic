@@ -1398,7 +1398,6 @@ function AccountingBucketsPanel() {
   const upsert = useServerFn(upsertAccountingBucket);
   const remove = useServerFn(deleteAccountingBucket);
   const listCls = useServerFn(listClassifications);
-  const listTypes = useServerFn(listAccountTypes);
 
   const { data: buckets = [] } = useQuery({
     queryKey: ["accounting_buckets", companyId],
@@ -1410,11 +1409,9 @@ function AccountingBucketsPanel() {
     queryFn: () => listCls({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
-  const { data: accountTypes = [] } = useQuery({
-    queryKey: ["account_types", companyId],
-    queryFn: () => listTypes({ data: { companyId: companyId! } }),
-    enabled: !!companyId,
-  });
+  // Account Types are deprecated.
+  const accountTypes: any[] = [];
+
 
   type BForm = {
     id?: string;
