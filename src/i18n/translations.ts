@@ -1113,6 +1113,11 @@ export const translations = {
       sourceFixedAssets: "Fixed Assets",
       sourceLoans: "Loans Management",
       sourceManual: "Manual Entry",
+      details: "Entry Details",
+      edit: "Edit Entry",
+      reference: "Reference",
+      description: "Description",
+      readOnlyNotice: "Read-only: this entry is not manual or not in draft status",
     },
     journals: {
       allowManualEntries: "Allow manual entries from this journal",
