@@ -840,11 +840,11 @@ function ChartOfAccountsPanel() {
               </div>
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_receivable} onCheckedChange={(v) => setForm({ ...form, is_receivable: v })} />
-                <Label>ذمم مدينة (Receivable)</Label>
+                <Label>{t("accounts.isReceivable")}</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_payable} onCheckedChange={(v) => setForm({ ...form, is_payable: v })} />
-                <Label>ذمم دائنة (Payable)</Label>
+                <Label>{t("accounts.isPayable")}</Label>
               </div>
             </div>
             <div className="col-span-2">
