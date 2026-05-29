@@ -86,6 +86,14 @@ function CustomerInvoicesPage() {
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const { openInvoiceId } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  useEffect(() => { if (openInvoiceId) setDetailId(openInvoiceId); }, [openInvoiceId]);
+  const closeDetail = () => {
+    setDetailId(null);
+    if (openInvoiceId) navigate({ search: (prev: any) => ({ ...prev, openInvoiceId: undefined }) });
+  };
   const [header, setHeader] = useState({
     partner_id: "",
     invoice_date: new Date().toISOString().slice(0, 10),
