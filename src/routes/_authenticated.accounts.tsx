@@ -284,9 +284,6 @@ function ChartOfAccountsPanel() {
       });
     },
 
-    },
-
-
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["accounts"] });
