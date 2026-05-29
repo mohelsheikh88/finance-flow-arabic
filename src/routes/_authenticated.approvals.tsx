@@ -49,6 +49,11 @@ function ApprovalsPage() {
     queryFn: () => listRolesFn(),
   });
   const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
+  const roleLabel = (code: string) => {
+    const r = (rolesData as any[]).find((x) => x.code === code);
+    if (r) return locale === "ar" ? r.name_ar : r.name_en;
+    return t(`users.${code}`) || code;
+  };
 
   const [wfOpen, setWfOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -360,7 +365,7 @@ function ApprovalsPage() {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {(w.approval_steps_def || []).sort((a: any, b: any) => a.step_order - b.step_order).map((s: any) => (
                   <Badge key={s.id} variant="outline" className="font-mono text-[10px]">
-                    {s.step_order}. {localized(s, "step_name")} ({t(`users.${s.required_role}`)})
+                    {s.step_order}. {localized(s, "step_name")} ({roleLabel(s.required_role)})
                   </Badge>
                 ))}
               </div>
