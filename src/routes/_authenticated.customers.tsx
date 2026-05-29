@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   createPartner, listPartners, updatePartner, deletePartner, listAccounts,
   listCustomerTypes, upsertCustomerType, deleteCustomerType,
+  listPartnerContacts, savePartnerContacts,
 } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
