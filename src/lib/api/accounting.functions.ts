@@ -556,7 +556,7 @@ const AccountUpsertSchema = z.object({
   code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
-  account_type_id: z.string().uuid(),
+  account_type_id: z.string().trim().min(1).max(255),
   parent_id: z.string().uuid().nullable().optional(),
   currency_code: z.string().trim().min(1).max(10).nullable().optional(),
   is_group: z.boolean().optional(),
@@ -565,24 +565,33 @@ const AccountUpsertSchema = z.object({
   notes: z.string().max(2000).nullable().optional(),
 });
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export const upsertAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof AccountUpsertSchema>) => AccountUpsertSchema.parse(i))
   .handler(async ({ data, context }) => {
-    // Resolve classification from selected account type (DB trigger will also sync it)
-    const { data: at, error: atErr } = await context.supabase
+    // Resolve account type even if a legacy UI sends the type name/code instead of its UUID.
+    const accountTypeInput = data.account_type_id.trim();
+    const { data: accountTypes, error: atErr } = await context.supabase
       .from("account_types")
-      .select("classification")
-      .eq("id", data.account_type_id)
-      .single();
-    if (atErr || !at) throw new Error("Invalid account type");
+      .select("id, code, name_ar, name_en, classification")
+      .eq("company_id", data.company_id);
+    if (atErr) throw new Error(atErr.message);
+    const norm = (value: unknown) => String(value ?? "").trim().toLowerCase();
+    const at = UUID_RE.test(accountTypeInput)
+      ? (accountTypes ?? []).find((tp: any) => tp.id === accountTypeInput)
+      : (accountTypes ?? []).find((tp: any) =>
+          [tp.code, tp.name_ar, tp.name_en, tp.classification].map(norm).includes(norm(accountTypeInput)),
+        );
+    if (!at) throw new Error("Invalid account type | نوع الحساب غير صحيح");
     const payload: any = {
       company_id: data.company_id,
       code: data.code,
       name_ar: data.name_ar,
       name_en: data.name_en,
       account_type: at.classification,
-      account_type_id: data.account_type_id,
+      account_type_id: at.id,
       parent_id: data.parent_id ?? null,
       currency_code: data.currency_code || null,
       is_group: data.is_group ?? false,
