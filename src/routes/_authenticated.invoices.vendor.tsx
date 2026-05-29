@@ -330,6 +330,12 @@ function VendorBillsPage() {
               </div>
             </div>
 
+            {editingId && (
+              <div className="mt-4">
+                <HistoryLog table="invoices" recordId={editingId} />
+              </div>
+            )}
+
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => { setOpen(false); reset(); }}>{t("common.cancel")}</Button>
               {editingId ? (
