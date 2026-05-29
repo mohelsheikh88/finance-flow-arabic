@@ -68,7 +68,9 @@ function CustomersPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const [typesOpen, setTypesOpen] = useState(false);
+
 
   const { data: all = [] } = useQuery({
     queryKey: ["partners", companyId],
