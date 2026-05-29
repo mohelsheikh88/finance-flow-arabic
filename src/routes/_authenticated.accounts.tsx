@@ -1031,9 +1031,7 @@ function ChartOfAccountsTable({
                 </td>
                 <td className="p-3 text-center">
                   {a.is_group ? (
-                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                      {t("accounts.isGroup")}
-                    </Badge>
+                    <span className="text-sm">{t("accounts.isGroup")}</span>
                   ) : (
                     <span className="text-muted-foreground text-xs">—</span>
                   )}
