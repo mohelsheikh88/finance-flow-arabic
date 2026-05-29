@@ -603,6 +603,12 @@ export const translations = {
       cost: "Cost",
       category: "Category",
       currencies: "Currencies",
+      account: "account",
+      page: "page",
+      of: "of",
+      show: "Show",
+      rowsPerPage: "Rows per page",
+
     },
 
     auth: {
