@@ -88,9 +88,20 @@ export function RolesManagement() {
           },
         });
       }
+      const code = form.code.trim().toLowerCase();
+      if (!/^[a-z][a-z0-9_]*$/.test(code)) {
+        throw new Error(
+          locale === "ar"
+            ? "كود الدور يجب أن يبدأ بحرف إنجليزي صغير ويحتوي فقط على حروف صغيرة وأرقام و _"
+            : "Role code must start with a lowercase letter and contain only lowercase letters, digits, and _",
+        );
+      }
+      if (!form.name_ar.trim() || !form.name_en.trim()) {
+        throw new Error(locale === "ar" ? "الاسم بالعربي والإنجليزي مطلوب" : "Arabic and English names are required");
+      }
       return createFn({
         data: {
-          code: form.code.trim().toLowerCase(),
+          code,
           name_ar: form.name_ar,
           name_en: form.name_en,
           description_ar: form.description_ar || null,
@@ -106,7 +117,18 @@ export function RolesManagement() {
       setDialogOpen(false);
       toast.success(t("common.saved"));
     },
-    onError: (e: any) => toast.error(e.message ?? String(e)),
+    onError: (e: any) => {
+      let msg = e?.message ?? String(e);
+      try {
+        const parsed = JSON.parse(msg);
+        if (Array.isArray(parsed) && parsed[0]?.path?.[0] === "code") {
+          msg = locale === "ar"
+            ? "كود الدور غير صالح: استخدم حروف إنجليزية صغيرة وأرقام و _ فقط، ويبدأ بحرف"
+            : "Invalid role code: use lowercase letters, digits, and _ only, starting with a letter";
+        }
+      } catch {}
+      toast.error(msg);
+    },
   });
 
   const toggleMut = useMutation({
