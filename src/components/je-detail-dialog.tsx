@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Save, Pencil, X } from "lucide-react";
+import { Plus, Trash2, Save, Pencil, X, ExternalLink } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getJournalEntry, updateJournalEntry, listAccounts, listPartners } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
@@ -45,6 +46,20 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
   });
 
   const isManualDraft = entry && entry.status === "draft" && (entry.source_type ?? "manual") === "manual";
+
+  const sourceLink: { to: string; label: string } | null = (() => {
+    if (!entry) return null;
+    const st = entry.source_type;
+    if (!st || st === "manual") return null;
+    if (st === "invoice") {
+      const isVendor = entry.source_invoice_type === "vendor_bill" || entry.source_invoice_type === "vendor";
+      return { to: isVendor ? "/invoices/vendor" : "/invoices/customer", label: isVendor ? t("je.sourceAP") : t("je.sourceAR") };
+    }
+    if (st === "payment") return { to: "/payments", label: t("je.sourceTreasury") };
+    if (["depreciation", "asset_disposal", "asset_acquisition", "fixed_asset"].includes(st)) return { to: "/assets", label: t("je.sourceFixedAssets") };
+    if (["loan", "loan_payment", "loan_disbursement"].includes(st)) return { to: "/loans", label: t("je.sourceLoans") };
+    return null;
+  })();
 
   const [editing, setEditing] = useState(false);
   const [header, setHeader] = useState({ entry_date: "", reference: "", description: "" });
@@ -128,6 +143,20 @@ export function JEDetailDialog({ entryId, onClose }: { entryId: string | null; o
             {!isManualDraft && (
               <div className="text-xs text-muted-foreground bg-muted/40 border rounded p-2">
                 {t("je.readOnlyNotice")}
+              </div>
+            )}
+            {sourceLink && (
+              <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/20 rounded p-2">
+                <span className="text-muted-foreground">{t("je.source")}:</span>
+                <span className="font-medium">{sourceLink.label}</span>
+                <Link
+                  to={sourceLink.to}
+                  onClick={onClose}
+                  className="ms-auto inline-flex items-center gap-1 text-primary hover:underline"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  {t("je.openSource")}
+                </Link>
               </div>
             )}
 
