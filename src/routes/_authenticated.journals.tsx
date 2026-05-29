@@ -523,6 +523,13 @@ function JournalsPage() {
               />
               <Label>{t("common.active")}</Label>
             </div>
+            <div className="col-span-2 flex items-center gap-2">
+              <Switch
+                checked={form.allow_manual_entries}
+                onCheckedChange={(v) => setForm({ ...form, allow_manual_entries: v })}
+              />
+              <Label>{t("journals.allowManualEntries")}</Label>
+            </div>
 
             <div className="col-span-2">
               <Label>{t("common.defaultDebitAccount")}</Label>
