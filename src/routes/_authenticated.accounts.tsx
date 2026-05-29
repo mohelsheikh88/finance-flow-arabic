@@ -685,12 +685,13 @@ function ChartOfAccountsPanel() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-2">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>
-              <span className="font-medium text-foreground">{filteredAccounts.length}</span> {t("common.account")} — {t("common.page")}{" "}
+              <span className="font-medium text-foreground">{filteredAccounts.length}</span>{" "}
+              {filteredAccounts.length === 1 ? t("common.account") : t("common.accounts")} — {t("common.page")}{" "}
               <span className="font-medium text-foreground">{safePage}</span> {t("common.of")}{" "}
               <span className="font-medium text-foreground">{totalPages}</span>
             </span>
             <div className="flex items-center gap-2">
-              <span>{t("common.show")}:</span>
+              <span>{t("common.rowsPerPage")}:</span>
               <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
                 <SelectTrigger className="h-8 w-[110px]">
                   <SelectValue />
@@ -709,10 +710,10 @@ function ChartOfAccountsPanel() {
 
           {pageSize > 0 && totalPages > 1 && (
             <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1}>
+              <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1} aria-label={t("common.firstPage")} title={t("common.firstPage")}>
                 <ChevronsLeft className="h-4 w-4 rtl-flip" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setPage(safePage - 1)} disabled={safePage <= 1}>
+              <Button variant="outline" size="sm" onClick={() => setPage(safePage - 1)} disabled={safePage <= 1} aria-label={t("common.prevPage")} title={t("common.prevPage")}>
                 <ChevronLeft className="h-4 w-4 rtl-flip" />
               </Button>
               {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -727,15 +728,16 @@ function ChartOfAccountsPanel() {
                       size="sm"
                       onClick={() => setPage(p)}
                       className="min-w-[2.25rem] px-2"
+                      aria-label={`${t("common.page")} ${p}`}
                     >
                       {p}
                     </Button>
                   </Fragment>
                 ))}
-              <Button variant="outline" size="sm" onClick={() => setPage(safePage + 1)} disabled={safePage >= totalPages}>
+              <Button variant="outline" size="sm" onClick={() => setPage(safePage + 1)} disabled={safePage >= totalPages} aria-label={t("common.nextPage")} title={t("common.nextPage")}>
                 <ChevronRight className="h-4 w-4 rtl-flip" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage >= totalPages}>
+              <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage >= totalPages} aria-label={t("common.lastPage")} title={t("common.lastPage")}>
                 <ChevronsRight className="h-4 w-4 rtl-flip" />
               </Button>
             </div>
