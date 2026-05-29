@@ -298,7 +298,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       {embedded && (
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-            <Download className="h-4 w-4 me-1" />Export
+            <FileDown className="h-4 w-4 me-1" />Export
           </Button>
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
