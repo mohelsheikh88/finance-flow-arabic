@@ -749,6 +749,107 @@ export const savePartnerContacts = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ---------------- Partner Attachments ----------------
+
+const DOC_TYPES = ["cr", "vat", "national_address", "contract", "other"] as const;
+
+export const listPartnerAttachments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { partnerId: string }) =>
+    z.object({ partnerId: z.string().uuid() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await (context.supabase as any)
+      .from("partner_attachments")
+      .select("*")
+      .eq("partner_id", data.partnerId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const uploadPartnerAttachment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      partnerId: z.string().uuid(),
+      docType: z.enum(DOC_TYPES),
+      fileName: z.string().min(1).max(255),
+      mimeType: z.string().max(255).optional().nullable(),
+      fileSize: z.number().int().nonnegative().optional().nullable(),
+      // base64-encoded file contents (no data: prefix)
+      contentBase64: z.string().min(1),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${data.partnerId}/${data.docType}/${Date.now()}_${safeName}`;
+    const bytes = Uint8Array.from(atob(data.contentBase64), (c) => c.charCodeAt(0));
+    const { error: upErr } = await sb.storage
+      .from("partner-attachments")
+      .upload(path, bytes, {
+        contentType: data.mimeType || "application/octet-stream",
+        upsert: false,
+      });
+    if (upErr) throw new Error(upErr.message);
+
+    const { data: row, error } = await sb
+      .from("partner_attachments")
+      .insert({
+        partner_id: data.partnerId,
+        doc_type: data.docType,
+        file_path: path,
+        file_name: data.fileName,
+        mime_type: data.mimeType || null,
+        file_size: data.fileSize ?? null,
+        uploaded_by: context.userId,
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deletePartnerAttachment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: row, error: e1 } = await sb
+      .from("partner_attachments")
+      .select("file_path")
+      .eq("id", data.id)
+      .single();
+    if (e1) throw new Error(e1.message);
+    if (row?.file_path) {
+      await sb.storage.from("partner-attachments").remove([row.file_path]);
+    }
+    const { error } = await sb.from("partner_attachments").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getPartnerAttachmentUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: row, error: e1 } = await sb
+      .from("partner_attachments")
+      .select("file_path, file_name")
+      .eq("id", data.id)
+      .single();
+    if (e1) throw new Error(e1.message);
+    const { data: signed, error } = await sb.storage
+      .from("partner-attachments")
+      .createSignedUrl(row.file_path, 300);
+    if (error) throw new Error(error.message);
+    return { url: signed.signedUrl as string, fileName: row.file_name as string };
+  });
+
+
+
 export const listJournals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string }) => i)
