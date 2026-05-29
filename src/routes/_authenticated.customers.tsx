@@ -227,10 +227,16 @@ function CustomersPage() {
                   value={form.customer_type_id ?? "__none__"}
                   onValueChange={(v) => {
                     const newTypeId = v === "__none__" ? null : v;
+                    const ct = newTypeId
+                      ? (customerTypes as any[]).find((x) => x.id === newTypeId)
+                      : null;
                     setForm((prev) => ({
                       ...prev,
                       customer_type_id: newTypeId,
                       code: !prev.id && newTypeId ? computeNextCode(newTypeId) : (!newTypeId && !prev.id ? "" : prev.code),
+                      receivable_account_id: ct?.receivable_account_id
+                        ? ct.receivable_account_id
+                        : prev.receivable_account_id,
                     }));
                   }}
                 >
@@ -343,6 +349,7 @@ function CustomersPage() {
         open={typesOpen}
         onClose={() => setTypesOpen(false)}
         types={customerTypes as any[]}
+        arAccounts={arAccounts}
         companyId={companyId!}
       />
     </div>
@@ -353,15 +360,17 @@ type CTFormState = {
   id?: string;
   code: string; name_ar: string; name_en: string; notes: string;
   is_active: boolean; sort_order: number;
+  receivable_account_id: string | null;
 };
 const ctEmpty: CTFormState = {
   code: "", name_ar: "", name_en: "", notes: "", is_active: true, sort_order: 0,
+  receivable_account_id: null,
 };
 
 function CustomerTypesDialog({
-  open, onClose, types, companyId,
+  open, onClose, types, arAccounts, companyId,
 }: {
-  open: boolean; onClose: () => void; types: any[]; companyId: string;
+  open: boolean; onClose: () => void; types: any[]; arAccounts: any[]; companyId: string;
 }) {
   const { t } = useI18n();
   const localized = useLocalized();
@@ -383,6 +392,7 @@ function CustomerTypesDialog({
           notes: form.notes.trim() || null,
           is_active: form.is_active,
           sort_order: Number(form.sort_order) || 0,
+          receivable_account_id: form.receivable_account_id || null,
         } as any,
       }),
     onSuccess: () => {
@@ -407,6 +417,7 @@ function CustomerTypesDialog({
   const startEdit = (ct: any) => setForm({
     id: ct.id, code: ct.code, name_ar: ct.name_ar, name_en: ct.name_en,
     notes: ct.notes ?? "", is_active: !!ct.is_active, sort_order: ct.sort_order ?? 0,
+    receivable_account_id: ct.receivable_account_id ?? null,
   });
 
   return (
@@ -431,6 +442,23 @@ function CustomerTypesDialog({
             <div className="col-span-1 flex items-center gap-2 pb-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               <Label className="text-xs">{t("common.active")}</Label>
+            </div>
+            <div className="col-span-6">
+              <Label className="text-xs">{t("customers.receivableAccount")}</Label>
+              <Select
+                value={form.receivable_account_id ?? "__none__"}
+                onValueChange={(v) => setForm({ ...form, receivable_account_id: v === "__none__" ? null : v })}
+              >
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— {t("common.none")} —</SelectItem>
+                  {arAccounts.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.code} — {localized(a, "name")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="col-span-6 flex justify-end gap-2">
               {form.id && (
