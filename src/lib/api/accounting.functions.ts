@@ -1039,12 +1039,15 @@ export const createJournalEntry = createServerFn({ method: "POST" })
       if (l.debit === 0 && l.credit === 0) throw new Error("A line must have debit or credit");
     }
 
-    // Generate entry number
+    // Generate entry number — and check that this journal allows manual entries
     const { data: journal } = await context.supabase
       .from("journals")
-      .select("sequence_prefix, sequence_next")
+      .select("sequence_prefix, sequence_next, allow_manual_entries")
       .eq("id", data.journal_id)
       .single();
+    if (journal && journal.allow_manual_entries === false) {
+      throw new Error("This journal does not allow manual entries");
+    }
     const prefix = journal?.sequence_prefix ?? "JV";
     const seq = journal?.sequence_next ?? 1;
     const yr = new Date(data.entry_date).getFullYear();
