@@ -80,6 +80,7 @@ type FormState = {
   default_debit_account_id: string;
   default_credit_account_id: string;
   is_active: boolean;
+  allow_manual_entries: boolean;
 };
 
 const empty: FormState = {
@@ -93,6 +94,7 @@ const empty: FormState = {
   default_debit_account_id: "",
   default_credit_account_id: "",
   is_active: true,
+  allow_manual_entries: true,
 };
 
 const NONE = "__none__";
