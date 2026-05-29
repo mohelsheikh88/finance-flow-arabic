@@ -1130,7 +1130,16 @@ export const getJournalEntry = createServerFn({ method: "GET" })
       .eq("entry_id", data.id)
       .order("line_number");
     if (lErr) throw new Error(lErr.message);
-    return { ...je, lines: lines ?? [] } as any;
+    let source_invoice_type: string | null = null;
+    if ((je as any).source_type === "invoice" && (je as any).source_id) {
+      const { data: inv } = await context.supabase
+        .from("invoices")
+        .select("invoice_type")
+        .eq("id", (je as any).source_id)
+        .maybeSingle();
+      source_invoice_type = (inv as any)?.invoice_type ?? null;
+    }
+    return { ...je, lines: lines ?? [], source_invoice_type } as any;
   });
 
 const UpdateJESchema = z.object({
