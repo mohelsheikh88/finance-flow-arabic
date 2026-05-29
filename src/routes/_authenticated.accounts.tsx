@@ -214,12 +214,15 @@ function ChartOfAccountsPanel() {
     });
   }, [accounts, search, filterClassification, filterIsGroup, filterStatus, localized, typeById]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / pageSize));
+  const effectivePageSize = pageSize > 0 ? pageSize : Math.max(filteredAccounts.length, 1);
+  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / effectivePageSize));
   const safePage = Math.min(Math.max(1, page), totalPages);
   const paginatedAccounts = useMemo(() => {
+    if (pageSize === 0) return filteredAccounts;
     const start = (safePage - 1) * pageSize;
     return filteredAccounts.slice(start, start + pageSize);
-  }, [filteredAccounts, safePage]);
+  }, [filteredAccounts, safePage, pageSize]);
+
 
   const openNew = () => {
     const defCls =
