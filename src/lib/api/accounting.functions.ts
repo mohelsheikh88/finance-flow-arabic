@@ -820,6 +820,9 @@ export const listJournals = createServerFn({ method: "GET" })
       .order("code");
     if (error) throw new Error(error.message);
     return rows ?? [];
+  });
+
+
 
 const JOURNAL_TYPES = ["sales", "purchase", "bank", "cash", "misc"] as const;
 
