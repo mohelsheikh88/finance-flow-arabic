@@ -239,6 +239,7 @@ function FiscalPeriodsPage() {
     return rows.slice().sort((a, b) => (a.lock_date < b.lock_date ? 1 : -1))[0];
   }, [lockRows]);
 
+  const [ldEditOpen, setLdEditOpen] = useState(false);
   const [ldDate, setLdDate] = useState<string>("");
   const [ldNotes, setLdNotes] = useState<string>("");
 
@@ -265,11 +266,13 @@ function FiscalPeriodsPage() {
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["lock_dates"] });
+      setLdEditOpen(false);
     },
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
   const canSaveLD = !!ldDate && (ldDate !== (currentLock?.lock_date ?? "") || (ldNotes || "") !== (currentLock?.notes ?? ""));
+
 
 
 
@@ -553,35 +556,52 @@ function FiscalPeriodsPage() {
           </p>
         </div>
 
-        {currentLock && (
-          <div className="mb-4 flex items-center gap-3 rounded-md border border-warning/30 bg-warning/5 p-3">
+        <div className="mb-4 flex items-center justify-between rounded-md border border-warning/30 bg-warning/5 p-3">
+          <div className="flex items-center gap-3">
             <ShieldCheck className="h-4 w-4 text-warning" />
             <div className="text-sm">
               <span className="text-muted-foreground">
                 {isAr ? "التاريخ الحالي المقفل: " : "Currently locked through: "}
               </span>
-              <span className="font-mono font-semibold">{currentLock.lock_date}</span>
+              <span className="font-mono font-semibold">
+                {currentLock ? currentLock.lock_date : (isAr ? "—" : "—")}
+              </span>
             </div>
           </div>
-        )}
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <Label>{isAr ? "تاريخ الإقفال" : "Lock Date"} *</Label>
-            <Input type="date" value={ldDate} onChange={(e) => setLdDate(e.target.value)} />
-          </div>
-          <div>
-            <Label>{t("common.notes")}</Label>
-            <Input value={ldNotes} onChange={(e) => setLdNotes(e.target.value)} />
-          </div>
-        </div>
-
-        <div className="mt-4 flex justify-end">
-          <Button onClick={() => ldSaveMut.mutate()} disabled={!canSaveLD || ldSaveMut.isPending}>
-            {t("common.save")}
+          <Button size="sm" variant="ghost" onClick={() => setLdEditOpen(true)} title={t("common.edit")}>
+            <Pencil className="h-4 w-4" />
           </Button>
         </div>
       </Card>
+
+      {/* Lock Date Edit Dialog */}
+      <Dialog open={ldEditOpen} onOpenChange={(o) => { setLdEditOpen(o); if (!o) { setLdDate(currentLock?.lock_date ?? ""); setLdNotes(currentLock?.notes ?? ""); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {isAr ? "تعديل تاريخ الإقفال" : "Edit Lock Date"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div>
+              <Label>{isAr ? "تاريخ الإقفال" : "Lock Date"} *</Label>
+              <Input type="date" value={ldDate} onChange={(e) => setLdDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>{t("common.notes")}</Label>
+              <Input value={ldNotes} onChange={(e) => setLdNotes(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLdEditOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={() => ldSaveMut.mutate()} disabled={!canSaveLD || ldSaveMut.isPending}>
+              {t("common.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
 
