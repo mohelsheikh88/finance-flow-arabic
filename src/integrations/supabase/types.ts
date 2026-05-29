@@ -1634,6 +1634,47 @@ export type Database = {
           },
         ]
       }
+      partner_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          mobile: string | null
+          name: string
+          notes: string | null
+          partner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          mobile?: string | null
+          name: string
+          notes?: string | null
+          partner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          mobile?: string | null
+          name?: string
+          notes?: string | null
+          partner_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_contacts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           address_ar: string | null
