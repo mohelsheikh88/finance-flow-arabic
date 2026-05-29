@@ -154,7 +154,7 @@ function ChartOfAccountsPanel() {
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = useState(1);
-  useEffect(() => { setPage(1); }, [search, filterClassification, filterIsGroup, filterStatus]);
+  useEffect(() => { setPage(1); setSelectedIds(new Set()); }, [search, filterClassification, filterIsGroup, filterStatus]);
   const pageSize = 50;
 
 
