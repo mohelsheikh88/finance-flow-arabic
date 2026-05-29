@@ -60,11 +60,7 @@ export function InvoiceDetailDialog({
   const handlePrint = async () => {
     if (!inv) return;
     if (!isPosted) {
-      toast.error(
-        locale === "ar"
-          ? "لا يمكن إصدار الفاتورة الضريبية إلا بعد الترحيل (POST)"
-          : "Tax invoice can only be issued after posting"
-      );
+      toast.error(t("invoices.cannotPrintBeforePost"));
       return;
     }
     try {
