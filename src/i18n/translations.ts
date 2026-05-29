@@ -738,6 +738,7 @@ export const translations = {
       reports: "Financial Reports",
       balanceSheet: "Balance Sheet",
       incomeStatement: "Income Statement",
+      cashFlow: "Cash Flow Statement",
       aging: "Aging Report",
       vatReport: "VAT Report",
       partnerStatement: "Partner Statement",
