@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createInvoice, listInvoices, postInvoice, getInvoice, updateInvoice, resetInvoiceToDraft, canResetInvoice } from "@/lib/api/invoices.functions";
+import { createInvoice, listInvoices, postInvoice, getInvoice, updateInvoice, resetInvoiceToDraft, canResetInvoice, deleteInvoice } from "@/lib/api/invoices.functions";
 import { listAccounts, listPartners } from "@/lib/api/accounting.functions";
 import { listTaxes } from "@/lib/api/vat.functions";
 import { listPaymentTerms } from "@/lib/api/payment-terms.functions";
@@ -54,6 +54,7 @@ function VendorBillsPage() {
   const update = useServerFn(updateInvoice);
   const getInv = useServerFn(getInvoice);
   const resetFn = useServerFn(resetInvoiceToDraft);
+  const delFn = useServerFn(deleteInvoice);
   const accFn = useServerFn(listAccounts);
   const partFn = useServerFn(listPartners);
   const taxFn = useServerFn(listTaxes);
@@ -201,10 +202,22 @@ function VendorBillsPage() {
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => delFn({ data: { id } }),
+    onSuccess: () => { toast.success(t("common.deleted")); qc.invalidateQueries({ queryKey: ["invoices"] }); },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+
   const handleResetClick = (id: string) => {
     if (!window.confirm(t("invoices.resetConfirm"))) return;
     resetMut.mutate(id);
   };
+
+  const handleDeleteClick = (id: string) => {
+    if (!window.confirm(t("invoices.deleteConfirm"))) return;
+    deleteMut.mutate(id);
+  };
+
 
   const canSave = header.partner_id && header.invoice_date && lines.every((l) => l.account_id && l.quantity > 0);
 
@@ -370,7 +383,11 @@ function VendorBillsPage() {
                         <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
                           <Check className="h-3 w-3 me-1" />{t("je.post")}
                         </Button>
+                        <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDeleteClick(inv.id)} disabled={deleteMut.isPending}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </>
+
                     )}
                     {inv.status === "posted" && Number(inv.amount_paid || 0) === 0 && (
                       <ResetToDraftButton invoiceId={inv.id} onConfirm={handleResetClick} pending={resetMut.isPending} />

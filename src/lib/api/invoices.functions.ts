@@ -388,6 +388,40 @@ export const postInvoice = createServerFn({ method: "POST" })
     return postInvoiceCore(context.supabase, context.userId!, data.id);
   });
 
+export const deleteInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: inv, error: ie } = await supabase
+      .from("invoices")
+      .select("id, status, amount_paid, company_id, branch_id, invoice_date, journal_entry_id")
+      .eq("id", data.id)
+      .single();
+    if (ie || !inv) throw new Error(ie?.message || "Invoice not found");
+    if (inv.status !== "draft") throw new Error("Only draft invoices can be deleted. Reset to draft first.");
+    if (Number(inv.amount_paid || 0) > 0) throw new Error("Cannot delete: invoice has payments.");
+
+    await assertNotLocked(supabase, inv.company_id, inv.branch_id, inv.invoice_date);
+
+    // Remove linked draft JE (cascade clears its lines)
+    if (inv.journal_entry_id) {
+      await supabase.from("journal_entry_lines").delete().eq("entry_id", inv.journal_entry_id);
+      await supabase.from("journal_entries").delete().eq("id", inv.journal_entry_id);
+    }
+    await supabase
+      .from("approval_requests")
+      .delete()
+      .eq("document_type", "invoice")
+      .eq("document_id", inv.id);
+
+    // invoice_lines now cascade-deletes via FK
+    const { error: de } = await supabase.from("invoices").delete().eq("id", inv.id);
+    if (de) throw new Error(de.message);
+    return { ok: true };
+  });
+
+
 const UpdateInvoiceSchema = z.object({
   id: z.string().uuid(),
   partner_id: z.string().uuid(),
