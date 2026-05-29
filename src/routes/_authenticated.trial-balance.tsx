@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
@@ -58,37 +58,43 @@ function MultiSelect({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
+          type="button"
           role="combobox"
           aria-expanded={open}
-          className={cn("h-9 min-w-[14rem] justify-between font-normal", className)}
+          className={cn(
+            "min-h-10 w-full flex items-center gap-1.5 px-2 py-1 border border-input rounded-lg bg-background hover:border-ring/50 focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring transition-colors cursor-pointer text-start",
+            className,
+          )}
         >
-          <div className="flex flex-wrap items-center gap-1 overflow-hidden">
+          <div className="flex flex-wrap items-center gap-1 flex-1 min-w-0">
             {selected.length === 0 ? (
-              <span className="text-muted-foreground text-xs">{placeholder}</span>
+              <span className="text-muted-foreground text-sm font-normal px-1">{placeholder}</span>
             ) : selected.length <= 2 ? (
               selected.map((v) => (
-                <Badge key={v} variant="secondary" className="text-[10px] gap-1 py-0">
+                <span
+                  key={v}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-foreground text-xs font-medium border border-border"
+                >
                   {labelMap.get(v) ?? v}
                   <X
-                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
+                    className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       toggle(v);
                     }}
                   />
-                </Badge>
+                </span>
               ))
             ) : (
-              <Badge variant="secondary" className="text-[10px]">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-foreground text-xs font-semibold border border-border">
                 {selected.length}
-              </Badge>
+              </span>
             )}
           </div>
-          <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+          <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 text-muted-foreground" />
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-[20rem] p-0" align="start">
         <Command>
@@ -175,21 +181,33 @@ function TBPage() {
   );
   const totalClosing = totals.beg + totals.d - totals.c;
 
+  const labelCls = "block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 ms-1";
+
   return (
     <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="page-title">{t("tb.title")}</h1>
-        <div className="flex items-end gap-2 flex-wrap">
-          <div>
-            <Label className="text-xs">{t("vat.dateFrom")}</Label>
-            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9 w-44" />
+      <h1 className="page-title">{t("tb.title")}</h1>
+      <Card className="p-4">
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="flex-1 min-w-[160px]">
+            <Label className={labelCls}>{t("vat.dateFrom")}</Label>
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="h-10 rounded-lg font-medium"
+            />
           </div>
-          <div>
-            <Label className="text-xs">{t("vat.dateTo")}</Label>
-            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 w-44" />
+          <div className="flex-1 min-w-[160px]">
+            <Label className={labelCls}>{t("vat.dateTo")}</Label>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="h-10 rounded-lg font-medium"
+            />
           </div>
-          <div>
-            <Label className="text-xs">{locale === "ar" ? "الحالة" : "Status"}</Label>
+          <div className="flex-[1.5] min-w-[240px]">
+            <Label className={labelCls}>{locale === "ar" ? "الحالة" : "Status"}</Label>
             <MultiSelect
               options={statusOptions}
               selected={statuses}
@@ -199,8 +217,8 @@ function TBPage() {
               emptyText={locale === "ar" ? "لا نتائج" : "No results"}
             />
           </div>
-          <div>
-            <Label className="text-xs">{locale === "ar" ? "الدفاتر" : "Journals"}</Label>
+          <div className="flex-[1.5] min-w-[200px]">
+            <Label className={labelCls}>{locale === "ar" ? "الدفاتر" : "Journals"}</Label>
             <MultiSelect
               options={journalOptions}
               selected={journalIds}
@@ -208,11 +226,10 @@ function TBPage() {
               placeholder={locale === "ar" ? "كل الدفاتر" : "All journals"}
               searchPlaceholder={locale === "ar" ? "ابحث عن دفتر..." : "Search journals..."}
               emptyText={locale === "ar" ? "لا نتائج" : "No results"}
-              className="min-w-[16rem]"
             />
           </div>
         </div>
-      </div>
+      </Card>
       <Card>
         <table className="w-full text-xs">
           <thead className="bg-muted/50">
