@@ -330,6 +330,8 @@ const AccountUpsertSchema = z.object({
   is_group: z.boolean().optional(),
   is_active: z.boolean().optional(),
   is_reconcilable: z.boolean().optional(),
+  is_receivable: z.boolean().optional(),
+  is_payable: z.boolean().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
 
