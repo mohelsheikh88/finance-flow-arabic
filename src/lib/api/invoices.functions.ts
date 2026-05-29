@@ -481,6 +481,10 @@ export const resetInvoiceToDraft = createServerFn({ method: "POST" })
     if (Number(inv.amount_paid || 0) > 0) {
       throw new Error("Cannot reset: invoice has payments allocated. Reverse payments first.");
     }
+    if (!(await isPeriodOpen(supabase, inv.company_id, inv.invoice_date))) {
+      throw new Error("Cannot reset: fiscal period for the invoice date is closed.");
+    }
+
 
     const allowed = await canUserResetInvoice(supabase, userId!, inv);
     if (!allowed) throw new Error("You do not have permission to reset this invoice to draft.");
