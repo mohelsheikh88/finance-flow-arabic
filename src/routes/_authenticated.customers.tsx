@@ -225,7 +225,14 @@ function CustomersPage() {
                 <Label>{t("customers.customerType")}</Label>
                 <Select
                   value={form.customer_type_id ?? "__none__"}
-                  onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}
+                  onValueChange={(v) => {
+                    const newTypeId = v === "__none__" ? null : v;
+                    setForm((prev) => ({
+                      ...prev,
+                      customer_type_id: newTypeId,
+                      code: !prev.id && newTypeId ? computeNextCode(newTypeId) : (!newTypeId && !prev.id ? "" : prev.code),
+                    }));
+                  }}
                 >
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
