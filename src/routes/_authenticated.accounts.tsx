@@ -23,7 +23,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, FileDown, FileUp, ChevronDown, ChevronRight, FolderTree, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, FileDown, FileUp, ChevronDown, ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight, FolderTree, FileText } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -149,6 +149,9 @@ function ChartOfAccountsPanel() {
   const [filterClassification, setFilterClassification] = useState("all");
   const [filterIsGroup, setFilterIsGroup] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [search, filterClassification, filterIsGroup, filterStatus]);
+  const pageSize = 50;
 
 
   const typeById = useMemo(() => {
@@ -181,6 +184,13 @@ function ChartOfAccountsPanel() {
       return true;
     });
   }, [accounts, search, filterClassification, filterIsGroup, filterStatus, localized, typeById]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const paginatedAccounts = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredAccounts.slice(start, start + pageSize);
+  }, [filteredAccounts, safePage]);
 
   const openNew = () => {
     const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
@@ -509,7 +519,7 @@ function ChartOfAccountsPanel() {
       </div>
 
       <ChartOfAccountsTable
-        accounts={filteredAccounts as any[]}
+        accounts={paginatedAccounts as any[]}
         accountTypes={accountTypes as any[]}
         classifications={classifications as any[]}
         onEdit={openEdit}
@@ -547,6 +557,42 @@ function ChartOfAccountsPanel() {
           })
         }
       />
+
+      {filteredAccounts.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-2">
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{filteredAccounts.length}</span> حساب — صفحة{" "}
+            <span className="font-medium text-foreground">{safePage}</span> من{" "}
+            <span className="font-medium text-foreground">{totalPages}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={safePage <= 1}>
+              <ChevronsLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(safePage - 1)} disabled={safePage <= 1}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <Button
+                key={p}
+                variant={p === safePage ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPage(p)}
+                className="min-w-[2.25rem] px-2"
+              >
+                {p}
+              </Button>
+            ))}
+            <Button variant="outline" size="sm" onClick={() => setPage(safePage + 1)} disabled={safePage >= totalPages}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={safePage >= totalPages}>
+              <ChevronsRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
 
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
