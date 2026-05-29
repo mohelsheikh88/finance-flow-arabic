@@ -326,3 +326,173 @@ export const postInvoice = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     return postInvoiceCore(context.supabase, context.userId!, data.id);
   });
+
+const UpdateInvoiceSchema = z.object({
+  id: z.string().uuid(),
+  partner_id: z.string().uuid(),
+  invoice_date: z.string(),
+  due_date: z.string().optional().nullable(),
+  reference: z.string().max(100).optional().nullable(),
+  notes: z.string().max(1000).optional().nullable(),
+  lines: z.array(LineSchema).min(1),
+});
+
+export const updateInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => UpdateInvoiceSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: inv, error: ie } = await supabase
+      .from("invoices")
+      .select("id, status, company_id, branch_id, invoice_date")
+      .eq("id", data.id)
+      .single();
+    if (ie || !inv) throw new Error(ie?.message || "Invoice not found");
+    if (inv.status !== "draft") throw new Error("Only draft invoices can be edited");
+
+    await assertNotLocked(supabase, inv.company_id, inv.branch_id, inv.invoice_date);
+    await assertNotLocked(supabase, inv.company_id, inv.branch_id, data.invoice_date);
+
+    let subtotal = 0, tax_amount = 0;
+    const computedLines = data.lines.map((l, idx) => {
+      const c = computeLine(l);
+      subtotal += c.subtotal;
+      tax_amount += c.tax_amount;
+      return { ...l, ...c, line_number: idx + 1 };
+    });
+    const total = subtotal + tax_amount;
+
+    const { error: ue } = await supabase
+      .from("invoices")
+      .update({
+        partner_id: data.partner_id,
+        invoice_date: data.invoice_date,
+        due_date: data.due_date || null,
+        reference: data.reference || null,
+        notes: data.notes || null,
+        subtotal, tax_amount, total,
+        amount_due: total,
+      })
+      .eq("id", data.id);
+    if (ue) throw new Error(ue.message);
+
+    await supabase.from("invoice_lines").delete().eq("invoice_id", data.id);
+    const lineRows = computedLines.map((l) => ({
+      invoice_id: data.id,
+      line_number: l.line_number,
+      description: l.description || null,
+      account_id: l.account_id,
+      cost_center_id: l.cost_center_id || null,
+      quantity: l.quantity,
+      unit_price: l.unit_price,
+      tax_id: l.tax_id || null,
+      tax_rate: l.tax_rate,
+      subtotal: l.subtotal,
+      tax_amount: l.tax_amount,
+      total: l.total,
+    }));
+    const { error: lerr } = await supabase.from("invoice_lines").insert(lineRows);
+    if (lerr) throw new Error(lerr.message);
+    return { ok: true };
+  });
+
+/**
+ * Permission: user can reset a posted invoice to draft if they are admin,
+ * or if they hold a role required by any approval workflow step matching
+ * this invoice's journal_type.
+ */
+async function canUserResetInvoice(supabase: any, userId: string, invoice: any): Promise<boolean> {
+  const { data: isAdmin } = await supabase.rpc("is_admin", { _user_id: userId });
+  if (isAdmin) return true;
+
+  if (!invoice.journal_id) return false;
+  const { data: journal } = await supabase
+    .from("journals")
+    .select("journal_type")
+    .eq("id", invoice.journal_id)
+    .maybeSingle();
+  if (!journal?.journal_type) return false;
+
+  const { data: wfs } = await supabase
+    .from("approval_workflows")
+    .select("id, approval_steps_def(required_role)")
+    .eq("company_id", invoice.company_id)
+    .eq("journal_type", journal.journal_type)
+    .eq("is_active", true);
+  const roles = new Set<string>();
+  for (const wf of wfs ?? []) {
+    for (const s of (wf as any).approval_steps_def ?? []) {
+      if (s.required_role) roles.add(s.required_role);
+    }
+  }
+  if (roles.size === 0) return false;
+  const { data: hasAny } = await supabase.rpc("has_any_role", {
+    _user_id: userId,
+    _roles: Array.from(roles),
+  });
+  return !!hasAny;
+}
+
+export const canResetInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: inv } = await supabase
+      .from("invoices")
+      .select("id, status, company_id, journal_id, amount_paid")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!inv) return { allowed: false, reason: "not_found" };
+    if (inv.status !== "posted") return { allowed: false, reason: "not_posted" };
+    if (Number(inv.amount_paid || 0) > 0) return { allowed: false, reason: "has_payments" };
+    const allowed = await canUserResetInvoice(supabase, userId!, inv);
+    return { allowed, reason: allowed ? null : "no_permission" };
+  });
+
+export const resetInvoiceToDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: inv, error: ie } = await supabase
+      .from("invoices")
+      .select("*")
+      .eq("id", data.id)
+      .single();
+    if (ie || !inv) throw new Error(ie?.message || "Invoice not found");
+    if (inv.status !== "posted") throw new Error("Only posted invoices can be reset to draft");
+    if (Number(inv.amount_paid || 0) > 0) {
+      throw new Error("Cannot reset: invoice has payments allocated. Reverse payments first.");
+    }
+
+    const allowed = await canUserResetInvoice(supabase, userId!, inv);
+    if (!allowed) throw new Error("You do not have permission to reset this invoice to draft.");
+
+    await assertNotLocked(supabase, inv.company_id, inv.branch_id, inv.invoice_date);
+
+    if (inv.journal_entry_id) {
+      await supabase.from("journal_entry_lines").delete().eq("entry_id", inv.journal_entry_id);
+      const { error: jeErr } = await supabase.from("journal_entries").delete().eq("id", inv.journal_entry_id);
+      if (jeErr) throw new Error(jeErr.message);
+    }
+
+    const { error: ue } = await supabase
+      .from("invoices")
+      .update({
+        status: "draft",
+        journal_entry_id: null,
+        posted_by: null,
+        posted_at: null,
+      })
+      .eq("id", inv.id);
+    if (ue) throw new Error(ue.message);
+
+    await supabase
+      .from("approval_requests")
+      .delete()
+      .eq("document_type", "invoice")
+      .eq("document_id", inv.id);
+
+    return { ok: true };
+  });
