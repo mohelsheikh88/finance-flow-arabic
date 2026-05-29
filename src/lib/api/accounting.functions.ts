@@ -1133,7 +1133,7 @@ export const getTrialBalance = createServerFn({ method: "GET" })
       .select(
         "debit, credit, accounts!inner(id, code, name_ar, name_en, account_type), journal_entries!inner(entry_date, status, company_id)",
       )
-      .eq("journal_entries.status", "posted")
+      .in("journal_entries.status", ["draft", "posted"])
       .eq("journal_entries.company_id", data.companyId)
       .lte("journal_entries.entry_date", data.asOfDate);
     if (error) throw new Error(error.message);
