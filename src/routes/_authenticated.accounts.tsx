@@ -368,10 +368,10 @@ function ChartOfAccountsPanel() {
       <div className="flex items-center justify-end gap-2">
         <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
         <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-          <FileDown className="h-4 w-4 me-1" />Export
+          <FileUp className="h-4 w-4 me-1" />Export
         </Button>
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
-          <FileUp className="h-4 w-4 me-1" />Import
+          <FileDown className="h-4 w-4 me-1" />Import
         </Button>
         <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
           <Plus className="h-4 w-4 me-1" />{t("common.new")}
