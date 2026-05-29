@@ -1339,7 +1339,10 @@ function ChartOfAccountsTable({
         <tbody>
           {rows.map((a) => {
             const tp = typeById.get(a.account_type_id);
-            const cls = tp ? clsById.get(tp.classification_id) : null;
+            const cls =
+              (a.classification_id ? clsById.get(a.classification_id) : null) ??
+              (tp ? clsById.get(tp.classification_id) : null);
+
             const checked = selectedIds.has(a.id);
             return (
               <tr key={a.id} className={`border-t hover:bg-muted/30 ${checked ? "bg-primary/5" : ""}`}>
