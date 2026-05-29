@@ -454,8 +454,13 @@ export const updateInvoice = createServerFn({ method: "POST" })
     }));
     const { error: lerr } = await supabase.from("invoice_lines").insert(lineRows);
     if (lerr) throw new Error(lerr.message);
+
+    // Refresh the linked draft JE so it stays in sync with invoice lines
+    await upsertInvoiceJE(supabase, data.id, context.userId!, "draft");
+
     return { ok: true };
   });
+
 
 /**
  * Permission: user can reset a posted invoice to draft if they are admin,
