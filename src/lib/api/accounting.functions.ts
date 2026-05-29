@@ -1072,6 +1072,7 @@ export const createJournalEntry = createServerFn({ method: "POST" })
         status: data.status,
         total_debit: totalDebit,
         total_credit: totalCredit,
+        source_type: "manual",
         created_by: context.userId,
         posted_by: data.status === "posted" ? context.userId : null,
         posted_at: data.status === "posted" ? new Date().toISOString() : null,
