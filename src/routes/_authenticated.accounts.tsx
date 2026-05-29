@@ -1186,6 +1186,9 @@ function ChartOfAccountsTable({
   accounts,
   accountTypes,
   classifications,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
   onEdit,
   onDelete,
   onToggleReconcilable,
@@ -1194,6 +1197,9 @@ function ChartOfAccountsTable({
   accounts: any[];
   accountTypes: any[];
   classifications: any[];
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string, v: boolean) => void;
+  onToggleSelectAll: (v: boolean) => void;
   onEdit: (a: any) => void;
   onDelete: (a: any) => void;
   onToggleGroup: (a: any, v: boolean) => void;
@@ -1221,11 +1227,22 @@ function ChartOfAccountsTable({
     [accounts],
   );
 
+  const pageSelectedCount = rows.filter((r) => selectedIds.has(r.id)).length;
+  const allSelected = rows.length > 0 && pageSelectedCount === rows.length;
+  const someSelected = pageSelectedCount > 0 && pageSelectedCount < rows.length;
+
   return (
     <Card>
       <table className="w-full text-sm">
         <thead className="bg-muted/50">
           <tr>
+            <th className="p-3 w-10 text-center">
+              <Checkbox
+                checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                onCheckedChange={(v) => onToggleSelectAll(v === true)}
+                aria-label="select all"
+              />
+            </th>
             <th className="text-start p-3 font-medium w-32">{t("common.code")}</th>
             <th className="text-start p-3 font-medium">{t("common.nameEn")}</th>
             <th className="text-start p-3 font-medium">{t("common.nameAr")}</th>
@@ -1241,8 +1258,16 @@ function ChartOfAccountsTable({
           {rows.map((a) => {
             const tp = typeById.get(a.account_type_id);
             const cls = tp ? clsById.get(tp.classification_id) : null;
+            const checked = selectedIds.has(a.id);
             return (
-              <tr key={a.id} className="border-t hover:bg-muted/30">
+              <tr key={a.id} className={`border-t hover:bg-muted/30 ${checked ? "bg-primary/5" : ""}`}>
+                <td className="p-3 text-center">
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => onToggleSelect(a.id, v === true)}
+                    aria-label={`select ${a.code}`}
+                  />
+                </td>
                 <td className="p-3 font-mono">{a.code}</td>
                 <td className="p-3">{a.name_en}</td>
                 <td className="p-3">{a.name_ar}</td>
@@ -1294,7 +1319,7 @@ function ChartOfAccountsTable({
           })}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={9} className="p-8 text-center text-muted-foreground">
+              <td colSpan={10} className="p-8 text-center text-muted-foreground">
                 {t("common.noData")}
               </td>
             </tr>
@@ -1304,6 +1329,7 @@ function ChartOfAccountsTable({
     </Card>
   );
 }
+
 
 const bucketColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
