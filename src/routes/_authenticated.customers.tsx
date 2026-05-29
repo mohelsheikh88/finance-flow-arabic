@@ -701,6 +701,153 @@ function AttachmentsCount({ partnerId }: { partnerId: string }) {
   );
 }
 
+function FirstContactCells({
+  partnerId, fallbackEmail, fallbackPhone,
+}: { partnerId: string; fallbackEmail?: string | null; fallbackPhone?: string | null }) {
+  const listFn = useServerFn(listPartnerContacts);
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["partner_contacts", partnerId],
+    queryFn: () => listFn({ data: { partnerId } }),
+  });
+  const first = (contacts as any[])[0];
+  const name = first?.name || "—";
+  const phone = first?.mobile || fallbackPhone || "—";
+  const email = first?.email || fallbackEmail || "—";
+  return (
+    <>
+      <td className="p-3 text-muted-foreground">{name}</td>
+      <td className="p-3 font-mono text-muted-foreground" dir="ltr">{phone}</td>
+      <td className="p-3 text-muted-foreground" dir="ltr">{email}</td>
+    </>
+  );
+}
+
+function CustomerPreviewDialog({
+  partnerId, partner, onClose, typeLabel, accountLabel, localized,
+}: {
+  partnerId: string | null;
+  partner: any;
+  onClose: () => void;
+  typeLabel: (id?: string | null) => string;
+  accountLabel: (id?: string | null) => string;
+  localized: (row: any, base: string) => string;
+}) {
+  const { t } = useI18n();
+  const contactsFn = useServerFn(listPartnerContacts);
+  const attachFn = useServerFn(listPartnerAttachments);
+  const urlFn = useServerFn(getPartnerAttachmentUrl);
+
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["partner_contacts", partnerId],
+    queryFn: () => contactsFn({ data: { partnerId: partnerId! } }),
+    enabled: !!partnerId,
+  });
+  const { data: attachments = [] } = useQuery({
+    queryKey: ["partner_attachments", partnerId],
+    queryFn: () => attachFn({ data: { partnerId: partnerId! } }),
+    enabled: !!partnerId,
+  });
+
+  const open = !!partnerId && !!partner;
+
+  const openAttachment = async (att: any) => {
+    try {
+      const res: any = await urlFn({ data: { filePath: att.file_path } });
+      if (res?.signedUrl) window.open(res.signedUrl, "_blank");
+    } catch {
+      toast.error("Failed to open file");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{t("customers.customerDetails")}</DialogTitle>
+        </DialogHeader>
+        {partner && (
+          <div className="space-y-5 text-sm">
+            <div className="grid grid-cols-2 gap-4">
+              <Field label={t("common.code")} value={partner.code} mono />
+              <Field label={t("customers.customerType")} value={typeLabel(partner.customer_type_id)} />
+              <Field label={t("common.name") + " (Ar)"} value={partner.name_ar} />
+              <Field label={t("common.name") + " (En)"} value={partner.name_en} />
+              <Field label={t("partners.vatNumber")} value={partner.vat_number} mono />
+              <Field label={t("customers.receivableAccountShort")} value={accountLabel(partner.receivable_account_id)} mono />
+              <Field label={t("customers.nationalAddress")} value={partner.address_ar} />
+              <Field label={t("partners.creditLimit")} value={Number(partner.credit_limit ?? 0).toLocaleString()} mono />
+            </div>
+
+            <div>
+              <div className="font-medium mb-2">{t("customers.contacts")}</div>
+              {(contacts as any[]).length === 0 ? (
+                <div className="text-muted-foreground text-xs">—</div>
+              ) : (
+                <div className="border rounded-md overflow-hidden">
+                  <table className="w-full text-xs">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-start p-2 font-medium">{t("customers.contactName")}</th>
+                        <th className="text-start p-2 font-medium">{t("customers.phone")}</th>
+                        <th className="text-start p-2 font-medium">{t("customers.email")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(contacts as any[]).map((c) => (
+                        <tr key={c.id} className="border-t">
+                          <td className="p-2">{c.name || "—"}</td>
+                          <td className="p-2 font-mono" dir="ltr">{c.mobile || "—"}</td>
+                          <td className="p-2" dir="ltr">{c.email || "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="font-medium mb-2">{t("customers.attachments")}</div>
+              {(attachments as any[]).length === 0 ? (
+                <div className="text-muted-foreground text-xs">—</div>
+              ) : (
+                <div className="space-y-1">
+                  {(attachments as any[]).map((a) => (
+                    <div key={a.id} className="flex items-center justify-between border rounded-md p-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Paperclip className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="text-xs font-medium truncate">{a.file_name}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">· {t("customers.doc_" + a.doc_type) || a.doc_type}</span>
+                      </div>
+                      <Button size="sm" variant="ghost" className="h-7" onClick={() => openAttachment(a)}>
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>{t("common.close") || "Close"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Field({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
+      <div className={mono ? "font-mono" : ""}>{value || "—"}</div>
+    </div>
+  );
+}
+
+
+
 
 function PartnerAttachments({ partnerId }: { partnerId: string }) {
   const { t } = useI18n();
