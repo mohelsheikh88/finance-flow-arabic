@@ -31,7 +31,6 @@ export const upsertTax = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, id: row.id };
   });
-  });
 
 export const deleteTax = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
