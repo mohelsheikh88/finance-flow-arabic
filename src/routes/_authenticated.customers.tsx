@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   createPartner, listPartners, updatePartner, deletePartner, listAccounts,
   listCustomerTypes, upsertCustomerType, deleteCustomerType,
+  listPartnerContacts, savePartnerContacts,
 } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -23,26 +24,32 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Plus, Search, Settings2, Trash2, Users } from "lucide-react";
+import { Pencil, Plus, Search, Settings2, Trash2, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   component: CustomersPage,
 });
 
+type ContactRow = { id?: string; name: string; email: string; mobile: string };
+
 type FormState = {
   id?: string;
   code: string; name_ar: string; name_en: string; vat_number: string;
-  email: string; phone: string; credit_limit: number; address_ar: string;
+  credit_limit: number; address_ar: string;
   receivable_account_id: string | null;
   customer_type_id: string | null;
+  contacts: ContactRow[];
 };
+
+const emptyContact = (): ContactRow => ({ name: "", email: "", mobile: "" });
 
 const emptyForm: FormState = {
   code: "", name_ar: "", name_en: "", vat_number: "",
-  email: "", phone: "", credit_limit: 0, address_ar: "",
+  credit_limit: 0, address_ar: "",
   receivable_account_id: null,
   customer_type_id: null,
+  contacts: [emptyContact()],
 };
 
 function CustomersPage() {
@@ -121,35 +128,65 @@ function CustomersPage() {
     return `${prefix}-${String(next).padStart(4, "0")}`;
   };
 
-  const openCreate = () => { setForm(emptyForm); setOpen(true); };
-  const openEdit = (p: any) => {
+  const openCreate = () => { setForm({ ...emptyForm, contacts: [emptyContact()] }); setOpen(true); };
+  const contactsFn = useServerFn(listPartnerContacts);
+  const saveContactsFn = useServerFn(savePartnerContacts);
+
+  const openEdit = async (p: any) => {
+    let contacts: ContactRow[] = [];
+    try {
+      const rows = await contactsFn({ data: { partnerId: p.id } });
+      contacts = (rows as any[]).map((r) => ({
+        id: r.id, name: r.name ?? "", email: r.email ?? "", mobile: r.mobile ?? "",
+      }));
+    } catch { /* ignore */ }
+    if (contacts.length === 0) {
+      contacts = [{ name: "", email: p.email ?? "", mobile: p.phone ?? "" }];
+    }
     setForm({
       id: p.id, code: p.code, name_ar: p.name_ar, name_en: p.name_en,
-      vat_number: p.vat_number ?? "", email: p.email ?? "", phone: p.phone ?? "",
+      vat_number: p.vat_number ?? "",
       credit_limit: Number(p.credit_limit ?? 0), address_ar: p.address_ar ?? "",
       receivable_account_id: p.receivable_account_id ?? null,
       customer_type_id: p.customer_type_id ?? null,
+      contacts,
     });
     setOpen(true);
   };
 
   const saveMut = useMutation({
     mutationFn: async () => {
+      const primary = form.contacts[0] ?? emptyContact();
       const payload = {
         code: form.code, name_ar: form.name_ar, name_en: form.name_en,
         vat_number: form.vat_number || null,
-        email: form.email || null, phone: form.phone || null,
+        email: primary.email || null, phone: primary.mobile || null,
         credit_limit: Number(form.credit_limit) || 0,
         address_ar: form.address_ar || null,
         receivable_account_id: form.receivable_account_id || null,
         customer_type_id: form.customer_type_id || null,
       };
+      let partnerId = form.id;
       if (form.id) {
-        return update({ data: { id: form.id, ...payload } as any });
+        await update({ data: { id: form.id, ...payload } as any });
+      } else {
+        const row = await create({ data: {
+          ...payload, is_customer: true, is_vendor: false, company_id: companyId!,
+        } as any });
+        partnerId = (row as any)?.id;
       }
-      return create({ data: {
-        ...payload, is_customer: true, is_vendor: false, company_id: companyId!,
-      } as any });
+      if (partnerId) {
+        const cleaned = form.contacts
+          .filter((c) => (c.name || c.email || c.mobile).trim().length > 0)
+          .map((c) => ({
+            ...(c.id ? { id: c.id } : {}),
+            name: c.name.trim() || "—",
+            email: c.email.trim() || null,
+            mobile: c.mobile.trim() || null,
+          }));
+        await saveContactsFn({ data: { partnerId, contacts: cleaned } });
+      }
+      return { ok: true };
     },
     onSuccess: () => {
       toast.success(t("common.saved"));
@@ -186,9 +223,10 @@ function CustomersPage() {
             <DialogTrigger asChild>
               <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
             </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{t("customers.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
+              {/* 1. Code */}
               <div>
                 <Label>{t("common.code")} *</Label>
                 <Input
@@ -198,28 +236,13 @@ function CustomersPage() {
                   className={!isEdit && !!form.customer_type_id ? "bg-muted" : undefined}
                 />
               </div>
-              <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
+              <div /> {/* spacer to keep Code on its own row visually */}
+
+              {/* 2. Name (Ar) - 3. Name (En) */}
               <div><Label>{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-              <div><Label>{t("common.email")}</Label><Input dir="ltr" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-              <div><Label>{t("common.phone")}</Label><Input dir="ltr" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-              <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
-              <div>
-                <Label>{t("customers.receivableAccount")}</Label>
-                <Input
-                  readOnly
-                  className="bg-muted"
-                  value={
-                    form.receivable_account_id
-                      ? (() => {
-                          const a = (accounts as any[]).find((x) => x.id === form.receivable_account_id);
-                          return a ? `${a.code} — ${localized(a, "name")}` : "—";
-                        })()
-                      : ""
-                  }
-                  placeholder={t("customers.defaultFromJournal")}
-                />
-              </div>
+
+              {/* 4. Customer Type */}
               <div>
                 <Label>{t("customers.customerType")}</Label>
                 <Select
@@ -250,7 +273,99 @@ function CustomersPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2"><Label>{t("setup.address")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
+
+              {/* 5. AR (GL) */}
+              <div>
+                <Label>{t("customers.receivableAccount")}</Label>
+                <Input
+                  readOnly
+                  className="bg-muted"
+                  value={
+                    form.receivable_account_id
+                      ? (() => {
+                          const a = (accounts as any[]).find((x) => x.id === form.receivable_account_id);
+                          return a ? `${a.code} — ${localized(a, "name")}` : "—";
+                        })()
+                      : ""
+                  }
+                  placeholder={t("customers.defaultFromJournal")}
+                />
+              </div>
+
+              {/* 6. VAT - 7. National Address */}
+              <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
+              <div><Label>{t("customers.nationalAddress")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
+
+              {/* 8-10. Contacts (Name, Email, Phone) — repeatable */}
+              <div className="col-span-2 space-y-2 pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <Label>{t("customers.contacts")}</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setForm({ ...form, contacts: [...form.contacts, emptyContact()] })}
+                  >
+                    <Plus className="h-3.5 w-3.5 me-1" />{t("customers.addContact")}
+                  </Button>
+                </div>
+                {form.contacts.map((c, idx) => (
+                  <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+                    <div>
+                      {idx === 0 && <Label className="text-xs">{t("customers.contactName")}</Label>}
+                      <Input
+                        value={c.name}
+                        onChange={(e) => {
+                          const next = [...form.contacts];
+                          next[idx] = { ...c, name: e.target.value };
+                          setForm({ ...form, contacts: next });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      {idx === 0 && <Label className="text-xs">{t("common.email")}</Label>}
+                      <Input
+                        dir="ltr"
+                        type="email"
+                        value={c.email}
+                        onChange={(e) => {
+                          const next = [...form.contacts];
+                          next[idx] = { ...c, email: e.target.value };
+                          setForm({ ...form, contacts: next });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      {idx === 0 && <Label className="text-xs">{t("common.phone")}</Label>}
+                      <Input
+                        dir="ltr"
+                        value={c.mobile}
+                        onChange={(e) => {
+                          const next = [...form.contacts];
+                          next[idx] = { ...c, mobile: e.target.value };
+                          setForm({ ...form, contacts: next });
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-9 w-9 text-destructive"
+                      disabled={form.contacts.length === 1}
+                      onClick={() => {
+                        const next = form.contacts.filter((_, i) => i !== idx);
+                        setForm({ ...form, contacts: next.length ? next : [emptyContact()] });
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* 11. Credit Limit */}
+              <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
