@@ -519,7 +519,7 @@ function ChartOfAccountsPanel() {
       </div>
 
       <ChartOfAccountsTable
-        accounts={filteredAccounts as any[]}
+        accounts={paginatedAccounts as any[]}
         accountTypes={accountTypes as any[]}
         classifications={classifications as any[]}
         onEdit={openEdit}
