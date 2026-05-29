@@ -1,0 +1,1 @@
+ALTER TABLE public.journals ADD COLUMN IF NOT EXISTS allow_manual_entries boolean NOT NULL DEFAULT true;

@@ -80,6 +80,7 @@ type FormState = {
   default_debit_account_id: string;
   default_credit_account_id: string;
   is_active: boolean;
+  allow_manual_entries: boolean;
 };
 
 const empty: FormState = {
@@ -93,6 +94,7 @@ const empty: FormState = {
   default_debit_account_id: "",
   default_credit_account_id: "",
   is_active: true,
+  allow_manual_entries: true,
 };
 
 const NONE = "__none__";
@@ -173,6 +175,7 @@ function JournalsPage() {
       default_debit_account_id: r.default_debit_account_id ?? "",
       default_credit_account_id: r.default_credit_account_id ?? "",
       is_active: !!r.is_active,
+      allow_manual_entries: r.allow_manual_entries !== false,
     });
     setOpen(true);
   };
@@ -193,6 +196,7 @@ function JournalsPage() {
           default_debit_account_id: form.default_debit_account_id || null,
           default_credit_account_id: form.default_credit_account_id || null,
           is_active: form.is_active,
+          allow_manual_entries: form.allow_manual_entries,
         },
       }),
     onSuccess: () => {
@@ -346,6 +350,7 @@ function JournalsPage() {
               <th className="text-start p-3 font-medium">{t("common.defaultDebitAccount")}</th>
               <th className="text-start p-3 font-medium">{t("common.defaultCreditAccount")}</th>
               <th className="text-center p-3 font-medium">{t("common.status")}</th>
+              <th className="text-center p-3 font-medium">{t("journals.manualShort")}</th>
               <th className="text-end p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
@@ -376,6 +381,9 @@ function JournalsPage() {
                 <td className="p-3 text-center">
                   {r.is_active ? t("common.active") : t("common.inactive")}
                 </td>
+                <td className="p-3 text-center">
+                  {r.allow_manual_entries !== false ? "✓" : "—"}
+                </td>
                 <td className="p-3">
                   <div className="flex items-center gap-1 justify-end">
                     <Button
@@ -401,7 +409,7 @@ function JournalsPage() {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={11} className="p-8 text-center text-muted-foreground">
+                <td colSpan={12} className="p-8 text-center text-muted-foreground">
                   {t("common.noData")}
                 </td>
               </tr>
@@ -518,6 +526,13 @@ function JournalsPage() {
                 onCheckedChange={(v) => setForm({ ...form, is_active: v })}
               />
               <Label>{t("common.active")}</Label>
+            </div>
+            <div className="col-span-2 flex items-center gap-2">
+              <Switch
+                checked={form.allow_manual_entries}
+                onCheckedChange={(v) => setForm({ ...form, allow_manual_entries: v })}
+              />
+              <Label>{t("journals.allowManualEntries")}</Label>
             </div>
 
             <div className="col-span-2">

@@ -36,7 +36,7 @@ function NewJEPage() {
   const createFn = useServerFn(createJournalEntry);
 
   const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accountsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
-  const { data: journals = [] } = useQuery({ queryKey: ["journals", companyId], queryFn: () => journalsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const { data: journals = [] } = useQuery({ queryKey: ["journals", companyId, "manual"], queryFn: () => journalsFn({ data: { companyId: companyId!, manualOnly: true } }), enabled: !!companyId });
   const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partnersFn({ data: { companyId: companyId! } }), enabled: !!companyId });
 
   const postableAccounts = accounts.filter((a: any) => !a.is_group);

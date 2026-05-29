@@ -852,14 +852,15 @@ export const getPartnerAttachmentUrl = createServerFn({ method: "POST" })
 
 export const listJournals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { companyId: string }) => i)
+  .inputValidator((i: { companyId: string; manualOnly?: boolean }) => i)
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase
+    let q = context.supabase
       .from("journals")
       .select("*")
       .eq("company_id", data.companyId)
-      .eq("is_active", true)
-      .order("code");
+      .eq("is_active", true);
+    if (data.manualOnly) q = q.eq("allow_manual_entries", true);
+    const { data: rows, error } = await q.order("code");
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
@@ -899,6 +900,7 @@ export const upsertJournal = createServerFn({ method: "POST" })
     default_debit_account_id: string | null;
     default_credit_account_id: string | null;
     is_active: boolean;
+    allow_manual_entries: boolean;
   }) =>
     z
       .object({
@@ -914,6 +916,7 @@ export const upsertJournal = createServerFn({ method: "POST" })
         default_debit_account_id: z.string().uuid().nullable(),
         default_credit_account_id: z.string().uuid().nullable(),
         is_active: z.boolean(),
+        allow_manual_entries: z.boolean(),
       })
       .parse(i),
   )
@@ -930,6 +933,7 @@ export const upsertJournal = createServerFn({ method: "POST" })
       default_debit_account_id: data.default_debit_account_id,
       default_credit_account_id: data.default_credit_account_id,
       is_active: data.is_active,
+      allow_manual_entries: data.allow_manual_entries,
     };
     if (data.id) {
       const { data: row, error } = await context.supabase
@@ -1035,12 +1039,15 @@ export const createJournalEntry = createServerFn({ method: "POST" })
       if (l.debit === 0 && l.credit === 0) throw new Error("A line must have debit or credit");
     }
 
-    // Generate entry number
+    // Generate entry number — and check that this journal allows manual entries
     const { data: journal } = await context.supabase
       .from("journals")
-      .select("sequence_prefix, sequence_next")
+      .select("sequence_prefix, sequence_next, allow_manual_entries")
       .eq("id", data.journal_id)
       .single();
+    if (journal && journal.allow_manual_entries === false) {
+      throw new Error("This journal does not allow manual entries");
+    }
     const prefix = journal?.sequence_prefix ?? "JV";
     const seq = journal?.sequence_next ?? 1;
     const yr = new Date(data.entry_date).getFullYear();
