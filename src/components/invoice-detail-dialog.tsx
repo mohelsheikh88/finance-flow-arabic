@@ -83,7 +83,14 @@ export function InvoiceDetailDialog({
 
   return (
     <Dialog open={!!invoiceId} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto overflow-x-hidden relative">
+        {payRibbon && (
+          <div className="pointer-events-none absolute top-0 end-0 h-28 w-28 overflow-hidden z-50">
+            <div className={`absolute top-[22px] end-[-42px] rotate-45 ${payRibbon.cls} text-[11px] font-bold tracking-wide py-1 w-[160px] text-center shadow-md`}>
+              {payRibbon.label}
+            </div>
+          </div>
+        )}
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 flex-wrap">
             <FileText className="h-5 w-5 text-primary" />
