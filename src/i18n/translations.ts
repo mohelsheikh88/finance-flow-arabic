@@ -1065,6 +1065,11 @@ export const translations = {
       errorWithSuggestion: "Date {date} is locked — you can't save on or before it. Try a date from {next} onward.",
       errorGeneric: "This date falls inside a locked period and cannot be saved.",
     },
+    jeErrors: {
+      manualNotAllowed: "Journal \"{journal}\" does not allow manual entries. Pick another journal or enable \"Allow manual entries\" in Journals settings.",
+      notAuthorized: "You are not authorized to create manual journal entries. Contact your administrator to grant access.",
+      journalNotFound: "The selected journal was not found. Refresh the page and try again.",
+    },
 
     dashboard: {
       title: "Accounting Dashboard",
