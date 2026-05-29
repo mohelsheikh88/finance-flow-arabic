@@ -883,6 +883,45 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_types: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          notes: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       depreciation_schedule: {
         Row: {
           accumulated_depreciation: number
@@ -1693,6 +1732,7 @@ export type Database = {
           created_at: string
           credit_limit: number | null
           currency_code: string | null
+          customer_type_id: string | null
           default_purchase_tax_id: string | null
           default_sale_tax_id: string | null
           email: string | null
@@ -1721,6 +1761,7 @@ export type Database = {
           created_at?: string
           credit_limit?: number | null
           currency_code?: string | null
+          customer_type_id?: string | null
           default_purchase_tax_id?: string | null
           default_sale_tax_id?: string | null
           email?: string | null
@@ -1749,6 +1790,7 @@ export type Database = {
           created_at?: string
           credit_limit?: number | null
           currency_code?: string | null
+          customer_type_id?: string | null
           default_purchase_tax_id?: string | null
           default_sale_tax_id?: string | null
           email?: string | null
@@ -1780,6 +1822,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "currencies"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "partners_customer_type_id_fkey"
+            columns: ["customer_type_id"]
+            isOneToOne: false
+            referencedRelation: "customer_types"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "partners_default_purchase_tax_id_fkey"

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   createPartner, listPartners, updatePartner, deletePartner, listAccounts,
+  listCustomerTypes, upsertCustomerType, deleteCustomerType,
 } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -11,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -21,7 +23,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Plus, Search, Trash2, Users } from "lucide-react";
+import { Pencil, Plus, Search, Settings2, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/customers")({
@@ -33,12 +35,14 @@ type FormState = {
   code: string; name_ar: string; name_en: string; vat_number: string;
   email: string; phone: string; credit_limit: number; address_ar: string;
   receivable_account_id: string | null;
+  customer_type_id: string | null;
 };
 
 const emptyForm: FormState = {
   code: "", name_ar: "", name_en: "", vat_number: "",
   email: "", phone: "", credit_limit: 0, address_ar: "",
   receivable_account_id: null,
+  customer_type_id: null,
 };
 
 function CustomersPage() {
@@ -51,10 +55,12 @@ function CustomersPage() {
   const update = useServerFn(updatePartner);
   const remove = useServerFn(deletePartner);
   const accountsFn = useServerFn(listAccounts);
+  const typesFn = useServerFn(listCustomerTypes);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [typesOpen, setTypesOpen] = useState(false);
 
   const { data: all = [] } = useQuery({
     queryKey: ["partners", companyId],
@@ -67,6 +73,14 @@ function CustomersPage() {
     queryFn: () => accountsFn({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+
+  const { data: customerTypes = [] } = useQuery({
+    queryKey: ["customer_types", companyId],
+    queryFn: () => typesFn({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+  const activeTypes = (customerTypes as any[]).filter((t) => t.is_active);
+
 
   // Show only accounts marked as Receivable in the Chart of Accounts
   const arAccounts = (accounts as any[]).filter(
@@ -85,6 +99,12 @@ function CustomersPage() {
     const a = (accounts as any[]).find((x) => x.id === id);
     return a ? `${a.code} — ${localized(a, "name")}` : "—";
   };
+  const typeLabel = (id?: string | null) => {
+    if (!id) return "—";
+    const ct = (customerTypes as any[]).find((x) => x.id === id);
+    return ct ? localized(ct, "name") : "—";
+  };
+
 
   const openCreate = () => { setForm(emptyForm); setOpen(true); };
   const openEdit = (p: any) => {
@@ -93,6 +113,7 @@ function CustomersPage() {
       vat_number: p.vat_number ?? "", email: p.email ?? "", phone: p.phone ?? "",
       credit_limit: Number(p.credit_limit ?? 0), address_ar: p.address_ar ?? "",
       receivable_account_id: p.receivable_account_id ?? null,
+      customer_type_id: p.customer_type_id ?? null,
     });
     setOpen(true);
   };
@@ -106,6 +127,7 @@ function CustomersPage() {
         credit_limit: Number(form.credit_limit) || 0,
         address_ar: form.address_ar || null,
         receivable_account_id: form.receivable_account_id || null,
+        customer_type_id: form.customer_type_id || null,
       };
       if (form.id) {
         return update({ data: { id: form.id, ...payload } as any });
@@ -140,10 +162,15 @@ function CustomersPage() {
           <h1 className="page-title">{t("customers.title")}</h1>
           <p className="text-sm text-muted-foreground">{customers.length} {t("customers.activeCustomers")}</p>
         </div>
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(emptyForm); }}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setTypesOpen(true)}>
+            <Settings2 className="h-4 w-4 me-1" />
+            {t("customers.manageTypes")}
+          </Button>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(emptyForm); }}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{t("customers.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
@@ -171,6 +198,23 @@ function CustomersPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>{t("customers.customerType")}</Label>
+                <Select
+                  value={form.customer_type_id ?? "__none__"}
+                  onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— {t("common.none")} —</SelectItem>
+                    {activeTypes.map((ct) => (
+                      <SelectItem key={ct.id} value={ct.id}>
+                        {ct.code} — {localized(ct, "name")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="col-span-2"><Label>{t("setup.address")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
             </div>
             <DialogFooter>
@@ -179,6 +223,7 @@ function CustomersPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -213,6 +258,7 @@ function CustomersPage() {
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
+              <th className="text-start p-3 font-medium">{t("customers.customerType")}</th>
               <th className="text-start p-3 font-medium">{t("customers.receivableAccountShort")}</th>
               <th className="text-start p-3 font-medium">{t("customers.phone")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("partners.creditLimit")}</th>
@@ -225,6 +271,7 @@ function CustomersPage() {
                 <td className="p-3 font-mono">{p.code}</td>
                 <td className="p-3 font-medium">{localized(p, "name")}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.vat_number || "—"}</td>
+                <td className="p-3 text-muted-foreground">{typeLabel(p.customer_type_id)}</td>
                 <td className="p-3 font-mono text-muted-foreground">{accountLabel(p.receivable_account_id)}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.phone || "—"}</td>
                 <td className="p-3 text-end font-mono">{Number(p.credit_limit ?? 0).toLocaleString()}</td>
@@ -240,7 +287,7 @@ function CustomersPage() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
@@ -261,6 +308,175 @@ function CustomersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <CustomerTypesDialog
+        open={typesOpen}
+        onClose={() => setTypesOpen(false)}
+        types={customerTypes as any[]}
+        companyId={companyId!}
+      />
     </div>
+  );
+}
+
+type CTFormState = {
+  id?: string;
+  code: string; name_ar: string; name_en: string; notes: string;
+  is_active: boolean; sort_order: number;
+};
+const ctEmpty: CTFormState = {
+  code: "", name_ar: "", name_en: "", notes: "", is_active: true, sort_order: 0,
+};
+
+function CustomerTypesDialog({
+  open, onClose, types, companyId,
+}: {
+  open: boolean; onClose: () => void; types: any[]; companyId: string;
+}) {
+  const { t } = useI18n();
+  const localized = useLocalized();
+  const qc = useQueryClient();
+  const upsertFn = useServerFn(upsertCustomerType);
+  const removeFn = useServerFn(deleteCustomerType);
+  const [form, setForm] = useState<CTFormState>(ctEmpty);
+  const [confirmDelete, setConfirmDelete] = useState<any | null>(null);
+
+  const saveMut = useMutation({
+    mutationFn: () =>
+      upsertFn({
+        data: {
+          ...(form.id ? { id: form.id } : {}),
+          company_id: companyId,
+          code: form.code.trim(),
+          name_ar: form.name_ar.trim(),
+          name_en: form.name_en.trim(),
+          notes: form.notes.trim() || null,
+          is_active: form.is_active,
+          sort_order: Number(form.sort_order) || 0,
+        } as any,
+      }),
+    onSuccess: () => {
+      toast.success(t("common.saved"));
+      qc.invalidateQueries({ queryKey: ["customer_types"] });
+      setForm(ctEmpty);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => removeFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success(t("common.deleted"));
+      qc.invalidateQueries({ queryKey: ["customer_types"] });
+      qc.invalidateQueries({ queryKey: ["partners"] });
+      setConfirmDelete(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const startEdit = (ct: any) => setForm({
+    id: ct.id, code: ct.code, name_ar: ct.name_ar, name_en: ct.name_en,
+    notes: ct.notes ?? "", is_active: !!ct.is_active, sort_order: ct.sort_order ?? 0,
+  });
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={(v) => { if (!v) { setForm(ctEmpty); onClose(); } }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle>{t("customers.manageTypes")}</DialogTitle></DialogHeader>
+
+          <div className="grid grid-cols-6 gap-2 items-end p-3 rounded-md border bg-muted/30">
+            <div className="col-span-1">
+              <Label className="text-xs">{t("common.code")} *</Label>
+              <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <Label className="text-xs">{t("common.nameAr")} *</Label>
+              <Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <Label className="text-xs">{t("common.nameEn")} *</Label>
+              <Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} />
+            </div>
+            <div className="col-span-1 flex items-center gap-2 pb-2">
+              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
+              <Label className="text-xs">{t("common.active")}</Label>
+            </div>
+            <div className="col-span-6 flex justify-end gap-2">
+              {form.id && (
+                <Button variant="outline" size="sm" onClick={() => setForm(ctEmpty)}>
+                  {t("common.cancel")}
+                </Button>
+              )}
+              <Button
+                size="sm"
+                onClick={() => saveMut.mutate()}
+                disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en}
+              >
+                <Plus className="h-4 w-4 me-1" />
+                {form.id ? t("common.save") : t("common.add")}
+              </Button>
+            </div>
+          </div>
+
+          <div className="border rounded-md overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-start p-2">{t("common.code")}</th>
+                  <th className="text-start p-2">{t("common.name")}</th>
+                  <th className="text-start p-2">{t("common.status")}</th>
+                  <th className="text-end p-2 w-24">{t("common.actions")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {types.map((ct) => (
+                  <tr key={ct.id} className="border-t hover:bg-muted/30">
+                    <td className="p-2 font-mono">{ct.code}</td>
+                    <td className="p-2">{localized(ct, "name")}</td>
+                    <td className="p-2">{ct.is_active ? t("common.active") : t("common.inactive")}</td>
+                    <td className="p-2 text-end">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => startEdit(ct)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setConfirmDelete(ct)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {types.length === 0 && (
+                  <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setForm(ctEmpty); onClose(); }}>{t("common.close")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("common.confirmDelete")} — {confirmDelete?.code}</AlertDialogTitle>
+            <AlertDialogDescription>{t("common.deleteWarning")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
