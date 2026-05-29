@@ -2300,6 +2300,51 @@ export type Database = {
           },
         ]
       }
+      transaction_attachments: {
+        Row: {
+          branch_id: string
+          company_id: string
+          created_at: string
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          transaction_id: string
+          transaction_type: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          branch_id: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          transaction_id: string
+          transaction_type: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          branch_id?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          transaction_id?: string
+          transaction_type?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       user_branch_access: {
         Row: {
           branch_id: string

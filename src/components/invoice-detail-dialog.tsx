@@ -4,10 +4,14 @@ import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, FileText } from "lucide-react";
+import { ExternalLink, FileText, Printer } from "lucide-react";
 import { getInvoice } from "@/lib/api/invoices.functions";
 import { useI18n, useLocalized } from "@/i18n";
 import { HistoryLog } from "@/components/history-log";
+import { TransactionAttachments } from "@/components/transaction-attachments";
+import { ApprovalWorkflowTimeline } from "@/components/approval-workflow-timeline";
+import { printTaxInvoice } from "@/components/invoice-print";
+import { toast } from "sonner";
 
 function fmt(n: number) {
   return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -31,7 +35,7 @@ export function InvoiceDetailDialog({
   invoiceId: string | null;
   onClose: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const localized = useLocalized();
   const getFn = useServerFn(getInvoice);
 
@@ -47,13 +51,26 @@ export function InvoiceDetailDialog({
   const taxAmt = lines.reduce((s, l) => s + Number(l.quantity) * Number(l.unit_price) * (Number(l.tax_rate || 0) / 100), 0);
   const total = subtotal + taxAmt;
 
+  const handlePrint = async () => {
+    if (!inv) return;
+    try {
+      await printTaxInvoice({
+        invoice: inv,
+        company: (inv as any).companies ?? null,
+        lang: (locale as "ar" | "en") ?? "ar",
+      });
+    } catch (e: any) {
+      toast.error(e.message || "Print failed");
+    }
+  };
+
   return (
     <Dialog open={!!invoiceId} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 flex-wrap">
             <FileText className="h-5 w-5 text-primary" />
-            <span>{t("invoices.detailsTitle") || "Invoice Details"}</span>
+            <span>{t("invoices.detailsTitle") || "تفاصيل الفاتورة"}</span>
             {inv && <span className="font-mono text-sm text-muted-foreground">{(inv as any).invoice_number}</span>}
             {inv && <Badge variant="outline" className={statusClass((inv as any).status)}>{t(`je.${(inv as any).status}` as any) || (inv as any).status}</Badge>}
           </DialogTitle>
@@ -63,10 +80,9 @@ export function InvoiceDetailDialog({
           <div className="p-8 text-center text-muted-foreground text-sm">{t("common.loading")}</div>
         ) : (
           <div className="space-y-4">
-            {/* JE hyperlink */}
             {je && (
               <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/20 rounded p-2.5">
-                <span className="text-muted-foreground">{t("invoices.linkedJE") || "Linked Journal Entry"}:</span>
+                <span className="text-muted-foreground">{t("invoices.linkedJE") || "القيد المرتبط"}:</span>
                 <span className="font-mono font-medium">{je.entry_number}</span>
                 <Badge variant="outline" className="text-[10px]">{t(`je.${je.status}` as any) || je.status}</Badge>
                 <Link
@@ -76,12 +92,11 @@ export function InvoiceDetailDialog({
                   className="ms-auto inline-flex items-center gap-1 text-primary hover:underline font-medium"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
-                  {t("invoices.openJE") || "Open Entry"}
+                  {t("invoices.openJE") || "فتح القيد"}
                 </Link>
               </div>
             )}
 
-            {/* Header info */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div>
                 <div className="text-[11px] text-muted-foreground mb-0.5">{t("invoices.date")}</div>
@@ -109,7 +124,6 @@ export function InvoiceDetailDialog({
               )}
             </div>
 
-            {/* Lines */}
             <div className="border rounded-md overflow-hidden">
               <table className="w-full text-xs">
                 <thead className="bg-muted/50">
@@ -174,11 +188,27 @@ export function InvoiceDetailDialog({
               </table>
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <TransactionAttachments
+                transactionType="invoice"
+                transactionId={(inv as any).id}
+                companyId={(inv as any).company_id}
+                branchId={(inv as any).branch_id}
+              />
+              <ApprovalWorkflowTimeline documentType="invoice" documentId={(inv as any).id} />
+            </div>
+
             <HistoryLog table="invoices" recordId={(inv as any).id} />
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
+          {inv && (
+            <Button variant="default" onClick={handlePrint}>
+              <Printer className="h-4 w-4 me-1" />
+              {t("invoices.printTax") || "طباعة فاتورة ضريبية"}
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose}>{t("common.close")}</Button>
         </DialogFooter>
       </DialogContent>
