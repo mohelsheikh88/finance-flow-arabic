@@ -273,6 +273,34 @@ function ChartOfAccountsPanel() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const runBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    setBulkDeleting(true);
+    let ok = 0;
+    const errors: string[] = [];
+    for (const id of ids) {
+      try {
+        await remove({ data: { id } });
+        ok++;
+      } catch (e: any) {
+        const acc = (accounts as any[]).find((a) => a.id === id);
+        errors.push(`${acc?.code ?? id}: ${e?.message ?? "error"}`);
+      }
+    }
+    setBulkDeleting(false);
+    setBulkDeleteOpen(false);
+    setSelectedIds(new Set());
+    qc.invalidateQueries({ queryKey: ["accounts"] });
+    if (errors.length) {
+      const shown = errors.slice(0, 5).join("\n");
+      const more = errors.length > 5 ? `\n…+${errors.length - 5}` : "";
+      toast.warning(`Deleted ${ok}/${ids.length}\n${shown}${more}`);
+    } else {
+      toast.success(`Deleted ${ok}`);
+    }
+  };
+
   const typeColors: Record<string, string> = {
     asset: "bg-info/10 text-info border-info/30",
     liability: "bg-warning/10 text-warning border-warning/30",
