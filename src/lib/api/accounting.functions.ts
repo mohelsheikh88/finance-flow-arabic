@@ -820,7 +820,107 @@ export const listJournals = createServerFn({ method: "GET" })
       .order("code");
     if (error) throw new Error(error.message);
     return rows ?? [];
+
+const JOURNAL_TYPES = ["sales", "purchase", "bank", "cash", "misc"] as const;
+
+export const listJournalsAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => i)
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("journals")
+      .select(
+        "*, default_debit_account:accounts!journals_default_debit_account_id_fkey(id, code, name_ar, name_en), default_credit_account:accounts!journals_default_credit_account_id_fkey(id, code, name_ar, name_en)",
+      )
+      .eq("company_id", data.companyId)
+      .order("journal_type")
+      .order("code");
+    if (error) throw new Error(error.message);
+    return rows ?? [];
   });
+
+export const upsertJournal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: {
+    id?: string;
+    company_id: string;
+    code: string;
+    name_ar: string;
+    name_en: string;
+    journal_type: (typeof JOURNAL_TYPES)[number];
+    sequence_prefix: string | null;
+    sequence_next: number;
+    currency_code: string | null;
+    default_debit_account_id: string | null;
+    default_credit_account_id: string | null;
+    is_active: boolean;
+  }) =>
+    z
+      .object({
+        id: z.string().uuid().optional(),
+        company_id: z.string().uuid(),
+        code: z.string().min(1).max(20).regex(/^[A-Za-z0-9_-]+$/),
+        name_ar: z.string().min(1).max(255),
+        name_en: z.string().min(1).max(255),
+        journal_type: z.enum(JOURNAL_TYPES),
+        sequence_prefix: z.string().max(20).nullable(),
+        sequence_next: z.number().int().min(1),
+        currency_code: z.string().min(3).max(3).nullable(),
+        default_debit_account_id: z.string().uuid().nullable(),
+        default_credit_account_id: z.string().uuid().nullable(),
+        is_active: z.boolean(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const payload: any = {
+      company_id: data.company_id,
+      code: data.code.trim().toUpperCase(),
+      name_ar: data.name_ar.trim(),
+      name_en: data.name_en.trim(),
+      journal_type: data.journal_type,
+      sequence_prefix: data.sequence_prefix?.trim() || null,
+      sequence_next: data.sequence_next,
+      currency_code: data.currency_code || null,
+      default_debit_account_id: data.default_debit_account_id,
+      default_credit_account_id: data.default_credit_account_id,
+      is_active: data.is_active,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("journals")
+        .update(payload)
+        .eq("id", data.id)
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("journals")
+      .insert(payload)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteJournal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { count } = await context.supabase
+      .from("journal_entries")
+      .select("id", { count: "exact", head: true })
+      .eq("journal_id", data.id);
+    if ((count ?? 0) > 0)
+      throw new Error("Journal has entries and cannot be deleted | الدفتر مستخدم في قيود ولا يمكن حذفه");
+    const { error } = await context.supabase.from("journals").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 
 export const listJournalEntries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
