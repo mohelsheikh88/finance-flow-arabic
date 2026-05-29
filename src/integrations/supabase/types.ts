@@ -137,6 +137,8 @@ export type Database = {
           id: string
           is_active: boolean
           is_group: boolean
+          is_payable: boolean
+          is_receivable: boolean
           is_reconcilable: boolean
           name_ar: string
           name_en: string
@@ -155,6 +157,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_group?: boolean
+          is_payable?: boolean
+          is_receivable?: boolean
           is_reconcilable?: boolean
           name_ar: string
           name_en: string
@@ -173,6 +177,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_group?: boolean
+          is_payable?: boolean
+          is_receivable?: boolean
           is_reconcilable?: boolean
           name_ar?: string
           name_en?: string
