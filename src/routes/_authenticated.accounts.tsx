@@ -935,6 +935,106 @@ function ChartOfAccountsTree({
 }
 
 
+
+function ChartOfAccountsTable({
+  accounts,
+  accountTypes,
+  onEdit,
+  onDelete,
+  onToggleReconcilable,
+}: {
+  accounts: any[];
+  accountTypes: any[];
+  onEdit: (a: any) => void;
+  onDelete: (a: any) => void;
+  onToggleReconcilable: (a: any, v: boolean) => void;
+}) {
+  const { t } = useI18n();
+  const localized = useLocalized();
+
+  const typeById = useMemo(() => {
+    const m = new Map<string, any>();
+    accountTypes.forEach((tp) => m.set(tp.id, tp));
+    return m;
+  }, [accountTypes]);
+
+  const rows = useMemo(
+    () => [...accounts].sort((a, b) => String(a.code).localeCompare(String(b.code))),
+    [accounts],
+  );
+
+  return (
+    <Card>
+      <table className="w-full text-sm">
+        <thead className="bg-muted/50">
+          <tr>
+            <th className="text-start p-3 font-medium w-40">{t("common.code")}</th>
+            <th className="text-start p-3 font-medium">{t("accounts.title")}</th>
+            <th className="text-start p-3 font-medium w-56">{t("common.type") || "Type"}</th>
+            <th className="text-center p-3 font-medium w-48">{t("accounts.isReconcilable")}</th>
+            <th className="text-center p-3 font-medium w-28">{t("common.status")}</th>
+            <th className="text-end p-3 font-medium w-32">{t("common.actions")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((a) => {
+            const tp = typeById.get(a.account_type_id);
+            return (
+              <tr key={a.id} className="border-t hover:bg-muted/30">
+                <td className="p-3 font-mono">{a.code}</td>
+                <td className="p-3">
+                  <span className={a.is_group ? "font-semibold" : ""}>{localized(a, "name")}</span>
+                </td>
+                <td className="p-3 text-muted-foreground">
+                  {tp ? localized(tp, "name") : "—"}
+                </td>
+                <td className="p-3 text-center">
+                  <Switch
+                    checked={!!a.is_reconcilable}
+                    onCheckedChange={(v) => onToggleReconcilable(a, v)}
+                  />
+                </td>
+                <td className="p-3 text-center">
+                  {a.is_active ? (
+                    <Badge variant="outline" className="bg-success/10 text-success border-success/30">
+                      {t("common.active")}
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">{t("common.inactive")}</Badge>
+                  )}
+                </td>
+                <td className="p-3">
+                  <div className="flex items-center gap-1 justify-end">
+                    <Button size="sm" variant="ghost" onClick={() => onEdit(a)} aria-label={t("common.edit")}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onDelete(a)}
+                      aria-label={t("common.delete")}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                {t("common.noData")}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </Card>
+  );
+}
+
 const bucketColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
   liability: "bg-warning/10 text-warning border-warning/30",
