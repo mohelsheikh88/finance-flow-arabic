@@ -56,11 +56,20 @@ export const getInvoice = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { data: inv, error } = await context.supabase
       .from("invoices")
-      .select("*, partners(code, name_ar, name_en, vat_number), invoice_lines(*, accounts(code, name_ar, name_en)), journal_entries(id, entry_number, status, entry_date), companies(name_ar, name_en, vat_number, cr_number, address_ar, address_en, phone, logo_url)")
+      .select("*, partners(code, name_ar, name_en, vat_number), invoice_lines(*, accounts(code, name_ar, name_en)), companies(name_ar, name_en, vat_number, cr_number, address_ar, address_en, phone, logo_url)")
       .eq("id", data.id)
       .single();
     if (error) throw new Error(error.message);
-    return inv;
+    let journal_entry = null as null | { id: string; entry_number: string; status: string; entry_date: string };
+    if (inv?.journal_entry_id) {
+      const { data: je } = await context.supabase
+        .from("journal_entries")
+        .select("id, entry_number, status, entry_date")
+        .eq("id", inv.journal_entry_id)
+        .maybeSingle();
+      journal_entry = je as typeof journal_entry;
+    }
+    return { ...inv, journal_entries: journal_entry };
   });
 
 
