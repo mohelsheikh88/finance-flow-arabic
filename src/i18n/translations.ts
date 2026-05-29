@@ -1097,6 +1097,13 @@ export const translations = {
       cancelled: "Cancelled",
       post: "Post",
       saveDraft: "Save as Draft",
+      source: "Journal Source",
+      sourceAR: "Accounts Receivable",
+      sourceAP: "Accounts Payable",
+      sourceTreasury: "Treasury & Banks",
+      sourceFixedAssets: "Fixed Assets",
+      sourceLoans: "Loans Management",
+      sourceManual: "Manual Entry",
     },
     accounts: {
       title: "Chart of Accounts",
