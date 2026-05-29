@@ -1085,7 +1085,16 @@ export const translations = {
       selectAll: "Select all",
       confirmBulkChangeTitle: "Confirm Bulk Change",
       confirmBulkChangeMessage: "The selected accounts will have their classification changed to:",
-
+      isReceivable: "Receivable",
+      isPayable: "Payable",
+      selectClassificationFirst: "Please select an account classification first",
+      selectClassificationHint: "Please select a classification first — cannot save without one.",
+      selectedSingular: "account selected",
+      selectedPlural: "accounts selected",
+      clearSelection: "Clear selection",
+      deleteSelected: "Delete selected",
+      bulkDeleteTitle: "Delete {count} accounts",
+      bulkDeleteMessage: "Are you sure you want to delete the selected accounts? This action cannot be undone.",
     },
 
     partners: {
