@@ -155,14 +155,14 @@ function CustomersPage() {
               <div><Label>{t("common.phone")}</Label><Input dir="ltr" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
               <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
               <div>
-                <Label>حساب الذمم المدينة (GL)</Label>
+                <Label>{t("customers.receivableAccount")}</Label>
                 <Select
                   value={form.receivable_account_id ?? "__none__"}
                   onValueChange={(v) => setForm({ ...form, receivable_account_id: v === "__none__" ? null : v })}
                 >
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">— (الافتراضي من اليومية) —</SelectItem>
+                    <SelectItem value="__none__">{t("customers.defaultFromJournal")}</SelectItem>
                     {arAccounts.map((a) => (
                       <SelectItem key={a.id} value={a.id}>
                         {a.code} — {localized(a, "name")}
@@ -213,8 +213,8 @@ function CustomersPage() {
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
-              <th className="text-start p-3 font-medium">حساب الذمم (GL)</th>
-              <th className="text-start p-3 font-medium">Phone</th>
+              <th className="text-start p-3 font-medium">{t("customers.receivableAccountShort")}</th>
+              <th className="text-start p-3 font-medium">{t("customers.phone")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("partners.creditLimit")}</th>
               <th className="text-end p-3 font-medium w-24">{t("common.actions") || ""}</th>
             </tr>
@@ -248,15 +248,15 @@ function CustomersPage() {
       <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("common.confirmDelete") || "تأكيد الحذف"}</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("common.deleteWarning") || "لا يمكن التراجع عن هذا الإجراء."}
+              {t("common.deleteWarning")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={() => deleteMut.mutate()} disabled={deleteMut.isPending}>
-              {t("common.delete") || "حذف"}
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

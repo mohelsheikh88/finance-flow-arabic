@@ -275,7 +275,7 @@ function ChartOfAccountsPanel() {
   const saveMut = useMutation({
     mutationFn: () => {
       if (!form.classification_id) {
-        throw new Error("اختر تصنيف الحساب أولاً | Please select an account classification first");
+        throw new Error(t("accounts.selectClassificationFirst"));
       }
       return upsert({
         data: {
@@ -427,7 +427,7 @@ function ChartOfAccountsPanel() {
       const buf = await f.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      if (!ws) { toast.error("Empty workbook | الملف فارغ"); return; }
+      if (!ws) { toast.error(t("common.emptyWorkbook")); return; }
       const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
 
       // ----- Schema validation -----
@@ -439,16 +439,16 @@ function ChartOfAccountsPanel() {
 
       const header = (XLSX.utils.sheet_to_json<any>(ws, { header: 1 })[0] as any[] | undefined) ?? [];
       const headerCols = header.map((h) => String(h ?? "").trim()).filter(Boolean);
-      if (!headerCols.length) { toast.error("Sheet has no header row | الورقة لا تحتوي على صف عناوين"); return; }
+      if (!headerCols.length) { toast.error(t("common.noHeaderRow")); return; }
 
       const missing = REQUIRED.filter((c) => !headerCols.includes(c));
       if (missing.length) {
-        toast.error(`Missing required columns: ${missing.join(", ")} | أعمدة مطلوبة ناقصة`);
+        toast.error(`${t("common.missingColumns")}: ${missing.join(", ")}`);
         return;
       }
       const unknown = headerCols.filter((c) => !EXPECTED.includes(c));
       if (unknown.length) {
-        toast.error(`Unexpected columns: ${unknown.join(", ")} | أعمدة غير متوقعة`);
+        toast.error(`${t("common.unexpectedColumns")}: ${unknown.join(", ")}`);
         return;
       }
 
@@ -612,11 +612,11 @@ function ChartOfAccountsPanel() {
         <div className="flex items-center justify-between gap-3 p-3 rounded-md border bg-muted/40">
           <div className="text-sm">
             <span className="font-semibold text-foreground">{selectedIds.size}</span>{" "}
-            {selectedIds.size === 1 ? "حساب محدد" : "حساب محددين"}
+            {selectedIds.size === 1 ? t("accounts.selectedSingular") : t("accounts.selectedPlural")}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
-              إلغاء التحديد
+              {t("accounts.clearSelection")}
             </Button>
             <Button
               variant="destructive"
@@ -625,7 +625,7 @@ function ChartOfAccountsPanel() {
               disabled={bulkDeleting}
             >
               <Trash2 className="h-4 w-4 me-1" />
-              حذف المحدد ({selectedIds.size})
+              {t("accounts.deleteSelected")} ({selectedIds.size})
             </Button>
           </div>
         </div>
@@ -796,7 +796,7 @@ function ChartOfAccountsPanel() {
               </Select>
               {!form.classification_id && (
                 <p className="mt-1 text-xs text-destructive">
-                  اختر تصنيف الحساب أولاً — لا يمكن الحفظ بدون تصنيف.
+                  {t("accounts.selectClassificationHint")}
                 </p>
               )}
             </div>
@@ -840,11 +840,11 @@ function ChartOfAccountsPanel() {
               </div>
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_receivable} onCheckedChange={(v) => setForm({ ...form, is_receivable: v })} />
-                <Label>ذمم مدينة (Receivable)</Label>
+                <Label>{t("accounts.isReceivable")}</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_payable} onCheckedChange={(v) => setForm({ ...form, is_payable: v })} />
-                <Label>ذمم دائنة (Payable)</Label>
+                <Label>{t("accounts.isPayable")}</Label>
               </div>
             </div>
             <div className="col-span-2">
@@ -883,9 +883,9 @@ function ChartOfAccountsPanel() {
       <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => !bulkDeleting && setBulkDeleteOpen(o)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف {selectedIds.size} حساب</AlertDialogTitle>
+            <AlertDialogTitle>{t("accounts.bulkDeleteTitle", { count: selectedIds.size })}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف الحسابات المحددة؟ لا يمكن التراجع عن هذا الإجراء.
+              {t("accounts.bulkDeleteMessage")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -895,7 +895,7 @@ function ChartOfAccountsPanel() {
               disabled={bulkDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {bulkDeleting ? "جارٍ الحذف..." : t("common.delete")}
+              {bulkDeleting ? t("common.deleting") : t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
