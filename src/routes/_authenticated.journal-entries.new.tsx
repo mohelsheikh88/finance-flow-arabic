@@ -89,7 +89,8 @@ function NewJEPage() {
       qc.invalidateQueries();
       navigate({ to: "/journal-entries" });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+
   });
 
   return (
