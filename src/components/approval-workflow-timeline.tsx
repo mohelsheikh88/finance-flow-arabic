@@ -93,16 +93,13 @@ export function ApprovalWorkflowTimeline({
               <div className="w-full overflow-x-auto pb-2">
                 <ol className="flex items-start justify-between gap-0 min-w-full px-2" dir="rtl">
                   {nodes.map((step: any, idx: number) => {
-                    const action = step.__submitter
-                      ? { acted_at: req.created_at, action: "approved" }
-                      : (req.approval_actions || []).find((a: any) => a.step_order === step.step_order);
+                    const action = (req.approval_actions || []).find(
+                      (a: any) => a.step_order === step.step_order,
+                    );
                     const done = action != null;
                     const isCurrent =
-                      !step.__submitter &&
-                      req.status === "pending" &&
-                      step.step_order === req.current_step;
+                      req.status === "pending" && step.step_order === req.current_step;
                     const rejected = action?.action === "rejected";
-                    const isPending = !done && !isCurrent;
 
                     let circleCls = "bg-background border-muted text-muted-foreground";
                     let icon: any = <span className="text-xs font-semibold">{idx + 1}</span>;
