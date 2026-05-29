@@ -186,10 +186,21 @@ export const translations = {
     },
     paymentMethods: {
       new: "وسيلة دفع جديدة",
+      edit: "تعديل وسيلة الدفع",
       type: "النوع",
       bank: "الحساب البنكي",
       inbound: "للتحصيل",
       outbound: "للدفع",
+      seed: "إضافة وسائل جاهزة",
+      seedTitle: "وسائل الدفع الجاهزة",
+      seedDesc: "اختر الوسائل اللي تحتاجها، وهنضيف بس اللي مش موجود.",
+      seedAdd: "إضافة المختار",
+      regionSaudi: "السعودية",
+      regionGlobal: "عالمية",
+      selectAll: "اختيار الكل",
+      clearSelection: "إلغاء التحديد",
+      seeded: "تمت إضافة {count} وسيلة",
+      deleteConfirm: "حذف وسيلة الدفع؟ لا يمكن التراجع.",
       types: {
         cash: "نقدًا",
         bank_transfer: "تحويل بنكي",
@@ -198,6 +209,7 @@ export const translations = {
         other: "أخرى",
       },
     },
+
     currencies: {
       title: "العملات",
       subtitle: "إدارة العملات وأسعار الصرف المستخدمة في النظام",
@@ -722,10 +734,21 @@ export const translations = {
     },
     paymentMethods: {
       new: "New Payment Method",
+      edit: "Edit Payment Method",
       type: "Type",
       bank: "Bank Account",
       inbound: "For Receipts",
       outbound: "For Payments",
+      seed: "Add Presets",
+      seedTitle: "Preset Payment Methods",
+      seedDesc: "Pick the methods you need — only missing ones will be added.",
+      seedAdd: "Add Selected",
+      regionSaudi: "Saudi Arabia",
+      regionGlobal: "Global",
+      selectAll: "Select all",
+      clearSelection: "Clear",
+      seeded: "Added {count} method(s)",
+      deleteConfirm: "Delete this payment method? This cannot be undone.",
       types: {
         cash: "Cash",
         bank_transfer: "Bank Transfer",
@@ -734,6 +757,7 @@ export const translations = {
         other: "Other",
       },
     },
+
     currencies: {
       title: "Currencies",
       subtitle: "Manage currencies and exchange rates used across the system",
