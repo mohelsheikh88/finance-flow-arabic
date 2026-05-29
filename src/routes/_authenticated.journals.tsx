@@ -480,7 +480,7 @@ function JournalsPage() {
               />
             </div>
             <div>
-              <Label>Next Sequence #</Label>
+              <Label>#</Label>
               <Input
                 type="number"
                 min={1}
