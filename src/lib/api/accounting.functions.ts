@@ -100,13 +100,14 @@ export const deleteClassification = createServerFn({ method: "POST" })
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { count } = await (context.supabase as any)
-      .from("account_types")
+      .from("accounts")
       .select("id", { count: "exact", head: true })
       .eq("classification_id", data.id);
     if ((count ?? 0) > 0)
       throw new Error(
-        "This classification is linked to account types and cannot be deleted | هذا التصنيف مرتبط بأنواع حسابات ولا يمكن حذفه",
+        "This classification is used by accounts and cannot be deleted | هذا التصنيف مستخدم في حسابات ولا يمكن حذفه",
       );
+
 
     const { error } = await (context.supabase as any)
       .from("classifications")
