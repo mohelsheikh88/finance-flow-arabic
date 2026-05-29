@@ -61,6 +61,7 @@ function JEListPage() {
               </tr>
             ))}
             {entries.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+          </tbody>
         </table>
       </Card>
     </div>
