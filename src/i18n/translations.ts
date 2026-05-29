@@ -1245,6 +1245,7 @@ export const translations = {
     approvals: {
       title: "Hierarchical Approvals",
       newWorkflow: "New Workflow",
+      editWorkflow: "Edit Workflow",
       workflows: "Workflows",
       requests: "Approval Requests",
       noWorkflows: "No workflows configured yet",
