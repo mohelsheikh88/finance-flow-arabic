@@ -236,10 +236,22 @@ export function RolesManagement() {
               <Input
                 value={form.code}
                 disabled={!!editing}
-                onChange={(e) => setForm({ ...form, code: e.target.value })}
+                onChange={(e) => {
+                  const sanitized = e.target.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9_]/g, "_")
+                    .replace(/^[^a-z]+/, "");
+                  setForm({ ...form, code: sanitized });
+                }}
                 placeholder="e.g. treasury_manager"
               />
-              {!editing && <p className="text-[10px] text-muted-foreground mt-1">{t("roles.codeHint")}</p>}
+              {!editing && (
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {locale === "ar"
+                    ? "حروف إنجليزية صغيرة وأرقام و _ فقط، ويبدأ بحرف. مثال: treasury_manager"
+                    : "Lowercase letters, digits, and _ only. Must start with a letter. e.g. treasury_manager"}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
