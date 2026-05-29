@@ -222,6 +222,10 @@ function ApprovalsPage() {
         <TabsContent value="roles">
           <RolesManagement />
         </TabsContent>
+
+        <TabsContent value="user_roles">
+          <UserRolesManagement />
+        </TabsContent>
       </Tabs>
     </div>
   );
