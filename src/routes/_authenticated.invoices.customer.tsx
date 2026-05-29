@@ -265,6 +265,7 @@ function CustomerInvoicesPage() {
                 <td className="p-3 text-end font-mono text-success">{fmt(inv.amount_paid)}</td>
                 <td className="p-3 text-end font-mono font-semibold">{fmt(inv.amount_due)}</td>
                 <td className="p-3">{statusBadge(inv.status, t)}</td>
+                <td className="p-3 text-center"><ApprovalCell documentType="invoice" documentId={inv.id} /></td>
                 <td className="p-3 text-end">
                   {inv.status === "draft" && (
                     <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
@@ -274,7 +275,7 @@ function CustomerInvoicesPage() {
                 </td>
               </tr>
             ))}
-            {invoices.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {invoices.length === 0 && <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
