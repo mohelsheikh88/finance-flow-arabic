@@ -675,8 +675,7 @@ export const translations = {
       prevPage: "Previous page",
       nextPage: "Next page",
       lastPage: "Last page",
-
-
+      logout: "Logout",
     },
 
     auth: {
