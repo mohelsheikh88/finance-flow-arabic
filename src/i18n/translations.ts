@@ -388,6 +388,11 @@ export const translations = {
       sourceFixedAssets: "الأصول الثابتة",
       sourceLoans: "إدارة القروض",
       sourceManual: "قيد يدوي",
+      details: "تفاصيل القيد",
+      edit: "تعديل القيد",
+      reference: "المرجع",
+      description: "الوصف",
+      readOnlyNotice: "لا يمكن التعديل: هذا القيد ليس مانوال أو ليس في حالة مسودة",
     },
     journals: {
       allowManualEntries: "السماح بإنشاء قيود يدوية من هذا الدفتر",
