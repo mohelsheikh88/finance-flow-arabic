@@ -27,6 +27,20 @@ function JEListPage() {
 
   const fmt = (n: number) => new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", { minimumFractionDigits: 2 }).format(n);
 
+  const sourceLabel = (e: any) => {
+    const st = e.source_type;
+    if (st === "invoice") {
+      return e.source_invoice_type === "vendor_bill" || e.source_invoice_type === "vendor"
+        ? t("je.sourceAP")
+        : t("je.sourceAR");
+    }
+    if (st === "payment") return t("je.sourceTreasury");
+    if (st === "depreciation" || st === "asset_disposal" || st === "asset_acquisition" || st === "fixed_asset")
+      return t("je.sourceFixedAssets");
+    if (st === "loan" || st === "loan_payment" || st === "loan_disbursement") return t("je.sourceLoans");
+    return t("je.sourceManual");
+  };
+
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -40,6 +54,7 @@ function JEListPage() {
               <th className="text-start p-3">{t("je.entryNumber")}</th>
               <th className="text-start p-3">{t("je.entryDate")}</th>
               <th className="text-start p-3">{t("je.journal")}</th>
+              <th className="text-start p-3">{t("je.source")}</th>
               <th className="text-start p-3">{t("common.description")}</th>
               <th className="text-end p-3 font-mono">{t("je.debit")}</th>
               <th className="text-end p-3 font-mono">{t("je.credit")}</th>
@@ -53,6 +68,7 @@ function JEListPage() {
                 <td className="p-3 font-mono">{e.entry_number}</td>
                 <td className="p-3">{e.entry_date}</td>
                 <td className="p-3">{e.journals ? localized(e.journals, "name") : "—"}</td>
+                <td className="p-3">{sourceLabel(e)}</td>
                 <td className="p-3 text-muted-foreground">{e.description || "—"}</td>
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_debit))}</td>
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_credit))}</td>
@@ -60,7 +76,7 @@ function JEListPage() {
                 <td className="p-3 text-center"><ApprovalCell documentType="journal_entry" documentId={e.id} /></td>
               </tr>
             ))}
-            {entries.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {entries.length === 0 && <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
