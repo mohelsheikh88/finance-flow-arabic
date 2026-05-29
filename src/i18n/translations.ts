@@ -77,10 +77,15 @@ export const translations = {
       currencies: "العملات",
       company: "الشركة",
       account: "حساب",
+      accounts: "حسابات",
       page: "صفحة",
       of: "من",
       show: "عرض",
       rowsPerPage: "صفوف لكل صفحة",
+      firstPage: "الصفحة الأولى",
+      prevPage: "الصفحة السابقة",
+      nextPage: "الصفحة التالية",
+      lastPage: "الصفحة الأخيرة",
 
     },
 
@@ -604,10 +609,16 @@ export const translations = {
       category: "Category",
       currencies: "Currencies",
       account: "account",
-      page: "page",
+      accounts: "accounts",
+      page: "Page",
       of: "of",
       show: "Show",
       rowsPerPage: "Rows per page",
+      firstPage: "First page",
+      prevPage: "Previous page",
+      nextPage: "Next page",
+      lastPage: "Last page",
+
 
     },
 
