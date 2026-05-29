@@ -31,7 +31,6 @@ function Page() {
 
   const list = useServerFn(listLockDates);
   const create = useServerFn(createLockDate);
-  const remove = useServerFn(deleteLockDate);
 
   const { data: rows = [] } = useQuery({
     queryKey: ["lock_dates", companyId],
