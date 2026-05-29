@@ -189,8 +189,10 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       items: [
         { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/users", icon: Users, title: t("nav.users") },
+        { url: "/roles", icon: ShieldCheck, title: t("roles.title") },
       ],
     },
+
   ];
 
 

@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listApprovalRequests, listWorkflows, createWorkflow, actOnRequest } from "@/lib/api/approvals.functions";
+import { listRoles } from "@/lib/api/roles.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -23,8 +24,8 @@ export const Route = createFileRoute("/_authenticated/approvals")({
   component: ApprovalsPage,
 });
 
-const ROLES = ["finance_manager", "accounting_manager", "chief_accountant", "accountant"] as const;
 const DOC_TYPES = ["journal_entry", "invoice", "payment", "asset_disposal"] as const;
+
 
 function ApprovalsPage() {
   const { t } = useI18n();
