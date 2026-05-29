@@ -67,7 +67,7 @@ function JEListPage() {
           </thead>
           <tbody>
             {entries.map((e: any) => (
-              <tr key={e.id} className="border-t hover:bg-muted/30">
+              <tr key={e.id} onClick={() => setSelectedId(e.id)} className="border-t hover:bg-muted/30 cursor-pointer">
                 <td className="p-3 font-mono">{e.entry_number}</td>
                 <td className="p-3">{e.entry_date}</td>
                 <td className="p-3">{e.journals ? localized(e.journals, "name") : "—"}</td>
@@ -76,13 +76,14 @@ function JEListPage() {
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_debit))}</td>
                 <td className="p-3 text-end font-mono">{fmt(Number(e.total_credit))}</td>
                 <td className="p-3 text-center"><StatusBadge status={e.status} /></td>
-                <td className="p-3 text-center"><ApprovalCell documentType="journal_entry" documentId={e.id} /></td>
+                <td className="p-3 text-center" onClick={(ev) => ev.stopPropagation()}><ApprovalCell documentType="journal_entry" documentId={e.id} /></td>
               </tr>
             ))}
             {entries.length === 0 && <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
+      <JEDetailDialog entryId={selectedId} onClose={() => setSelectedId(null)} />
     </div>
   );
 }
