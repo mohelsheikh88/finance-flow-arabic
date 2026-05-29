@@ -731,6 +731,8 @@ export const translations = {
       document: "المستند",
       reference: "المرجع",
       approval: "الاعتماد",
+      workflow: "مسار الاعتماد",
+      noWorkflow: "لا يوجد مسار اعتماد مطبق على هذا المستند",
       actionDone: "تم تنفيذ الإجراء",
       doc: { journal_entry: "قيد يومي", invoice: "فاتورة", payment: "دفعة", asset_disposal: "استبعاد أصل" },
       jt: { sales: "مبيعات", purchase: "مشتريات", bank: "بنك", cash: "صندوق", misc: "متنوعة" },
