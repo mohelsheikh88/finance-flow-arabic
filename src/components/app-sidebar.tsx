@@ -339,7 +339,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                               asChild
                               isActive={isActive(item.url)}
                               tooltip={item.title}
-                              className="h-9 gap-2.5 text-[13.5px]"
+                              className="nav-pill h-9 gap-2.5 text-[13.5px] !bg-transparent data-[active=true]:!bg-transparent"
                             >
                               <Link to={item.url} className="flex items-center gap-2.5">
                                 <item.icon className="h-[15px] w-[15px] shrink-0 text-sidebar-foreground/70" />
