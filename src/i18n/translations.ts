@@ -1109,6 +1109,10 @@ export const translations = {
       sourceLoans: "Loans Management",
       sourceManual: "Manual Entry",
     },
+    journals: {
+      allowManualEntries: "Allow manual entries from this journal",
+      manualShort: "Manual",
+    },
     accounts: {
       title: "Chart of Accounts",
       type: "Accounts Groups",
