@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listLockDates, createLockDate, deleteLockDate } from "@/lib/api/lock-dates.functions";
+import { listLockDates, createLockDate } from "@/lib/api/lock-dates.functions";
+
 import { useBranch } from "@/lib/branch-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, useLocalized } from "@/i18n";
@@ -14,7 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Lock } from "lucide-react";
+import { Plus, Lock } from "lucide-react";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/lock-dates")({
@@ -29,7 +31,6 @@ function Page() {
 
   const list = useServerFn(listLockDates);
   const create = useServerFn(createLockDate);
-  const remove = useServerFn(deleteLockDate);
 
   const { data: rows = [] } = useQuery({
     queryKey: ["lock_dates", companyId],
@@ -73,14 +74,6 @@ function Page() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const removeMut = useMutation({
-    mutationFn: (id: string) => remove({ data: { id } }),
-    onSuccess: () => {
-      toast.success(t("common.saved"));
-      qc.invalidateQueries({ queryKey: ["lock_dates"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const canSave = !!form.lock_date;
 
@@ -134,7 +127,6 @@ function Page() {
               <th className="text-start p-3 font-medium">{t("lockDates.lockDate")}</th>
               <th className="text-start p-3 font-medium">{t("lockDates.scope")}</th>
               <th className="text-start p-3 font-medium">{t("common.notes")}</th>
-              <th className="text-center p-3 font-medium">{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -149,17 +141,13 @@ function Page() {
                   )}
                 </td>
                 <td className="p-3 text-muted-foreground">{r.notes ?? "—"}</td>
-                <td className="p-3 text-center">
-                  <Button size="sm" variant="ghost" onClick={() => removeMut.mutate(r.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </td>
               </tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={3} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
     </div>
   );
 }
+
