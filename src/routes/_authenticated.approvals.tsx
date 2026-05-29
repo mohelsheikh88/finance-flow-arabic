@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listWorkflows, createWorkflow, updateWorkflow, deleteWorkflow } from "@/lib/api/approvals.functions";
+import { listWorkflows, createWorkflow, updateWorkflow, deleteWorkflow, setWorkflowActive } from "@/lib/api/approvals.functions";
 import { listRoles } from "@/lib/api/roles.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -41,6 +41,7 @@ function ApprovalsPage() {
   const createWf = useServerFn(createWorkflow);
   const updateWf = useServerFn(updateWorkflow);
   const deleteWf = useServerFn(deleteWorkflow);
+  const setActiveWf = useServerFn(setWorkflowActive);
   const listRolesFn = useServerFn(listRoles);
 
   const { data: rolesData = [] } = useQuery({
@@ -145,9 +146,26 @@ function ApprovalsPage() {
       setDeleteId(null);
     },
     onError: (e: any) => {
-      toast.error(e.message);
+      const msg = e.message === "HAS_REQUESTS"
+        ? (locale === "ar"
+            ? "لا يمكن حذف هذا الـ Workflow لوجود طلبات اعتماد مرتبطة به. قم بتعطيله بدلاً من الحذف."
+            : "Cannot delete this workflow because it has linked approval requests. Deactivate it instead.")
+        : e.message;
+      toast.error(msg);
       setDeleteId(null);
     },
+  });
+
+  const toggleActiveMut = useMutation({
+    mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
+      setActiveWf({ data: { id, is_active } }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["workflows"] });
+      toast.success(v.is_active
+        ? (locale === "ar" ? "تم تفعيل الـ Workflow" : "Workflow activated")
+        : (locale === "ar" ? "تم تعطيل الـ Workflow" : "Workflow deactivated"));
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const saveMut = editingId ? updateWfMut : createWfMut;
@@ -324,6 +342,13 @@ function ApprovalsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={w.is_active ? "default" : "secondary"}>{w.is_active ? t("common.active") : t("common.inactive")}</Badge>
+                  <div className="flex items-center gap-1" title={locale === "ar" ? "تفعيل/تعطيل" : "Enable/Disable"}>
+                    <Switch
+                      checked={!!w.is_active}
+                      disabled={toggleActiveMut.isPending}
+                      onCheckedChange={(v) => toggleActiveMut.mutate({ id: w.id, is_active: v })}
+                    />
+                  </div>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(w)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>

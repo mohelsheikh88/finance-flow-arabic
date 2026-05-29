@@ -151,6 +151,20 @@ export const updateWorkflow = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setWorkflowActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string; is_active: boolean }) =>
+    z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase
+      .from("approval_workflows")
+      .update({ is_active: data.is_active })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteWorkflow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
@@ -161,13 +175,14 @@ export const deleteWorkflow = createServerFn({ method: "POST" })
       .select("id", { count: "exact", head: true })
       .eq("workflow_id", data.id);
     if ((count ?? 0) > 0) {
-      throw new Error("Cannot delete workflow with existing approval requests. Deactivate it instead.");
+      throw new Error("HAS_REQUESTS");
     }
     await supabase.from("approval_steps_def").delete().eq("workflow_id", data.id);
     const { error } = await supabase.from("approval_workflows").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 
 /**
