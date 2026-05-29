@@ -27,7 +27,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX, FileDown } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 
@@ -286,7 +286,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-              <Download className="h-4 w-4 me-1" />Export
+              <FileDown className="h-4 w-4 me-1" />Export
             </Button>
             <Button onClick={openNew} disabled={!companyId}>
               <Plus className="h-4 w-4 me-1" />{t("common.new")}
@@ -298,7 +298,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       {embedded && (
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-            <Download className="h-4 w-4 me-1" />Export
+            <FileDown className="h-4 w-4 me-1" />Export
           </Button>
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}

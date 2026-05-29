@@ -23,7 +23,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Download, Upload, ChevronDown, ChevronRight, FolderTree, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, FileDown, FileUp, ChevronDown, ChevronRight, FolderTree, FileText } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -368,10 +368,10 @@ function ChartOfAccountsPanel() {
       <div className="flex items-center justify-end gap-2">
         <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
         <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-          <Download className="h-4 w-4 me-1" />Export
+          <FileDown className="h-4 w-4 me-1" />Export
         </Button>
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
-          <Upload className="h-4 w-4 me-1" />Import
+          <FileUp className="h-4 w-4 me-1" />Import
         </Button>
         <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
           <Plus className="h-4 w-4 me-1" />{t("common.new")}
