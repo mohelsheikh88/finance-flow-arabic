@@ -411,14 +411,27 @@ function ChartOfAccountsPanel() {
         </div>
       </div>
 
-      <ChartOfAccountsTree
+      <ChartOfAccountsTable
         accounts={filteredAccounts as any[]}
         accountTypes={accountTypes as any[]}
-        classifications={classifications as any[]}
-        typeColors={typeColors}
-        statementOf={statementOf}
         onEdit={openEdit}
         onDelete={setToDelete}
+        onToggleReconcilable={(a, v) =>
+          upsertMut.mutate({
+            id: a.id,
+            company_id: companyId!,
+            code: a.code,
+            name_ar: a.name_ar,
+            name_en: a.name_en,
+            account_type_id: a.account_type_id,
+            parent_id: a.parent_id ?? null,
+            currency_code: a.currency_code ?? null,
+            is_group: !!a.is_group,
+            is_active: !!a.is_active,
+            is_reconcilable: v,
+            notes: a.notes ?? null,
+          })
+        }
       />
 
 
