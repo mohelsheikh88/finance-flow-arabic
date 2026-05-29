@@ -1182,6 +1182,9 @@ export const translations = {
       doc_national_address: "National Address",
       doc_contract: "Contract Image",
       doc_other: "Other",
+      email: "Email",
+      customerDetails: "Customer Details",
+
     },
     tb: {
       title: "Trial Balance",
