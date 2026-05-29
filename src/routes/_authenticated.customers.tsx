@@ -189,7 +189,15 @@ function CustomersPage() {
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>{t("customers.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>{t("common.code")} *</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
+              <div>
+                <Label>{t("common.code")} *</Label>
+                <Input
+                  value={form.code}
+                  onChange={(e) => setForm({ ...form, code: e.target.value })}
+                  readOnly={!isEdit && !!form.customer_type_id}
+                  className={!isEdit && !!form.customer_type_id ? "bg-muted" : undefined}
+                />
+              </div>
               <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
               <div><Label>{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
