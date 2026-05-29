@@ -74,6 +74,14 @@ function CustomersPage() {
     enabled: !!companyId,
   });
 
+  const { data: customerTypes = [] } = useQuery({
+    queryKey: ["customer_types", companyId],
+    queryFn: () => typesFn({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+  const activeTypes = (customerTypes as any[]).filter((t) => t.is_active);
+
+
   // Show only accounts marked as Receivable in the Chart of Accounts
   const arAccounts = (accounts as any[]).filter(
     (a) => a.is_active && !a.is_group && a.is_receivable,
