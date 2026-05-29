@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { StatusBadge } from "@/routes/_authenticated.dashboard";
+import { ApprovalCell } from "@/components/approval-cell";
 
 export const Route = createFileRoute("/_authenticated/journal-entries/")({
   component: JEListPage,
