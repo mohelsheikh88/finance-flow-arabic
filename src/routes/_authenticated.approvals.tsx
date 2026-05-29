@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShieldCheck, Plus, Trash2, Pencil, GripVertical } from "lucide-react";
+import { ShieldCheck, Plus, Trash2, Pencil, GripVertical, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { RolesManagement } from "@/components/roles-management";
 import { UserRolesManagement } from "@/components/user-roles-management";
@@ -91,6 +91,29 @@ function ApprovalsPage() {
     setWfForm({
       name_ar: w.name_ar || "",
       name_en: w.name_en || "",
+      journal_type: (w.journal_type || "sales") as typeof JOURNAL_TYPES[number],
+      min_amount: Number(w.min_amount) || 0,
+      max_amount: w.max_amount != null ? Number(w.max_amount) : null,
+    });
+    const ss = (w.approval_steps_def || [])
+      .slice()
+      .sort((a: any, b: any) => a.step_order - b.step_order)
+      .map((s: any, i: number) => ({
+        step_order: i + 1,
+        required_role: s.required_role,
+        step_name_ar: s.step_name_ar || "",
+        step_name_en: s.step_name_en || "",
+      }));
+    setSteps(ss.length ? ss : [{ step_order: 1, required_role: "accountant", step_name_ar: "", step_name_en: "" }]);
+    setWfOpen(true);
+  };
+
+  const duplicateWf = (w: any) => {
+    setEditingId(null);
+    setIsActive(true);
+    setWfForm({
+      name_ar: (w.name_ar || "") + " (نسخة)",
+      name_en: (w.name_en || "") + " (Copy)",
       journal_type: (w.journal_type || "sales") as typeof JOURNAL_TYPES[number],
       min_amount: Number(w.min_amount) || 0,
       max_amount: w.max_amount != null ? Number(w.max_amount) : null,
@@ -354,8 +377,11 @@ function ApprovalsPage() {
                       onCheckedChange={(v) => toggleActiveMut.mutate({ id: w.id, is_active: v })}
                     />
                   </div>
-                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(w)}>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(w)} title={locale === "ar" ? "تعديل" : "Edit"}>
                     <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => duplicateWf(w)} title={locale === "ar" ? "نسخ" : "Duplicate"}>
+                    <Copy className="h-3.5 w-3.5" />
                   </Button>
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(w.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
