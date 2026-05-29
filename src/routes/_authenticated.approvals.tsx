@@ -19,6 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShieldCheck, Plus, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { RolesManagement } from "@/components/roles-management";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
   component: ApprovalsPage,
