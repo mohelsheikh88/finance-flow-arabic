@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listRoles, createRole, updateRole, deleteRole } from "@/lib/api/roles.functions";
@@ -12,18 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ShieldCheck, Plus, Pencil, Trash2, Lock } from "lucide-react";
+import { Plus, Pencil, Trash2, Lock } from "lucide-react";
 import { toast } from "sonner";
-
-export const Route = createFileRoute("/_authenticated/roles")({
-  component: RolesPage,
-});
 
 type RoleRow = {
   id: string;
@@ -37,7 +32,7 @@ type RoleRow = {
   sort_order: number;
 };
 
-function RolesPage() {
+export function RolesManagement() {
   const { t, locale } = useI18n();
   const qc = useQueryClient();
   const listFn = useServerFn(listRoles);
@@ -135,14 +130,14 @@ function RolesPage() {
   });
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5" />
+            <Lock className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{t("roles.title")}</h1>
+            <h2 className="text-lg font-bold">{t("roles.title")}</h2>
             <p className="text-xs text-muted-foreground">{t("roles.subtitle")}</p>
           </div>
         </div>

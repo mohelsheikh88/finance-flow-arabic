@@ -19,6 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShieldCheck, Plus, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { RolesManagement } from "@/components/roles-management";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
   component: ApprovalsPage,
@@ -212,6 +213,7 @@ function ApprovalsPage() {
         <TabsList>
           <TabsTrigger value="requests">{t("approvals.requests")}</TabsTrigger>
           <TabsTrigger value="workflows">{t("approvals.workflows")} ({workflows.length})</TabsTrigger>
+          <TabsTrigger value="roles">{t("roles.title")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="requests" className="space-y-3">
@@ -290,6 +292,10 @@ function ApprovalsPage() {
               </div>
             </Card>
           ))}
+        </TabsContent>
+
+        <TabsContent value="roles">
+          <RolesManagement />
         </TabsContent>
       </Tabs>
     </div>

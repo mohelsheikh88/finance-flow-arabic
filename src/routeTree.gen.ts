@@ -18,7 +18,6 @@ import { Route as AuthenticatedTrialBalanceRouteImport } from './routes/_authent
 import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.taxes'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
-import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated.roles'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
@@ -103,11 +102,6 @@ const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedRolesRoute = AuthenticatedRolesRouteImport.update({
-  id: '/roles',
-  path: '/roles',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedReceiptsRoute = AuthenticatedReceiptsRouteImport.update({
@@ -361,7 +355,6 @@ export interface FileRoutesByFullPath {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
-  '/roles': typeof AuthenticatedRolesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
@@ -412,7 +405,6 @@ export interface FileRoutesByTo {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
-  '/roles': typeof AuthenticatedRolesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
@@ -465,7 +457,6 @@ export interface FileRoutesById {
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
-  '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/taxes': typeof AuthenticatedTaxesRoute
@@ -518,7 +509,6 @@ export interface FileRouteTypes {
     | '/payments'
     | '/purchase'
     | '/receipts'
-    | '/roles'
     | '/settings'
     | '/setup'
     | '/taxes'
@@ -569,7 +559,6 @@ export interface FileRouteTypes {
     | '/payments'
     | '/purchase'
     | '/receipts'
-    | '/roles'
     | '/settings'
     | '/setup'
     | '/taxes'
@@ -621,7 +610,6 @@ export interface FileRouteTypes {
     | '/_authenticated/payments'
     | '/_authenticated/purchase'
     | '/_authenticated/receipts'
-    | '/_authenticated/roles'
     | '/_authenticated/settings'
     | '/_authenticated/setup'
     | '/_authenticated/taxes'
@@ -714,13 +702,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/roles': {
-      id: '/_authenticated/roles'
-      path: '/roles'
-      fullPath: '/roles'
-      preLoaderRoute: typeof AuthenticatedRolesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/receipts': {
@@ -1033,7 +1014,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
-  AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedTaxesRoute: typeof AuthenticatedTaxesRoute
@@ -1082,7 +1062,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
-  AuthenticatedRolesRoute: AuthenticatedRolesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedTaxesRoute: AuthenticatedTaxesRoute,
@@ -1119,3 +1098,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
