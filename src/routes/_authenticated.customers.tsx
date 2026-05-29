@@ -128,35 +128,65 @@ function CustomersPage() {
     return `${prefix}-${String(next).padStart(4, "0")}`;
   };
 
-  const openCreate = () => { setForm(emptyForm); setOpen(true); };
-  const openEdit = (p: any) => {
+  const openCreate = () => { setForm({ ...emptyForm, contacts: [emptyContact()] }); setOpen(true); };
+  const contactsFn = useServerFn(listPartnerContacts);
+  const saveContactsFn = useServerFn(savePartnerContacts);
+
+  const openEdit = async (p: any) => {
+    let contacts: ContactRow[] = [];
+    try {
+      const rows = await contactsFn({ data: { partnerId: p.id } });
+      contacts = (rows as any[]).map((r) => ({
+        id: r.id, name: r.name ?? "", email: r.email ?? "", mobile: r.mobile ?? "",
+      }));
+    } catch { /* ignore */ }
+    if (contacts.length === 0) {
+      contacts = [{ name: "", email: p.email ?? "", mobile: p.phone ?? "" }];
+    }
     setForm({
       id: p.id, code: p.code, name_ar: p.name_ar, name_en: p.name_en,
-      vat_number: p.vat_number ?? "", email: p.email ?? "", phone: p.phone ?? "",
+      vat_number: p.vat_number ?? "",
       credit_limit: Number(p.credit_limit ?? 0), address_ar: p.address_ar ?? "",
       receivable_account_id: p.receivable_account_id ?? null,
       customer_type_id: p.customer_type_id ?? null,
+      contacts,
     });
     setOpen(true);
   };
 
   const saveMut = useMutation({
     mutationFn: async () => {
+      const primary = form.contacts[0] ?? emptyContact();
       const payload = {
         code: form.code, name_ar: form.name_ar, name_en: form.name_en,
         vat_number: form.vat_number || null,
-        email: form.email || null, phone: form.phone || null,
+        email: primary.email || null, phone: primary.mobile || null,
         credit_limit: Number(form.credit_limit) || 0,
         address_ar: form.address_ar || null,
         receivable_account_id: form.receivable_account_id || null,
         customer_type_id: form.customer_type_id || null,
       };
+      let partnerId = form.id;
       if (form.id) {
-        return update({ data: { id: form.id, ...payload } as any });
+        await update({ data: { id: form.id, ...payload } as any });
+      } else {
+        const row = await create({ data: {
+          ...payload, is_customer: true, is_vendor: false, company_id: companyId!,
+        } as any });
+        partnerId = (row as any)?.id;
       }
-      return create({ data: {
-        ...payload, is_customer: true, is_vendor: false, company_id: companyId!,
-      } as any });
+      if (partnerId) {
+        const cleaned = form.contacts
+          .filter((c) => (c.name || c.email || c.mobile).trim().length > 0)
+          .map((c) => ({
+            ...(c.id ? { id: c.id } : {}),
+            name: c.name.trim() || "—",
+            email: c.email.trim() || null,
+            mobile: c.mobile.trim() || null,
+          }));
+        await saveContactsFn({ data: { partnerId, contacts: cleaned } });
+      }
+      return { ok: true };
     },
     onSuccess: () => {
       toast.success(t("common.saved"));
