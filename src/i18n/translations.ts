@@ -1119,6 +1119,7 @@ export const translations = {
       reference: "Reference",
       description: "Description",
       readOnlyNotice: "Read-only: this entry is not manual or not in draft status",
+      openSource: "Open transaction in module",
     },
     journals: {
       allowManualEntries: "Allow manual entries from this journal",
