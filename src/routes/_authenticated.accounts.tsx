@@ -1517,9 +1517,7 @@ function AccountingBucketsPanel() {
           const cls = (classifications as any[]).filter(
             (c) => c.bucket === b.code && c.is_active,
           );
-          const typesCount = (accountTypes as any[]).filter(
-            (at) => at.classification === b.code,
-          ).length;
+
           const swatch =
             bucketColors[b.code] ?? "bg-muted text-foreground border-border";
           return (
