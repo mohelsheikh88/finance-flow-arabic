@@ -328,9 +328,32 @@ function ChartOfAccountsPanel() {
       const buf = await f.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
+      if (!ws) { toast.error("Empty workbook | الملف فارغ"); return; }
       const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
 
-      // Resolve account_type from classification_code (matches export format)
+      // ----- Schema validation -----
+      const EXPECTED = [
+        "code", "name_ar", "name_en", "classification_code", "classification_name",
+        "is_group", "is_active", "is_reconcilable", "notes",
+      ];
+      const REQUIRED = ["code", "name_ar", "name_en", "classification_code"];
+
+      const header = (XLSX.utils.sheet_to_json<any>(ws, { header: 1 })[0] as any[] | undefined) ?? [];
+      const headerCols = header.map((h) => String(h ?? "").trim()).filter(Boolean);
+      if (!headerCols.length) { toast.error("Sheet has no header row | الورقة لا تحتوي على صف عناوين"); return; }
+
+      const missing = REQUIRED.filter((c) => !headerCols.includes(c));
+      if (missing.length) {
+        toast.error(`Missing required columns: ${missing.join(", ")} | أعمدة مطلوبة ناقصة`);
+        return;
+      }
+      const unknown = headerCols.filter((c) => !EXPECTED.includes(c));
+      if (unknown.length) {
+        toast.error(`Unexpected columns: ${unknown.join(", ")} | أعمدة غير متوقعة`);
+        return;
+      }
+
+      // ----- Resolve account_type from classification_code (matches export format) -----
       const clsByCode = new Map<string, any>();
       (classifications as any[]).forEach((c) => clsByCode.set(String(c.code).toLowerCase(), c));
       const typeByClassificationId = new Map<string, any>();
@@ -340,33 +363,69 @@ function ChartOfAccountsPanel() {
         }
       });
 
-      const rows = raw.map((r) => {
-        const ccode = String(r.classification_code ?? "").trim().toLowerCase();
-        const cls = ccode ? clsByCode.get(ccode) : null;
-        const tp = cls ? typeByClassificationId.get(cls.id) : null;
+      // ----- Row-level validation -----
+      const rowErrors: string[] = [];
+      const unknownCls = new Set<string>();
+      const rows: any[] = [];
+      raw.forEach((r, idx) => {
+        const lineNo = idx + 2; // header is row 1
+        const code = String(r.code ?? "").trim();
+        const name_ar = String(r.name_ar ?? "").trim();
+        const name_en = String(r.name_en ?? "").trim();
+        const ccodeRaw = String(r.classification_code ?? "").trim();
+
+        if (!code && !name_ar && !name_en && !ccodeRaw) return; // skip blank line
+
+        const missingFields: string[] = [];
+        if (!code) missingFields.push("code");
+        if (!name_ar) missingFields.push("name_ar");
+        if (!name_en) missingFields.push("name_en");
+        if (!ccodeRaw) missingFields.push("classification_code");
+        if (missingFields.length) {
+          rowErrors.push(`Row ${lineNo}: missing ${missingFields.join(", ")}`);
+          return;
+        }
+
+        const cls = clsByCode.get(ccodeRaw.toLowerCase());
+        if (!cls) {
+          unknownCls.add(ccodeRaw);
+          rowErrors.push(`Row ${lineNo}: unknown classification_code "${ccodeRaw}"`);
+          return;
+        }
+        const tp = typeByClassificationId.get(cls.id);
         const bucket = String(cls?.bucket ?? tp?.classification ?? "").trim().toLowerCase();
-        return {
-          code: String(r.code ?? "").trim(),
-          name_ar: String(r.name_ar ?? "").trim(),
-          name_en: String(r.name_en ?? "").trim(),
+
+        rows.push({
+          code,
+          name_ar,
+          name_en,
           account_type: bucket,
           account_type_code: tp?.code ?? null,
           parent_code: null,
           currency_code: null,
           is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
-          is_active: r.is_active === undefined || r.is_active === "" ? true
+          is_active: r.is_active === undefined || r.is_active === ""
+            ? true
             : r.is_active === true || r.is_active === 1 || String(r.is_active).toLowerCase() === "true",
           is_reconcilable: r.is_reconcilable === true || r.is_reconcilable === 1 || String(r.is_reconcilable).toLowerCase() === "true",
           notes: r.notes ? String(r.notes) : null,
-        };
-      }).filter((r) => r.code);
+        });
+      });
+
+      if (rowErrors.length) {
+        const shown = rowErrors.slice(0, 5).join("\n");
+        const more = rowErrors.length > 5 ? `\n…+${rowErrors.length - 5} more` : "";
+        toast.error(`Import failed (${rowErrors.length} issue${rowErrors.length > 1 ? "s" : ""}):\n${shown}${more}`);
+        return;
+      }
       if (!rows.length) { toast.error(t("common.noData")); return; }
       importMut.mutate(rows);
     } catch (err: any) {
       toast.error(err.message ?? "Import failed");
     }
-
   };
+
+
 
 
   return (
