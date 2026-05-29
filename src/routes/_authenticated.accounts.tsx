@@ -384,7 +384,10 @@ function ChartOfAccountsPanel() {
 
     const rows = (accounts as any[]).map((a) => {
       const tp = typesById.get(a.account_type_id);
-      const cls = tp ? clsById.get(tp.classification_id) : null;
+      const cls =
+        (a.classification_id ? clsById.get(a.classification_id) : null) ??
+        (tp ? clsById.get(tp.classification_id) : null);
+
       return {
         code: a.code,
         name_ar: a.name_ar,
