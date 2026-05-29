@@ -214,7 +214,7 @@ export function InvoiceDetailDialog({
 
         <DialogFooter className="gap-2">
           {inv && (
-            <Button variant="default" onClick={handlePrint}>
+            <Button variant="default" onClick={handlePrint} disabled={!isPosted} title={!isPosted ? (locale === "ar" ? "متاح بعد الترحيل فقط" : "Available after posting only") : undefined}>
               <Printer className="h-4 w-4 me-1" />
               {t("invoices.printTax") || "طباعة فاتورة ضريبية"}
             </Button>
