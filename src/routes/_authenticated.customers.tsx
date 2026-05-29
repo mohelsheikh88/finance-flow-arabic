@@ -213,8 +213,8 @@ function CustomersPage() {
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
-              <th className="text-start p-3 font-medium">حساب الذمم (GL)</th>
-              <th className="text-start p-3 font-medium">Phone</th>
+              <th className="text-start p-3 font-medium">{t("customers.receivableAccountShort")}</th>
+              <th className="text-start p-3 font-medium">{t("customers.phone")}</th>
               <th className="text-end p-3 font-medium font-mono">{t("partners.creditLimit")}</th>
               <th className="text-end p-3 font-medium w-24">{t("common.actions") || ""}</th>
             </tr>
