@@ -497,6 +497,9 @@ export const translations = {
       doc_national_address: "العنوان الوطني",
       doc_contract: "صورة التعاقد",
       doc_other: "أخرى",
+      email: "البريد الإلكتروني",
+      customerDetails: "تفاصيل العميل",
+
     },
     tb: {
       title: "ميزان المراجعة",
@@ -1179,6 +1182,9 @@ export const translations = {
       doc_national_address: "National Address",
       doc_contract: "Contract Image",
       doc_other: "Other",
+      email: "Email",
+      customerDetails: "Customer Details",
+
     },
     tb: {
       title: "Trial Balance",
