@@ -155,14 +155,14 @@ function CustomersPage() {
               <div><Label>{t("common.phone")}</Label><Input dir="ltr" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
               <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
               <div>
-                <Label>حساب الذمم المدينة (GL)</Label>
+                <Label>{t("customers.receivableAccount")}</Label>
                 <Select
                   value={form.receivable_account_id ?? "__none__"}
                   onValueChange={(v) => setForm({ ...form, receivable_account_id: v === "__none__" ? null : v })}
                 >
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">— (الافتراضي من اليومية) —</SelectItem>
+                    <SelectItem value="__none__">{t("customers.defaultFromJournal")}</SelectItem>
                     {arAccounts.map((a) => (
                       <SelectItem key={a.id} value={a.id}>
                         {a.code} — {localized(a, "name")}
