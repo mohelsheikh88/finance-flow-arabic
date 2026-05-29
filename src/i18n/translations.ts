@@ -123,6 +123,13 @@ export const translations = {
       profit: "ربح",
       loss: "خسارة",
       isSubtitle: "قائمة الدخل عن الفترة",
+      bsSubtitle: "الميزانية العمومية كما في التاريخ المحدد",
+      totalAssets: "إجمالي الأصول",
+      totalLiabEquity: "إجمالي الخصوم وحقوق الملكية",
+      retainedEarnings: "الأرباح المحتجزة",
+      liabAndEquity: "الخصوم وحقوق الملكية",
+      balanced: "متوازنة",
+      notBalanced: "غير متوازنة",
     },
 
     nav: {
