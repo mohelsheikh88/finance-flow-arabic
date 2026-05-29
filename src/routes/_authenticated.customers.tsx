@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   createPartner, listPartners, updatePartner, deletePartner, listAccounts,
+  listCustomerTypes, upsertCustomerType, deleteCustomerType,
 } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -11,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -21,7 +23,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Plus, Search, Trash2, Users } from "lucide-react";
+import { Pencil, Plus, Search, Settings2, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/customers")({
@@ -33,12 +35,14 @@ type FormState = {
   code: string; name_ar: string; name_en: string; vat_number: string;
   email: string; phone: string; credit_limit: number; address_ar: string;
   receivable_account_id: string | null;
+  customer_type_id: string | null;
 };
 
 const emptyForm: FormState = {
   code: "", name_ar: "", name_en: "", vat_number: "",
   email: "", phone: "", credit_limit: 0, address_ar: "",
   receivable_account_id: null,
+  customer_type_id: null,
 };
 
 function CustomersPage() {
