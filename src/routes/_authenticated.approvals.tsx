@@ -191,6 +191,7 @@ function ApprovalsPage() {
         <TabsList>
           <TabsTrigger value="workflows">{t("approvals.workflows")} ({workflows.length})</TabsTrigger>
           <TabsTrigger value="roles">{t("roles.title")}</TabsTrigger>
+          <TabsTrigger value="user_roles">{t("users.title")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="workflows" className="space-y-2">
