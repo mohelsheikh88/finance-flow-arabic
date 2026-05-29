@@ -291,6 +291,8 @@ function ChartOfAccountsPanel() {
           is_group: form.is_group,
           is_active: form.is_active,
           is_reconcilable: form.is_reconcilable,
+          is_receivable: form.is_receivable,
+          is_payable: form.is_payable,
           notes: form.notes.trim() || null,
         },
       });
