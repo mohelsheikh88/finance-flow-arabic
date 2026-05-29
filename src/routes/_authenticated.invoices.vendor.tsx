@@ -383,7 +383,11 @@ function VendorBillsPage() {
                         <Button size="sm" variant="outline" onClick={() => postMut.mutate(inv.id)} disabled={postMut.isPending}>
                           <Check className="h-3 w-3 me-1" />{t("je.post")}
                         </Button>
+                        <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDeleteClick(inv.id)} disabled={deleteMut.isPending}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </>
+
                     )}
                     {inv.status === "posted" && Number(inv.amount_paid || 0) === 0 && (
                       <ResetToDraftButton invoiceId={inv.id} onConfirm={handleResetClick} pending={resetMut.isPending} />
