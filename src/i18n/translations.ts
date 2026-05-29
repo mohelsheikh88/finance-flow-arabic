@@ -605,7 +605,6 @@ export const translations = {
       required: "Required field",
       saved: "Saved successfully",
       error: "An error occurred",
-      saved: "Saved successfully",
       deleted: "Deleted successfully",
       confirmDelete: "Are you sure you want to delete?",
       welcome: "Welcome",
