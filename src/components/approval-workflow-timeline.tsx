@@ -23,7 +23,7 @@ export function ApprovalWorkflowTimeline({
   documentType: DocType;
   documentId: string;
 }) {
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
   const localized = useLocalized();
   const qc = useQueryClient();
   const getFn = useServerFn(getApprovalForDocument);
@@ -95,7 +95,7 @@ export function ApprovalWorkflowTimeline({
 
             return (
               <div className="w-full overflow-x-auto pb-2">
-                <ol className="flex items-start justify-between gap-0 min-w-full px-2" dir="rtl">
+                <ol className="flex items-start justify-between gap-0 min-w-full px-2" dir={dir}>
                   {nodes.map((step: any, idx: number) => {
                     const action = (req.approval_actions || []).find(
                       (a: any) => a.step_order === step.step_order,
