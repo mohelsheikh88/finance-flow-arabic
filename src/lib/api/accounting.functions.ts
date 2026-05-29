@@ -601,6 +601,8 @@ export const upsertAccount = createServerFn({ method: "POST" })
       name_en: data.name_en,
       account_type: cls.bucket,
       account_type_id: null,
+      classification_id: cls.id,
+
       parent_id: data.parent_id ?? null,
       currency_code: data.currency_code || null,
       is_group: data.is_group ?? false,
