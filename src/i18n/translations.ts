@@ -1430,10 +1430,10 @@ export const translations = {
       empty: "No attachments yet",
       uploaded: "Attachment uploaded",
       deleteConfirm: "Delete this attachment?",
-      viewChangeHistory: "View Change History",
-      afterPostingOnly: "Available after posting only",
-      cannotPrintBeforePost: "Tax invoice can only be issued after posting",
     },
+    viewChangeHistory: "View Change History",
+    afterPostingOnly: "Available after posting only",
+    cannotPrintBeforePost: "Tax invoice can only be issued after posting",
 
     payments: {
       title: "Payments & Collections",
