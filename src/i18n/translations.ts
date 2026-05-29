@@ -596,6 +596,7 @@ export const translations = {
       updated: "تم حفظ التعديلات",
       noResetPermission: "ليس لديك صلاحية إرجاع هذه الفاتورة إلى مسودة",
       hasPayments: "لا يمكن الإرجاع: توجد دفعات مرتبطة بالفاتورة",
+      periodClosed: "لا يمكن الإرجاع: الفترة المالية لتاريخ الفاتورة مغلقة",
     },
 
     payments: {
