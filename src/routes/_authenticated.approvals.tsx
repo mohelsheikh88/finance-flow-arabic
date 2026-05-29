@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ShieldCheck, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { RolesManagement } from "@/components/roles-management";
+import { UserRolesManagement } from "@/components/user-roles-management";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
   component: ApprovalsPage,
