@@ -1159,6 +1159,10 @@ export const translations = {
       phone: "Phone",
       customerType: "Customer Type",
       manageTypes: "Manage Customer Types",
+      nationalAddress: "National Address",
+      contacts: "Contact Details",
+      contactName: "Contact Name",
+      addContact: "Add Contact",
     },
     tb: {
       title: "Trial Balance",
