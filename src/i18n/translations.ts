@@ -399,6 +399,10 @@ export const translations = {
       description: "الوصف",
       readOnlyNotice: "لا يمكن التعديل: هذا القيد ليس مانوال أو ليس في حالة مسودة",
       openSource: "فتح المعاملة في الموديول",
+      manualDisabledShort: "غير متاح",
+      manualDisabledReason: "القيود اليدوية معطّلة في إعدادات هذا الدفتر",
+      unavailableJournalsHelp: "الدفاتر التالية لا تسمح بالقيود اليدوية:",
+      permissionNotice: "يجب أن تكون لديك صلاحية محاسبية لإنشاء قيود يدوية",
     },
     journals: {
       allowManualEntries: "السماح بإنشاء قيود يدوية من هذا الدفتر",
@@ -1130,6 +1134,10 @@ export const translations = {
       description: "Description",
       readOnlyNotice: "Read-only: this entry is not manual or not in draft status",
       openSource: "Open transaction in module",
+      manualDisabledShort: "Unavailable",
+      manualDisabledReason: "Manual entries are disabled in this journal's settings",
+      unavailableJournalsHelp: "The following journals don't allow manual entries:",
+      permissionNotice: "You need accounting permissions to create manual entries",
     },
     journals: {
       allowManualEntries: "Allow manual entries from this journal",
