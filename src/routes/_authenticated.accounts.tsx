@@ -550,10 +550,50 @@ function ChartOfAccountsPanel() {
         </div>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between gap-3 p-3 rounded-md border bg-muted/40">
+          <div className="text-sm">
+            <span className="font-semibold text-foreground">{selectedIds.size}</span>{" "}
+            {selectedIds.size === 1 ? "حساب محدد" : "حساب محددين"}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
+              إلغاء التحديد
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteOpen(true)}
+              disabled={bulkDeleting}
+            >
+              <Trash2 className="h-4 w-4 me-1" />
+              حذف المحدد ({selectedIds.size})
+            </Button>
+          </div>
+        </div>
+      )}
+
       <ChartOfAccountsTable
         accounts={paginatedAccounts as any[]}
         accountTypes={accountTypes as any[]}
         classifications={classifications as any[]}
+        selectedIds={selectedIds}
+        onToggleSelect={(id: string, v: boolean) =>
+          setSelectedIds((s) => {
+            const next = new Set(s);
+            v ? next.add(id) : next.delete(id);
+            return next;
+          })
+        }
+        onToggleSelectAll={(v: boolean) =>
+          setSelectedIds((s) => {
+            const next = new Set(s);
+            const pageIds = (paginatedAccounts as any[]).map((a) => a.id);
+            if (v) pageIds.forEach((id) => next.add(id));
+            else pageIds.forEach((id) => next.delete(id));
+            return next;
+          })
+        }
         onEdit={openEdit}
         onDelete={setToDelete}
         onToggleGroup={(a: any, v: boolean) =>
@@ -589,6 +629,7 @@ function ChartOfAccountsPanel() {
           })
         }
       />
+
 
       {filteredAccounts.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-2">
