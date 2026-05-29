@@ -184,6 +184,13 @@ function ChartOfAccountsPanel() {
     });
   }, [accounts, search, filterClassification, filterIsGroup, filterStatus, localized, typeById]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const paginatedAccounts = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredAccounts.slice(start, start + pageSize);
+  }, [filteredAccounts, safePage]);
+
   const openNew = () => {
     const def = (accountTypes as any[]).find((t) => t.classification === "asset") ?? (accountTypes as any[])[0];
     setForm({ ...empty, account_type_id: def?.id ?? "", classification_id: def?.classification_id ?? "" });
