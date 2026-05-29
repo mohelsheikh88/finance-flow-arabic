@@ -1304,6 +1304,7 @@ export const translations = {
       updated: "Changes saved",
       noResetPermission: "You don't have permission to reset this invoice to draft",
       hasPayments: "Cannot reset: invoice has linked payments",
+      periodClosed: "Cannot reset: fiscal period for the invoice date is closed",
     },
 
     payments: {
