@@ -371,7 +371,7 @@ function ChartOfAccountsPanel() {
           <FileDown className="h-4 w-4 me-1" />Export
         </Button>
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
-          <Upload className="h-4 w-4 me-1" />Import
+          <FileUp className="h-4 w-4 me-1" />Import
         </Button>
         <Button onClick={openNew} disabled={!companyId || (accountTypes as any[]).length === 0}>
           <Plus className="h-4 w-4 me-1" />{t("common.new")}
