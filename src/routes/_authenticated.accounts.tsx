@@ -223,11 +223,21 @@ function ChartOfAccountsPanel() {
 
   const saveMut = useMutation({
     mutationFn: () => {
+      const selectedCls = (classifications as any[]).find((c) => c.id === form.classification_id);
+      const bucket = selectedCls?.bucket;
       const resolvedTypeId =
         form.account_type_id ||
         (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id && tp.is_active)?.id ||
         (accountTypes as any[]).find((tp) => tp.classification_id === form.classification_id)?.id ||
+        (bucket
+          ? (accountTypes as any[]).find((tp) => tp.classification === bucket && tp.is_active)?.id ??
+            (accountTypes as any[]).find((tp) => tp.classification === bucket)?.id
+          : undefined) ||
         "";
+      if (!resolvedTypeId) {
+        const name = selectedCls ? (selectedCls.name_ar || selectedCls.name_en || selectedCls.code) : "";
+        throw new Error(`لا يوجد نوع حساب مرتبط بالتصنيف "${name}". افتح "Account Types" واربط نوع حساب بهذا التصنيف أولاً.`);
+      }
       return upsert({
         data: {
           id: form.id,
