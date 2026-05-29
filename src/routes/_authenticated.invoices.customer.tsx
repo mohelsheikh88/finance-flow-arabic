@@ -409,7 +409,11 @@ function CustomerInvoicesPage() {
           </thead>
           <tbody>
             {invoices.map((inv: any) => (
-              <tr key={inv.id} className="border-t hover:bg-muted/30">
+              <tr
+                key={inv.id}
+                className="border-t hover:bg-muted/30 cursor-pointer"
+                onClick={() => setDetailId(inv.id)}
+              >
                 <td className="p-3 font-mono">{inv.invoice_number}</td>
                 <td className="p-3">{inv.invoice_date}</td>
                 <td className="p-3 font-medium">{localized(inv.partners, "name")}</td>
@@ -417,8 +421,8 @@ function CustomerInvoicesPage() {
                 <td className="p-3 text-end font-mono text-success">{fmt(inv.amount_paid)}</td>
                 <td className="p-3 text-end font-mono font-semibold">{fmt(inv.amount_due)}</td>
                 <td className="p-3">{statusBadge(inv.status, t)}</td>
-                <td className="p-3 text-center"><ApprovalCell documentType="invoice" documentId={inv.id} /></td>
-                <td className="p-3 text-end">
+                <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><ApprovalCell documentType="invoice" documentId={inv.id} /></td>
+                <td className="p-3 text-end" onClick={(e) => e.stopPropagation()}>
                   <div className="inline-flex gap-1">
                     {inv.status === "draft" && (
                       <>
@@ -445,6 +449,8 @@ function CustomerInvoicesPage() {
           </tbody>
         </table>
       </Card>
+
+      <InvoiceDetailDialog invoiceId={detailId} onClose={closeDetail} />
     </div>
   );
 }
