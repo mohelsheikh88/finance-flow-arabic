@@ -175,6 +175,7 @@ function JournalsPage() {
       default_debit_account_id: r.default_debit_account_id ?? "",
       default_credit_account_id: r.default_credit_account_id ?? "",
       is_active: !!r.is_active,
+      allow_manual_entries: r.allow_manual_entries !== false,
     });
     setOpen(true);
   };
