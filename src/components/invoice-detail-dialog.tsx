@@ -35,7 +35,7 @@ export function InvoiceDetailDialog({
   invoiceId: string | null;
   onClose: () => void;
 }) {
-  const { t, lang } = useI18n();
+  const { t, locale } = useI18n();
   const localized = useLocalized();
   const getFn = useServerFn(getInvoice);
 
@@ -57,7 +57,7 @@ export function InvoiceDetailDialog({
       await printTaxInvoice({
         invoice: inv,
         company: (inv as any).companies ?? null,
-        lang: (lang as "ar" | "en") ?? "ar",
+        lang: (locale as "ar" | "en") ?? "ar",
       });
     } catch (e: any) {
       toast.error(e.message || "Print failed");
