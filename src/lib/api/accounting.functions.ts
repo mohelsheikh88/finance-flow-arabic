@@ -668,6 +668,7 @@ const ImportRowSchema = z.object({
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
   account_type: z.string().trim().min(1).max(50),
+  account_type_code: z.string().trim().max(50).optional().nullable(),
   parent_code: z.string().trim().max(50).optional().nullable(),
   currency_code: z.string().trim().max(10).optional().nullable(),
   is_group: z.boolean().optional(),
