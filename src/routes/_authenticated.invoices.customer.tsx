@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createInvoice, listInvoices, postInvoice } from "@/lib/api/invoices.functions";
 import { listAccounts, listPartners } from "@/lib/api/accounting.functions";
 import { listTaxes } from "@/lib/api/vat.functions";
+import { listPaymentTerms } from "@/lib/api/payment-terms.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
