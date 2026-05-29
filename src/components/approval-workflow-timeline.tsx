@@ -149,15 +149,11 @@ export function ApprovalWorkflowTimeline({
                           {isLast && <div className="flex-1" />}
                         </div>
                         <div className={`mt-2 text-xs text-center px-1 ${labelCls}`}>
-                          {step.__submitter
-                            ? (t("approvals.submitter") || "مقدم الطلب")
-                            : localized(step, "step_name")}
+                          {localized(step, "step_name")}
                         </div>
-                        {!step.__submitter && (
-                          <div className="text-[10px] text-muted-foreground mt-0.5 text-center">
-                            {t(`users.${step.required_role}`) || step.required_role}
-                          </div>
-                        )}
+                        <div className="text-[10px] text-muted-foreground mt-0.5 text-center">
+                          {t(`users.${step.required_role}`) || step.required_role}
+                        </div>
                         {action?.acted_at && (
                           <div className="text-[9px] text-muted-foreground/70 mt-0.5 font-mono">
                             {new Date(action.acted_at).toLocaleDateString()}
