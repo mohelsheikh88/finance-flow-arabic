@@ -15,7 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Lock } from "lucide-react";
+import { Plus, Lock } from "lucide-react";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/lock-dates")({
