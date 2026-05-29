@@ -166,24 +166,24 @@ export function ApprovalWorkflowTimeline({
           })()}
 
           {req.status === "pending" && (
-            <div className="flex gap-2 border-t mt-3 pt-3">
+            <div className="flex gap-2 border-t mt-2 pt-2">
               <Button
                 size="sm"
-                className="flex-1"
+                className="flex-1 h-7 text-xs"
                 onClick={() => actMut.mutate("approved")}
                 disabled={actMut.isPending}
               >
-                <CheckCircle2 className="h-3.5 w-3.5 me-1" />
+                <CheckCircle2 className="h-3 w-3 me-1" />
                 {t("approvals.status.approved")}
               </Button>
               <Button
                 size="sm"
                 variant="destructive"
-                className="flex-1"
+                className="flex-1 h-7 text-xs"
                 onClick={() => actMut.mutate("rejected")}
                 disabled={actMut.isPending}
               >
-                <XCircle className="h-3.5 w-3.5 me-1" />
+                <XCircle className="h-3 w-3 me-1" />
                 {t("approvals.status.rejected")}
               </Button>
             </div>
