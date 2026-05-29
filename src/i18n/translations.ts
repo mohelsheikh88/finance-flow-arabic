@@ -660,6 +660,7 @@ export const translations = {
       add: "Add",
       new: "New",
       search: "Search...",
+      remove: "Remove",
       actions: "Actions",
       yes: "Yes",
       no: "No",
