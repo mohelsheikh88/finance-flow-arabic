@@ -1262,6 +1262,7 @@ const CustomerTypeSchema = z.object({
   notes: z.string().max(500).optional().nullable(),
   is_active: z.boolean().default(true),
   sort_order: z.number().int().min(0).default(0),
+  receivable_account_id: z.string().uuid().optional().nullable(),
 });
 
 export const upsertCustomerType = createServerFn({ method: "POST" })
