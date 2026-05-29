@@ -44,7 +44,7 @@ function JEListPage() {
 
   const closeDialog = () => {
     setSelectedId(null);
-    if (openEntryId) navigate({ search: (prev) => ({ ...prev, openEntryId: undefined }) });
+    if (openEntryId) navigate({ search: (prev: any) => ({ ...prev, openEntryId: undefined }) });
   };
 
   const fmt = (n: number) => new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", { minimumFractionDigits: 2 }).format(n);
