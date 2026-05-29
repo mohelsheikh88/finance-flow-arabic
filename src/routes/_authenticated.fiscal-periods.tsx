@@ -12,10 +12,8 @@ import {
 import {
   listLockDates, createLockDate, updateLockDate, deleteLockDate,
 } from "@/lib/api/lock-dates.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { formatLockError } from "@/lib/lock-error";
-import { Textarea } from "@/components/ui/textarea";
-import { useLocalized } from "@/i18n";
+
 
 import { useBranch } from "@/lib/branch-context";
 import { useI18n } from "@/i18n";
