@@ -188,6 +188,7 @@ export async function postInvoiceCore(
     const res = await maybeRequestApproval(supabase, userId, {
       companyId: inv.company_id,
       branchId: inv.branch_id,
+      journalId: inv.journal_id ?? null,
       documentType: "invoice",
       documentId: inv.id,
       documentReference: inv.invoice_number,
