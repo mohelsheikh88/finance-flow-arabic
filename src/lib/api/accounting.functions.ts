@@ -829,19 +829,15 @@ export const getTrialBalance = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     // Build classification metadata per account so the TB groups can show
     // the user-defined classification name/bucket rather than the legacy enum only.
-    const [{ data: classifications }, { data: accountTypes }, { data: accountsList }] =
+    const [{ data: classifications }, { data: accountsList }] =
       await Promise.all([
         context.supabase
           .from("classifications")
           .select("id, code, name_ar, name_en, statement, normal_balance, bucket")
           .eq("company_id", data.companyId),
         context.supabase
-          .from("account_types")
-          .select("id, classification_id, classification")
-          .eq("company_id", data.companyId),
-        context.supabase
           .from("accounts")
-          .select("id, account_type_id, account_type")
+          .select("id, classification_id, account_type")
           .eq("company_id", data.companyId),
       ]);
     const clsById = new Map<string, any>();
@@ -850,16 +846,10 @@ export const getTrialBalance = createServerFn({ method: "GET" })
     (classifications ?? []).forEach((c: any) => {
       if (!clsByBucket.has(c.bucket)) clsByBucket.set(c.bucket, c);
     });
-    const typeById = new Map<string, any>();
-    (accountTypes ?? []).forEach((t: any) => typeById.set(t.id, t));
     const acctMeta = new Map<string, any>();
     for (const a of accountsList ?? []) {
       let cls: any = null;
-      if (a.account_type_id) {
-        const at = typeById.get(a.account_type_id);
-        if (at?.classification_id) cls = clsById.get(at.classification_id) ?? null;
-        if (!cls && at?.classification) cls = clsByBucket.get(at.classification) ?? null;
-      }
+      if (a.classification_id) cls = clsById.get(a.classification_id) ?? null;
       if (!cls) cls = clsByBucket.get(a.account_type) ?? null;
       acctMeta.set(a.id, {
         classification_id: cls?.id ?? null,
@@ -871,6 +861,7 @@ export const getTrialBalance = createServerFn({ method: "GET" })
         normal_balance: cls?.normal_balance ?? null,
       });
     }
+
 
     // Get all posted lines up to date
     const { data: rows, error } = await context.supabase
