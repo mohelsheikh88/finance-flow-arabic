@@ -249,9 +249,10 @@ export function PaymentsView({
                     {t(`je.${p.status}`) || p.status}
                   </Badge>
                 </td>
+                <td className="p-3 text-center"><ApprovalCell documentType="payment" documentId={p.id} /></td>
               </tr>
             ))}
-            {payments.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+            {payments.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
           </tbody>
         </table>
       </Card>
