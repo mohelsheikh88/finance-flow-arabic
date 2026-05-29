@@ -129,6 +129,7 @@ export type Database = {
         Row: {
           account_type: string
           account_type_id: string | null
+          classification_id: string | null
           code: string
           company_id: string
           created_at: string
@@ -146,6 +147,7 @@ export type Database = {
         Insert: {
           account_type: string
           account_type_id?: string | null
+          classification_id?: string | null
           code: string
           company_id: string
           created_at?: string
@@ -163,6 +165,7 @@ export type Database = {
         Update: {
           account_type?: string
           account_type_id?: string | null
+          classification_id?: string | null
           code?: string
           company_id?: string
           created_at?: string
@@ -183,6 +186,13 @@ export type Database = {
             columns: ["account_type_id"]
             isOneToOne: false
             referencedRelation: "account_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_classification_id_fkey"
+            columns: ["classification_id"]
+            isOneToOne: false
+            referencedRelation: "classifications"
             referencedColumns: ["id"]
           },
           {
