@@ -1137,12 +1137,18 @@ export const getJournalEntry = createServerFn({ method: "GET" })
       .eq("id", data.id)
       .single();
     if (error || !je) throw new Error(error?.message ?? "Entry not found");
-    const { data: lines, error: lErr } = await context.supabase
+    const { data: linesRaw, error: lErr } = await context.supabase
       .from("journal_entry_lines")
       .select("*, accounts(code, name_ar, name_en), partners(code, name_ar, name_en)")
       .eq("entry_id", data.id)
       .order("line_number");
     if (lErr) throw new Error(lErr.message);
+    // Sort lines by account code (chart of accounts tree order)
+    const lines = (linesRaw ?? []).slice().sort((a: any, b: any) => {
+      const ca = (a.accounts?.code ?? "") as string;
+      const cb = (b.accounts?.code ?? "") as string;
+      return ca.localeCompare(cb, undefined, { numeric: true, sensitivity: "base" });
+    });
     let source_invoice_type: string | null = null;
     if ((je as any).source_type === "invoice" && (je as any).source_id) {
       const { data: inv } = await context.supabase
