@@ -1130,6 +1130,7 @@ export const translations = {
       internal_auditor: "Internal Auditor",
       branchAccess: "Branch Access",
       assignRole: "Assign Role",
+      noRoles: "No roles assigned",
     },
     roles: {
       title: "Roles Management",
