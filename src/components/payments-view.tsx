@@ -16,8 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { Plus, ArrowDownToLine, ArrowUpFromLine, History } from "lucide-react";
 import { ApprovalCell } from "@/components/approval-cell";
+import { HistoryLog } from "@/components/history-log";
 import { toast } from "sonner";
 
 function fmt(n: number) {
@@ -46,6 +47,7 @@ export function PaymentsView({
 
   const [dir, setDir] = useState<"inbound" | "outbound">(initialDirection);
   const [open, setOpen] = useState(false);
+  const [historyId, setHistoryId] = useState<string | null>(null);
 
   const { data: payments = [] } = useQuery({
     queryKey: ["payments", branchId, dir],
