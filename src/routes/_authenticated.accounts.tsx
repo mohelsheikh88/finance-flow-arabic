@@ -103,6 +103,8 @@ const empty: FormState = {
   is_group: false,
   is_active: true,
   is_reconcilable: false,
+  is_receivable: false,
+  is_payable: false,
   notes: "",
 };
 
