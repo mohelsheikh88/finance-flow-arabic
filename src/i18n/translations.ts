@@ -389,6 +389,10 @@ export const translations = {
       sourceLoans: "إدارة القروض",
       sourceManual: "قيد يدوي",
     },
+    journals: {
+      allowManualEntries: "السماح بإنشاء قيود يدوية من هذا الدفتر",
+      manualShort: "قيود يدوية",
+    },
     accounts: {
       title: "Chart of Accounts",
       type: "مجموعات الحسابات",
