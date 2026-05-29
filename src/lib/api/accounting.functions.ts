@@ -1225,7 +1225,13 @@ export const updateJournalEntry = createServerFn({ method: "POST" })
 
 export const getTrialBalance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { companyId: string; asOfDate: string; dateFrom?: string | null }) => i)
+  .inputValidator((i: {
+    companyId: string;
+    asOfDate: string;
+    dateFrom?: string | null;
+    statuses?: string[] | null;
+    journalIds?: string[] | null;
+  }) => i)
   .handler(async ({ data, context }) => {
     // Build classification metadata per account so the TB groups can show
     // the user-defined classification name/bucket rather than the legacy enum only.
@@ -1262,16 +1268,24 @@ export const getTrialBalance = createServerFn({ method: "GET" })
       });
     }
 
-    // Get all posted lines up to asOfDate (closing) — we'll split into beginning vs period via dateFrom.
-    const { data: rows, error } = await context.supabase
+    const statuses = (data.statuses && data.statuses.length > 0)
+      ? data.statuses.filter((s) => s === "draft" || s === "posted")
+      : ["draft", "posted"];
+    const journalIds = (data.journalIds && data.journalIds.length > 0) ? data.journalIds : null;
+
+    // Get all lines up to asOfDate (closing) — we'll split into beginning vs period via dateFrom.
+    let q = context.supabase
       .from("journal_entry_lines")
       .select(
-        "debit, credit, accounts!inner(id, code, name_ar, name_en, account_type), journal_entries!inner(entry_date, status, company_id)",
+        "debit, credit, accounts!inner(id, code, name_ar, name_en, account_type), journal_entries!inner(entry_date, status, company_id, journal_id)",
       )
-      .in("journal_entries.status", ["draft", "posted"])
+      .in("journal_entries.status", statuses)
       .eq("journal_entries.company_id", data.companyId)
       .lte("journal_entries.entry_date", data.asOfDate);
+    if (journalIds) q = q.in("journal_entries.journal_id", journalIds);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
+
 
     const dateFrom = data.dateFrom || null;
 
