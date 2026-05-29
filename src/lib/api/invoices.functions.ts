@@ -433,6 +433,18 @@ async function canUserResetInvoice(supabase: any, userId: string, invoice: any):
   return !!hasAny;
 }
 
+async function isPeriodOpen(supabase: any, companyId: string, date: string): Promise<boolean> {
+  const { data: period } = await supabase
+    .from("fiscal_periods")
+    .select("status")
+    .eq("company_id", companyId)
+    .lte("date_from", date)
+    .gte("date_to", date)
+    .maybeSingle();
+  if (!period) return true; // no period defined => not blocked
+  return period.status === "open";
+}
+
 export const canResetInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
@@ -440,15 +452,19 @@ export const canResetInvoice = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: inv } = await supabase
       .from("invoices")
-      .select("id, status, company_id, journal_id, amount_paid")
+      .select("id, status, company_id, journal_id, amount_paid, invoice_date")
       .eq("id", data.id)
       .maybeSingle();
     if (!inv) return { allowed: false, reason: "not_found" };
     if (inv.status !== "posted") return { allowed: false, reason: "not_posted" };
     if (Number(inv.amount_paid || 0) > 0) return { allowed: false, reason: "has_payments" };
+    if (!(await isPeriodOpen(supabase, inv.company_id, inv.invoice_date))) {
+      return { allowed: false, reason: "period_closed" };
+    }
     const allowed = await canUserResetInvoice(supabase, userId!, inv);
     return { allowed, reason: allowed ? null : "no_permission" };
   });
+
 
 export const resetInvoiceToDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
