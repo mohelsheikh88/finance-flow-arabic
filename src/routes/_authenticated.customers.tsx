@@ -362,9 +362,9 @@ const ctEmpty: CTFormState = {
 };
 
 function CustomerTypesDialog({
-  open, onClose, types, companyId,
+  open, onClose, types, arAccounts, companyId,
 }: {
-  open: boolean; onClose: () => void; types: any[]; companyId: string;
+  open: boolean; onClose: () => void; types: any[]; arAccounts: any[]; companyId: string;
 }) {
   const { t } = useI18n();
   const localized = useLocalized();
