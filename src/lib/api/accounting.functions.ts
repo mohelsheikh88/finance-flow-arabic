@@ -1268,9 +1268,9 @@ export const getTrialBalance = createServerFn({ method: "GET" })
       });
     }
 
-    const statuses = (data.statuses && data.statuses.length > 0)
+    const statuses = ((data.statuses && data.statuses.length > 0)
       ? data.statuses.filter((s) => s === "draft" || s === "posted")
-      : ["draft", "posted"];
+      : ["draft", "posted"]) as ("draft" | "posted")[];
     const journalIds = (data.journalIds && data.journalIds.length > 0) ? data.journalIds : null;
 
     // Get all lines up to asOfDate (closing) — we'll split into beginning vs period via dateFrom.
