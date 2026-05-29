@@ -449,6 +449,22 @@ function ChartOfAccountsPanel() {
         classifications={classifications as any[]}
         onEdit={openEdit}
         onDelete={setToDelete}
+        onToggleGroup={(a: any, v: boolean) =>
+          inlineUpsertMut.mutate({
+            id: a.id,
+            company_id: companyId!,
+            code: a.code,
+            name_ar: a.name_ar,
+            name_en: a.name_en,
+            account_type_id: a.account_type_id,
+            parent_id: a.parent_id ?? null,
+            currency_code: a.currency_code ?? null,
+            is_group: v,
+            is_active: !!a.is_active,
+            is_reconcilable: !!a.is_reconcilable,
+            notes: a.notes ?? null,
+          })
+        }
         onToggleReconcilable={(a: any, v: boolean) =>
           inlineUpsertMut.mutate({
             id: a.id,
