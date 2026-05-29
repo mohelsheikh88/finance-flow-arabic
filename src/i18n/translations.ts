@@ -1416,6 +1416,17 @@ export const translations = {
       noResetPermission: "You don't have permission to reset this invoice to draft",
       hasPayments: "Cannot reset: invoice has linked payments",
       periodClosed: "Cannot reset: fiscal period for the invoice date is closed",
+      detailsTitle: "Invoice Details",
+      linkedJE: "Linked Journal Entry",
+      openJE: "Open Entry",
+      printTax: "Print Tax Invoice",
+    },
+    attachments: {
+      title: "Attachments",
+      upload: "Upload Attachment",
+      empty: "No attachments yet",
+      uploaded: "Attachment uploaded",
+      deleteConfirm: "Delete this attachment?",
     },
 
     payments: {
