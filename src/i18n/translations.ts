@@ -105,6 +105,12 @@ export const translations = {
       signInWithGoogle: "تسجيل الدخول بحساب جوجل",
       loginSubtitle: "ادخل بياناتك للوصول إلى لوحة التحكم المحاسبية",
       signupSubtitle: "أنشئ حسابك للبدء في استخدام النظام",
+      signOut: "تسجيل الخروج",
+    },
+    reports: {
+      totalIncome: "إجمالي الإيرادات",
+      totalExpenses: "إجمالي المصروفات",
+      netIncome: "صافي الربح",
     },
     nav: {
       dashboard: "لوحة التحكم",
@@ -670,6 +676,12 @@ export const translations = {
       signInWithGoogle: "Continue with Google",
       loginSubtitle: "Enter your credentials to access the accounting dashboard",
       signupSubtitle: "Create your account to start using the system",
+      signOut: "Sign out",
+    },
+    reports: {
+      totalIncome: "Total Income",
+      totalExpenses: "Total Expenses",
+      netIncome: "Net Income",
     },
     nav: {
       dashboard: "Dashboard",
