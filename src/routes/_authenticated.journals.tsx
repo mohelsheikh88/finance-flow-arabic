@@ -471,7 +471,7 @@ function JournalsPage() {
             </div>
 
             <div>
-              <Label>Sequence Prefix</Label>
+              <Label>{t("common.sequencePrefix")}</Label>
               <Input
                 value={form.sequence_prefix}
                 onChange={(e) => setForm({ ...form, sequence_prefix: e.target.value })}
