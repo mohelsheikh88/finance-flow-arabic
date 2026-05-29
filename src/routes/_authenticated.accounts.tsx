@@ -424,8 +424,8 @@ function ChartOfAccountsPanel() {
         accountTypes={accountTypes as any[]}
         onEdit={openEdit}
         onDelete={setToDelete}
-        onToggleReconcilable={(a, v) =>
-          upsertMut.mutate({
+        onToggleReconcilable={(a: any, v: boolean) =>
+          inlineUpsertMut.mutate({
             id: a.id,
             company_id: companyId!,
             code: a.code,
