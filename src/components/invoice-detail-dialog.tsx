@@ -40,6 +40,8 @@ export function InvoiceDetailDialog({
   const { t, locale } = useI18n();
   const localized = useLocalized();
   const getFn = useServerFn(getInvoice);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showAttachments, setShowAttachments] = useState(false);
 
   const { data: inv, isLoading } = useQuery({
     queryKey: ["invoice-detail", invoiceId],
