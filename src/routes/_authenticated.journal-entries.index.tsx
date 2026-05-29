@@ -26,6 +26,7 @@ function JEListPage() {
     queryFn: () => fn({ data: { branchId: branchId!, limit: 200 } }),
     enabled: !!branchId,
   });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fmt = (n: number) => new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", { minimumFractionDigits: 2 }).format(n);
 
