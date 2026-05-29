@@ -50,38 +50,42 @@ export function ApprovalWorkflowTimeline({
   });
 
   return (
-    <div className="border rounded-lg p-3 bg-muted/20">
-      <div className="flex items-center gap-2 text-sm font-semibold mb-2">
-        <ShieldCheck className="h-4 w-4 text-primary" />
-        <span>{t("approvals.workflow") || "مسار الاعتماد"}</span>
+    <div className="border rounded-md px-3 py-2 bg-muted/20">
+      <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+          <span>{t("approvals.workflow") || "مسار الاعتماد"}</span>
+          {req?.approval_workflows && (
+            <span className="text-[10px] text-muted-foreground font-normal">
+              — {localized(req.approval_workflows, "name")}
+            </span>
+          )}
+        </div>
+        {req && (
+          <Badge
+            variant={
+              req.status === "approved"
+                ? "default"
+                : req.status === "rejected"
+                  ? "destructive"
+                  : "secondary"
+            }
+            className="text-[9px] h-5 px-1.5"
+          >
+            {req.status === "pending" && <Clock className="h-2.5 w-2.5 me-1" />}
+            {req.status === "approved" && <CheckCircle2 className="h-2.5 w-2.5 me-1" />}
+            {req.status === "rejected" && <XCircle className="h-2.5 w-2.5 me-1" />}
+            {t(`approvals.status.${req.status}`)}
+          </Badge>
+        )}
       </div>
 
       {!req ? (
-        <div className="text-[11px] text-muted-foreground text-center py-3">
+        <div className="text-[10px] text-muted-foreground text-center py-2">
           {t("approvals.noWorkflow") || "لا يوجد مسار اعتماد مطبق على هذه العملية"}
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-xs font-medium">
-              {req.approval_workflows ? localized(req.approval_workflows, "name") : "—"}
-            </span>
-            <Badge
-              variant={
-                req.status === "approved"
-                  ? "default"
-                  : req.status === "rejected"
-                    ? "destructive"
-                    : "secondary"
-              }
-              className="text-[10px]"
-            >
-              {req.status === "pending" && <Clock className="h-3 w-3 me-1" />}
-              {req.status === "approved" && <CheckCircle2 className="h-3 w-3 me-1" />}
-              {req.status === "rejected" && <XCircle className="h-3 w-3 me-1" />}
-              {t(`approvals.status.${req.status}`)}
-            </Badge>
-          </div>
 
           {/* Horizontal journey stepper */}
           {(() => {
