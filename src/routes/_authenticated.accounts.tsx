@@ -241,6 +241,14 @@ function ChartOfAccountsPanel() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const inlineUpsertMut = useMutation({
+    mutationFn: (data: any) => upsert({ data }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["accounts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
@@ -281,20 +289,32 @@ function ChartOfAccountsPanel() {
   });
 
   const handleExport = () => {
-    const rows = (accounts as any[]).map((a) => ({
-      code: a.code,
-      name_ar: a.name_ar,
-      name_en: a.name_en,
-      account_type: a.account_type,
-      parent_code: (accounts as any[]).find((p) => p.id === a.parent_id)?.code ?? "",
-      currency_code: a.currency_code ?? "",
-      is_group: a.is_group ? 1 : 0,
-      is_active: a.is_active ? 1 : 0,
-      is_reconcilable: a.is_reconcilable ? 1 : 0,
-      notes: a.notes ?? "",
-    }));
+    const typesById = new Map<string, any>();
+    (accountTypes as any[]).forEach((tp) => typesById.set(tp.id, tp));
+    const clsById = new Map<string, any>();
+    (classifications as any[]).forEach((c) => clsById.set(c.id, c));
+
+    const rows = (accounts as any[]).map((a) => {
+      const tp = typesById.get(a.account_type_id);
+      const cls = tp ? clsById.get(tp.classification_id) : null;
+      return {
+        code: a.code,
+        name_ar: a.name_ar,
+        name_en: a.name_en,
+        classification_code: cls?.code ?? "",
+        account_type_code: tp?.code ?? "",
+        account_type: a.account_type ?? tp?.classification ?? "",
+        parent_code: (accounts as any[]).find((p) => p.id === a.parent_id)?.code ?? "",
+        currency_code: a.currency_code ?? "",
+        is_group: a.is_group ? 1 : 0,
+        is_active: a.is_active ? 1 : 0,
+        is_reconcilable: a.is_reconcilable ? 1 : 0,
+        notes: a.notes ?? "",
+      };
+    });
     const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{
-      code: "", name_ar: "", name_en: "", account_type: "asset",
+      code: "", name_ar: "", name_en: "",
+      classification_code: "", account_type_code: "", account_type: "asset",
       parent_code: "", currency_code: "", is_group: 0, is_active: 1, is_reconcilable: 0, notes: "",
     }]);
     const wb = XLSX.utils.book_new();
@@ -311,25 +331,37 @@ function ChartOfAccountsPanel() {
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
-      const rows = raw.map((r) => ({
-        code: String(r.code ?? "").trim(),
-        name_ar: String(r.name_ar ?? "").trim(),
-        name_en: String(r.name_en ?? "").trim(),
-        account_type: String(r.account_type ?? "").trim().toLowerCase(),
-        parent_code: r.parent_code ? String(r.parent_code).trim() : null,
-        currency_code: r.currency_code ? String(r.currency_code).trim() : null,
-        is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
-        is_active: r.is_active === undefined || r.is_active === "" ? true
-          : r.is_active === true || r.is_active === 1 || String(r.is_active).toLowerCase() === "true",
-        is_reconcilable: r.is_reconcilable === true || r.is_reconcilable === 1 || String(r.is_reconcilable).toLowerCase() === "true",
-        notes: r.notes ? String(r.notes) : null,
-      })).filter((r) => r.code);
+
+      // Resolve account_type from either account_type_code (preferred) or legacy account_type bucket
+      const typeByCode = new Map<string, any>();
+      (accountTypes as any[]).forEach((tp) => typeByCode.set(String(tp.code).toLowerCase(), tp));
+
+      const rows = raw.map((r) => {
+        const tcode = String(r.account_type_code ?? "").trim().toLowerCase();
+        const tp = tcode ? typeByCode.get(tcode) : null;
+        const bucket = String(r.account_type ?? tp?.classification ?? "").trim().toLowerCase();
+        return {
+          code: String(r.code ?? "").trim(),
+          name_ar: String(r.name_ar ?? "").trim(),
+          name_en: String(r.name_en ?? "").trim(),
+          account_type: bucket,
+          account_type_code: tp?.code ?? null,
+          parent_code: r.parent_code ? String(r.parent_code).trim() : null,
+          currency_code: r.currency_code ? String(r.currency_code).trim() : null,
+          is_group: r.is_group === true || r.is_group === 1 || String(r.is_group).toLowerCase() === "true",
+          is_active: r.is_active === undefined || r.is_active === "" ? true
+            : r.is_active === true || r.is_active === 1 || String(r.is_active).toLowerCase() === "true",
+          is_reconcilable: r.is_reconcilable === true || r.is_reconcilable === 1 || String(r.is_reconcilable).toLowerCase() === "true",
+          notes: r.notes ? String(r.notes) : null,
+        };
+      }).filter((r) => r.code);
       if (!rows.length) { toast.error(t("common.noData")); return; }
       importMut.mutate(rows);
     } catch (err: any) {
       toast.error(err.message ?? "Import failed");
     }
   };
+
 
   return (
     <div className="space-y-4">
@@ -411,14 +443,27 @@ function ChartOfAccountsPanel() {
         </div>
       </div>
 
-      <ChartOfAccountsTree
+      <ChartOfAccountsTable
         accounts={filteredAccounts as any[]}
         accountTypes={accountTypes as any[]}
-        classifications={classifications as any[]}
-        typeColors={typeColors}
-        statementOf={statementOf}
         onEdit={openEdit}
         onDelete={setToDelete}
+        onToggleReconcilable={(a: any, v: boolean) =>
+          inlineUpsertMut.mutate({
+            id: a.id,
+            company_id: companyId!,
+            code: a.code,
+            name_ar: a.name_ar,
+            name_en: a.name_en,
+            account_type_id: a.account_type_id,
+            parent_id: a.parent_id ?? null,
+            currency_code: a.currency_code ?? null,
+            is_group: !!a.is_group,
+            is_active: !!a.is_active,
+            is_reconcilable: v,
+            notes: a.notes ?? null,
+          })
+        }
       />
 
 
@@ -913,6 +958,106 @@ function ChartOfAccountsTree({
   );
 }
 
+
+
+function ChartOfAccountsTable({
+  accounts,
+  accountTypes,
+  onEdit,
+  onDelete,
+  onToggleReconcilable,
+}: {
+  accounts: any[];
+  accountTypes: any[];
+  onEdit: (a: any) => void;
+  onDelete: (a: any) => void;
+  onToggleReconcilable: (a: any, v: boolean) => void;
+}) {
+  const { t } = useI18n();
+  const localized = useLocalized();
+
+  const typeById = useMemo(() => {
+    const m = new Map<string, any>();
+    accountTypes.forEach((tp) => m.set(tp.id, tp));
+    return m;
+  }, [accountTypes]);
+
+  const rows = useMemo(
+    () => [...accounts].sort((a, b) => String(a.code).localeCompare(String(b.code))),
+    [accounts],
+  );
+
+  return (
+    <Card>
+      <table className="w-full text-sm">
+        <thead className="bg-muted/50">
+          <tr>
+            <th className="text-start p-3 font-medium w-40">{t("common.code")}</th>
+            <th className="text-start p-3 font-medium">{t("accounts.title")}</th>
+            <th className="text-start p-3 font-medium w-56">{t("common.type") || "Type"}</th>
+            <th className="text-center p-3 font-medium w-48">{t("accounts.isReconcilable")}</th>
+            <th className="text-center p-3 font-medium w-28">{t("common.status")}</th>
+            <th className="text-end p-3 font-medium w-32">{t("common.actions")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((a) => {
+            const tp = typeById.get(a.account_type_id);
+            return (
+              <tr key={a.id} className="border-t hover:bg-muted/30">
+                <td className="p-3 font-mono">{a.code}</td>
+                <td className="p-3">
+                  <span className={a.is_group ? "font-semibold" : ""}>{localized(a, "name")}</span>
+                </td>
+                <td className="p-3 text-muted-foreground">
+                  {tp ? localized(tp, "name") : "—"}
+                </td>
+                <td className="p-3 text-center">
+                  <Switch
+                    checked={!!a.is_reconcilable}
+                    onCheckedChange={(v) => onToggleReconcilable(a, v)}
+                  />
+                </td>
+                <td className="p-3 text-center">
+                  {a.is_active ? (
+                    <Badge variant="outline" className="bg-success/10 text-success border-success/30">
+                      {t("common.active")}
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">{t("common.inactive")}</Badge>
+                  )}
+                </td>
+                <td className="p-3">
+                  <div className="flex items-center gap-1 justify-end">
+                    <Button size="sm" variant="ghost" onClick={() => onEdit(a)} aria-label={t("common.edit")}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onDelete(a)}
+                      aria-label={t("common.delete")}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                {t("common.noData")}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </Card>
+  );
+}
 
 const bucketColors: Record<string, string> = {
   asset: "bg-info/10 text-info border-info/30",
