@@ -222,6 +222,74 @@ function FiscalPeriodsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // ---------- Lock Dates ----------
+  const localized = useLocalized();
+  const listLD = useServerFn(listLockDates);
+  const createLD = useServerFn(createLockDate);
+  const updateLD = useServerFn(updateLockDate);
+  const removeLD = useServerFn(deleteLockDate);
+
+  const { data: lockRows = [] } = useQuery({
+    queryKey: ["lock_dates", companyId],
+    queryFn: () => listLD({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+  const { data: companyBranches = [] } = useQuery({
+    queryKey: ["branches", companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("branches")
+        .select("id, code, name_ar, name_en")
+        .eq("company_id", companyId!)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!companyId,
+  });
+
+  type LDForm = { branch_id: string; lock_date: string; notes: string };
+  const LD_EMPTY: LDForm = { branch_id: "__all__", lock_date: "", notes: "" };
+  const [ldOpen, setLdOpen] = useState(false);
+  const [ldEditingId, setLdEditingId] = useState<string | null>(null);
+  const [ldForm, setLdForm] = useState<LDForm>(LD_EMPTY);
+  const [ldDelId, setLdDelId] = useState<string | null>(null);
+
+  const openLDCreate = () => { setLdEditingId(null); setLdForm(LD_EMPTY); setLdOpen(true); };
+  const openLDEdit = (r: any) => {
+    setLdEditingId(r.id);
+    setLdForm({ branch_id: r.branch_id ?? "__all__", lock_date: r.lock_date, notes: r.notes ?? "" });
+    setLdOpen(true);
+  };
+
+  const ldSaveMut = useMutation({
+    mutationFn: () => {
+      const branch_id = ldForm.branch_id === "__all__" ? null : ldForm.branch_id;
+      if (ldEditingId) {
+        return updateLD({ data: { id: ldEditingId, branch_id, lock_date: ldForm.lock_date, notes: ldForm.notes || null } });
+      }
+      return createLD({ data: { company_id: companyId!, branch_id, lock_date: ldForm.lock_date, notes: ldForm.notes || null } });
+    },
+    onSuccess: () => {
+      toast.success(t("common.saved"));
+      qc.invalidateQueries({ queryKey: ["lock_dates"] });
+      setLdOpen(false); setLdEditingId(null); setLdForm(LD_EMPTY);
+    },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+
+  const ldRemoveMut = useMutation({
+    mutationFn: (id: string) => removeLD({ data: { id } }),
+    onSuccess: () => {
+      toast.success(t("common.saved"));
+      qc.invalidateQueries({ queryKey: ["lock_dates"] });
+      setLdDelId(null);
+    },
+    onError: (e: Error) => toast.error(formatLockError(e, t)),
+  });
+  const canSaveLD = !!ldForm.lock_date;
+
+
   const canSave = !!(form.name && form.date_from && form.date_to && companyId);
   const monthsLabels = isAr
     ? ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
