@@ -180,7 +180,7 @@ export async function postDueDepreciationCore(
     .select(`
       id, period_date, depreciation_amount, accumulated_depreciation, book_value, asset_id,
       fixed_assets!inner(
-        id, company_id, branch_id, code, name_ar, name_en,
+        id, company_id, branch_id, code, name_ar, name_en, partner_id,
         depreciation_account_id, accumulated_depreciation_account_id,
         acquisition_cost, useful_life_months
       )
@@ -282,6 +282,7 @@ export async function postDueDepreciationCore(
           entry_id: je.id,
           line_number: 1,
           account_id: asset.depreciation_account_id,
+          partner_id: asset.partner_id ?? null,
           description: `Depreciation expense – ${asset.code}`,
           debit: amount,
           credit: 0,
@@ -290,6 +291,7 @@ export async function postDueDepreciationCore(
           entry_id: je.id,
           line_number: 2,
           account_id: asset.accumulated_depreciation_account_id,
+          partner_id: asset.partner_id ?? null,
           description: `Accumulated depreciation – ${asset.code}`,
           debit: 0,
           credit: amount,

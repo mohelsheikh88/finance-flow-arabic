@@ -210,6 +210,7 @@ export async function postPaymentCore(
     {
       line_number: 1,
       account_id: cashAccountId,
+      partner_id: pay.partner_id,
       description: `Payment ${pay.payment_number}`,
       debit: isInbound ? pay.amount : 0,
       credit: isInbound ? 0 : pay.amount,
