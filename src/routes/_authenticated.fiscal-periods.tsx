@@ -12,10 +12,8 @@ import {
 import {
   listLockDates, createLockDate, updateLockDate, deleteLockDate,
 } from "@/lib/api/lock-dates.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { formatLockError } from "@/lib/lock-error";
-import { Textarea } from "@/components/ui/textarea";
-import { useLocalized } from "@/i18n";
+
 
 import { useBranch } from "@/lib/branch-context";
 import { useI18n } from "@/i18n";
@@ -222,8 +220,7 @@ function FiscalPeriodsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // ---------- Lock Dates ----------
-  const localized = useLocalized();
+  // ---------- Lock Date (single, company-wide) ----------
   const listLD = useServerFn(listLockDates);
   const createLD = useServerFn(createLockDate);
   const updateLD = useServerFn(updateLockDate);
@@ -234,60 +231,47 @@ function FiscalPeriodsPage() {
     queryFn: () => listLD({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
-  const { data: companyBranches = [] } = useQuery({
-    queryKey: ["branches", companyId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("branches")
-        .select("id, code, name_ar, name_en")
-        .eq("company_id", companyId!)
-        .order("code");
-      if (error) throw error;
-      return data ?? [];
-    },
-    enabled: !!companyId,
-  });
 
-  type LDForm = { branch_id: string; lock_date: string; notes: string };
-  const LD_EMPTY: LDForm = { branch_id: "__all__", lock_date: "", notes: "" };
-  const [ldOpen, setLdOpen] = useState(false);
-  const [ldEditingId, setLdEditingId] = useState<string | null>(null);
-  const [ldForm, setLdForm] = useState<LDForm>(LD_EMPTY);
-  const [ldDelId, setLdDelId] = useState<string | null>(null);
+  // The single company-wide lock row (branch_id null). Pick the latest if multiple exist.
+  const currentLock = useMemo(() => {
+    const rows = (lockRows as any[]).filter((r) => !r.branch_id);
+    if (rows.length === 0) return null;
+    return rows.slice().sort((a, b) => (a.lock_date < b.lock_date ? 1 : -1))[0];
+  }, [lockRows]);
 
-  const openLDCreate = () => { setLdEditingId(null); setLdForm(LD_EMPTY); setLdOpen(true); };
-  const openLDEdit = (r: any) => {
-    setLdEditingId(r.id);
-    setLdForm({ branch_id: r.branch_id ?? "__all__", lock_date: r.lock_date, notes: r.notes ?? "" });
-    setLdOpen(true);
-  };
+  const [ldDate, setLdDate] = useState<string>("");
+  const [ldNotes, setLdNotes] = useState<string>("");
+
+  // Keep inputs in sync with current value when it loads/changes
+  useMemo(() => {
+    setLdDate(currentLock?.lock_date ?? "");
+    setLdNotes(currentLock?.notes ?? "");
+  }, [currentLock?.id]);
 
   const ldSaveMut = useMutation({
-    mutationFn: () => {
-      const branch_id = ldForm.branch_id === "__all__" ? null : ldForm.branch_id;
-      if (ldEditingId) {
-        return updateLD({ data: { id: ldEditingId, branch_id, lock_date: ldForm.lock_date, notes: ldForm.notes || null } });
+    mutationFn: async () => {
+      // Cleanup: delete any extra company-wide rows so only one remains
+      const extras = (lockRows as any[]).filter(
+        (r) => !r.branch_id && r.id !== currentLock?.id,
+      );
+      for (const r of extras) {
+        await removeLD({ data: { id: r.id } });
       }
-      return createLD({ data: { company_id: companyId!, branch_id, lock_date: ldForm.lock_date, notes: ldForm.notes || null } });
+      if (currentLock) {
+        return updateLD({ data: { id: currentLock.id, branch_id: null, lock_date: ldDate, notes: ldNotes || null } });
+      }
+      return createLD({ data: { company_id: companyId!, branch_id: null, lock_date: ldDate, notes: ldNotes || null } });
     },
     onSuccess: () => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["lock_dates"] });
-      setLdOpen(false); setLdEditingId(null); setLdForm(LD_EMPTY);
     },
     onError: (e: Error) => toast.error(formatLockError(e, t)),
   });
 
-  const ldRemoveMut = useMutation({
-    mutationFn: (id: string) => removeLD({ data: { id } }),
-    onSuccess: () => {
-      toast.success(t("common.saved"));
-      qc.invalidateQueries({ queryKey: ["lock_dates"] });
-      setLdDelId(null);
-    },
-    onError: (e: Error) => toast.error(formatLockError(e, t)),
-  });
-  const canSaveLD = !!ldForm.lock_date;
+  const canSaveLD = !!ldDate && (ldDate !== (currentLock?.lock_date ?? "") || (ldNotes || "") !== (currentLock?.notes ?? ""));
+
+
 
 
   const canSave = !!(form.name && form.date_from && form.date_to && companyId);
@@ -555,137 +539,51 @@ function FiscalPeriodsPage() {
         </div>
       </Card>
 
-      {/* ---------- Lock Dates section ---------- */}
+      {/* ---------- Lock Date (single) ---------- */}
       <Card className="p-4" id="lock-dates-section">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <div>
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Lock className="h-4 w-4" />
-              {isAr ? "تواريخ الإقفال" : "Lock Dates"}
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              {isAr
-                ? "تمنع أي إدخال أو تعديل في تواريخ المعاملات قبل أو يوم تاريخ الإقفال — على مستوى الشركة كلها أو فرع محدد."
-                : "Block any entry or change to transactions on or before the lock date — company-wide or for a specific branch."}
-            </p>
-          </div>
-          <Button onClick={openLDCreate} size="sm">
-            <Plus className="h-4 w-4 me-1" />
-            {isAr ? "تاريخ إقفال جديد" : "New Lock Date"}
-          </Button>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            {isAr ? "تاريخ الإقفال" : "Lock Date"}
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            {isAr
+              ? "تاريخ إقفال واحد على مستوى الشركة. لا يمكن إدخال أو تعديل أي بيانات في هذا التاريخ أو ما قبله."
+              : "A single company-wide lock date. No data can be entered or modified on or before this date."}
+          </p>
         </div>
 
-        <div className="rounded-md border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{isAr ? "تاريخ الإقفال" : "Lock Date"}</TableHead>
-                <TableHead>{isAr ? "النطاق" : "Scope"}</TableHead>
-                <TableHead>{t("common.notes")}</TableHead>
-                <TableHead className="text-end">{t("common.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {lockRows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                    {t("common.noData")}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                lockRows.map((r: any) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono text-xs">{r.lock_date}</TableCell>
-                    <TableCell>
-                      {r.branches ? (
-                        <Badge variant="outline">{r.branches.code} — {localized(r.branches, "name")}</Badge>
-                      ) : (
-                        <Badge>{isAr ? "كل الفروع" : "All Branches"}</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{r.notes ?? "—"}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 justify-end">
-                        <Button size="sm" variant="ghost" onClick={() => openLDEdit(r)} title={t("common.edit")}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setLdDelId(r.id)}
-                          className="text-destructive hover:text-destructive"
-                          title={t("common.delete")}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        {currentLock && (
+          <div className="mb-4 flex items-center gap-3 rounded-md border border-warning/30 bg-warning/5 p-3">
+            <ShieldCheck className="h-4 w-4 text-warning" />
+            <div className="text-sm">
+              <span className="text-muted-foreground">
+                {isAr ? "التاريخ الحالي المقفل: " : "Currently locked through: "}
+              </span>
+              <span className="font-mono font-semibold">{currentLock.lock_date}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <Label>{isAr ? "تاريخ الإقفال" : "Lock Date"} *</Label>
+            <Input type="date" value={ldDate} onChange={(e) => setLdDate(e.target.value)} />
+          </div>
+          <div>
+            <Label>{t("common.notes")}</Label>
+            <Input value={ldNotes} onChange={(e) => setLdNotes(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <Button onClick={() => ldSaveMut.mutate()} disabled={!canSaveLD || ldSaveMut.isPending}>
+            {t("common.save")}
+          </Button>
         </div>
       </Card>
 
-      {/* Lock Date dialog */}
-      <Dialog open={ldOpen} onOpenChange={(o) => { setLdOpen(o); if (!o) { setLdEditingId(null); setLdForm(LD_EMPTY); } }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {ldEditingId
-                ? (isAr ? "تعديل تاريخ إقفال" : "Edit Lock Date")
-                : (isAr ? "تاريخ إقفال جديد" : "New Lock Date")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>{isAr ? "النطاق" : "Scope"}</Label>
-              <Select value={ldForm.branch_id} onValueChange={(v) => setLdForm({ ...ldForm, branch_id: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">{isAr ? "كل الفروع" : "All Branches"}</SelectItem>
-                  {companyBranches.map((b: any) => (
-                    <SelectItem key={b.id} value={b.id}>{b.code} — {localized(b, "name")}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{isAr ? "تاريخ الإقفال" : "Lock Date"} *</Label>
-              <Input type="date" value={ldForm.lock_date} onChange={(e) => setLdForm({ ...ldForm, lock_date: e.target.value })} />
-            </div>
-            <div>
-              <Label>{t("common.notes")}</Label>
-              <Textarea value={ldForm.notes} onChange={(e) => setLdForm({ ...ldForm, notes: e.target.value })} rows={2} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setLdOpen(false)}>{t("common.cancel")}</Button>
-            <Button onClick={() => ldSaveMut.mutate()} disabled={!canSaveLD || ldSaveMut.isPending}>{t("common.save")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      <AlertDialog open={!!ldDelId} onOpenChange={(o) => !o && setLdDelId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{isAr ? "تأكيد الحذف" : "Confirm Delete"}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {isAr ? "سيتم حذف تاريخ الإقفال نهائياً." : "This lock date will be permanently deleted."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => ldDelId && ldRemoveMut.mutate(ldDelId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("common.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
 
       {/* Create / Edit dialog */}
