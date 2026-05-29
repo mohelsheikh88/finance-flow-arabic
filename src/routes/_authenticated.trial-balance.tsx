@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getTrialBalance } from "@/lib/api/accounting.functions";
+import { getTrialBalance, listJournals } from "@/lib/api/accounting.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/trial-balance")({
   component: TBPage,
@@ -15,24 +21,147 @@ export const Route = createFileRoute("/_authenticated/trial-balance")({
 
 function defaultRange() {
   const d = new Date();
-  const from = new Date(d.getFullYear(), 0, 1);
+  const from = new Date(d.getFullYear(), d.getMonth(), 1);
   const f = (x: Date) => x.toISOString().slice(0, 10);
   return { from: f(from), to: f(d) };
+}
+
+type Option = { value: string; label: string };
+
+function MultiSelect({
+  options,
+  selected,
+  onChange,
+  placeholder,
+  searchPlaceholder,
+  emptyText,
+  className,
+}: {
+  options: Option[];
+  selected: string[];
+  onChange: (v: string[]) => void;
+  placeholder: string;
+  searchPlaceholder: string;
+  emptyText: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const toggle = (v: string) =>
+    onChange(selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v]);
+  const labelMap = useMemo(() => {
+    const m = new Map<string, string>();
+    options.forEach((o) => m.set(o.value, o.label));
+    return m;
+  }, [options]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn("h-9 min-w-[14rem] justify-between font-normal", className)}
+        >
+          <div className="flex flex-wrap items-center gap-1 overflow-hidden">
+            {selected.length === 0 ? (
+              <span className="text-muted-foreground text-xs">{placeholder}</span>
+            ) : selected.length <= 2 ? (
+              selected.map((v) => (
+                <Badge key={v} variant="secondary" className="text-[10px] gap-1 py-0">
+                  {labelMap.get(v) ?? v}
+                  <X
+                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggle(v);
+                    }}
+                  />
+                </Badge>
+              ))
+            ) : (
+              <Badge variant="secondary" className="text-[10px]">
+                {selected.length}
+              </Badge>
+            )}
+          </div>
+          <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[20rem] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder} className="h-9" />
+          <CommandList>
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup>
+              {options.map((o) => {
+                const isSel = selected.includes(o.value);
+                return (
+                  <CommandItem key={o.value} value={o.label} onSelect={() => toggle(o.value)}>
+                    <Check className={cn("me-2 h-4 w-4", isSel ? "opacity-100" : "opacity-0")} />
+                    {o.label}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+          {selected.length > 0 && (
+            <div className="border-t p-2">
+              <Button variant="ghost" size="sm" className="w-full h-7 text-xs" onClick={() => onChange([])}>
+                <X className="h-3 w-3 me-1" />
+                <span>Clear all</span>
+              </Button>
+            </div>
+          )}
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 function TBPage() {
   const { t, locale } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
-  const init = defaultRange();
+  const init = useMemo(defaultRange, []);
   const [dateFrom, setDateFrom] = useState(init.from);
   const [dateTo, setDateTo] = useState(init.to);
-  const fn = useServerFn(getTrialBalance);
-  const { data: rows = [] } = useQuery({
-    queryKey: ["tb", companyId, dateFrom, dateTo],
-    queryFn: () => fn({ data: { companyId: companyId!, asOfDate: dateTo, dateFrom } }),
+  const [statuses, setStatuses] = useState<string[]>(["draft", "posted"]);
+  const [journalIds, setJournalIds] = useState<string[]>([]);
+
+  const tbFn = useServerFn(getTrialBalance);
+  const journalsFn = useServerFn(listJournals);
+
+  const { data: journals = [] } = useQuery({
+    queryKey: ["journals-list", companyId],
+    queryFn: () => journalsFn({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+
+  const { data: rows = [] } = useQuery({
+    queryKey: ["tb", companyId, dateFrom, dateTo, statuses.join(","), journalIds.join(",")],
+    queryFn: () =>
+      tbFn({
+        data: {
+          companyId: companyId!,
+          asOfDate: dateTo,
+          dateFrom,
+          statuses: statuses.length ? statuses : null,
+          journalIds: journalIds.length ? journalIds : null,
+        },
+      }),
+    enabled: !!companyId,
+  });
+
+  const journalOptions: Option[] = (journals as any[]).map((j) => ({
+    value: j.id,
+    label: `${j.code} — ${locale === "ar" ? j.name_ar : j.name_en}`,
+  }));
+  const statusOptions: Option[] = [
+    { value: "draft", label: t("je.draft") },
+    { value: "posted", label: t("je.posted") },
+  ];
 
   const fmt = (n: number) => new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", { minimumFractionDigits: 2 }).format(n);
   const totals = rows.reduce(
@@ -50,8 +179,37 @@ function TBPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="page-title">{t("tb.title")}</h1>
         <div className="flex items-end gap-2 flex-wrap">
-          <div><Label className="text-xs">{t("vat.dateFrom")}</Label><Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9 w-44" /></div>
-          <div><Label className="text-xs">{t("vat.dateTo")}</Label><Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 w-44" /></div>
+          <div>
+            <Label className="text-xs">{t("vat.dateFrom")}</Label>
+            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9 w-44" />
+          </div>
+          <div>
+            <Label className="text-xs">{t("vat.dateTo")}</Label>
+            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 w-44" />
+          </div>
+          <div>
+            <Label className="text-xs">{locale === "ar" ? "الحالة" : "Status"}</Label>
+            <MultiSelect
+              options={statusOptions}
+              selected={statuses}
+              onChange={setStatuses}
+              placeholder={locale === "ar" ? "كل الحالات" : "All statuses"}
+              searchPlaceholder={locale === "ar" ? "ابحث..." : "Search..."}
+              emptyText={locale === "ar" ? "لا نتائج" : "No results"}
+            />
+          </div>
+          <div>
+            <Label className="text-xs">{locale === "ar" ? "الدفاتر" : "Journals"}</Label>
+            <MultiSelect
+              options={journalOptions}
+              selected={journalIds}
+              onChange={setJournalIds}
+              placeholder={locale === "ar" ? "كل الدفاتر" : "All journals"}
+              searchPlaceholder={locale === "ar" ? "ابحث عن دفتر..." : "Search journals..."}
+              emptyText={locale === "ar" ? "لا نتائج" : "No results"}
+              className="min-w-[16rem]"
+            />
+          </div>
         </div>
       </div>
       <Card>
