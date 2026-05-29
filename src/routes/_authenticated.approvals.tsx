@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listWorkflows, createWorkflow } from "@/lib/api/approvals.functions";
+import { listWorkflows, createWorkflow, updateWorkflow, deleteWorkflow } from "@/lib/api/approvals.functions";
 import { listRoles } from "@/lib/api/roles.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
@@ -15,8 +15,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShieldCheck, Plus, Trash2 } from "lucide-react";
+import { ShieldCheck, Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { RolesManagement } from "@/components/roles-management";
 import { UserRolesManagement } from "@/components/user-roles-management";
@@ -34,6 +39,8 @@ function ApprovalsPage() {
   const qc = useQueryClient();
   const listWf = useServerFn(listWorkflows);
   const createWf = useServerFn(createWorkflow);
+  const updateWf = useServerFn(updateWorkflow);
+  const deleteWf = useServerFn(deleteWorkflow);
   const listRolesFn = useServerFn(listRoles);
 
   const { data: rolesData = [] } = useQuery({
@@ -43,6 +50,9 @@ function ApprovalsPage() {
   const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
 
   const [wfOpen, setWfOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState(true);
 
   const { data: wfData } = useQuery({
     queryKey: ["workflows", companyId],
@@ -59,6 +69,39 @@ function ApprovalsPage() {
     { step_order: 2, required_role: "finance_manager", step_name_ar: "اعتماد المدير المالي", step_name_en: "Finance Manager Approval" },
   ]);
 
+  const resetForm = () => {
+    setEditingId(null);
+    setIsActive(true);
+    setWfForm({ name_ar: "", name_en: "", journal_type: "sales", min_amount: 0, max_amount: null });
+    setSteps([
+      { step_order: 1, required_role: "chief_accountant", step_name_ar: "مراجعة رئيس الحسابات", step_name_en: "Chief Accountant Review" },
+      { step_order: 2, required_role: "finance_manager", step_name_ar: "اعتماد المدير المالي", step_name_en: "Finance Manager Approval" },
+    ]);
+  };
+
+  const openEdit = (w: any) => {
+    setEditingId(w.id);
+    setIsActive(!!w.is_active);
+    setWfForm({
+      name_ar: w.name_ar || "",
+      name_en: w.name_en || "",
+      journal_type: (w.journal_type || "sales") as typeof JOURNAL_TYPES[number],
+      min_amount: Number(w.min_amount) || 0,
+      max_amount: w.max_amount != null ? Number(w.max_amount) : null,
+    });
+    const ss = (w.approval_steps_def || [])
+      .slice()
+      .sort((a: any, b: any) => a.step_order - b.step_order)
+      .map((s: any, i: number) => ({
+        step_order: i + 1,
+        required_role: s.required_role,
+        step_name_ar: s.step_name_ar || "",
+        step_name_en: s.step_name_en || "",
+      }));
+    setSteps(ss.length ? ss : [{ step_order: 1, required_role: "accountant", step_name_ar: "", step_name_en: "" }]);
+    setWfOpen(true);
+  };
+
   const createWfMut = useMutation({
     mutationFn: () => createWf({
       data: {
@@ -71,10 +114,43 @@ function ApprovalsPage() {
       qc.invalidateQueries({ queryKey: ["workflows"] });
       toast.success(t("common.saved"));
       setWfOpen(false);
-      setWfForm({ name_ar: "", name_en: "", journal_type: "sales", min_amount: 0, max_amount: null });
+      resetForm();
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  const updateWfMut = useMutation({
+    mutationFn: () => updateWf({
+      data: {
+        id: editingId!,
+        ...wfForm,
+        is_active: isActive,
+        steps: steps.map((s, i) => ({ ...s, step_order: i + 1 })),
+      },
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workflows"] });
+      toast.success(t("common.saved"));
+      setWfOpen(false);
+      resetForm();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteWfMut = useMutation({
+    mutationFn: (id: string) => deleteWf({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workflows"] });
+      toast.success(t("common.deleted") || t("common.saved"));
+      setDeleteId(null);
+    },
+    onError: (e: any) => {
+      toast.error(e.message);
+      setDeleteId(null);
+    },
+  });
+
+  const saveMut = editingId ? updateWfMut : createWfMut;
 
   const workflows = wfData?.workflows || [];
 
@@ -85,12 +161,16 @@ function ApprovalsPage() {
           <ShieldCheck className="h-5 w-5 text-primary" />
           <h1 className="page-title">{t("approvals.title")}</h1>
         </div>
-        <Dialog open={wfOpen} onOpenChange={setWfOpen}>
+        <Dialog open={wfOpen} onOpenChange={(o) => { setWfOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 me-1" />{t("approvals.newWorkflow")}</Button>
+            <Button size="sm" onClick={() => resetForm()}><Plus className="h-4 w-4 me-1" />{t("approvals.newWorkflow")}</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>{t("approvals.newWorkflow")}</DialogTitle></DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingId ? (t("approvals.editWorkflow") || t("common.edit")) : t("approvals.newWorkflow")}
+              </DialogTitle>
+            </DialogHeader>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("common.nameAr")}</Label>
@@ -119,6 +199,12 @@ function ApprovalsPage() {
                   <Input type="number" value={wfForm.max_amount ?? ""} onChange={(e) => setWfForm({ ...wfForm, max_amount: e.target.value ? Number(e.target.value) : null })} />
                 </div>
               </div>
+              {editingId && (
+                <div className="col-span-2 flex items-center gap-2 pt-2">
+                  <Switch checked={isActive} onCheckedChange={setIsActive} />
+                  <Label className="text-xs">{isActive ? t("common.active") : t("common.inactive")}</Label>
+                </div>
+              )}
             </div>
 
             <div className="border-t pt-3">
@@ -176,9 +262,9 @@ function ApprovalsPage() {
                     toast.error(locale === "ar" ? `أكمل بيانات الخطوة رقم ${badStep + 1}` : `Complete step #${badStep + 1} fields`);
                     return;
                   }
-                  createWfMut.mutate();
+                  saveMut.mutate();
                 }}
-                disabled={createWfMut.isPending}
+                disabled={saveMut.isPending}
               >
                 {t("common.save")}
               </Button>
@@ -206,7 +292,15 @@ function ApprovalsPage() {
                     {w.journal_type ? t(`approvals.jt.${w.journal_type}`) : t(`approvals.doc.${w.document_type}`)} • {Number(w.min_amount).toFixed(0)} - {w.max_amount ? Number(w.max_amount).toFixed(0) : "∞"} {w.currency_code}
                   </div>
                 </div>
-                <Badge variant={w.is_active ? "default" : "secondary"}>{w.is_active ? t("common.active") : t("common.inactive")}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={w.is_active ? "default" : "secondary"}>{w.is_active ? t("common.active") : t("common.inactive")}</Badge>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(w)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(w.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {(w.approval_steps_def || []).sort((a: any, b: any) => a.step_order - b.step_order).map((s: any) => (
@@ -227,6 +321,28 @@ function ApprovalsPage() {
           <UserRolesManagement />
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("common.confirm")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {locale === "ar"
+                ? "هل أنت متأكد من حذف هذا الـ Workflow؟ لا يمكن التراجع عن هذا الإجراء."
+                : "Are you sure you want to delete this workflow? This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{locale === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteId && deleteWfMut.mutate(deleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {locale === "ar" ? "حذف" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
