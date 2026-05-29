@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listApprovalRequests, listWorkflows, createWorkflow, actOnRequest } from "@/lib/api/approvals.functions";
+import { listRoles } from "@/lib/api/roles.functions";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -23,11 +24,11 @@ export const Route = createFileRoute("/_authenticated/approvals")({
   component: ApprovalsPage,
 });
 
-const ROLES = ["finance_manager", "accounting_manager", "chief_accountant", "accountant"] as const;
 const DOC_TYPES = ["journal_entry", "invoice", "payment", "asset_disposal"] as const;
 
+
 function ApprovalsPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const localized = useLocalized();
   const { companyId, branchId } = useBranch();
   const qc = useQueryClient();
@@ -35,6 +36,14 @@ function ApprovalsPage() {
   const listWf = useServerFn(listWorkflows);
   const createWf = useServerFn(createWorkflow);
   const act = useServerFn(actOnRequest);
+  const listRolesFn = useServerFn(listRoles);
+
+  const { data: rolesData = [] } = useQuery({
+    queryKey: ["roles_active"],
+    queryFn: () => listRolesFn(),
+  });
+  const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
+
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [wfOpen, setWfOpen] = useState(false);
 
@@ -148,7 +157,11 @@ function ApprovalsPage() {
                       <Select value={s.required_role} onValueChange={(v) => { const c = [...steps]; c[i].required_role = v; setSteps(c); }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {ROLES.map((r) => <SelectItem key={r} value={r}>{t(`users.${r}`)}</SelectItem>)}
+                          {activeRoles.map((r: any) => (
+                            <SelectItem key={r.code} value={r.code}>
+                              {locale === "ar" ? r.name_ar : r.name_en}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
