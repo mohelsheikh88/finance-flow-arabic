@@ -97,6 +97,7 @@ function CustomersPage() {
       vat_number: p.vat_number ?? "", email: p.email ?? "", phone: p.phone ?? "",
       credit_limit: Number(p.credit_limit ?? 0), address_ar: p.address_ar ?? "",
       receivable_account_id: p.receivable_account_id ?? null,
+      customer_type_id: p.customer_type_id ?? null,
     });
     setOpen(true);
   };
@@ -110,6 +111,7 @@ function CustomersPage() {
         credit_limit: Number(form.credit_limit) || 0,
         address_ar: form.address_ar || null,
         receivable_account_id: form.receivable_account_id || null,
+        customer_type_id: form.customer_type_id || null,
       };
       if (form.id) {
         return update({ data: { id: form.id, ...payload } as any });
