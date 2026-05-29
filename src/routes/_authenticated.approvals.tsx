@@ -28,7 +28,7 @@ const DOC_TYPES = ["journal_entry", "invoice", "payment", "asset_disposal"] as c
 
 
 function ApprovalsPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const localized = useLocalized();
   const { companyId, branchId } = useBranch();
   const qc = useQueryClient();
@@ -158,7 +158,7 @@ function ApprovalsPage() {
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {activeRoles.map((r: any) => (
-                            <SelectItem key={r.code} value={r.code}>
+                              {locale === "ar" ? r.name_ar : r.name_en}
                               {t("locale") === "ar" ? r.name_ar : r.name_en}
                             </SelectItem>
                           ))}
