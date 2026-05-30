@@ -11,6 +11,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/i18n";
+import { BrandIdentityProvider } from "@/lib/brand-identity";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { BranchProvider } from "@/lib/branch-context";
 import { Toaster } from "@/components/ui/sonner";
@@ -109,19 +110,21 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <AuthProvider>
-          <BranchProvider>
-            <ConflictTrackerProvider>
-              <OfflineQueueProvider>
-                <AuthSync />
-                <ScopedRealtime />
-                <ConflictSubscriber />
-                <Outlet />
-                <Toaster richColors position="top-center" />
-              </OfflineQueueProvider>
-            </ConflictTrackerProvider>
-          </BranchProvider>
-        </AuthProvider>
+        <BrandIdentityProvider>
+          <AuthProvider>
+            <BranchProvider>
+              <ConflictTrackerProvider>
+                <OfflineQueueProvider>
+                  <AuthSync />
+                  <ScopedRealtime />
+                  <ConflictSubscriber />
+                  <Outlet />
+                  <Toaster richColors position="top-center" />
+                </OfflineQueueProvider>
+              </ConflictTrackerProvider>
+            </BranchProvider>
+          </AuthProvider>
+        </BrandIdentityProvider>
       </I18nProvider>
     </QueryClientProvider>
   );
