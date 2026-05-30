@@ -29,7 +29,7 @@ function measureLabelWidth(
   }
   // icon + gap + nesting/padding breathing room.
   const total = Math.ceil(max + 22 + 14 + 40 + 24);
-  return Math.max(260, Math.min(420, total));
+  return Math.max(300, Math.min(440, total));
 
 }
 
