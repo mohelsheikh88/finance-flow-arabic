@@ -36,8 +36,8 @@ export const BRAND_IDENTITIES: Record<BrandIdentityId, BrandIdentity> = {
     glyphColor: "#ffffff",
     titleColor: "#2d0d44",
     accentColor: "#d63384",
-    arabicFont: "Cairo, system-ui, sans-serif",
-    latinFont: "Inter, system-ui, sans-serif",
+    arabicFont: "'Tajawal', 'Cairo', system-ui, sans-serif",
+    latinFont: "'Inter', system-ui, sans-serif",
     swatches: ["#1a0b2e", "#2d0d44", "#d63384", "#f8d7e8"],
   },
   navy: {
@@ -50,8 +50,8 @@ export const BRAND_IDENTITIES: Record<BrandIdentityId, BrandIdentity> = {
     glyphColor: "#c9a24b",
     titleColor: "#0a1b38",
     accentColor: "#c9a24b",
-    arabicFont: "'Playfair Display', Cairo, serif",
-    latinFont: "'Playfair Display', Inter, serif",
+    arabicFont: "'Amiri', 'Cairo', serif",
+    latinFont: "'Playfair Display', Georgia, serif",
     swatches: ["#0a1b38", "#0e2a55", "#c9a24b", "#f4f1ea"],
   },
   copper: {
@@ -64,8 +64,8 @@ export const BRAND_IDENTITIES: Record<BrandIdentityId, BrandIdentity> = {
     glyphColor: "#d4a373",
     titleColor: "#1a1a1a",
     accentColor: "#925b3e",
-    arabicFont: "'IBM Plex Sans Arabic', Cairo, sans-serif",
-    latinFont: "Inter, system-ui, sans-serif",
+    arabicFont: "'IBM Plex Sans Arabic', 'Cairo', sans-serif",
+    latinFont: "'Inter', system-ui, sans-serif",
     swatches: ["#1a1a1a", "#925b3e", "#d4a373", "#e5d1c1"],
   },
 };
