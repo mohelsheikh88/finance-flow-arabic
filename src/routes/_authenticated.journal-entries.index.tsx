@@ -28,13 +28,14 @@ function JEListPage() {
   const { t, locale } = useI18n();
   const localized = useLocalized();
   const { branchId } = useBranch();
+  const { user } = useAuth();
   const fn = useServerFn(listJournalEntries);
   const { openEntryId } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const { data: entries = [] } = useQuery({
     queryKey: ["je-list", branchId],
     queryFn: () => fn({ data: { branchId: branchId!, limit: 200 } }),
-    enabled: !!branchId,
+    enabled: !!user && !!branchId,
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
