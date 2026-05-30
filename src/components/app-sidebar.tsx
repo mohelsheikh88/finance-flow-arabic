@@ -272,7 +272,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
               defaultOpen={groupActive}
               className="group/collapsible"
             >
-              <SidebarGroup className="sidebar-grandparent">
+              <SidebarGroup className="sidebar-grandparent mb-1.5">
                 <SidebarGroupLabel asChild>
                   <CollapsibleTrigger
                     className={
