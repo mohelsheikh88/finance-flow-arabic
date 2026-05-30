@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listTaxes, upsertTax, deleteTax, toggleTaxActive } from "@/lib/api/vat.functions";
 import { listAccounts } from "@/lib/api/accounting.functions";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -73,6 +74,7 @@ function TaxesPage() {
   const isRtl = locale === "ar";
   const localized = useLocalized();
   const { companyId } = useBranch();
+  const { user } = useAuth();
   const qc = useQueryClient();
 
   const list = useServerFn(listTaxes);
@@ -84,13 +86,13 @@ function TaxesPage() {
   const { data: taxes = [], isLoading } = useQuery({
     queryKey: ["taxes", companyId],
     queryFn: () => list({ data: { companyId: companyId! } }),
-    enabled: !!companyId,
+    enabled: !!user && !!companyId,
   });
 
   const { data: accounts = [] } = useQuery({
     queryKey: ["accounts-all", companyId],
     queryFn: () => accountsFn({ data: { companyId: companyId! } }),
-    enabled: !!companyId,
+    enabled: !!user && !!companyId,
   });
 
   const [tab, setTab] = useState<"all" | "sale" | "purchase">("all");
