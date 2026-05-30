@@ -8,6 +8,7 @@ import { createInvoice, listInvoices, postInvoice, getInvoice, updateInvoice, re
 import { listAccounts, listPartners } from "@/lib/api/accounting.functions";
 import { listTaxes } from "@/lib/api/vat.functions";
 import { listPaymentTerms } from "@/lib/api/payment-terms.functions";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -56,6 +57,7 @@ function CustomerInvoicesPage() {
   const { t } = useI18n();
   const localized = useLocalized();
   const { companyId, branchId } = useBranch();
+  const { user } = useAuth();
   const qc = useQueryClient();
 
   const list = useServerFn(listInvoices);
@@ -73,12 +75,12 @@ function CustomerInvoicesPage() {
   const { data: invoices = [] } = useQuery({
     queryKey: ["invoices", branchId, "customer"],
     queryFn: () => list({ data: { branchId: branchId!, invoiceType: "customer" } }),
-    enabled: !!branchId,
+    enabled: !!user && !!branchId,
   });
-  const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accFn({ data: { companyId: companyId! } }), enabled: !!companyId });
-  const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partFn({ data: { companyId: companyId! } }), enabled: !!companyId });
-  const { data: taxes = [] } = useQuery({ queryKey: ["taxes", companyId], queryFn: () => taxFn({ data: { companyId: companyId! } }), enabled: !!companyId });
-  const { data: paymentTerms = [] } = useQuery({ queryKey: ["payment-terms", companyId], queryFn: () => termsFn({ data: { companyId: companyId! } }), enabled: !!companyId });
+  const { data: accounts = [] } = useQuery({ queryKey: ["accounts", companyId], queryFn: () => accFn({ data: { companyId: companyId! } }), enabled: !!user && !!companyId });
+  const { data: partners = [] } = useQuery({ queryKey: ["partners", companyId], queryFn: () => partFn({ data: { companyId: companyId! } }), enabled: !!user && !!companyId });
+  const { data: taxes = [] } = useQuery({ queryKey: ["taxes", companyId], queryFn: () => taxFn({ data: { companyId: companyId! } }), enabled: !!user && !!companyId });
+  const { data: paymentTerms = [] } = useQuery({ queryKey: ["payment-terms", companyId], queryFn: () => termsFn({ data: { companyId: companyId! } }), enabled: !!user && !!companyId });
 
   const customers = partners.filter((p: any) => p.is_customer);
   const incomeAccounts = accounts.filter((a: any) => !a.is_group && a.account_type === "income");

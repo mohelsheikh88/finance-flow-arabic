@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getVatReport } from "@/lib/api/vat.functions";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
@@ -32,6 +33,7 @@ function VatPage() {
   const { t } = useI18n();
   const localized = useLocalized();
   const { companyId } = useBranch();
+  const { user } = useAuth();
   const get = useServerFn(getVatReport);
   const init = todayMonthRange();
   const [dateFrom, setDateFrom] = useState(init.from);
@@ -40,7 +42,7 @@ function VatPage() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: ["vat", companyId, dateFrom, dateTo],
     queryFn: () => get({ data: { companyId: companyId!, dateFrom, dateTo } }),
-    enabled: !!companyId,
+    enabled: !!user && !!companyId,
   });
 
   const netVat = data ? data.output.vat - data.input.vat : 0;
