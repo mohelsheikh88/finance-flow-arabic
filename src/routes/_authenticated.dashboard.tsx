@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getDashboardKpis, listJournalEntries } from "@/lib/api/accounting.functions";
 import { getUserContext } from "@/lib/api/context.functions";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,23 +29,24 @@ function DashboardPage() {
   const { t, locale } = useI18n();
   const localized = useLocalized();
   const { companyId, branchId } = useBranch();
+  const { user } = useAuth();
   const fetchCtx = useServerFn(getUserContext);
   const fetchKpis = useServerFn(getDashboardKpis);
   const fetchJEs = useServerFn(listJournalEntries);
 
-  const { data: ctx } = useQuery({ queryKey: ["user-context"], queryFn: () => fetchCtx() });
+  const { data: ctx } = useQuery({ queryKey: ["user-context"], queryFn: () => fetchCtx(), enabled: !!user });
   const hasSetup = (ctx?.companies?.length ?? 0) > 0;
 
   const { data: kpis } = useQuery({
     queryKey: ["dashboard-kpis", companyId, branchId],
     queryFn: () => fetchKpis({ data: { companyId: companyId!, branchId: branchId! } }),
-    enabled: !!companyId && !!branchId,
+    enabled: !!user && !!companyId && !!branchId,
   });
 
   const { data: recent } = useQuery({
     queryKey: ["recent-je", branchId],
     queryFn: () => fetchJEs({ data: { branchId: branchId!, limit: 10 } }),
-    enabled: !!branchId,
+    enabled: !!user && !!branchId,
   });
 
   if (ctx && !hasSetup) {
