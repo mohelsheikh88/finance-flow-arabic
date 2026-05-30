@@ -330,7 +330,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                               </CollapsibleTrigger>
                             </SidebarGroupLabel>
                             <CollapsibleContent className="overflow-visible data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                              <div className="relative ms-3 ps-3 border-s border-sidebar-border/60">
+                              <div className="relative ms-2 ps-2 sm:ms-3 sm:ps-3 border-s border-sidebar-border/60">
                                 <SidebarMenu>
                                   {sg.items.map((item) => (
                                     <SidebarMenuItem key={item.url} className="relative">
