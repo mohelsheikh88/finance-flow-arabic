@@ -11,6 +11,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/i18n";
+import { BrandIdentityProvider } from "@/lib/brand-identity";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { BranchProvider } from "@/lib/branch-context";
 import { Toaster } from "@/components/ui/sonner";
