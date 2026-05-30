@@ -110,19 +110,21 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <AuthProvider>
-          <BranchProvider>
-            <ConflictTrackerProvider>
-              <OfflineQueueProvider>
-                <AuthSync />
-                <ScopedRealtime />
-                <ConflictSubscriber />
-                <Outlet />
-                <Toaster richColors position="top-center" />
-              </OfflineQueueProvider>
-            </ConflictTrackerProvider>
-          </BranchProvider>
-        </AuthProvider>
+        <BrandIdentityProvider>
+          <AuthProvider>
+            <BranchProvider>
+              <ConflictTrackerProvider>
+                <OfflineQueueProvider>
+                  <AuthSync />
+                  <ScopedRealtime />
+                  <ConflictSubscriber />
+                  <Outlet />
+                  <Toaster richColors position="top-center" />
+                </OfflineQueueProvider>
+              </ConflictTrackerProvider>
+            </BranchProvider>
+          </AuthProvider>
+        </BrandIdentityProvider>
       </I18nProvider>
     </QueryClientProvider>
   );
