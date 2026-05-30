@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { listJournalEntries } from "@/lib/api/accounting.functions";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
 import { useI18n, useLocalized } from "@/i18n";
 import { Card } from "@/components/ui/card";
