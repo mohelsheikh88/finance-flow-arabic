@@ -275,10 +275,37 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
               <SidebarGroup className="sidebar-grandparent">
                 <SidebarGroupLabel asChild>
                   <CollapsibleTrigger
-                    className="nav-pill group/trigger flex h-auto w-full cursor-pointer items-center gap-2.5 px-2 py-2 text-sidebar-foreground/85"
+                    className={
+                      "group/trigger relative flex h-auto w-full cursor-pointer items-center justify-between gap-3 rounded-xl p-3 " +
+                      "bg-gradient-to-br from-white/[0.06] to-white/[0.01] border border-white/[0.06] shadow-lg " +
+                      "transition-all duration-300 ease-out " +
+                      "hover:from-white/[0.10] hover:to-white/[0.02] hover:border-[hsl(327,92%,60%)]/40 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.55)] " +
+                      (groupActive ? "from-white/[0.09] to-white/[0.02] border-[hsl(327,92%,60%)]/35" : "")
+                    }
                   >
-                    <g.icon className="h-[18px] w-[18px] shrink-0 text-[hsl(327,92%,72%)]" />
-                    <span className="flex-1 whitespace-nowrap text-start font-medium">{g.label}</span>
+                    {/* Accent bar (active) */}
+                    <span
+                      aria-hidden
+                      className={
+                        "pointer-events-none absolute inset-y-2 start-0 w-[3px] rounded-e-full bg-[hsl(327,92%,60%)] shadow-[0_0_14px_hsl(327,92%,60%)] transition-opacity duration-300 " +
+                        (groupActive ? "opacity-100" : "opacity-0 group-hover/trigger:opacity-100")
+                      }
+                    />
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Icon well */}
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-black/35 border border-white/[0.08] shadow-inner transition-all duration-300 group-hover/trigger:border-[hsl(327,92%,60%)]/40 group-hover/trigger:bg-black/50">
+                        <g.icon className="h-[18px] w-[18px] text-[hsl(327,92%,72%)] transition-transform duration-500 ease-out group-hover/trigger:-translate-y-0.5 group-hover/trigger:scale-110" />
+                      </div>
+                      <span className="flex-1 min-w-0 truncate text-start text-[14px] font-semibold tracking-tight text-white/90">
+                        {g.label}
+                      </span>
+                    </div>
+                    <ChevronRight
+                      className={
+                        "h-4 w-4 shrink-0 text-white/30 transition-all duration-300 group-hover/trigger:text-[hsl(327,92%,72%)] " +
+                        "rtl:rotate-180 group-data-[state=open]/collapsible:rotate-90 rtl:group-data-[state=open]/collapsible:-rotate-90"
+                      }
+                    />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-visible data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
