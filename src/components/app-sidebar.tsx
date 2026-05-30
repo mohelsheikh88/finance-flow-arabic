@@ -311,7 +311,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-visible data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                  <SidebarGroupContent className="relative ms-3 ps-3 border-s border-dashed border-sidebar-border/70">
+                  <SidebarGroupContent className="relative ms-2 ps-2 sm:ms-3 sm:ps-3 border-s border-dashed border-sidebar-border/70">
                     {g.subgroups?.map((sg) => {
                       const subActive = sg.items.some((it) => isActive(it.url));
                       return (
