@@ -31,14 +31,16 @@ export function BrandLogo({
   const enColor = isLight ? "text-white/90" : "text-slate-500";
   const enSubColor = isLight ? "text-white/50" : "text-slate-500";
 
+  const isAr = locale === "ar";
+
   return (
     <div
       className={`flex items-center gap-3 ${className}`}
-      dir={locale === "ar" ? "rtl" : "ltr"}
+      dir={isAr ? "rtl" : "ltr"}
     >
       <BrandMark size={size} identity={identity} />
       {showWordmark && (
-        <div className="flex items-center gap-3">
+        isAr ? (
           <div className="flex flex-col items-end leading-tight">
             <span
               className={`text-[15px] font-bold tracking-tight ${titleColor}`}
@@ -56,7 +58,7 @@ export function BrandLogo({
               نظام مالي متكامل
             </span>
           </div>
-          <div className={`w-px h-7 ${dividerColor}`} aria-hidden />
+        ) : (
           <div className="flex flex-col leading-tight">
             <span
               className={`text-[15px] font-semibold tracking-tight ${enColor}`}
@@ -71,11 +73,12 @@ export function BrandLogo({
               Financial ERP
             </span>
           </div>
-        </div>
+        )
       )}
     </div>
   );
 }
+
 
 type MarkProps = { size?: number; identity?: BrandIdentity };
 
