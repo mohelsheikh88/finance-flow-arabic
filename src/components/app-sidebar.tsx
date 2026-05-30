@@ -240,7 +240,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="overflow-y-auto overflow-x-hidden px-3">
+      <SidebarContent className="overflow-y-auto overflow-x-hidden px-2 sm:px-3">
         {groups.map((g) => {
           const groupActive = g.items?.some((it) => isActive(it.url)) || g.subgroups?.some((sg) => sg.items.some((it) => isActive(it.url)));
           if (collapsed) {
