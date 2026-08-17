@@ -268,14 +268,39 @@ export const deleteUser = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     if (data.userId === context.userId) throw new Error("You cannot delete your own account");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("user_module_access").delete().eq("user_id", data.userId);
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
-    await supabaseAdmin.from("user_branch_access").delete().eq("user_id", data.userId);
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
-    if (error) throw new Error(error.message);
-    // profiles has no FK cascade to auth.users, so remove it explicitly
-    const { error: pe } = await supabaseAdmin.from("profiles").delete().eq("id", data.userId);
-    if (pe) throw new Error(pe.message);
+
+    // Remove every application-level record first. This also repairs users whose
+    // auth account was removed by an earlier, partially completed deletion.
+    const { error: moduleError } = await supabaseAdmin
+      .from("user_module_access")
+      .delete()
+      .eq("user_id", data.userId);
+    if (moduleError) throw new Error(moduleError.message);
+
+    const { error: roleError } = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.userId);
+    if (roleError) throw new Error(roleError.message);
+
+    const { error: branchError } = await supabaseAdmin
+      .from("user_branch_access")
+      .delete()
+      .eq("user_id", data.userId);
+    if (branchError) throw new Error(branchError.message);
+
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .delete()
+      .eq("id", data.userId);
+    if (profileError) throw new Error(profileError.message);
+
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    // Deletion is intentionally idempotent: a missing auth account means the
+    // desired final state has already been reached.
+    if (authError && !authError.message.toLowerCase().includes("user not found")) {
+      throw new Error(authError.message);
+    }
     return { ok: true };
   });
 
