@@ -404,7 +404,7 @@ function ApprovalsPage() {
         </TabsContent>
 
         <TabsContent value="user_roles">
-          <UserRolesManagement />
+          <UserRolesManagement moduleScope="accounting" rolesOnly />
         </TabsContent>
       </Tabs>
 
