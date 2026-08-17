@@ -393,7 +393,7 @@ function FiscalPeriodsPage() {
               {isAr ? "بداية السنة المالية" : "Fiscal Year Setup"}
             </Button>
           </Link>
-          <Link to="/reports">
+          <Link to="/reports/executive-summary">
             <Button variant="outline" size="sm">
               <FileBarChart className="h-4 w-4 me-1" />
               {isAr ? "التقارير" : "Reports"}
