@@ -437,9 +437,9 @@ export function UserRolesManagement({
                         </span>
                       )}
                       {u.roles.map((r: string) => (
-                        <Badge key={r} variant="secondary" className={rolesOnly ? "gap-1 pe-1" : "gap-1"}>
+                        <Badge key={r} variant="secondary" className={rolesOnly && r !== "admin" ? "gap-1 pe-1" : "gap-1"}>
                           {roleLabel(r)}
-                          {rolesOnly && (
+                          {rolesOnly && r !== "admin" && (
                             <button
                               onClick={() => removeMut.mutate({ userId: u.id, role: r })}
                               className="hover:bg-destructive/20 rounded-sm p-0.5"
