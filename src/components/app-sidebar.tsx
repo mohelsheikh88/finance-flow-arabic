@@ -278,10 +278,10 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                       "group/trigger relative flex h-auto w-full cursor-pointer items-center justify-between gap-2.5 sm:gap-3 rounded-xl p-2.5 sm:p-3 " +
                       "bg-gradient-to-br from-white/[0.06] to-white/[0.01] border border-white/[0.06] shadow-lg " +
                       "transition-all duration-300 ease-out " +
-                      "hover:from-white/[0.10] hover:to-white/[0.02] hover:border-[hsl(327,92%,60%)]/40 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-14px_rgba(0,0,0,0.55)] " +
-                      "active:from-white/[0.12] active:to-white/[0.03] active:border-[hsl(327,92%,60%)]/50 active:scale-[0.99] " +
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(327,92%,60%)]/50 " +
-                      (groupActive ? "from-white/[0.09] to-white/[0.02] border-[hsl(327,92%,60%)]/35" : "")
+                      "hover:from-white/[0.10] hover:to-white/[0.02] hover:border-[hsl(327,92%,60%)]/30 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.35)] " +
+                      "active:from-white/[0.12] active:to-white/[0.03] active:border-[hsl(327,92%,60%)]/40 active:scale-[0.99] " +
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(327,92%,60%)]/40 " +
+                      (groupActive ? "from-white/[0.09] to-white/[0.02] border-[hsl(327,92%,60%)]/30" : "")
                     }
                   >
                     {/* Accent bar (active) */}
