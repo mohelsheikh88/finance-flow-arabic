@@ -225,18 +225,21 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
 
       <SidebarHeader className="overflow-visible border-b border-sidebar-border/60">
         <div className="flex items-center gap-2.5 px-2 py-2.5">
-          {/* Glass-morphism logo container */}
-          <div className="relative shrink-0">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[hsl(327,92%,55%)]/40 to-[hsl(280,70%,55%)]/30 blur-md opacity-70" />
-            <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] ring-1 ring-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              {collapsed ? <BrandMark size={26} /> : <BrandMark size={26} />}
+          {/* Glass-morphism logo container (collapsed only) */}
+          {collapsed && (
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[hsl(327,92%,55%)]/40 to-[hsl(280,70%,55%)]/30 blur-md opacity-70" />
+              <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] ring-1 ring-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                <BrandMark size={26} />
+              </div>
             </div>
-          </div>
+          )}
           {!collapsed && (
             <div className="flex-1 min-w-0 flex items-center gap-1.5">
               <div className="flex-1 min-w-0">
-                <BrandLogo size={28} variant="light" />
+                <BrandLogo size={40} variant="light" />
               </div>
+
               {onTogglePin && (
                 <Button
                   type="button"
