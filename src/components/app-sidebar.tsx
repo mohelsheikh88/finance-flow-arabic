@@ -29,6 +29,7 @@ import {
   SlidersHorizontal,
   ChevronRight,
 
+
   Pin,
   PinOff,
   LogOut,
