@@ -27,10 +27,8 @@ import {
   UsersRound,
   BarChart3,
   SlidersHorizontal,
-  ChevronRight,
-
-
   Pin,
+
   PinOff,
   LogOut,
 } from "lucide-react";
