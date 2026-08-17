@@ -21,7 +21,8 @@ function fmt(n: number, locale: string) {
   return new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", {
     style: "currency",
     currency: "SAR",
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(n);
 }
 
