@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.self";
 
 const APP_ROLES = [
   "admin",
@@ -133,7 +133,7 @@ export const setUserModules = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/admin.self.server");
     const { error: de } = await supabaseAdmin
       .from("user_module_access")
       .delete()
@@ -169,7 +169,7 @@ export const createUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/admin.self.server");
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -228,7 +228,7 @@ export const updateUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/admin.self.server");
 
     const patch: {
       display_name_ar?: string;
@@ -268,7 +268,7 @@ export const deleteUser = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     if (data.userId === context.userId) throw new Error("You cannot delete your own account");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/admin.self.server");
 
     // Remove every application-level record first. This also repairs users whose
     // auth account was removed by an earlier, partially completed deletion.

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.self";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const listLockDates = createServerFn({ method: "GET" })

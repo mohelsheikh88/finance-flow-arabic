@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.self";
 
 // Runs server-side daily maintenance for the current user/company.
 // Extend this handler with real ops (e.g. FX rate sync, depreciation,

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.self";
 
 type Bucket = "asset" | "liability" | "equity" | "income" | "expense" | "COGS";
 type Statement = "balance_sheet" | "income_statement";
