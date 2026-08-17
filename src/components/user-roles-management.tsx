@@ -63,6 +63,16 @@ import {
 import { toast } from "sonner";
 
 const APP_ROLES = ["admin"] as const;
+// Roles supported by the database enum `app_role`
+const DB_ROLES = [
+  "admin",
+  "finance_manager",
+  "accounting_manager",
+  "chief_accountant",
+  "accountant",
+  "internal_auditor",
+] as const;
+
 
 export const MODULES = [
   { key: "accounting", icon: Wallet, tKey: "nav.financialAccounting" },
@@ -330,7 +340,9 @@ export function UserRolesManagement({
               ? (rolesRegistry as any[])
                   .filter((r) => r.is_active !== false)
                   .map((r) => r.code)
+                  .filter((c: string) => (DB_ROLES as readonly string[]).includes(c))
               : [...APP_ROLES];
+
             const available = roleSource.filter((r) => !u.roles.includes(r));
             const mods = modulesByUser.get(u.id) ?? [];
             const active = u.is_active !== false;
