@@ -237,7 +237,7 @@ export const translations = {
       fixedAssets: "الأصول الثابتة",
       loansGroup: "إدارة القروض",
       purchaseProcurement: "المشتريات",
-      inventoryManagement: "إدارة المخزون",
+      inventoryManagement: "المخزون",
       humanResources: "الموارد البشرية",
     },
     ar: {
@@ -1012,7 +1012,7 @@ export const translations = {
       fixedAssets: "Fixed Assets",
       loansGroup: "Loans Management",
       purchaseProcurement: "Purchase",
-      inventoryManagement: "Inventory Management",
+      inventoryManagement: "Inventory",
       humanResources: "Human Resources",
     },
     ar: {
