@@ -330,7 +330,9 @@ export function UserRolesManagement({
               ? (rolesRegistry as any[])
                   .filter((r) => r.is_active !== false)
                   .map((r) => r.code)
+                  .filter((c: string) => (DB_ROLES as readonly string[]).includes(c))
               : [...APP_ROLES];
+
             const available = roleSource.filter((r) => !u.roles.includes(r));
             const mods = modulesByUser.get(u.id) ?? [];
             const active = u.is_active !== false;
