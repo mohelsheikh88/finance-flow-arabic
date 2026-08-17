@@ -76,68 +76,81 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  /* Premium Deep Purple + Magenta theme (matches sidebar) */
-  --primary: oklch(0.34 0.16 295);           /* deep purple */
-  --primary-deep: oklch(0.22 0.13 295);      /* deeper purple */
-  --primary-light: oklch(0.60 0.24 315);     /* purple-violet glow */
-  --primary-foreground: oklch(0.99 0.005 320);
+  --radius: 0.75rem;
+  /* Alhayat HMC — medical teal + vibrant emerald */
+  --primary: hsl(186 85% 28%);
+  --primary-deep: hsl(195 60% 16%);
+  --primary-light: hsl(180 70% 45%);
+  --primary-foreground: hsl(180 60% 98%);
 
-  /* Magenta accent for emphasis (CTAs, highlights, badges) */
-  --accent: oklch(0.62 0.27 0);              /* vivid magenta */
-  --accent-foreground: oklch(0.99 0 0);
+  --accent: hsl(158 75% 42%);
+  --accent-foreground: hsl(0 0% 100%);
 
-  --background: oklch(0.985 0.006 310);
-  --foreground: oklch(0.18 0.04 295);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.04 295);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.04 295);
+  --background: hsl(180 35% 98%);
+  --foreground: hsl(195 45% 10%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(195 45% 10%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(195 45% 10%);
 
-  --secondary: oklch(0.965 0.012 310);
-  --secondary-foreground: oklch(0.28 0.12 295);
-  --muted: oklch(0.965 0.012 310);
-  --muted-foreground: oklch(0.48 0.04 295);
+  --secondary: hsl(175 40% 94%);
+  --secondary-foreground: hsl(195 45% 16%);
+  --muted: hsl(180 30% 95%);
+  --muted-foreground: hsl(195 15% 40%);
 
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.58 0.15 155);
-  --success-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.78 0.14 80);
-  --warning-foreground: oklch(0.20 0.05 80);
-  --info: oklch(0.55 0.18 295);
-  --info-foreground: oklch(0.98 0 0);
+  --destructive: hsl(354 75% 50%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --success: hsl(152 70% 38%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(35 95% 52%);
+  --warning-foreground: hsl(25 60% 12%);
+  --info: hsl(200 90% 45%);
+  --info-foreground: hsl(0 0% 100%);
 
-  --border: oklch(0.91 0.012 310);
-  --input: oklch(0.91 0.012 310);
-  --ring: oklch(0.60 0.24 315);
+  --border: hsl(185 25% 86%);
+  --input: hsl(185 25% 90%);
+  --ring: hsl(186 85% 35%);
 
-  /* Sidebar — deep purple with magenta highlight */
-  --sidebar: hsl(263 55% 14%);
-  --sidebar-foreground: hsl(280 25% 94%);
-  --sidebar-primary: hsl(327 92% 58%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(263 50% 22%);
-  --sidebar-accent-foreground: hsl(280 30% 97%);
-  --sidebar-border: hsl(263 40% 26%);
-  --sidebar-ring: hsl(327 92% 58%);
+  /* Sidebar — deep teal with emerald highlight */
+  --sidebar: hsl(195 60% 12%);
+  --sidebar-foreground: hsl(180 30% 92%);
+  --sidebar-primary: hsl(158 75% 48%);
+  --sidebar-primary-foreground: hsl(195 45% 10%);
+  --sidebar-accent: hsl(186 65% 22%);
+  --sidebar-accent-foreground: hsl(180 40% 96%);
+  --sidebar-border: hsl(186 50% 24%);
+  --sidebar-ring: hsl(158 75% 48%);
 }
 
 .dark {
-  --background: oklch(0.14 0.02 260);
-  --foreground: oklch(0.96 0.005 255);
-  --card: oklch(0.19 0.025 260);
-  --card-foreground: oklch(0.96 0.005 255);
-  --popover: oklch(0.19 0.025 260);
-  --popover-foreground: oklch(0.96 0.005 255);
-  --secondary: oklch(0.24 0.025 260);
-  --secondary-foreground: oklch(0.96 0.005 255);
-  --muted: oklch(0.22 0.02 260);
-  --muted-foreground: oklch(0.66 0.012 260);
-  --accent: oklch(0.30 0.06 80);
-  --accent-foreground: oklch(0.96 0.02 85);
-  --border: oklch(0.28 0.015 260);
-  --input: oklch(0.28 0.015 260);
+  --background: hsl(195 50% 7%);
+  --foreground: hsl(180 25% 94%);
+  --card: hsl(195 40% 10%);
+  --card-foreground: hsl(180 25% 94%);
+  --popover: hsl(195 40% 10%);
+  --popover-foreground: hsl(180 25% 94%);
+  --primary: hsl(180 70% 52%);
+  --primary-foreground: hsl(195 50% 8%);
+  --primary-light: hsl(180 80% 62%);
+  --secondary: hsl(195 30% 15%);
+  --secondary-foreground: hsl(180 25% 94%);
+  --muted: hsl(195 25% 13%);
+  --muted-foreground: hsl(180 15% 65%);
+  --accent: hsl(158 70% 50%);
+  --accent-foreground: hsl(195 50% 8%);
+  --destructive: hsl(354 70% 55%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(195 25% 18%);
+  --input: hsl(195 25% 18%);
+  --ring: hsl(180 70% 52%);
+  --sidebar: hsl(195 60% 5%);
+  --sidebar-foreground: hsl(180 25% 92%);
+  --sidebar-primary: hsl(158 75% 52%);
+  --sidebar-primary-foreground: hsl(195 50% 8%);
+  --sidebar-accent: hsl(195 35% 12%);
+  --sidebar-accent-foreground: hsl(180 25% 94%);
+  --sidebar-border: hsl(195 30% 16%);
+  --sidebar-ring: hsl(158 75% 52%);
 }
 
 
@@ -182,7 +195,7 @@
   transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease, color 200ms ease;
 }
 .nav-pill:hover {
-  background: hsl(263 40% 22% / 0.28) !important;
+  background: hsl(195 40% 22% / 0.28) !important;
   border-color: transparent;
 }
 /* Parent / grandparent triggers never get the "active" pill treatment —
@@ -210,8 +223,8 @@
   bottom: 12%;
   width: 4px;
   border-radius: 4px;
-  background: linear-gradient(180deg, hsl(327 95% 60%) 0%, hsl(263 55% 32%) 100%);
-  box-shadow: 0 0 0 1px hsl(327 92% 60% / 0.3), 0 0 16px hsl(327 95% 60% / 0.4);
+  background: linear-gradient(180deg, hsl(158 95% 60%) 0%, hsl(195 55% 32%) 100%);
+  box-shadow: 0 0 0 1px hsl(158 92% 60% / 0.3), 0 0 16px hsl(158 95% 60% / 0.4);
 }
 .page-subtitle {
   margin-top: 0.25rem;
@@ -246,13 +259,13 @@
 
 /* Premium purple/magenta app surface */
 .bg-app-surface {
-  background-color: oklch(0.985 0.008 310);
+  background-color: hsl(180 35% 98%);
   background-image:
-    radial-gradient(ellipse 1200px 700px at 8% -10%, hsl(327 92% 55% / 0.12), transparent 60%),
-    radial-gradient(ellipse 1000px 600px at 100% 10%, hsl(263 55% 32% / 0.14), transparent 55%),
-    radial-gradient(ellipse 1100px 700px at 50% 110%, hsl(285 80% 50% / 0.10), transparent 60%),
+    radial-gradient(ellipse 1200px 700px at 8% -10%, hsl(158 92% 55% / 0.12), transparent 60%),
+    radial-gradient(ellipse 1000px 600px at 100% 10%, hsl(195 55% 32% / 0.14), transparent 55%),
+    radial-gradient(ellipse 1100px 700px at 50% 110%, hsl(180 80% 50% / 0.10), transparent 60%),
     radial-gradient(circle at 30% 50%, oklch(1 0 0 / 0.55), transparent 55%),
-    linear-gradient(135deg, oklch(0.99 0.005 310) 0%, oklch(0.965 0.012 305) 50%, oklch(0.97 0.014 315) 100%);
+    linear-gradient(135deg, hsl(180 40% 99%) 0%, hsl(180 30% 96%) 50%, hsl(175 32% 97%) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -262,9 +275,9 @@
   inset: -20%;
   pointer-events: none;
   background:
-    radial-gradient(circle 400px at 20% 30%, hsl(327 92% 55% / 0.14), transparent 60%),
-    radial-gradient(circle 500px at 80% 70%, hsl(263 55% 32% / 0.14), transparent 60%),
-    radial-gradient(circle 350px at 60% 20%, hsl(285 80% 50% / 0.10), transparent 60%);
+    radial-gradient(circle 400px at 20% 30%, hsl(158 92% 55% / 0.14), transparent 60%),
+    radial-gradient(circle 500px at 80% 70%, hsl(195 55% 32% / 0.14), transparent 60%),
+    radial-gradient(circle 350px at 60% 20%, hsl(180 80% 50% / 0.10), transparent 60%);
   filter: blur(40px);
   animation: stc-float 18s ease-in-out infinite alternate;
 }
@@ -274,8 +287,8 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, hsl(263 55% 32% / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(263 55% 32% / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, hsl(195 55% 32% / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(195 55% 32% / 0.05) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
@@ -288,37 +301,37 @@
 
 /* Card & Table polish — subtle purple tint that ties to the sidebar */
 .card, [data-slot="card"] {
-  border-color: hsl(263 30% 88%);
+  border-color: hsl(195 30% 88%);
   box-shadow:
-    0 1px 0 hsl(263 40% 95%),
-    0 8px 24px -16px hsl(263 55% 32% / 0.18);
+    0 1px 0 hsl(195 40% 95%),
+    0 8px 24px -16px hsl(195 55% 32% / 0.18);
 }
 .card:hover, [data-slot="card"]:hover {
   box-shadow:
-    0 1px 0 hsl(263 40% 95%),
-    0 14px 32px -14px hsl(263 55% 32% / 0.28),
-    0 0 0 1px hsl(327 92% 60% / 0.18);
+    0 1px 0 hsl(195 40% 95%),
+    0 14px 32px -14px hsl(195 55% 32% / 0.28),
+    0 0 0 1px hsl(158 92% 60% / 0.18);
 }
 
 table thead {
-  background: linear-gradient(180deg, hsl(263 40% 97%), hsl(263 40% 94%));
+  background: linear-gradient(180deg, hsl(195 40% 97%), hsl(195 40% 94%));
 }
 table thead th {
-  color: hsl(263 45% 28%);
+  color: hsl(195 45% 28%);
   font-weight: 700;
-  border-bottom: 1px solid hsl(263 30% 86%) !important;
+  border-bottom: 1px solid hsl(195 30% 86%) !important;
 }
 table tbody tr {
   transition: background-color .15s ease;
 }
 table tbody tr:hover {
-  background-color: hsl(327 90% 96% / 0.55);
+  background-color: hsl(158 90% 96% / 0.55);
 }
 table tbody tr:nth-child(even) {
-  background-color: hsl(263 40% 99%);
+  background-color: hsl(195 40% 99%);
 }
 table td, table th {
-  border-color: hsl(263 25% 92%);
+  border-color: hsl(195 25% 92%);
 }
 
 
@@ -331,30 +344,30 @@ table td, table th {
 
 /* ===== Premium RTL Sidebar — Deep Purple & Magenta ===== */
 :root {
-  --sidebar: hsl(263 55% 14%);
-  --sidebar-foreground: hsl(280 25% 94%);
-  --sidebar-primary: hsl(327 92% 58%);
+  --sidebar: hsl(195 55% 14%);
+  --sidebar-foreground: hsl(180 25% 94%);
+  --sidebar-primary: hsl(158 92% 58%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(263 50% 22%);
-  --sidebar-accent-foreground: hsl(280 30% 97%);
-  --sidebar-border: hsl(263 40% 26%);
-  --sidebar-ring: hsl(327 92% 58%);
+  --sidebar-accent: hsl(195 50% 22%);
+  --sidebar-accent-foreground: hsl(180 30% 97%);
+  --sidebar-border: hsl(195 40% 26%);
+  --sidebar-ring: hsl(158 92% 58%);
 }
 
 [data-sidebar="sidebar"] {
   background:
-    radial-gradient(1200px 400px at 100% -10%, hsl(327 92% 55% / 0.22), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, hsl(285 80% 45% / 0.32), transparent 55%),
-    linear-gradient(180deg, hsl(263 60% 12%) 0%, hsl(263 55% 16%) 55%, hsl(265 65% 9%) 100%);
-  border-inline-start: 1px solid hsl(285 50% 30% / 0.6);
-  box-shadow: inset 1px 0 0 hsl(300 60% 96% / 0.05), 0 10px 40px -10px hsl(265 80% 5% / 0.6);
+    radial-gradient(1200px 400px at 100% -10%, hsl(158 92% 55% / 0.22), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, hsl(180 80% 45% / 0.32), transparent 55%),
+    linear-gradient(180deg, hsl(195 60% 12%) 0%, hsl(195 55% 16%) 55%, hsl(195 65% 9%) 100%);
+  border-inline-start: 1px solid hsl(180 50% 30% / 0.6);
+  box-shadow: inset 1px 0 0 hsl(180 60% 96% / 0.05), 0 10px 40px -10px hsl(195 80% 5% / 0.6);
 }
 
 [data-sidebar="group-label"] {
   height: auto !important;
   font-size: 14px;
   font-weight: 600;
-  color: hsl(300 30% 96% / 0.92) !important;
+  color: hsl(180 30% 96% / 0.92) !important;
   padding-inline-start: 0.5rem;
   margin-top: 0.125rem;
   letter-spacing: 0;
@@ -370,21 +383,21 @@ table td, table th {
   font-weight: 800;
   text-transform: none;
   letter-spacing: 0;
-  color: hsl(340 75% 72%) !important;
+  color: hsl(165 75% 72%) !important;
   padding-block: 0.75rem;
-  text-shadow: 0 1px 0 hsl(265 80% 6% / 0.45);
+  text-shadow: 0 1px 0 hsl(195 80% 6% / 0.45);
 }
 .sidebar-grandparent > [data-sidebar="group-label"] svg {
   width: 20px !important;
   height: 20px !important;
-  color: hsl(340 80% 65%) !important;
+  color: hsl(165 80% 65%) !important;
 }
 .sidebar-grandparent > [data-sidebar="group-label"]::after {
   content: "";
   display: block;
   height: 1px;
   margin-top: 10px;
-  background: linear-gradient(90deg, hsl(340 80% 58% / 0.8), hsl(285 70% 50% / 0.25) 60%, transparent);
+  background: linear-gradient(90deg, hsl(165 80% 58% / 0.8), hsl(180 70% 50% / 0.25) 60%, transparent);
 }
 
 /* Parent (subgroup) label — soft lavender-white, medium */
@@ -393,13 +406,13 @@ table td, table th {
   line-height: 1.25;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: hsl(285 35% 93% / 0.92) !important;
+  color: hsl(180 35% 93% / 0.92) !important;
   padding-block: 0.55rem;
 }
 .sidebar-parent > [data-sidebar="group-label"] svg {
   width: 17px !important;
   height: 17px !important;
-  color: hsl(285 55% 72% / 0.9) !important;
+  color: hsl(180 55% 72% / 0.9) !important;
 }
 
 /* Child (menu-button) — cool muted grey-purple, smallest */
@@ -407,12 +420,12 @@ table td, table th {
   font-size: 13px !important;
   font-weight: 500;
   letter-spacing: 0.005em;
-  color: hsl(280 18% 85% / 0.85);
+  color: hsl(180 18% 85% / 0.85);
 }
 [data-sidebar="menu-button"] svg {
   width: 15px !important;
   height: 15px !important;
-  color: hsl(280 25% 72% / 0.75) !important;
+  color: hsl(180 25% 72% / 0.75) !important;
 }
 
 
@@ -422,12 +435,12 @@ table td, table th {
   transition: background-color .2s ease, color .2s ease, transform .15s ease, box-shadow .25s ease;
 }
 [data-sidebar="menu-button"]:hover {
-  background: linear-gradient(90deg, hsl(327 80% 50% / 0.35), hsl(285 70% 42% / 0.55) 60%, hsl(263 60% 28% / 0.35)) !important;
+  background: linear-gradient(90deg, hsl(158 80% 50% / 0.35), hsl(180 70% 42% / 0.55) 60%, hsl(195 60% 28% / 0.35)) !important;
   color: hsl(0 0% 100%) !important;
-  border: 1px solid hsl(327 92% 60% / 0.45);
+  border: 1px solid hsl(158 92% 60% / 0.45);
   box-shadow:
     inset 0 1px 0 0 hsl(0 0% 100% / 0.08),
-    0 4px 14px -6px hsl(327 92% 55% / 0.5);
+    0 4px 14px -6px hsl(158 92% 55% / 0.5);
   transform: translateX(-2px);
 }
 
@@ -436,23 +449,23 @@ table td, table th {
 @keyframes sidebar-active-glow {
   0%, 100% {
     box-shadow:
-      inset 0 0 0 1px hsl(327 92% 65% / 0.65),
-      0 0 0 1px hsl(327 92% 60% / 0.35),
-      0 8px 22px -10px hsl(327 92% 50% / 0.55),
-      0 0 28px -4px hsl(327 95% 60% / 0.45);
+      inset 0 0 0 1px hsl(158 92% 65% / 0.65),
+      0 0 0 1px hsl(158 92% 60% / 0.35),
+      0 8px 22px -10px hsl(158 92% 50% / 0.55),
+      0 0 28px -4px hsl(158 95% 60% / 0.45);
   }
   50% {
     box-shadow:
-      inset 0 0 0 1px hsl(327 92% 70% / 0.85),
-      0 0 0 1px hsl(327 92% 65% / 0.5),
-      0 10px 28px -8px hsl(327 95% 55% / 0.7),
-      0 0 38px -2px hsl(327 95% 65% / 0.6);
+      inset 0 0 0 1px hsl(158 92% 70% / 0.85),
+      0 0 0 1px hsl(158 92% 65% / 0.5),
+      0 10px 28px -8px hsl(158 95% 55% / 0.7),
+      0 0 38px -2px hsl(158 95% 65% / 0.6);
   }
 }
 
 [data-sidebar="menu-button"][data-active="true"] {
   background:
-    linear-gradient(90deg, hsl(327 85% 45% / 0.35) 0%, hsl(285 75% 38% / 0.85) 35%, hsl(263 65% 22% / 0.7) 100%) !important;
+    linear-gradient(90deg, hsl(158 85% 45% / 0.35) 0%, hsl(180 75% 38% / 0.85) 35%, hsl(195 65% 22% / 0.7) 100%) !important;
   color: hsl(0 0% 100%) !important;
   font-weight: 700;
   animation: sidebar-active-glow 2.6s ease-in-out infinite;
@@ -467,11 +480,11 @@ table td, table th {
   bottom: 12%;
   width: 4px;
   border-radius: 4px;
-  background: linear-gradient(180deg, hsl(327 100% 72%) 0%, hsl(327 95% 60%) 50%, hsl(345 92% 55%) 100%);
+  background: linear-gradient(180deg, hsl(158 100% 72%) 0%, hsl(158 95% 60%) 50%, hsl(165 92% 55%) 100%);
   box-shadow:
-    0 0 10px hsl(327 95% 65% / 0.95),
-    0 0 22px hsl(327 95% 60% / 0.7),
-    0 0 36px hsl(327 95% 55% / 0.45);
+    0 0 10px hsl(158 95% 65% / 0.95),
+    0 0 22px hsl(158 95% 60% / 0.7),
+    0 0 36px hsl(158 95% 55% / 0.45);
 }
 
 /* Soft halo dot on the opposite side for extra emphasis */
@@ -484,13 +497,13 @@ table td, table th {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: hsl(327 100% 75%);
-  box-shadow: 0 0 10px hsl(327 95% 65% / 0.95), 0 0 18px hsl(327 95% 60% / 0.6);
+  background: hsl(158 100% 75%);
+  box-shadow: 0 0 10px hsl(158 95% 65% / 0.95), 0 0 18px hsl(158 95% 60% / 0.6);
 }
 
 [data-sidebar="menu-button"][data-active="true"] svg {
-  color: hsl(327 100% 78%) !important;
-  filter: drop-shadow(0 0 6px hsl(327 95% 60% / 0.7));
+  color: hsl(158 100% 78%) !important;
+  filter: drop-shadow(0 0 6px hsl(158 95% 60% / 0.7));
   transform: scale(1.08);
 }
 
@@ -498,24 +511,24 @@ table td, table th {
   transition: transform .2s ease, color .2s ease, filter .2s ease;
 }
 [data-sidebar="menu-button"]:hover svg {
-  color: hsl(327 95% 65%);
+  color: hsl(158 95% 65%);
   transform: scale(1.06);
 }
 
 
 [data-sidebar="group"] + [data-sidebar="group"] {
-  border-top: 1px solid hsl(300 60% 96% / 0.07);
+  border-top: 1px solid hsl(180 60% 96% / 0.07);
   margin-top: 4px;
   padding-top: 4px;
 }
 
 [data-sidebar="content"] {
   scrollbar-width: thin;
-  scrollbar-color: hsl(327 92% 58% / 0.5) transparent;
+  scrollbar-color: hsl(158 92% 58% / 0.5) transparent;
 }
 [data-sidebar="content"]::-webkit-scrollbar { width: 6px; }
 [data-sidebar="content"]::-webkit-scrollbar-thumb {
-  background: hsl(327 92% 58% / 0.5);
+  background: hsl(158 92% 58% / 0.5);
   border-radius: 6px;
 }
 
@@ -559,8 +572,8 @@ table td, table th {
   [data-sidebar="menu-button"][data-active="true"]::before {
     width: 3px;
     box-shadow:
-      0 0 8px hsl(327 95% 65% / 0.9),
-      0 0 16px hsl(327 95% 60% / 0.55);
+      0 0 8px hsl(158 95% 65% / 0.9),
+      0 0 16px hsl(158 95% 60% / 0.55);
   }
   [data-sidebar="menu-button"][data-active="true"]::after {
     display: none;
