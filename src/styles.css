@@ -224,7 +224,7 @@
   width: 4px;
   border-radius: 4px;
   background: linear-gradient(180deg, hsl(158 95% 60%) 0%, hsl(195 55% 32%) 100%);
-  box-shadow: 0 0 0 1px hsl(158 92% 60% / 0.3), 0 0 16px hsl(158 95% 60% / 0.4);
+  box-shadow: 0 0 0 1px hsl(158 92% 60% / 0.2), 0 0 8px hsl(158 95% 60% / 0.25);
 }
 .page-subtitle {
   margin-top: 0.25rem;

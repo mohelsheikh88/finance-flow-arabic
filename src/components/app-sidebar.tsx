@@ -276,26 +276,26 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   <CollapsibleTrigger
                     className={
                       "group/trigger relative flex h-auto w-full cursor-pointer items-center justify-between gap-2.5 sm:gap-3 rounded-xl p-2.5 sm:p-3 " +
-                      "bg-gradient-to-br from-white/[0.06] to-white/[0.01] border border-white/[0.06] shadow-lg " +
-                      "transition-all duration-300 ease-out " +
-                      "hover:from-white/[0.10] hover:to-white/[0.02] hover:border-[hsl(327,92%,60%)]/30 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.35)] " +
-                      "active:from-white/[0.12] active:to-white/[0.03] active:border-[hsl(327,92%,60%)]/40 active:scale-[0.99] " +
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(327,92%,60%)]/40 " +
-                      (groupActive ? "from-white/[0.09] to-white/[0.02] border-[hsl(327,92%,60%)]/30" : "")
+                      "bg-gradient-to-br from-white/[0.06] to-white/[0.01] border border-white/[0.06] shadow-sm " +
+                      "transition-all duration-200 ease-out " +
+                      "hover:from-white/[0.08] hover:to-white/[0.015] hover:border-white/[0.08] hover:-translate-y-0 hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.20)] " +
+                      "active:from-white/[0.09] active:to-white/[0.02] active:border-white/[0.10] active:scale-[0.99] " +
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-primary/30 " +
+                      (groupActive ? "from-white/[0.09] to-white/[0.02] border-sidebar-primary/25" : "")
                     }
                   >
                     {/* Accent bar (active) */}
                     <span
                       aria-hidden
                       className={
-                        "pointer-events-none absolute inset-y-2 start-0 w-[3px] rounded-e-full bg-[hsl(327,92%,60%)] shadow-[0_0_8px_hsl(327,92%,60%)/0.7] transition-opacity duration-300 " +
-                        (groupActive ? "opacity-100" : "opacity-0 group-hover/trigger:opacity-100 group-active/trigger:opacity-100 group-data-[state=open]/collapsible:opacity-100")
+                        "pointer-events-none absolute inset-y-2 start-0 w-[3px] rounded-e-full bg-sidebar-primary transition-opacity duration-200 " +
+                        (groupActive ? "opacity-100" : "opacity-0")
                       }
                     />
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                       {/* Icon well */}
-                      <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/35 border border-white/[0.08] shadow-inner transition-all duration-300 group-hover/trigger:border-[hsl(327,92%,60%)]/30 group-hover/trigger:bg-black/50 group-active/trigger:border-[hsl(327,92%,60%)]/40 group-active/trigger:bg-black/50">
-                        <g.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-[hsl(327,92%,72%)] transition-transform duration-500 ease-out group-hover/trigger:-translate-y-0.5 group-hover/trigger:scale-105 group-active/trigger:scale-105" />
+                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/30 border border-white/[0.06] shadow-inner transition-all duration-200 group-hover/trigger:border-white/[0.08] group-hover/trigger:bg-black/40 group-active/trigger:border-white/[0.10] group-active/trigger:bg-black/40">
+                        <g.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/80 transition-transform duration-300 ease-out group-hover/trigger:-translate-y-0 group-hover/trigger:scale-[1.02] group-active/trigger:scale-[1.02]" />
                       </div>
                       <span className="flex-1 min-w-0 truncate text-start text-[14.5px] sm:text-[16px] font-bold tracking-tight text-white/90">
                         {g.label}
