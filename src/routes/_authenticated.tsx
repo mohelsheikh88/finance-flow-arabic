@@ -123,8 +123,8 @@ function AuthenticatedLayout() {
   return (
     <DailyUpdateGate>
       {isAppsLauncher ? (
-        <div className="min-h-screen flex flex-col bg-app-surface" dir={dir}>
-          <Topbar hideSidebarTrigger />
+        <div className="min-h-screen flex flex-col bg-apps-surface" dir={dir}>
+          <Topbar hideSidebarTrigger transparent />
           <main className="flex-1 overflow-y-auto overflow-x-hidden">
             <Outlet />
           </main>

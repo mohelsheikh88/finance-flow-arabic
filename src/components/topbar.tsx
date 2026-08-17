@@ -27,7 +27,7 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { OfflineIndicator } from "@/components/offline-indicator";
 
-export function Topbar({ hideSidebarTrigger = false }: { hideSidebarTrigger?: boolean } = {}) {
+export function Topbar({ hideSidebarTrigger = false, transparent = false }: { hideSidebarTrigger?: boolean; transparent?: boolean } = {}) {
   const { t, locale, setLocale } = useI18n();
   const localized = useLocalized();
   const { user, signOut } = useAuth();
@@ -67,7 +67,12 @@ export function Topbar({ hideSidebarTrigger = false }: { hideSidebarTrigger?: bo
   const initials = (user?.email ?? "U").slice(0, 2).toUpperCase();
 
   return (
-    <header className="relative h-12 border-b bg-card flex items-center px-3 gap-2 shrink-0">
+    <header className={
+      "relative h-12 flex items-center px-3 gap-2 shrink-0 " +
+      (transparent
+        ? "border-b border-white/10 bg-transparent text-white [&_svg]:text-white/90"
+        : "border-b bg-card")
+    }>
       {ctxFetching && (
         <div className="absolute left-0 right-0 top-0 h-0.5 overflow-hidden">
           <div className="h-full w-1/3 bg-primary animate-[loading-bar_1.2s_ease-in-out_infinite]" />

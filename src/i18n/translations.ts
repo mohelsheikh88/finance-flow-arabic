@@ -3,6 +3,7 @@ export const translations = {
     common: {
       appName: "نظام الحياة المالي",
       appShort: "Financial ERP",
+      chooseModuleToStart: "اختر موديول للبدء",
       loading: "جاري التحميل...",
       save: "حفظ",
       cancel: "إلغاء",
@@ -801,6 +802,7 @@ export const translations = {
     common: {
       appName: "Al Hayat Financial ERP",
       appShort: "Financial ERP",
+      chooseModuleToStart: "Choose a module to get started",
       loading: "Loading...",
       save: "Save",
       cancel: "Cancel",

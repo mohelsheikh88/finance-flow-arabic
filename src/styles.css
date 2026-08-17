@@ -299,6 +299,43 @@
   100% { transform: translate(2%, -1%) scale(1.04); }
 }
 
+/* ===== Apps launcher — deep, premium enterprise-ERP surface ===== */
+.bg-apps-surface {
+  background-color: hsl(200 45% 8%);
+  background-image:
+    radial-gradient(ellipse 1100px 750px at 12% -8%, hsl(158 90% 45% / 0.22), transparent 58%),
+    radial-gradient(ellipse 900px 650px at 92% 8%, hsl(180 80% 42% / 0.20), transparent 55%),
+    radial-gradient(ellipse 1000px 700px at 50% 108%, hsl(195 70% 30% / 0.28), transparent 62%),
+    radial-gradient(ellipse 700px 500px at 78% 85%, hsl(158 85% 40% / 0.14), transparent 55%),
+    linear-gradient(160deg, hsl(200 55% 6%) 0%, hsl(195 60% 10%) 45%, hsl(190 55% 8%) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.bg-apps-surface::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 480px at 18% 22%, hsl(158 92% 50% / 0.16), transparent 62%),
+    radial-gradient(circle 560px at 82% 78%, hsl(180 85% 45% / 0.14), transparent 62%),
+    radial-gradient(circle 380px at 65% 15%, hsl(195 80% 40% / 0.12), transparent 60%);
+  filter: blur(60px);
+  animation: stc-float 22s ease-in-out infinite alternate;
+}
+.bg-apps-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, hsl(180 60% 90% / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(180 60% 90% / 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, black 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, black 20%, transparent 78%);
+}
+
 /* Card & Table polish — subtle purple tint that ties to the sidebar */
 .card, [data-slot="card"] {
   border-color: hsl(195 30% 88%);
