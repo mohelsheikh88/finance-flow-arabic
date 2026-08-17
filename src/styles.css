@@ -445,53 +445,20 @@ table td, table th {
 }
 
 
-/* ===== Active item — strong RTL-aware glow (static, no blinking) ===== */
+/* ===== Active item — same subtle look as hover, no extra glow/blinking ===== */
 [data-sidebar="menu-button"][data-active="true"] {
-  background:
-    linear-gradient(90deg, hsl(158 85% 45% / 0.35) 0%, hsl(180 75% 38% / 0.85) 35%, hsl(195 65% 22% / 0.7) 100%) !important;
+  background: linear-gradient(90deg, hsl(158 80% 50% / 0.35), hsl(180 70% 42% / 0.55) 60%, hsl(195 60% 28% / 0.35)) !important;
   color: hsl(0 0% 100%) !important;
+  border: 1px solid hsl(158 92% 60% / 0.45);
   font-weight: 700;
   box-shadow:
-    inset 0 0 0 1px hsl(158 92% 65% / 0.65),
-    0 0 0 1px hsl(158 92% 60% / 0.35),
-    0 8px 22px -10px hsl(158 92% 50% / 0.55),
-    0 0 28px -4px hsl(158 95% 60% / 0.45);
-}
-
-/* Glowing magenta bar pinned to the inline-end (right in RTL, left in LTR) */
-[data-sidebar="menu-button"][data-active="true"]::before {
-  content: "";
-  position: absolute;
-  inset-inline-end: 3px;
-  top: 12%;
-  bottom: 12%;
-  width: 4px;
-  border-radius: 4px;
-  background: linear-gradient(180deg, hsl(158 100% 72%) 0%, hsl(158 95% 60%) 50%, hsl(165 92% 55%) 100%);
-  box-shadow:
-    0 0 10px hsl(158 95% 65% / 0.95),
-    0 0 22px hsl(158 95% 60% / 0.7),
-    0 0 36px hsl(158 95% 55% / 0.45);
-}
-
-/* Soft halo dot on the opposite side for extra emphasis */
-[data-sidebar="menu-button"][data-active="true"]::after {
-  content: "";
-  position: absolute;
-  inset-inline-start: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: hsl(158 100% 75%);
-  box-shadow: 0 0 10px hsl(158 95% 65% / 0.95), 0 0 18px hsl(158 95% 60% / 0.6);
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.08),
+    0 4px 14px -6px hsl(158 92% 55% / 0.5);
 }
 
 [data-sidebar="menu-button"][data-active="true"] svg {
-  color: hsl(158 100% 78%) !important;
-  filter: drop-shadow(0 0 6px hsl(158 95% 60% / 0.7));
-  transform: scale(1.08);
+  color: hsl(158 95% 65%) !important;
+  transform: scale(1.06);
 }
 
 [data-sidebar="menu-button"] svg {
@@ -553,17 +520,6 @@ table td, table th {
   }
   .sidebar-parent > [data-sidebar="group-label"] {
     font-size: 14px;
-  }
-
-  /* Tweaked active glow — softer to avoid bleed in narrow sheet */
-  [data-sidebar="menu-button"][data-active="true"]::before {
-    width: 3px;
-    box-shadow:
-      0 0 8px hsl(158 95% 65% / 0.9),
-      0 0 16px hsl(158 95% 60% / 0.55);
-  }
-  [data-sidebar="menu-button"][data-active="true"]::after {
-    display: none;
   }
 
   /* Topbar trigger pop */
