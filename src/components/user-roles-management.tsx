@@ -62,14 +62,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const APP_ROLES = [
-  "admin",
-  "finance_manager",
-  "accounting_manager",
-  "chief_accountant",
-  "accountant",
-  "internal_auditor",
-] as const;
+const APP_ROLES = ["admin"] as const;
 
 export const MODULES = [
   { key: "accounting", icon: Wallet, tKey: "nav.financialAccounting" },
@@ -511,7 +504,7 @@ export function UserRolesManagement() {
                 <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                 {t("users.roles")}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {APP_ROLES.map((r) => (
                   <label
                     key={r}
@@ -537,7 +530,7 @@ export function UserRolesManagement() {
               <p className="text-[11px] text-muted-foreground">
                 {t("users.modulesHint")}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {MODULES.map((m) => {
                   const Icon = m.icon;
                   return (
