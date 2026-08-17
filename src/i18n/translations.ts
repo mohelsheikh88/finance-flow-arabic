@@ -1374,7 +1374,6 @@ export const translations = {
       accountant: "Accountant",
       internal_auditor: "Internal Auditor",
       internal_audit_manager: "Internal Audit Manager",
-      internal_audit_manager: "Internal Audit Manager",
       branchAccess: "Branch Access",
       assignRole: "Assign Role",
       noRoles: "No roles assigned",
