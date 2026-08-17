@@ -12,6 +12,18 @@ const APP_ROLES = [
   "internal_audit_manager",
 ] as const;
 
+// Company ids can be stale (e.g. coming from a previous backend). Only keep
+// the id when the company actually exists, otherwise fall back to a global role.
+async function resolveCompanyId(supabase: any, companyId: string | null) {
+  if (!companyId) return null;
+  const { data } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("id", companyId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 export const listUsersWithRoles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string | null }) =>
