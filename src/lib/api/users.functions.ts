@@ -229,10 +229,14 @@ export const updateUser = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const patch: Record<string, unknown> = {};
-    if (data.displayNameAr !== undefined) patch['display_name_ar'] = data.displayNameAr;
-    if (data.displayNameEn !== undefined) patch['display_name_en'] = data.displayNameEn;
-    if (data.isActive !== undefined) patch['is_active'] = data.isActive;
+    const patch: {
+      display_name_ar?: string;
+      display_name_en?: string;
+      is_active?: boolean;
+    } = {};
+    if (data.displayNameAr !== undefined) patch.display_name_ar = data.displayNameAr;
+    if (data.displayNameEn !== undefined) patch.display_name_en = data.displayNameEn;
+    if (data.isActive !== undefined) patch.is_active = data.isActive;
     if (Object.keys(patch).length) {
       const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.userId);
       if (error) throw new Error(error.message);
