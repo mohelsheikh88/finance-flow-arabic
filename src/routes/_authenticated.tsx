@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { useI18n } from "@/i18n";
 import { Loader2 } from "lucide-react";
 import { DailyUpdateGate } from "@/components/daily-update-gate";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -136,6 +137,7 @@ function AuthenticatedLayout() {
           </div>
           <div className="flex-1 flex flex-col min-w-0 relative z-10">
             <Topbar />
+            <Breadcrumbs />
             <main className="flex-1 overflow-y-auto overflow-x-hidden">
               <Outlet />
             </main>
