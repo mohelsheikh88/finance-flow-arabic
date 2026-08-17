@@ -298,16 +298,10 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                       <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/35 border border-white/[0.08] shadow-inner transition-all duration-300 group-hover/trigger:border-[hsl(327,92%,60%)]/40 group-hover/trigger:bg-black/50 group-active/trigger:border-[hsl(327,92%,60%)]/50 group-active/trigger:bg-black/50">
                         <g.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-[hsl(327,92%,72%)] transition-transform duration-500 ease-out group-hover/trigger:-translate-y-0.5 group-hover/trigger:scale-110 group-active/trigger:scale-110" />
                       </div>
-                      <span className="flex-1 min-w-0 truncate text-start text-[13.5px] sm:text-[14px] font-semibold tracking-tight text-white/90">
+                      <span className="flex-1 min-w-0 truncate text-start text-[15px] sm:text-[16px] font-bold tracking-tight text-white/90">
                         {g.label}
                       </span>
                     </div>
-                    <ChevronRight
-                      className={
-                        "h-4 w-4 shrink-0 text-white/30 transition-all duration-300 group-hover/trigger:text-[hsl(327,92%,72%)] group-data-[state=open]/collapsible:text-[hsl(327,92%,72%)] " +
-                        "rtl:rotate-180 group-data-[state=open]/collapsible:rotate-90 rtl:group-data-[state=open]/collapsible:-rotate-90"
-                      }
-                    />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent className="overflow-visible data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
