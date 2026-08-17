@@ -12,6 +12,18 @@ const APP_ROLES = [
   "internal_audit_manager",
 ] as const;
 
+// Company ids can be stale (e.g. coming from a previous backend). Only keep
+// the id when the company actually exists, otherwise fall back to a global role.
+async function resolveCompanyId(supabase: any, companyId: string | null) {
+  if (!companyId) return null;
+  const { data } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("id", companyId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 export const listUsersWithRoles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string | null }) =>
@@ -54,15 +66,17 @@ export const assignUserRole = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const companyId = await resolveCompanyId(supabase, data.companyId);
     const { error } = await supabase.from("user_roles").insert({
       user_id: data.userId,
       role: data.role,
-      company_id: data.companyId,
+      company_id: companyId,
       granted_by: userId,
     });
     if (error && !error.message.includes("duplicate")) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const removeUserRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -192,15 +206,17 @@ export const createUser = createServerFn({ method: "POST" })
       .eq("id", newId);
 
     if (data.roles.length) {
+      const companyId = await resolveCompanyId(supabaseAdmin, data.companyId);
       await supabaseAdmin.from("user_roles").insert(
         data.roles.map((r) => ({
           user_id: newId,
           role: r as any,
-          company_id: data.companyId,
+          company_id: companyId,
           granted_by: context.userId,
         })),
       );
     }
+
     if (data.modules.length) {
       await supabaseAdmin.from("user_module_access").insert(
         data.modules.map((m) => ({
