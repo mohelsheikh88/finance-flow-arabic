@@ -294,8 +294,8 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                     />
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                       {/* Icon well */}
-                      <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/35 border border-white/[0.08] shadow-inner transition-all duration-300 group-hover/trigger:border-[hsl(327,92%,60%)]/30 group-hover/trigger:bg-black/50 group-active/trigger:border-[hsl(327,92%,60%)]/40 group-active/trigger:bg-black/50">
-                        <g.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-[hsl(327,92%,72%)] transition-transform duration-500 ease-out group-hover/trigger:-translate-y-0.5 group-hover/trigger:scale-105 group-active/trigger:scale-105" />
+                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/30 border border-white/[0.06] shadow-inner transition-all duration-200 group-hover/trigger:border-white/[0.08] group-hover/trigger:bg-black/40 group-active/trigger:border-white/[0.10] group-active/trigger:bg-black/40">
+                        <g.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/80 transition-transform duration-300 ease-out group-hover/trigger:-translate-y-0 group-hover/trigger:scale-[1.02] group-active/trigger:scale-[1.02]" />
                       </div>
                       <span className="flex-1 min-w-0 truncate text-start text-[14.5px] sm:text-[16px] font-bold tracking-tight text-white/90">
                         {g.label}
