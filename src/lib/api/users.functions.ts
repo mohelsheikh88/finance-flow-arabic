@@ -206,15 +206,17 @@ export const createUser = createServerFn({ method: "POST" })
       .eq("id", newId);
 
     if (data.roles.length) {
+      const companyId = await resolveCompanyId(supabaseAdmin, data.companyId);
       await supabaseAdmin.from("user_roles").insert(
         data.roles.map((r) => ({
           user_id: newId,
           role: r as any,
-          company_id: data.companyId,
+          company_id: companyId,
           granted_by: context.userId,
         })),
       );
     }
+
     if (data.modules.length) {
       await supabaseAdmin.from("user_module_access").insert(
         data.modules.map((m) => ({
