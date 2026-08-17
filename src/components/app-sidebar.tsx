@@ -304,27 +304,16 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                 <SidebarGroupLabel asChild>
                   <CollapsibleTrigger
                     className={
-                      "group/trigger relative flex h-auto w-full cursor-pointer items-center justify-between gap-2.5 sm:gap-3 rounded-xl p-2.5 sm:p-3 " +
-                      "bg-gradient-to-br from-white/[0.06] to-white/[0.01] border border-white/[0.06] shadow-sm " +
-                      "transition-all duration-200 ease-out " +
-                      "hover:from-white/[0.08] hover:to-white/[0.015] hover:border-white/[0.08] hover:-translate-y-0 hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.20)] " +
-                      "active:from-white/[0.09] active:to-white/[0.02] active:border-white/[0.10] active:scale-[0.99] " +
+                      "sidebar-module-trigger group/trigger relative flex h-auto w-full cursor-pointer items-center justify-between gap-2.5 sm:gap-3 rounded-xl p-2.5 sm:p-3 " +
+                      "border border-white/[0.06] shadow-sm transition-all duration-200 ease-out " +
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-primary/30 " +
-                      (groupActive ? "from-white/[0.09] to-white/[0.02] border-sidebar-primary/25" : "")
+                      (groupActive ? "is-active" : "")
                     }
                   >
-                    {/* Accent bar (active) */}
-                    <span
-                      aria-hidden
-                      className={
-                        "pointer-events-none absolute inset-y-2 start-0 w-[3px] rounded-e-full bg-sidebar-primary transition-opacity duration-200 " +
-                        (groupActive ? "opacity-100" : "opacity-0")
-                      }
-                    />
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                       {/* Icon well */}
-                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/30 border border-white/[0.06] shadow-inner transition-all duration-200 group-hover/trigger:border-white/[0.08] group-hover/trigger:bg-black/40 group-active/trigger:border-white/[0.10] group-active/trigger:bg-black/40">
-                        <g.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/80 transition-transform duration-300 ease-out group-hover/trigger:-translate-y-0 group-hover/trigger:scale-[1.02] group-active/trigger:scale-[1.02]" />
+                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/25 border border-white/[0.06] shadow-inner transition-all duration-200 group-hover/trigger:bg-black/30 group-hover/trigger:border-white/[0.10]">
+                        <g.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/85 transition-colors duration-200 group-hover/trigger:text-white" />
                       </div>
                       <span className="flex-1 min-w-0 truncate text-start text-[14.5px] sm:text-[16px] font-bold tracking-tight text-white/90">
                         {g.label}

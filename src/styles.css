@@ -591,3 +591,39 @@ table td, table th {
   transition: transform .28s ease;
 }
 
+
+/* Sidebar module (grandparent) selection behaviour — teal gradient pill */
+.sidebar-module-trigger {
+  background-image: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--sidebar-primary) 4%, transparent),
+    color-mix(in oklab, var(--sidebar-primary) 1%, transparent)
+  );
+}
+[dir="rtl"] .sidebar-module-trigger {
+  background-image: linear-gradient(
+    to left,
+    color-mix(in oklab, var(--sidebar-primary) 4%, transparent),
+    color-mix(in oklab, var(--sidebar-primary) 1%, transparent)
+  );
+}
+.sidebar-module-trigger:hover,
+.sidebar-module-trigger.is-active,
+.sidebar-module-trigger[data-state="open"] {
+  border-color: color-mix(in oklab, var(--sidebar-primary) 32%, transparent);
+  background-image: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--sidebar-primary) 42%, transparent),
+    color-mix(in oklab, var(--sidebar) 88%, transparent) 85%
+  );
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 8%, transparent);
+}
+[dir="rtl"] .sidebar-module-trigger:hover,
+[dir="rtl"] .sidebar-module-trigger.is-active,
+[dir="rtl"] .sidebar-module-trigger[data-state="open"] {
+  background-image: linear-gradient(
+    to left,
+    color-mix(in oklab, var(--sidebar-primary) 42%, transparent),
+    color-mix(in oklab, var(--sidebar) 88%, transparent) 85%
+  );
+}
