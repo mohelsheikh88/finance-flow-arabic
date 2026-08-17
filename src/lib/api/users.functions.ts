@@ -86,3 +86,187 @@ export const removeUserRole = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------------------------------------------------------------------------
+// Admin user management (create / update / disable / delete) + module access
+// ---------------------------------------------------------------------------
+
+export const MODULE_KEYS = [
+  "accounting",
+  "purchase",
+  "inventory",
+  "hr",
+  "settings",
+] as const;
+
+async function assertAdmin(supabase: any, userId: string) {
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Only administrators can manage users");
+}
+
+export const listModuleAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("user_module_access")
+      .select("user_id, module_key");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const setUserModules = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        modules: z.array(z.enum(MODULE_KEYS)),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: de } = await supabaseAdmin
+      .from("user_module_access")
+      .delete()
+      .eq("user_id", data.userId);
+    if (de) throw new Error(de.message);
+    if (data.modules.length) {
+      const { error: ie } = await supabaseAdmin.from("user_module_access").insert(
+        data.modules.map((m) => ({
+          user_id: data.userId,
+          module_key: m,
+          granted_by: context.userId,
+        })),
+      );
+      if (ie) throw new Error(ie.message);
+    }
+    return { ok: true };
+  });
+
+export const createUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        email: z.string().email(),
+        password: z.string().min(8),
+        displayNameAr: z.string().min(1),
+        displayNameEn: z.string().min(1),
+        roles: z.array(z.string()).default([]),
+        modules: z.array(z.enum(MODULE_KEYS)).default([]),
+        companyId: z.string().uuid().nullable().default(null),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: {
+        display_name_ar: data.displayNameAr,
+        display_name_en: data.displayNameEn,
+      },
+    });
+    if (error) throw new Error(error.message);
+    const newId = created.user!.id;
+
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        display_name_ar: data.displayNameAr,
+        display_name_en: data.displayNameEn,
+      })
+      .eq("id", newId);
+
+    if (data.roles.length) {
+      await supabaseAdmin.from("user_roles").insert(
+        data.roles.map((r) => ({
+          user_id: newId,
+          role: r as any,
+          company_id: data.companyId,
+          granted_by: context.userId,
+        })),
+      );
+    }
+    if (data.modules.length) {
+      await supabaseAdmin.from("user_module_access").insert(
+        data.modules.map((m) => ({
+          user_id: newId,
+          module_key: m,
+          granted_by: context.userId,
+        })),
+      );
+    }
+    return { id: newId };
+  });
+
+export const updateUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        displayNameAr: z.string().min(1).optional(),
+        displayNameEn: z.string().min(1).optional(),
+        password: z.string().min(8).optional().nullable(),
+        isActive: z.boolean().optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const patch: Record<string, unknown> = {};
+    if (data.displayNameAr !== undefined) patch['display_name_ar'] = data.displayNameAr;
+    if (data.displayNameEn !== undefined) patch['display_name_en'] = data.displayNameEn;
+    if (data.isActive !== undefined) patch['is_active'] = data.isActive;
+    if (Object.keys(patch).length) {
+      const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.userId);
+      if (error) throw new Error(error.message);
+    }
+
+    if (data.password) {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+        password: data.password,
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    if (data.isActive !== undefined) {
+      // banning blocks sign-in for disabled users
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+        ban_duration: data.isActive ? "none" : "876000h",
+      } as any);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { userId: string }) =>
+    z.object({ userId: z.string().uuid() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    if (data.userId === context.userId) throw new Error("You cannot delete your own account");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("user_module_access").delete().eq("user_id", data.userId);
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
