@@ -48,6 +48,8 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
 import { BrandLogo, BrandMark } from "@/components/brand-logo";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 
@@ -58,16 +60,31 @@ type AppSidebarProps = {
 
 export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {}) {
   const { t, locale } = useI18n();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+  const { data: myAccess } = useQuery({
+    queryKey: ["my_module_access", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const [{ data: mods }, { data: roles }] = await Promise.all([
+        supabase.from("user_module_access").select("module_key").eq("user_id", user!.id),
+        supabase.from("user_roles").select("role").eq("user_id", user!.id),
+      ]);
+      return {
+        modules: (mods ?? []).map((m: any) => m.module_key as string),
+        isAdmin: (roles ?? []).some((r: any) => r.role === "admin"),
+      };
+    },
+  });
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + "/");
 
   type NavItem = { url: string; icon: any; title: string };
-  type NavGroup = { label: string; icon: any; items?: NavItem[]; subgroups?: { label: string; icon: any; items: NavItem[] }[] };
+  type NavGroup = { key?: string; label: string; icon: any; items?: NavItem[]; subgroups?: { label: string; icon: any; items: NavItem[] }[] };
   const groups: NavGroup[] = [
     {
+      key: "accounting",
       label: t("nav.financialAccounting"),
       icon: Wallet,
       subgroups: [
@@ -166,6 +183,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       ],
     },
     {
+      key: "purchase",
       label: t("nav.purchaseProcurement"),
       icon: ShoppingBag,
       items: [
@@ -173,6 +191,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       ],
     },
     {
+      key: "inventory",
       label: t("nav.inventoryManagement"),
       icon: Package,
       items: [
@@ -180,6 +199,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       ],
     },
     {
+      key: "hr",
       label: t("nav.humanResources"),
       icon: UsersRound,
       items: [
@@ -187,6 +207,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       ],
     },
     {
+      key: "settings",
       label: t("nav.generalSetting"),
       icon: Settings,
       items: [
@@ -240,7 +261,15 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto overflow-x-hidden px-2 sm:px-3">
-        {groups.map((g) => {
+        {groups
+          .filter((g) => {
+            if (!g.key) return true;
+            if (!myAccess) return true;
+            if (myAccess.isAdmin) return true;
+            if (myAccess.modules.length === 0) return true;
+            return myAccess.modules.includes(g.key);
+          })
+          .map((g) => {
           const groupActive = g.items?.some((it) => isActive(it.url)) || g.subgroups?.some((sg) => sg.items.some((it) => isActive(it.url)));
           if (collapsed) {
             const allItems = [
