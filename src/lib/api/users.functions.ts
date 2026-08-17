@@ -54,15 +54,17 @@ export const assignUserRole = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const companyId = await resolveCompanyId(supabase, data.companyId);
     const { error } = await supabase.from("user_roles").insert({
       user_id: data.userId,
       role: data.role,
-      company_id: data.companyId,
+      company_id: companyId,
       granted_by: userId,
     });
     if (error && !error.message.includes("duplicate")) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const removeUserRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
