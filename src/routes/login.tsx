@@ -27,7 +27,7 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && user) navigate({ to: "/dashboard", replace: true });
+    if (!authLoading && user) navigate({ to: "/apps", replace: true });
   }, [user, authLoading, navigate]);
 
   const onSubmit = async (e: React.FormEvent) => {

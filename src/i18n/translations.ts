@@ -180,6 +180,8 @@ export const translations = {
     },
 
     nav: {
+      apps: "التطبيقات",
+      backToApps: "كل التطبيقات",
       dashboard: "لوحة التحكم",
       mainDashboard: "الرئيسية",
       arDashboard: "لوحة الذمم المدينة",
@@ -974,6 +976,8 @@ export const translations = {
     },
 
     nav: {
+      apps: "Apps",
+      backToApps: "All Apps",
       dashboard: "Dashboard",
       mainDashboard: "Main Dashboard",
       arDashboard: "AR Dashboard",

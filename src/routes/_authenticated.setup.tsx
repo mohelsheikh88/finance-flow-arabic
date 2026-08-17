@@ -42,7 +42,7 @@ function SetupPage() {
     onSuccess: () => {
       toast.success(t("setup.done"));
       qc.invalidateQueries();
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/apps" });
     },
     onError: (e: Error) => toast.error(e.message),
   });

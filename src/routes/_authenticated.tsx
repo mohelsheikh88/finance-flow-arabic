@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Topbar } from "@/components/topbar";
@@ -39,6 +39,8 @@ function AuthenticatedLayout() {
   const { user, loading } = useAuth();
   const { dir, t } = useI18n();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAppsLauncher = pathname === "/apps";
 
   const [pinned, setPinned] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -120,30 +122,39 @@ function AuthenticatedLayout() {
 
   return (
     <DailyUpdateGate>
-      <SidebarProvider
-        open={open}
-        onOpenChange={(v) => { if (pinned) return; setHovered(v); }}
-        style={{
-          ["--sidebar-width" as any]: `${sidebarWidth}px`,
-        }}
-      >
-        <div className="min-h-screen flex w-full bg-app-surface" dir={dir}>
-          <div
-            onMouseEnter={handleEnter}
-            onMouseLeave={handleLeave}
-            className="contents"
-          >
-            <AppSidebar pinned={pinned} onTogglePin={onTogglePin} />
-          </div>
-          <div className="flex-1 flex flex-col min-w-0 relative z-10">
-            <Topbar />
-            <Breadcrumbs />
-            <main className="flex-1 overflow-y-auto overflow-x-hidden">
-              <Outlet />
-            </main>
-          </div>
+      {isAppsLauncher ? (
+        <div className="min-h-screen flex flex-col bg-app-surface" dir={dir}>
+          <Topbar />
+          <main className="flex-1 overflow-y-auto overflow-x-hidden">
+            <Outlet />
+          </main>
         </div>
-      </SidebarProvider>
+      ) : (
+        <SidebarProvider
+          open={open}
+          onOpenChange={(v) => { if (pinned) return; setHovered(v); }}
+          style={{
+            ["--sidebar-width" as any]: `${sidebarWidth}px`,
+          }}
+        >
+          <div className="min-h-screen flex w-full bg-app-surface" dir={dir}>
+            <div
+              onMouseEnter={handleEnter}
+              onMouseLeave={handleLeave}
+              className="contents"
+            >
+              <AppSidebar pinned={pinned} onTogglePin={onTogglePin} />
+            </div>
+            <div className="flex-1 flex flex-col min-w-0 relative z-10">
+              <Topbar />
+              <Breadcrumbs />
+              <main className="flex-1 overflow-y-auto overflow-x-hidden">
+                <Outlet />
+              </main>
+            </div>
+          </div>
+        </SidebarProvider>
+      )}
     </DailyUpdateGate>
   );
 }

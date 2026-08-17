@@ -26,6 +26,9 @@ import {
   HandCoins,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 export type NavItem = { url: string; icon: any; title: string };
 export type NavSubgroup = { label: string; icon: any; items: NavItem[] };
@@ -192,4 +195,45 @@ export function matchNavPath(groups: NavGroup[], pathname: string) {
     }
   }
   return null;
+}
+
+/** The first navigable URL inside a group — used as the card/back-button target. */
+export function groupHomeUrl(group: NavGroup): string {
+  return group.subgroups?.[0]?.items[0]?.url ?? group.items?.[0]?.url ?? "/apps";
+}
+
+/**
+ * Which modules (by group.key) the current user is allowed to see.
+ * Shared by the sidebar and the Apps launcher grid so they never disagree.
+ */
+export function useModuleAccess() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["my_module_access", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const [{ data: mods }, { data: roles }] = await Promise.all([
+        supabase.from("user_module_access").select("module_key").eq("user_id", user!.id),
+        supabase.from("user_roles").select("role").eq("user_id", user!.id),
+      ]);
+      return {
+        modules: (mods ?? []).map((m: any) => m.module_key as string),
+        isAdmin: (roles ?? []).some((r: any) => r.role === "admin"),
+      };
+    },
+  });
+}
+
+/** Nav groups filtered down to the ones this user is actually allowed to open. */
+export function useVisibleNavGroups(): NavGroup[] {
+  const groups = useNavGroups();
+  const { data: myAccess } = useModuleAccess();
+
+  return groups.filter((g) => {
+    if (!g.key) return true;
+    if (!myAccess) return true;
+    if (myAccess.isAdmin) return true;
+    if (myAccess.modules.length === 0) return true;
+    return myAccess.modules.includes(g.key);
+  });
 }
