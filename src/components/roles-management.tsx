@@ -212,32 +212,51 @@ export function RolesManagement() {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        disabled={idx === 0 || reorderMut.isPending}
+                        onClick={() => move(idx, -1)}
+                        title={t("common.moveUp")}
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        disabled={idx === roles.length - 1 || reorderMut.isPending}
+                        onClick={() => move(idx, 1)}
+                        title={t("common.moveDown")}
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => openEdit(r)} title={t("common.edit")}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      {!r.is_system && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="icon" variant="ghost" className="text-destructive" title={t("common.delete")}>
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {locale === "ar" ? r.name_ar : r.name_en}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => delMut.mutate(r.id)}>{t("common.delete")}</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="icon" variant="ghost" className="text-destructive" title={t("common.delete")}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {locale === "ar" ? r.name_ar : r.name_en}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => delMut.mutate(r.id)}>{t("common.delete")}</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </td>
+
                 </tr>
               ))}
             </tbody>
