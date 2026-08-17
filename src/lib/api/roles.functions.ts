@@ -66,16 +66,24 @@ export const deleteRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    // Block deletion of system roles
-    const { data: row, error: e0 } = await context.supabase
-      .from("roles_registry")
-      .select("is_system")
-      .eq("id", data.id)
-      .single();
-    if (e0) throw new Error(e0.message);
-    if (row?.is_system) throw new Error("Cannot delete a system role");
-
     const { error } = await context.supabase.from("roles_registry").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const reorderRoles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({ ids: z.array(z.string().uuid()).min(1) }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    for (let i = 0; i < data.ids.length; i++) {
+      const { error } = await context.supabase
+        .from("roles_registry")
+        .update({ sort_order: (i + 1) * 10 })
+        .eq("id", data.ids[i]);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+

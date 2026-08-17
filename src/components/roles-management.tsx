@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listRoles, createRole, updateRole, deleteRole } from "@/lib/api/roles.functions";
+import { listRoles, createRole, updateRole, deleteRole, reorderRoles } from "@/lib/api/roles.functions";
 import { useI18n } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Lock } from "lucide-react";
+import { Plus, Pencil, Trash2, Lock, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 type RoleRow = {
@@ -39,6 +39,7 @@ export function RolesManagement() {
   const createFn = useServerFn(createRole);
   const updateFn = useServerFn(updateRole);
   const deleteFn = useServerFn(deleteRole);
+  const reorderFn = useServerFn(reorderRoles);
 
   const { data: roles = [], isLoading } = useQuery({
     queryKey: ["roles_registry"],
@@ -141,6 +142,23 @@ export function RolesManagement() {
     onError: (e: any) => toast.error(e.message ?? String(e)),
   });
 
+  const reorderMut = useMutation({
+    mutationFn: (ids: string[]) => reorderFn({ data: { ids } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roles_registry"] });
+      qc.invalidateQueries({ queryKey: ["roles_active"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? String(e)),
+  });
+
+  const move = (index: number, delta: number) => {
+    const ids = (roles as RoleRow[]).map((r) => r.id);
+    const target = index + delta;
+    if (target < 0 || target >= ids.length) return;
+    [ids[index], ids[target]] = [ids[target], ids[index]];
+    reorderMut.mutate(ids);
+  };
+
   const delMut = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
     onSuccess: () => {
@@ -189,7 +207,7 @@ export function RolesManagement() {
               {!isLoading && roles.length === 0 && (
                 <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">{t("common.noData")}</td></tr>
               )}
-              {roles.map((r: RoleRow) => (
+              {roles.map((r: RoleRow, idx: number) => (
                 <tr key={r.id} className="border-t border-border/40">
                   <td className="px-3 py-2 font-mono text-xs">{r.code}</td>
                   <td className="px-3 py-2">{r.name_ar}</td>
@@ -212,32 +230,51 @@ export function RolesManagement() {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        disabled={idx === 0 || reorderMut.isPending}
+                        onClick={() => move(idx, -1)}
+                        title={t("common.moveUp")}
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        disabled={idx === roles.length - 1 || reorderMut.isPending}
+                        onClick={() => move(idx, 1)}
+                        title={t("common.moveDown")}
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => openEdit(r)} title={t("common.edit")}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      {!r.is_system && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="icon" variant="ghost" className="text-destructive" title={t("common.delete")}>
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {locale === "ar" ? r.name_ar : r.name_en}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => delMut.mutate(r.id)}>{t("common.delete")}</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="icon" variant="ghost" className="text-destructive" title={t("common.delete")}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {locale === "ar" ? r.name_ar : r.name_en}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => delMut.mutate(r.id)}>{t("common.delete")}</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </td>
+
                 </tr>
               ))}
             </tbody>
