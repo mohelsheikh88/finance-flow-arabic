@@ -337,12 +337,12 @@ export function UserRolesManagement({
       ) : (
         <div className="space-y-2">
           {filtered.map((u: any) => {
-            const roleSource: string[] = rolesOnly
-              ? (rolesRegistry as any[])
-                  .filter((r) => r.is_active !== false)
-                  .map((r) => r.code)
-                  .filter((c: string) => (DB_ROLES as readonly string[]).includes(c))
-              : [...APP_ROLES];
+                  const roleSource: string[] = rolesOnly
+                    ? (rolesRegistry as any[])
+                        .filter((r) => r.is_active !== false)
+                        .map((r) => r.code)
+                        .filter((c: string) => (DB_ROLES as readonly string[]).includes(c) && c !== "admin")
+                    : [...APP_ROLES];
 
             const available = roleSource.filter((r) => !u.roles.includes(r));
             const mods = modulesByUser.get(u.id) ?? [];
@@ -437,9 +437,9 @@ export function UserRolesManagement({
                         </span>
                       )}
                       {u.roles.map((r: string) => (
-                        <Badge key={r} variant="secondary" className={rolesOnly ? "gap-1 pe-1" : "gap-1"}>
+                        <Badge key={r} variant="secondary" className={rolesOnly && r !== "admin" ? "gap-1 pe-1" : "gap-1"}>
                           {roleLabel(r)}
-                          {rolesOnly && (
+                          {rolesOnly && r !== "admin" && (
                             <button
                               onClick={() => removeMut.mutate({ userId: u.id, role: r })}
                               className="hover:bg-destructive/20 rounded-sm p-0.5"
