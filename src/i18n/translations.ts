@@ -582,7 +582,6 @@ export const translations = {
       accountant: "محاسب",
       internal_auditor: "مراجع داخلي",
       internal_audit_manager: "مدير المراجعة الداخلية",
-      internal_audit_manager: "مدير المراجعة الداخلية",
       branchAccess: "الفروع المتاحة",
       assignRole: "إضافة دور",
       noRoles: "لا توجد أدوار معينة",
