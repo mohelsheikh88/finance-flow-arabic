@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.self";
 import { z } from "zod";
 
 const JOURNAL_TYPES = ["sales", "purchase", "bank", "cash", "misc"] as const;

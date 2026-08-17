@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.self";
+import { supabaseAdmin } from "@/integrations/supabase/admin.self.server";
 
 const CreateCompanySchema = z.object({
   code: z.string().min(1).max(50),
