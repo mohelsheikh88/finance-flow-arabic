@@ -63,6 +63,16 @@ import {
 import { toast } from "sonner";
 
 const APP_ROLES = ["admin"] as const;
+// Roles supported by the database enum `app_role`
+const DB_ROLES = [
+  "admin",
+  "finance_manager",
+  "accounting_manager",
+  "chief_accountant",
+  "accountant",
+  "internal_auditor",
+] as const;
+
 
 export const MODULES = [
   { key: "accounting", icon: Wallet, tKey: "nav.financialAccounting" },
