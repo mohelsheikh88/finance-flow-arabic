@@ -27,7 +27,7 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { OfflineIndicator } from "@/components/offline-indicator";
 
-export function Topbar() {
+export function Topbar({ hideSidebarTrigger = false }: { hideSidebarTrigger?: boolean } = {}) {
   const { t, locale, setLocale } = useI18n();
   const localized = useLocalized();
   const { user, signOut } = useAuth();
@@ -73,7 +73,7 @@ export function Topbar() {
           <div className="h-full w-1/3 bg-primary animate-[loading-bar_1.2s_ease-in-out_infinite]" />
         </div>
       )}
-      <SidebarTrigger />
+      {!hideSidebarTrigger && <SidebarTrigger />}
 
       {ctxFetching && (
         <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
