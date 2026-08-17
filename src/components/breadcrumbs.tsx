@@ -31,6 +31,8 @@ export function Breadcrumbs() {
   }
 
   const { group, subgroup, item } = match;
+  const groupUrl = group.subgroups?.[0]?.items[0]?.url ?? group.items?.[0]?.url ?? "/dashboard";
+  const subgroupUrl = subgroup?.items[0]?.url ?? groupUrl;
 
   return (
     <nav
@@ -43,12 +45,16 @@ export function Breadcrumbs() {
 
       <Chevron className="h-3 w-3 shrink-0 opacity-50" />
 
-      <span className="hover:text-foreground transition-colors shrink-0">{group.label}</span>
+      <Link to={groupUrl} className="hover:text-foreground transition-colors shrink-0">
+        {group.label}
+      </Link>
 
       {subgroup && (
         <>
           <Chevron className="h-3 w-3 shrink-0 opacity-50" />
-          <span className="hover:text-foreground transition-colors shrink-0">{subgroup.label}</span>
+          <Link to={subgroupUrl} className="hover:text-foreground transition-colors shrink-0">
+            {subgroup.label}
+          </Link>
         </>
       )}
 
