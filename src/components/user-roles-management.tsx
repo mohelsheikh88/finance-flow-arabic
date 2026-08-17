@@ -349,84 +349,98 @@ export function UserRolesManagement({
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground">{u.email}</div>
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {mods.length === 0 ? (
-                        <span className="text-[11px] text-muted-foreground italic">
-                          {t("users.noModules")}
-                        </span>
-                      ) : (
-                        mods.map((m) => {
-                          const def = MODULES.find((x) => x.key === m);
-                          if (!def) return null;
-                          const Icon = def.icon;
-                          return (
-                            <Badge
-                              key={m}
-                              variant="outline"
-                              className="gap-1 text-[10px] border-primary/40 text-primary"
+                  </div>
+
+                  <div className="flex-1 flex flex-col gap-2 min-w-[260px]">
+                    <div className="flex items-start gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                        {t("users.modules")}:
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {mods.length === 0 ? (
+                          <span className="text-[11px] text-muted-foreground italic">
+                            {t("users.noModules")}
+                          </span>
+                        ) : (
+                          mods.map((m: string) => {
+                            const def = MODULES.find((x) => x.key === m);
+                            if (!def) return null;
+                            const Icon = def.icon;
+                            return (
+                              <Badge
+                                key={m}
+                                variant="outline"
+                                className="gap-1 text-[10px] border-primary/40 text-primary"
+                              >
+                                <Icon className="h-3 w-3" />
+                                {t(def.tKey)}
+                              </Badge>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                        {t("users.roles")}:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 items-center">
+                        {u.roles.length === 0 && (
+                          <span className="text-xs text-muted-foreground italic">
+                            {t("users.noRoles")}
+                          </span>
+                        )}
+                        {u.roles.map((r: string) => (
+                          <Badge key={r} variant="secondary" className="gap-1 pe-1">
+                            {roleLabel(r)}
+                            <button
+                              onClick={() => removeMut.mutate({ userId: u.id, role: r })}
+                              className="hover:bg-destructive/20 rounded-sm p-0.5"
+                              title={t("common.remove")}
                             >
-                              <Icon className="h-3 w-3" />
-                              {t(def.tKey)}
-                            </Badge>
-                          );
-                        })
-                      )}
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                        {available.length > 0 && (
+                          <div className="flex gap-1 items-center">
+                            <Select
+                              value={pickRole[u.id] || ""}
+                              onValueChange={(v) => setPickRole((p) => ({ ...p, [u.id]: v }))}
+                            >
+                              <SelectTrigger className="h-7 text-xs w-[160px]">
+                                <SelectValue placeholder={t("users.assignRole")} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {available.map((r) => (
+                                  <SelectItem key={r} value={r} className="text-xs">
+                                    {roleLabel(r)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-7 w-7"
+                              disabled={!pickRole[u.id]}
+                              onClick={() => {
+                                const r = pickRole[u.id];
+                                if (!r) return;
+                                assignMut.mutate({ userId: u.id, role: r });
+                                setPickRole((p) => ({ ...p, [u.id]: "" }));
+                              }}
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex-1 flex flex-wrap gap-1.5 items-center justify-end">
-                    {u.roles.length === 0 && (
-                      <span className="text-xs text-muted-foreground italic">
-                        {t("users.noRoles")}
-                      </span>
-                    )}
-                    {u.roles.map((r: string) => (
-                      <Badge key={r} variant="secondary" className="gap-1 pe-1">
-                        {roleLabel(r)}
-                        <button
-                          onClick={() => removeMut.mutate({ userId: u.id, role: r })}
-                          className="hover:bg-destructive/20 rounded-sm p-0.5"
-                          title={t("common.remove")}
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                    {available.length > 0 && (
-                      <div className="flex gap-1 items-center">
-                        <Select
-                          value={pickRole[u.id] || ""}
-                          onValueChange={(v) => setPickRole((p) => ({ ...p, [u.id]: v }))}
-                        >
-                          <SelectTrigger className="h-7 text-xs w-[160px]">
-                            <SelectValue placeholder={t("users.assignRole")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {available.map((r) => (
-                              <SelectItem key={r} value={r} className="text-xs">
-                                {roleLabel(r)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-7 w-7"
-                          disabled={!pickRole[u.id]}
-                          onClick={() => {
-                            const r = pickRole[u.id];
-                            if (!r) return;
-                            assignMut.mutate({ userId: u.id, role: r });
-                            setPickRole((p) => ({ ...p, [u.id]: "" }));
-                          }}
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    )}
-
-                    {!rolesOnly && (
+                  {!rolesOnly && (
                     <div className="flex items-center gap-2 ms-2 ps-2 border-s">
                       <Switch
                         checked={active}
@@ -455,10 +469,10 @@ export function UserRolesManagement({
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </Card>
+
             );
           })}
         </div>
