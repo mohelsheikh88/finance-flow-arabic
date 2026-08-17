@@ -94,7 +94,13 @@ const emptyForm: FormState = {
   modules: [],
 };
 
-export function UserRolesManagement() {
+export function UserRolesManagement({
+  moduleScope,
+  rolesOnly = false,
+}: {
+  moduleScope?: string;
+  rolesOnly?: boolean;
+} = {}) {
   const { t, locale } = useI18n();
   const { companyId } = useBranch();
   const { user } = useAuth();
@@ -149,16 +155,23 @@ export function UserRolesManagement() {
     return t(`users.${code}`) || code;
   };
 
+  const scoped = useMemo(() => {
+    if (!moduleScope) return users as any[];
+    return (users as any[]).filter((u) =>
+      (modulesByUser.get(u.id) ?? []).includes(moduleScope),
+    );
+  }, [users, modulesByUser, moduleScope]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return users as any[];
-    return (users as any[]).filter(
+    if (!q) return scoped;
+    return scoped.filter(
       (u) =>
         u.email?.toLowerCase().includes(q) ||
         u.display_name_en?.toLowerCase().includes(q) ||
         u.display_name_ar?.toLowerCase().includes(q),
     );
-  }, [users, search]);
+  }, [scoped, search]);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["users_with_roles"] });
@@ -294,12 +307,14 @@ export function UserRolesManagement() {
           />
         </div>
         <div className="text-xs text-muted-foreground">
-          {filtered.length} / {users.length}
+          {filtered.length} / {scoped.length}
         </div>
-        <Button size="sm" className="h-8 gap-1.5" onClick={openCreate}>
-          <Plus className="h-3.5 w-3.5" />
-          {t("users.newUser")}
-        </Button>
+        {!rolesOnly && (
+          <Button size="sm" className="h-8 gap-1.5" onClick={openCreate}>
+            <Plus className="h-3.5 w-3.5" />
+            {t("users.newUser")}
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -311,7 +326,12 @@ export function UserRolesManagement() {
       ) : (
         <div className="space-y-2">
           {filtered.map((u: any) => {
-            const available = APP_ROLES.filter((r) => !u.roles.includes(r));
+            const roleSource: string[] = rolesOnly
+              ? (rolesRegistry as any[])
+                  .filter((r) => r.is_active !== false)
+                  .map((r) => r.code)
+              : [...APP_ROLES];
+            const available = roleSource.filter((r) => !u.roles.includes(r));
             const mods = modulesByUser.get(u.id) ?? [];
             const active = u.is_active !== false;
             return (
@@ -406,6 +426,7 @@ export function UserRolesManagement() {
                       </div>
                     )}
 
+                    {!rolesOnly && (
                     <div className="flex items-center gap-2 ms-2 ps-2 border-s">
                       <Switch
                         checked={active}
@@ -433,6 +454,7 @@ export function UserRolesManagement() {
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
+                    )}
                     </div>
                   </div>
                 </div>
