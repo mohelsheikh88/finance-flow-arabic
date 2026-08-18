@@ -42,6 +42,7 @@ import {
   CalendarClock,
   Tv,
   HeartPulse,
+  UserCog,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -193,6 +194,7 @@ export function useNavGroups(): NavGroup[] {
             { url: "/payment-methods", icon: CreditCard, title: t("nav.paymentMethods") },
             { url: "/payment-terms", icon: CreditCard, title: t("nav.paymentTerms") },
             { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
+            { url: "/accounting-user-access", icon: UserCog, title: t("common.sectionAccessTitle") },
           ],
         },
       ],

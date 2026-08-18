@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedAccountingUserAccessRouteImport } from './routes/_authenticated.accounting-user-access'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated.accounts'
 import { Route as AuthenticatedAmbulanceRouteImport } from './routes/_authenticated.ambulance'
 import { Route as AuthenticatedAppointmentsRouteImport } from './routes/_authenticated.appointments'
@@ -96,6 +97,12 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAccountingUserAccessRoute =
+  AuthenticatedAccountingUserAccessRouteImport.update({
+    id: '/accounting-user-access',
+    path: '/accounting-user-access',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAccountsRoute = AuthenticatedAccountsRouteImport.update({
   id: '/accounts',
   path: '/accounts',
@@ -475,6 +482,7 @@ const ApiPublicHooksPostDepreciationRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/accounting-user-access': typeof AuthenticatedAccountingUserAccessRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/ambulance': typeof AuthenticatedAmbulanceRoute
   '/appointments': typeof AuthenticatedAppointmentsRoute
@@ -548,6 +556,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/accounting-user-access': typeof AuthenticatedAccountingUserAccessRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/ambulance': typeof AuthenticatedAmbulanceRoute
   '/appointments': typeof AuthenticatedAppointmentsRoute
@@ -623,6 +632,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/accounting-user-access': typeof AuthenticatedAccountingUserAccessRoute
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/ambulance': typeof AuthenticatedAmbulanceRoute
   '/_authenticated/appointments': typeof AuthenticatedAppointmentsRoute
@@ -698,6 +708,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/accounting-user-access'
     | '/accounts'
     | '/ambulance'
     | '/appointments'
@@ -771,6 +782,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/accounting-user-access'
     | '/accounts'
     | '/ambulance'
     | '/appointments'
@@ -845,6 +857,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/accounting-user-access'
     | '/_authenticated/accounts'
     | '/_authenticated/ambulance'
     | '/_authenticated/appointments'
@@ -945,6 +958,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/accounting-user-access': {
+      id: '/_authenticated/accounting-user-access'
+      path: '/accounting-user-access'
+      fullPath: '/accounting-user-access'
+      preLoaderRoute: typeof AuthenticatedAccountingUserAccessRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/accounts': {
       id: '/_authenticated/accounts'
@@ -1433,6 +1453,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAccountingUserAccessRoute: typeof AuthenticatedAccountingUserAccessRoute
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedAmbulanceRoute: typeof AuthenticatedAmbulanceRoute
   AuthenticatedAppointmentsRoute: typeof AuthenticatedAppointmentsRoute
@@ -1504,6 +1525,8 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAccountingUserAccessRoute:
+    AuthenticatedAccountingUserAccessRoute,
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedAmbulanceRoute: AuthenticatedAmbulanceRoute,
   AuthenticatedAppointmentsRoute: AuthenticatedAppointmentsRoute,
