@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Scale } from "lucide-react";
+import { Plus, Trash2, Scale, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/fiscal-positions")({
@@ -38,6 +38,7 @@ function Page() {
 
   const [open, setOpen] = useState(false);
   const empty = {
+    id: null as string | null,
     name_ar: "",
     name_en: "",
     is_saudi: true,
@@ -46,6 +47,20 @@ function Page() {
     income_tax_applicable: false,
   };
   const [form, setForm] = useState(empty);
+
+  const openCreate = () => { setForm(empty); setOpen(true); };
+  const openEdit = (m: any) => {
+    setForm({
+      id: m.id,
+      name_ar: m.name_ar ?? "",
+      name_en: m.name_en ?? "",
+      is_saudi: !!m.is_saudi,
+      vat_applicable: !!m.vat_applicable,
+      zakat_applicable: !!m.zakat_applicable,
+      income_tax_applicable: !!m.income_tax_applicable,
+    });
+    setOpen(true);
+  };
 
   const createMut = useMutation({
     mutationFn: () =>
@@ -69,6 +84,31 @@ function Page() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const updateMut = useMutation({
+    mutationFn: () =>
+      update({
+        data: {
+          id: form.id!,
+          name_ar: form.name_ar,
+          name_en: form.name_en,
+          is_saudi: form.is_saudi,
+          vat_applicable: form.vat_applicable,
+          zakat_applicable: form.zakat_applicable,
+          income_tax_applicable: form.income_tax_applicable,
+        },
+      }),
+    onSuccess: () => {
+      toast.success(t("common.saved"));
+      qc.invalidateQueries({ queryKey: ["fiscal_positions"] });
+      setOpen(false);
+      setForm(empty);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveMut = () => (form.id ? updateMut.mutate() : createMut.mutate());
+  const saving = createMut.isPending || updateMut.isPending;
 
   const toggleActive = useMutation({
     mutationFn: (m: any) => update({ data: { id: m.id, is_active: !m.is_active } }),
@@ -95,10 +135,10 @@ function Page() {
         </div>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(empty); }}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 me-1" />{t("common.new")}</Button>
+            <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.new")}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
-            <DialogHeader><DialogTitle>{t("fiscalPositions.title")}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{form.id ? t("common.edit") : t("fiscalPositions.title")}</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>{t("common.nameEn")} *</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
@@ -121,7 +161,7 @@ function Page() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-              <Button onClick={() => createMut.mutate()} disabled={!canSave || createMut.isPending}>{t("common.save")}</Button>
+              <Button onClick={saveMut} disabled={!canSave || saving}>{t("common.save")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -156,6 +196,9 @@ function Page() {
                   </button>
                 </td>
                 <td className="p-3 text-center">
+                  <Button size="sm" variant="ghost" onClick={() => openEdit(m)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => removeMut.mutate(m.id)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
