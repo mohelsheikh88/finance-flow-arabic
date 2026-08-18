@@ -1051,7 +1051,7 @@ export const translations = {
       purchaseProcurement: "Purchase",
       inventoryManagement: "Inventory",
       humanResources: "Human Resources",
-      his: "Medical",
+      his: "Medical System",
       pharmacy: "Pharmacy",
       insurance: "Insurance",
       fleets: "Fleets",
