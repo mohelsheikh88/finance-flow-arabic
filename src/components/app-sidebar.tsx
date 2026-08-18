@@ -49,7 +49,6 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
 import { useVisibleNavGroups, matchNavPath } from "@/lib/nav-config";
-import { BrandLogo, BrandMark } from "@/components/brand-logo";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 
@@ -79,21 +78,22 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
 
       <SidebarHeader className="overflow-visible border-b border-sidebar-border/60">
-        <div className="flex items-center gap-2.5 px-2 py-2.5">
-          {/* Glass-morphism logo container (collapsed only) */}
-          {collapsed && (
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[hsl(327,92%,55%)]/40 to-[hsl(280,70%,55%)]/30 blur-md opacity-70" />
-              <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] ring-1 ring-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                <BrandMark size={26} />
-              </div>
-            </div>
-          )}
-          {!collapsed && (
-            <div className="flex-1 min-w-0 flex items-center gap-1.5">
-              <div className="flex-1 min-w-0">
-                <BrandLogo size={40} variant="light" />
-              </div>
+        <div className="flex items-center gap-2 px-2 py-2.5">
+          {collapsed ? (
+            <SidebarMenuButton asChild tooltip={t("nav.backToApps")} className="mx-auto">
+              <Link to="/apps" className="flex items-center justify-center">
+                <LayoutGrid className="h-5 w-5 shrink-0" />
+              </Link>
+            </SidebarMenuButton>
+          ) : (
+            <>
+              <Link
+                to="/apps"
+                className="flex-1 min-w-0 flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-colors"
+              >
+                <LayoutGrid className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t("nav.backToApps")}</span>
+              </Link>
 
               {onTogglePin && (
                 <Button
@@ -113,37 +113,12 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
                 </Button>
               )}
-            </div>
+            </>
           )}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto overflow-x-hidden px-2 sm:px-3">
-        {/* ===== Back to Apps (Odoo-style app switcher) ===== */}
-        {collapsed ? (
-          <SidebarGroup className="mb-1">
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip={t("nav.backToApps")}>
-                    <Link to="/apps" className="flex items-center gap-2">
-                      <LayoutGrid className="h-4 w-4 shrink-0" />
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ) : (
-          <Link
-            to="/apps"
-            className="flex items-center gap-2 rounded-lg px-2.5 py-2 mb-2 text-[12.5px] font-medium text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-colors"
-          >
-            <LayoutGrid className="h-3.5 w-3.5 shrink-0" />
-            <span>{t("nav.backToApps")}</span>
-          </Link>
-        )}
-
         {/* ===== Active module only ===== */}
         {activeGroup && (collapsed ? (
           <SidebarGroup>
