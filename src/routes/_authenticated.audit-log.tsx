@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listAuditLog, listAuditTables } from "@/lib/api/audit.functions";
+import { userDisplayLabel } from "@/lib/user-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -155,10 +156,7 @@ function AuditLogPage() {
                   <td className="p-3 font-mono text-muted-foreground text-[10px]" dir="ltr">{r.record_id?.slice(0, 8) ?? "—"}</td>
                   <td className="p-3">
                     {r.user ? (
-                      <div className="flex flex-col">
-                        <span className="font-medium">{r.user.display_name_ar || r.user.display_name_en || r.user.email}</span>
-                        <span className="text-[10px] text-muted-foreground" dir="ltr">{r.user.email}</span>
-                      </div>
+                      <span className="font-medium">{userDisplayLabel(r.user, "ar")}</span>
                     ) : <span className="text-muted-foreground">نظام</span>}
                   </td>
                   <td className="p-3 text-center">
@@ -188,7 +186,7 @@ function AuditLogPage() {
                 <Info label="العملية" value={actionLabel[selected.action]} />
                 <Info label="الجدول" value={selected.table_name} />
                 <Info label="معرّف السجل" value={selected.record_id ?? "—"} mono />
-                <Info label="المستخدم" value={selected.user?.email ?? "نظام"} />
+                <Info label="المستخدم" value={selected.user ? userDisplayLabel(selected.user, "ar") : "نظام"} />
                 <Info label="معرّف المستخدم" value={selected.user_id ?? "—"} mono />
               </div>
               {selected.old_data && (

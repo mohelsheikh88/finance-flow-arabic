@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getRecordHistory } from "@/lib/api/history.functions";
+import { userDisplayLabel } from "@/lib/user-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -182,11 +183,7 @@ function EventRow({ r, isLast }: { r: any; isLast: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const isLine = LINE_TABLES.has(r.table_name);
 
-  const userName = r.user
-    ? (locale === "ar"
-        ? r.user.display_name_ar || r.user.display_name_en || r.user.email
-        : r.user.display_name_en || r.user.display_name_ar || r.user.email)
-    : t("history.system");
+  const userName = r.user ? userDisplayLabel(r.user, locale) : t("history.system");
   const when = new Date(r.changed_at);
 
   const action = (r.action as "INSERT" | "UPDATE" | "DELETE") ?? "UPDATE";

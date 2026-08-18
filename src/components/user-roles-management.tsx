@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/users.functions";
 import { listRoles } from "@/lib/api/roles.functions";
 import { useNavGroups } from "@/lib/nav-config";
+import { userDisplayLabel } from "@/lib/user-display";
 import { useBranch } from "@/lib/branch-context";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useI18n } from "@/i18n";
@@ -365,7 +366,7 @@ export function UserRolesManagement({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm">
-                          {locale === "ar" ? u.display_name_ar : u.display_name_en}
+                          {userDisplayLabel(u, locale)}
                         </span>
                         {!active && (
                           <Badge variant="outline" className="text-[10px]">
@@ -376,9 +377,6 @@ export function UserRolesManagement({
                       <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
                         {u.employee_id && (
                           <span className="font-mono">#{u.employee_id}</span>
-                        )}
-                        {u.email && !u.email.includes("@employees.alhayat.internal") && (
-                          <span>{u.email}</span>
                         )}
                       </div>
                     </div>
@@ -662,7 +660,7 @@ export function UserRolesManagement({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("users.deleteUser")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmDelete?.email} — {t("users.deleteWarning")}
+              {userDisplayLabel(confirmDelete, locale)} — {t("users.deleteWarning")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

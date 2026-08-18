@@ -82,7 +82,7 @@ export const getRecordHistory = createServerFn({ method: "GET" })
     if (userIds.length > 0) {
       const { data: profs } = await supabaseAdmin
         .from("profiles")
-        .select("id, email, display_name_ar, display_name_en")
+        .select("id, email, display_name_ar, display_name_en, employee_id")
         .in("id", userIds);
       profilesById = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p]));
     }

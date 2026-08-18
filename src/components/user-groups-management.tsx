@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Users2, UserPlus, Blocks } from "lucide-react";
 import { toast } from "sonner";
+import { userDisplayLabel } from "@/lib/user-display";
 
 type UserGroup = {
   id: string;
@@ -31,6 +32,7 @@ type UserGroup = {
 type Profile = {
   id: string;
   email: string;
+  employee_id: string | null;
   display_name_ar: string | null;
   display_name_en: string | null;
 };
@@ -88,7 +90,7 @@ export function UserGroupsManagement() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, email, display_name_ar, display_name_en")
+        .select("id, email, employee_id, display_name_ar, display_name_en")
         .order("email");
       if (error) throw error;
       return data as Profile[];
@@ -160,7 +162,7 @@ export function UserGroupsManagement() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const userLabel = (p: Profile) => (locale === "ar" ? p.display_name_ar : p.display_name_en) || p.email;
+  const userLabel = (p: Profile) => userDisplayLabel(p, locale);
 
   return (
     <div className="space-y-4">

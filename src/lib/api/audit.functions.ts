@@ -43,11 +43,11 @@ export const listAuditLog = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     const ids = Array.from(new Set((rows ?? []).map((r) => r.user_id).filter(Boolean) as string[]));
-    let profilesById: Record<string, { display_name_ar: string | null; display_name_en: string | null; email: string }> = {};
+    let profilesById: Record<string, { display_name_ar: string | null; display_name_en: string | null; email: string; employee_id: string | null }> = {};
     if (ids.length > 0) {
       const { data: profs } = await supabase
         .from("profiles")
-        .select("id, email, display_name_ar, display_name_en")
+        .select("id, email, display_name_ar, display_name_en, employee_id")
         .in("id", ids);
       profilesById = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p]));
     }

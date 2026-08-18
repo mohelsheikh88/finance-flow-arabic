@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Languages, LogOut, User } from "lucide-react";
 import { useI18n, useLocalized } from "@/i18n";
+import { userDisplayLabel, userInitials } from "@/lib/user-display";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBranch } from "@/lib/branch-context";
 import { useQuery, useIsFetching } from "@tanstack/react-query";
@@ -64,7 +65,15 @@ export function Topbar({ hideSidebarTrigger = false, transparent = false }: { hi
     navigate({ to: "/login" });
   };
 
-  const initials = (user?.email ?? "U").slice(0, 2).toUpperCase();
+  const authProfile = user
+    ? {
+        employee_id: (user.user_metadata as any)?.employee_id,
+        display_name_ar: (user.user_metadata as any)?.display_name_ar,
+        display_name_en: (user.user_metadata as any)?.display_name_en,
+      }
+    : null;
+  const displayLabel = userDisplayLabel(authProfile, locale);
+  const initials = userInitials(authProfile, locale);
 
   return (
     <header className={
@@ -134,13 +143,13 @@ export function Topbar({ hideSidebarTrigger = false, transparent = false }: { hi
             <div className="h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">
               {initials}
             </div>
-            <span className="text-xs hidden md:inline">{user?.email}</span>
+            <span className="text-xs hidden md:inline">{displayLabel}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>
             <div className="flex flex-col">
-              <span className="text-sm">{user?.email}</span>
+              <span className="text-sm">{displayLabel}</span>
               {ctx?.isAdmin && <span className="text-[10px] text-primary">{t("users.admin")}</span>}
             </div>
           </DropdownMenuLabel>
