@@ -31,6 +31,7 @@ import {
   LineChart,
   Handshake,
   Home,
+  Ambulance,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -225,6 +226,13 @@ export function useNavGroups(): NavGroup[] {
       icon: Home,
       hue: 130, // soft green — care, warmth
       items: [{ url: "/home-care", icon: Home, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "ambulance",
+      label: t("nav.ambulance"),
+      icon: Ambulance,
+      hue: 10, // urgent red-orange — emergency
+      items: [{ url: "/ambulance", icon: Ambulance, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",

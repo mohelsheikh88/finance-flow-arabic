@@ -253,6 +253,7 @@ export const translations = {
       sales: "المبيعات",
       crm: "إدارة العملاء",
       homeCare: "الرعاية المنزلية",
+      ambulance: "الإسعاف",
     },
     ar: {
       invoices: "فواتير العملاء",
@@ -1059,6 +1060,7 @@ export const translations = {
       sales: "Sales",
       crm: "CRM",
       homeCare: "Home Care",
+      ambulance: "Ambulance",
     },
     ar: {
       invoices: "Invoices",

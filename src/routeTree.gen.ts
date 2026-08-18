@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated.accounts'
+import { Route as AuthenticatedAmbulanceRouteImport } from './routes/_authenticated.ambulance'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated.approvals'
 import { Route as AuthenticatedAppsRouteImport } from './routes/_authenticated.apps'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated.assets'
@@ -87,6 +88,11 @@ const LoginRoute = LoginRouteImport.update({
 const AuthenticatedAccountsRoute = AuthenticatedAccountsRouteImport.update({
   id: '/accounts',
   path: '/accounts',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAmbulanceRoute = AuthenticatedAmbulanceRouteImport.update({
+  id: '/ambulance',
+  path: '/ambulance',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedApprovalsRoute = AuthenticatedApprovalsRouteImport.update({
@@ -399,6 +405,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/accounts': typeof AuthenticatedAccountsRoute
+  '/ambulance': typeof AuthenticatedAmbulanceRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/apps': typeof AuthenticatedAppsRoute
   '/assets': typeof AuthenticatedAssetsRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/accounts': typeof AuthenticatedAccountsRoute
+  '/ambulance': typeof AuthenticatedAmbulanceRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/apps': typeof AuthenticatedAppsRoute
   '/assets': typeof AuthenticatedAssetsRoute
@@ -523,6 +531,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
+  '/_authenticated/ambulance': typeof AuthenticatedAmbulanceRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/apps': typeof AuthenticatedAppsRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
@@ -586,6 +595,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/accounts'
+    | '/ambulance'
     | '/approvals'
     | '/apps'
     | '/assets'
@@ -647,6 +657,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/accounts'
+    | '/ambulance'
     | '/approvals'
     | '/apps'
     | '/assets'
@@ -709,6 +720,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/accounts'
+    | '/_authenticated/ambulance'
     | '/_authenticated/approvals'
     | '/_authenticated/apps'
     | '/_authenticated/assets'
@@ -802,6 +814,13 @@ declare module '@tanstack/react-router' {
       path: '/accounts'
       fullPath: '/accounts'
       preLoaderRoute: typeof AuthenticatedAccountsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ambulance': {
+      id: '/_authenticated/ambulance'
+      path: '/ambulance'
+      fullPath: '/ambulance'
+      preLoaderRoute: typeof AuthenticatedAmbulanceRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/approvals': {
@@ -1201,6 +1220,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
+  AuthenticatedAmbulanceRoute: typeof AuthenticatedAmbulanceRoute
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
   AuthenticatedAppsRoute: typeof AuthenticatedAppsRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
@@ -1260,6 +1280,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
+  AuthenticatedAmbulanceRoute: AuthenticatedAmbulanceRoute,
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
   AuthenticatedAppsRoute: AuthenticatedAppsRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
