@@ -63,6 +63,7 @@ const emptyBranch = {
   code: "",
   name_ar: "",
   name_en: "",
+  cr_number: "",
   address_ar: "",
   phone: "",
   is_main: false,
@@ -215,6 +216,7 @@ function Page() {
         code: b.code ?? "",
         name_ar: b.name_ar ?? "",
         name_en: b.name_en ?? "",
+        cr_number: b.cr_number ?? "",
         address_ar: b.address_ar ?? "",
         phone: b.phone ?? "",
         is_main: !!b.is_main,
@@ -533,6 +535,7 @@ function Page() {
             <Field label={t("common.phone")} value={brForm.phone ?? ""} onChange={(v) => setBrForm({ ...brForm, phone: v })} dir="ltr" />
             <Field label={t("common.name") + " (AR)"} required value={brForm.name_ar} onChange={(v) => setBrForm({ ...brForm, name_ar: v })} />
             <Field label={t("common.name") + " (EN)"} required value={brForm.name_en} onChange={(v) => setBrForm({ ...brForm, name_en: v })} dir="ltr" />
+            <Field label={t("setup.crNumber")} value={brForm.cr_number ?? ""} onChange={(v) => setBrForm({ ...brForm, cr_number: v })} dir="ltr" />
             <div className="col-span-2">
               <Field label={t("setup.address")} value={brForm.address_ar ?? ""} onChange={(v) => setBrForm({ ...brForm, address_ar: v })} />
             </div>

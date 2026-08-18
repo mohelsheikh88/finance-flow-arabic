@@ -89,6 +89,7 @@ const BranchSchema = z.object({
   code: z.string().min(1).max(50),
   name_ar: z.string().min(1).max(255),
   name_en: z.string().min(1).max(255),
+  cr_number: z.string().max(50).optional().nullable(),
   address_ar: z.string().max(500).optional().nullable(),
   address_en: z.string().max(500).optional().nullable(),
   phone: z.string().max(50).optional().nullable(),
