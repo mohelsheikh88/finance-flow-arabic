@@ -41,8 +41,28 @@ function AppsLauncher() {
                        hover:-translate-y-1 hover:shadow-[0_20px_44px_-16px_rgba(0,0,0,0.6)]
                        active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--hue)_85%_60%/0.5)]"
           >
-            <div className="flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center">
-              <g.icon className="h-14 w-14 sm:h-16 sm:w-16 text-[hsl(var(--hue)_88%_68%)] transition-transform duration-200 group-hover:scale-110" />
+            <div className="relative flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center">
+              {/* Ambient colored glow — pure light, no visible edge/shape */}
+              <div
+                aria-hidden
+                className="absolute inset-0 rounded-full blur-xl opacity-60 transition-opacity duration-200 group-hover:opacity-90"
+                style={{ background: "radial-gradient(circle, hsl(var(--hue) 85% 55% / 0.4), transparent 70%)" }}
+              />
+              {/* Glossy top highlight — simulates a light source for depth */}
+              <div
+                aria-hidden
+                className="absolute top-2 inset-x-5 h-1/2 rounded-full blur-md opacity-35 pointer-events-none"
+                style={{ background: "radial-gradient(ellipse, white, transparent 72%)" }}
+              />
+              <g.icon
+                strokeWidth={1.6}
+                className="relative h-14 w-14 sm:h-16 sm:w-16 transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5"
+                style={{
+                  color: "hsl(var(--hue) 90% 70%)",
+                  filter:
+                    "drop-shadow(0 2px 3px hsl(var(--hue) 85% 30% / 0.6)) drop-shadow(0 10px 20px hsl(var(--hue) 85% 45% / 0.5))",
+                }}
+              />
             </div>
             <span className="text-[15px] sm:text-base font-bold text-center text-white/95 leading-tight">
               {g.label}
