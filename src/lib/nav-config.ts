@@ -353,9 +353,7 @@ export function useNavGroups(): NavGroup[] {
       items: [{ url: "/crm", icon: Handshake, title: t("common.willBeBuiltLater") }],
     },
     {
-      // No `key` on purpose — General Settings must NEVER be hidden by a
-      // branch/group configuration mistake (it's where you fix those
-      // mistakes from). Always visible, exactly like Main Dashboard.
+      key: "settings",
       label: t("nav.generalSetting"),
       icon: Settings,
       hue: 215, // neutral slate-blue — configuration
@@ -516,12 +514,15 @@ export function useVisibleNavGroups(): NavGroup[] {
   const { data: myAccess } = useModuleAccess();
   const { branchId } = useBranch();
   const { data: branchModules } = useBranchModuleAccess();
+  const isAdmin = !!myAccess?.isAdmin;
 
-  // Per-user/group assignment — applies to top-level modules AND
-  // sub-modules alike (a group can grant a specific sub-module directly).
+  // Per-user/group assignment (direct access or via a user group) — an
+  // admin is never restricted by this, so they can never lock themselves
+  // out through a forgotten/misconfigured group.
   const passesUserAccess = (key?: string) => {
     if (!key) return true;
     if (!myAccess) return true; // fail open while loading
+    if (isAdmin) return true;
     if (myAccess.modules.length === 0) return true; // nothing configured yet = unrestricted
     return myAccess.modules.includes(key);
   };
