@@ -33,6 +33,7 @@ import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authen
 import { Route as AuthenticatedFiscalPositionsRouteImport } from './routes/_authenticated.fiscal-positions'
 import { Route as AuthenticatedFleetsRouteImport } from './routes/_authenticated.fleets'
 import { Route as AuthenticatedHisRouteImport } from './routes/_authenticated.his'
+import { Route as AuthenticatedHomeCareRouteImport } from './routes/_authenticated.home-care'
 import { Route as AuthenticatedHrRouteImport } from './routes/_authenticated.hr'
 import { Route as AuthenticatedInsuranceRouteImport } from './routes/_authenticated.insurance'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
@@ -193,6 +194,11 @@ const AuthenticatedFleetsRoute = AuthenticatedFleetsRouteImport.update({
 const AuthenticatedHisRoute = AuthenticatedHisRouteImport.update({
   id: '/his',
   path: '/his',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHomeCareRoute = AuthenticatedHomeCareRouteImport.update({
+  id: '/home-care',
+  path: '/home-care',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedHrRoute = AuthenticatedHrRouteImport.update({
@@ -413,6 +419,7 @@ export interface FileRoutesByFullPath {
   '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/fleets': typeof AuthenticatedFleetsRoute
   '/his': typeof AuthenticatedHisRoute
+  '/home-care': typeof AuthenticatedHomeCareRoute
   '/hr': typeof AuthenticatedHrRoute
   '/insurance': typeof AuthenticatedInsuranceRoute
   '/inventory': typeof AuthenticatedInventoryRoute
@@ -473,6 +480,7 @@ export interface FileRoutesByTo {
   '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/fleets': typeof AuthenticatedFleetsRoute
   '/his': typeof AuthenticatedHisRoute
+  '/home-care': typeof AuthenticatedHomeCareRoute
   '/hr': typeof AuthenticatedHrRoute
   '/insurance': typeof AuthenticatedInsuranceRoute
   '/inventory': typeof AuthenticatedInventoryRoute
@@ -535,6 +543,7 @@ export interface FileRoutesById {
   '/_authenticated/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/_authenticated/fleets': typeof AuthenticatedFleetsRoute
   '/_authenticated/his': typeof AuthenticatedHisRoute
+  '/_authenticated/home-care': typeof AuthenticatedHomeCareRoute
   '/_authenticated/hr': typeof AuthenticatedHrRoute
   '/_authenticated/insurance': typeof AuthenticatedInsuranceRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
@@ -597,6 +606,7 @@ export interface FileRouteTypes {
     | '/fiscal-positions'
     | '/fleets'
     | '/his'
+    | '/home-care'
     | '/hr'
     | '/insurance'
     | '/inventory'
@@ -657,6 +667,7 @@ export interface FileRouteTypes {
     | '/fiscal-positions'
     | '/fleets'
     | '/his'
+    | '/home-care'
     | '/hr'
     | '/insurance'
     | '/inventory'
@@ -718,6 +729,7 @@ export interface FileRouteTypes {
     | '/_authenticated/fiscal-positions'
     | '/_authenticated/fleets'
     | '/_authenticated/his'
+    | '/_authenticated/home-care'
     | '/_authenticated/hr'
     | '/_authenticated/insurance'
     | '/_authenticated/inventory'
@@ -930,6 +942,13 @@ declare module '@tanstack/react-router' {
       path: '/his'
       fullPath: '/his'
       preLoaderRoute: typeof AuthenticatedHisRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/home-care': {
+      id: '/_authenticated/home-care'
+      path: '/home-care'
+      fullPath: '/home-care'
+      preLoaderRoute: typeof AuthenticatedHomeCareRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/hr': {
@@ -1202,6 +1221,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFiscalPositionsRoute: typeof AuthenticatedFiscalPositionsRoute
   AuthenticatedFleetsRoute: typeof AuthenticatedFleetsRoute
   AuthenticatedHisRoute: typeof AuthenticatedHisRoute
+  AuthenticatedHomeCareRoute: typeof AuthenticatedHomeCareRoute
   AuthenticatedHrRoute: typeof AuthenticatedHrRoute
   AuthenticatedInsuranceRoute: typeof AuthenticatedInsuranceRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
@@ -1260,6 +1280,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFiscalPositionsRoute: AuthenticatedFiscalPositionsRoute,
   AuthenticatedFleetsRoute: AuthenticatedFleetsRoute,
   AuthenticatedHisRoute: AuthenticatedHisRoute,
+  AuthenticatedHomeCareRoute: AuthenticatedHomeCareRoute,
   AuthenticatedHrRoute: AuthenticatedHrRoute,
   AuthenticatedInsuranceRoute: AuthenticatedInsuranceRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,

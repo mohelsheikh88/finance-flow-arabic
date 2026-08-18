@@ -30,6 +30,7 @@ import {
   Truck,
   LineChart,
   Handshake,
+  Home,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -217,6 +218,13 @@ export function useNavGroups(): NavGroup[] {
       icon: Handshake,
       hue: 300, // magenta — relationships
       items: [{ url: "/crm", icon: Handshake, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "homeCare",
+      label: t("nav.homeCare"),
+      icon: Home,
+      hue: 130, // soft green — care, warmth
+      items: [{ url: "/home-care", icon: Home, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",
