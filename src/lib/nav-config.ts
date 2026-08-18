@@ -184,21 +184,33 @@ export function useNavGroups(): NavGroup[] {
       label: t("nav.his"),
       icon: Stethoscope,
       hue: 351, // red/rose — medical
-      items: [{ url: "/his", icon: Stethoscope, title: t("common.willBeBuiltLater") }],
-    },
-    {
-      key: "pharmacy",
-      label: t("nav.pharmacy"),
-      icon: Pill,
-      hue: 152, // green — pharmacy cross
-      items: [{ url: "/pharmacy", icon: Pill, title: t("common.willBeBuiltLater") }],
-    },
-    {
-      key: "insurance",
-      label: t("nav.insurance"),
-      icon: Umbrella,
-      hue: 224, // trust blue — insurance / protection
-      items: [{ url: "/insurance", icon: Umbrella, title: t("common.willBeBuiltLater") }],
+      subgroups: [
+        {
+          label: t("nav.insurance"),
+          icon: Umbrella,
+          items: [{ url: "/insurance", icon: Umbrella, title: t("common.willBeBuiltLater") }],
+        },
+        {
+          label: t("nav.pharmacy"),
+          icon: Pill,
+          items: [{ url: "/pharmacy", icon: Pill, title: t("common.willBeBuiltLater") }],
+        },
+        {
+          label: t("nav.homeCare"),
+          icon: Home,
+          items: [{ url: "/home-care", icon: Home, title: t("common.willBeBuiltLater") }],
+        },
+        {
+          label: t("nav.ambulance"),
+          icon: Ambulance,
+          items: [{ url: "/ambulance", icon: Ambulance, title: t("common.willBeBuiltLater") }],
+        },
+        {
+          label: t("nav.outpatientClinics"),
+          icon: ClipboardPlus,
+          items: [{ url: "/outpatient-clinics", icon: ClipboardPlus, title: t("common.willBeBuiltLater") }],
+        },
+      ],
     },
     {
       key: "fleets",
@@ -220,27 +232,6 @@ export function useNavGroups(): NavGroup[] {
       icon: Handshake,
       hue: 300, // magenta — relationships
       items: [{ url: "/crm", icon: Handshake, title: t("common.willBeBuiltLater") }],
-    },
-    {
-      key: "homeCare",
-      label: t("nav.homeCare"),
-      icon: Home,
-      hue: 130, // soft green — care, warmth
-      items: [{ url: "/home-care", icon: Home, title: t("common.willBeBuiltLater") }],
-    },
-    {
-      key: "ambulance",
-      label: t("nav.ambulance"),
-      icon: Ambulance,
-      hue: 10, // urgent red-orange — emergency
-      items: [{ url: "/ambulance", icon: Ambulance, title: t("common.willBeBuiltLater") }],
-    },
-    {
-      key: "outpatientClinics",
-      label: t("nav.outpatientClinics"),
-      icon: ClipboardPlus,
-      hue: 188, // clinical cyan — clinics
-      items: [{ url: "/outpatient-clinics", icon: ClipboardPlus, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",
