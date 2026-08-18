@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Users2, ChevronDown, ChevronRight } from "lucide-react";
+import { Users2, ChevronDown, ChevronRight, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { userDisplayLabel } from "@/lib/user-display";
 import type { NavSubgroup } from "@/lib/nav-config";
@@ -161,6 +161,8 @@ export function ModuleSectionAccessManagement({
                 grantedCount={grantedCount(sg.key)}
                 isGranted={(userId) => isGranted(sg.key!, userId)}
                 onToggle={(userId, granted) => toggle.mutate({ userId, sectionKey: sg.key!, granted })}
+                isLocked={(userId) => sg.items.some((it) => isGranted(it.url, userId))}
+                lockedHint={t("common.sectionLockedHasScreens")}
                 locale={locale}
               />
             </div>
@@ -197,6 +199,8 @@ function EntityAccessPicker({
   onToggle,
   locale,
   compact = false,
+  isLocked,
+  lockedHint,
 }: {
   candidates: any[];
   grantedCount: number;
@@ -204,6 +208,9 @@ function EntityAccessPicker({
   onToggle: (userId: string, granted: boolean) => void;
   locale: string;
   compact?: boolean;
+  /** When true for a user, their checkbox can't be UNchecked (checking is always allowed). */
+  isLocked?: (userId: string) => boolean;
+  lockedHint?: string;
 }) {
   return (
     <Popover>
@@ -216,15 +223,30 @@ function EntityAccessPicker({
       </PopoverTrigger>
       <PopoverContent align="end" className="w-64 p-2">
         <div className="max-h-64 overflow-y-auto space-y-0.5">
-          {candidates.map((c: any) => (
-            <label
-              key={c.id}
-              className="flex items-center gap-2 rounded-md px-1.5 py-1.5 cursor-pointer hover:bg-accent/40 transition-colors"
-            >
-              <Checkbox checked={isGranted(c.id)} onCheckedChange={(v) => onToggle(c.id, v === true)} />
-              <span className="flex-1 text-[13px]">{userDisplayLabel(c, locale)}</span>
-            </label>
-          ))}
+          {candidates.map((c: any) => {
+            const locked = isGranted(c.id) && !!isLocked?.(c.id);
+            return (
+              <label
+                key={c.id}
+                className={
+                  "flex items-center gap-2 rounded-md px-1.5 py-1.5 transition-colors " +
+                  (locked ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:bg-accent/40")
+                }
+                title={locked ? lockedHint : undefined}
+              >
+                <Checkbox
+                  checked={isGranted(c.id)}
+                  disabled={locked}
+                  onCheckedChange={(v) => {
+                    if (locked) return;
+                    onToggle(c.id, v === true);
+                  }}
+                />
+                <span className="flex-1 text-[13px]">{userDisplayLabel(c, locale)}</span>
+                {locked && <Lock className="h-3 w-3 text-muted-foreground shrink-0" />}
+              </label>
+            );
+          })}
         </div>
       </PopoverContent>
     </Popover>
