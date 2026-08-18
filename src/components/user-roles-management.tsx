@@ -95,6 +95,10 @@ type FormState = {
   roles: string[];
   modules: string[];
   branchIds: string[];
+  canRead: boolean;
+  canWrite: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
 };
 
 const emptyForm: FormState = {
@@ -108,6 +112,10 @@ const emptyForm: FormState = {
   roles: [],
   modules: [],
   branchIds: [],
+  canRead: true,
+  canWrite: true,
+  canEdit: true,
+  canDelete: true,
 };
 
 export function UserRolesManagement({
@@ -283,6 +291,10 @@ export function UserRolesManagement({
             isActive: f.isActive,
             employeeId: f.employeeId || undefined,
             contactEmail: f.email || null,
+            canRead: f.canRead,
+            canWrite: f.canWrite,
+            canEdit: f.canEdit,
+            canDelete: f.canDelete,
             ...(f.password ? { password: f.password } : {}),
           },
         });
@@ -312,6 +324,10 @@ export function UserRolesManagement({
             roles: f.roles,
             modules: f.modules as any,
             companyId: companyId ?? null,
+            canRead: f.canRead,
+            canWrite: f.canWrite,
+            canEdit: f.canEdit,
+            canDelete: f.canDelete,
           },
         });
         if (f.branchIds.length && (created as any)?.id) {
@@ -345,6 +361,10 @@ export function UserRolesManagement({
       roles: [...(u.roles ?? [])],
       modules: [...(modulesByUser.get(u.id) ?? [])],
       branchIds: [...(branchesByUser.get(u.id) ?? [])],
+      canRead: u.can_read !== false,
+      canWrite: u.can_write !== false,
+      canEdit: u.can_edit !== false,
+      canDelete: u.can_delete !== false,
     });
     setOpen(true);
   };
@@ -701,6 +721,28 @@ export function UserRolesManagement({
                 {allBranches.length === 0 && (
                   <p className="text-[11px] text-muted-foreground col-span-2">{t("common.noData")}</p>
                 )}
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                {(
+                  [
+                    { key: "canRead", label: t("users.permRead") },
+                    { key: "canWrite", label: t("users.permWrite") },
+                    { key: "canEdit", label: t("users.permEdit") },
+                    { key: "canDelete", label: t("users.permDelete") },
+                  ] as const
+                ).map((p) => (
+                  <label
+                    key={p.key}
+                    className="flex items-center gap-2 rounded-md border p-2.5 text-xs cursor-pointer hover:bg-accent/40"
+                  >
+                    <Switch
+                      checked={form[p.key]}
+                      onCheckedChange={(v) => setForm((f) => ({ ...f, [p.key]: v }))}
+                    />
+                    {p.label}
+                  </label>
+                ))}
               </div>
             </div>
           </div>
