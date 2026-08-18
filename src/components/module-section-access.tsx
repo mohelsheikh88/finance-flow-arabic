@@ -81,11 +81,24 @@ export function ModuleSectionAccessManagement({
   });
 
   const toggle = useMutation({
-    mutationFn: async ({ userId, sectionKey, granted }: { userId: string; sectionKey: string; granted: boolean }) => {
+    mutationFn: async ({
+      userId,
+      sectionKey,
+      granted,
+      parentSectionKey,
+    }: {
+      userId: string;
+      sectionKey: string;
+      granted: boolean;
+      /** When granting a single screen, its parent section must come along too — otherwise the section-level check hides it despite the screen being explicitly allowed. */
+      parentSectionKey?: string;
+    }) => {
       if (granted) {
-        const { error } = await supabase
-          .from("user_module_access")
-          .upsert({ user_id: userId, module_key: sectionKey }, { onConflict: "user_id,module_key" });
+        const rows = [{ user_id: userId, module_key: sectionKey }];
+        if (parentSectionKey && parentSectionKey !== sectionKey) {
+          rows.push({ user_id: userId, module_key: parentSectionKey });
+        }
+        const { error } = await supabase.from("user_module_access").upsert(rows, { onConflict: "user_id,module_key" });
         if (error) throw error;
       } else {
         const { error } = await supabase.from("user_module_access").delete().eq("user_id", userId).eq("module_key", sectionKey);
@@ -162,7 +175,7 @@ export function ModuleSectionAccessManagement({
                       candidates={candidates}
                       grantedCount={grantedCount(item.url)}
                       isGranted={(userId) => isGranted(item.url, userId)}
-                      onToggle={(userId, granted) => toggle.mutate({ userId, sectionKey: item.url, granted })}
+                      onToggle={(userId, granted) => toggle.mutate({ userId, sectionKey: item.url, granted, parentSectionKey: sg.key! })}
                       locale={locale}
                       compact
                     />
