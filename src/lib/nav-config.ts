@@ -474,6 +474,16 @@ export function useModuleAccess() {
  * open, based on per-user/group module access (direct `user_module_access`
  * UNION any user group's granted modules). Admins are never restricted by
  * this, so the one admin account always sees everything.
+ *
+ * Three levels, each independently fail-open:
+ *  1. Top-level module (e.g. "accounting")
+ *  2. Section within it (e.g. "accountsReceivable")
+ *  3. Individual screen within a section (e.g. "/invoices/customer") —
+ *     keyed by URL. Restricting screens is SCOPED to the section they
+ *     belong to: an admin only has to grant specific screens for the
+ *     sections they actually want to narrow down. Every other section
+ *     everywhere keeps showing all of its screens by default, so
+ *     configuring one section never silently locks down unrelated ones.
  */
 export function useVisibleNavGroups(): NavGroup[] {
   const groups = useNavGroups();
@@ -488,10 +498,28 @@ export function useVisibleNavGroups(): NavGroup[] {
     return myAccess.modules.includes(key);
   };
 
+  // Screen-level check, scoped to the section it lives in — only
+  // restricts if THIS section has at least one screen explicitly granted.
+  const passesItemInSection = (sectionItems: NavItem[], itemUrl: string) => {
+    if (!myAccess) return true;
+    if (isAdmin) return true;
+    const sectionHasExplicitGrants = sectionItems.some((it) => myAccess.modules.includes(it.url));
+    if (!sectionHasExplicitGrants) return true; // fail open for this section
+    return myAccess.modules.includes(itemUrl);
+  };
+
   return groups
     .filter((g) => passesUserAccess(g.key))
     .map((g) => {
       if (!g.subgroups) return g;
-      return { ...g, subgroups: g.subgroups.filter((sg) => passesUserAccess(sg.key)) };
+      return {
+        ...g,
+        subgroups: g.subgroups
+          .filter((sg) => passesUserAccess(sg.key))
+          .map((sg) => ({
+            ...sg,
+            items: sg.items.filter((it) => passesItemInSection(sg.items, it.url)),
+          })),
+      };
     });
 }
