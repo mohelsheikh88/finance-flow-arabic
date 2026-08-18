@@ -433,18 +433,35 @@ export function isLauncherPath(pathname: string): boolean {
  * Which modules (by group.key) the current user is allowed to see.
  * Shared by the sidebar and the Apps launcher grid so they never disagree.
  */
+/**
+ * A user's effective module access is the UNION of two independent
+ * grants: direct per-user assignment (user_module_access) AND everything
+ * granted by any user group (Doctors, Finance, Nursing...) they belong
+ * to. Either one is enough — this is what gives maximum flexibility:
+ * assign a module straight to one person, or to a whole group at once.
+ */
 export function useModuleAccess() {
   const { user } = useAuth();
   return useQuery({
     queryKey: ["my_module_access", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [{ data: mods }, { data: roles }] = await Promise.all([
+      const [{ data: mods }, { data: roles }, { data: memberships }] = await Promise.all([
         supabase.from("user_module_access").select("module_key").eq("user_id", user!.id),
         supabase.from("user_roles").select("role").eq("user_id", user!.id),
+        supabase.from("user_group_members").select("group_id").eq("user_id", user!.id),
       ]);
+
+      const groupIds = (memberships ?? []).map((m: any) => m.group_id as string);
+      let groupModules: string[] = [];
+      if (groupIds.length > 0) {
+        const { data: gm } = await supabase.from("user_group_modules").select("module_key").in("group_id", groupIds);
+        groupModules = (gm ?? []).map((r: any) => r.module_key as string);
+      }
+      const directModules = (mods ?? []).map((m: any) => m.module_key as string);
+
       return {
-        modules: (mods ?? []).map((m: any) => m.module_key as string),
+        modules: Array.from(new Set([...directModules, ...groupModules])),
         isAdmin: (roles ?? []).some((r: any) => r.role === "admin"),
       };
     },
