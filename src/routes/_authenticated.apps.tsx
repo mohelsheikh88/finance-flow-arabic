@@ -33,7 +33,7 @@ function AppsLauncher() {
             key={g.label}
             to={groupHomeUrl(g)}
             style={{ ["--hue" as any]: g.hue }}
-            className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl p-3 sm:p-3.5
+            className="group flex flex-col items-center justify-center gap-2 aspect-square overflow-hidden rounded-2xl p-3 sm:p-3.5
                        bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.10]
                        shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)] backdrop-blur-sm
                        transition-all duration-200 ease-out
@@ -64,7 +64,7 @@ function AppsLauncher() {
                 }}
               />
             </div>
-            <span className="text-[15px] sm:text-base font-bold text-center text-white/95 leading-tight">
+            <span className="text-[13px] sm:text-sm font-bold text-center text-white/95 leading-tight line-clamp-2" title={g.label}>
               {g.label}
             </span>
           </Link>
