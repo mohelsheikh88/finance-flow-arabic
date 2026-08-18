@@ -673,9 +673,36 @@ export type Database = {
           },
         ]
       }
+      approver_scopes: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          scope_id: string
+          scope_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: string
+          scope_id: string
+          scope_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          scope_id?: string
+          scope_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
-          branch_id: string
+          branch_id: string | null
           code: string
           company_id: string
           created_at: string
@@ -685,10 +712,11 @@ export type Database = {
           name_en: string
           notes: string | null
           parent_id: string | null
+          sort_order: number
           updated_at: string
         }
         Insert: {
-          branch_id: string
+          branch_id?: string | null
           code: string
           company_id: string
           created_at?: string
@@ -698,10 +726,11 @@ export type Database = {
           name_en: string
           notes?: string | null
           parent_id?: string | null
+          sort_order?: number
           updated_at?: string
         }
         Update: {
-          branch_id?: string
+          branch_id?: string | null
           code?: string
           company_id?: string
           created_at?: string
@@ -711,6 +740,7 @@ export type Database = {
           name_en?: string
           notes?: string | null
           parent_id?: string | null
+          sort_order?: number
           updated_at?: string
         }
         Relationships: [
@@ -2581,6 +2611,7 @@ export type Database = {
         | "accountant"
         | "internal_auditor"
         | "internal_audit_manager"
+        | "direct_manager"
       approval_doc_type:
         | "journal_entry"
         | "invoice"
@@ -2739,6 +2770,7 @@ export const Constants = {
         "accountant",
         "internal_auditor",
         "internal_audit_manager",
+        "direct_manager",
       ],
       approval_doc_type: [
         "journal_entry",

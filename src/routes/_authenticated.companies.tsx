@@ -34,7 +34,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Building2, MapPin, Pencil, Network, ChevronRight, ChevronDown } from "lucide-react";
+import { Plus, Building2, MapPin, Pencil, Network, ChevronRight, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/companies")({
@@ -302,25 +302,33 @@ function Page() {
     return m;
   }, [branches]);
 
-  // ===== Departments (hierarchical, scoped to a branch) =====
-  const [deptBranchId, setDeptBranchId] = useState<string>("");
-  const activeDeptBranchId = deptBranchId || (branches as Branch[])[0]?.id || "";
+  // ===== Departments — independent org-chart tree, scoped to a COMPANY.
+  // A branch is just an optional tag on a department, not a nesting scope
+  // (mirrors the "HR & Personnel Request System" organization model). =====
+  const [deptCompanyId, setDeptCompanyId] = useState<string>("");
+  const activeDeptCompanyId = deptCompanyId || companies[0]?.id || "";
 
   const { data: departments = [] } = useQuery({
-    queryKey: ["departments", activeDeptBranchId],
-    enabled: !!activeDeptBranchId,
+    queryKey: ["departments", activeDeptCompanyId],
+    enabled: !!activeDeptCompanyId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("departments")
         .select("*")
-        .eq("branch_id", activeDeptBranchId)
+        .eq("company_id", activeDeptCompanyId)
+        .order("sort_order")
         .order("code");
       if (error) throw error;
       return data as any[];
     },
   });
 
-  const emptyDept = { branch_id: "", parent_id: "", code: "", name_ar: "", name_en: "", notes: "" };
+  const companyBranches = useMemo(
+    () => (branches as Branch[]).filter((b) => b.company_id === activeDeptCompanyId),
+    [branches, activeDeptCompanyId]
+  );
+
+  const emptyDept = { company_id: "", branch_id: "", parent_id: "", code: "", name_ar: "", name_en: "", notes: "" };
   const [deptOpen, setDeptOpen] = useState(false);
   const [deptForm, setDeptForm] = useState<typeof emptyDept & { id?: string }>(emptyDept);
 
@@ -328,7 +336,8 @@ function Page() {
     if (existing) {
       setDeptForm({
         id: existing.id,
-        branch_id: existing.branch_id,
+        company_id: existing.company_id,
+        branch_id: existing.branch_id ?? "",
         parent_id: existing.parent_id ?? "",
         code: existing.code ?? "",
         name_ar: existing.name_ar ?? "",
@@ -336,17 +345,16 @@ function Page() {
         notes: existing.notes ?? "",
       });
     } else {
-      setDeptForm({ ...emptyDept, branch_id: activeDeptBranchId, parent_id: parentId ?? "" });
+      setDeptForm({ ...emptyDept, company_id: activeDeptCompanyId, parent_id: parentId ?? "" });
     }
     setDeptOpen(true);
   };
 
   const deptMut = useMutation({
     mutationFn: async () => {
-      const activeBranch = (branches as Branch[]).find((b) => b.id === deptForm.branch_id);
       const payload = {
-        branch_id: deptForm.branch_id,
-        company_id: activeBranch?.company_id,
+        company_id: deptForm.company_id,
+        branch_id: deptForm.branch_id || null,
         parent_id: deptForm.parent_id || null,
         code: deptForm.code,
         name_ar: deptForm.name_ar,
@@ -369,6 +377,18 @@ function Page() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const deleteDept = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("departments").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("common.deleted"));
+      qc.invalidateQueries({ queryKey: ["departments"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const deptTree = useMemo(() => {
     const byParent: Record<string, any[]> = {};
     for (const d of departments) {
@@ -378,7 +398,58 @@ function Page() {
     return byParent;
   }, [departments]);
 
-  const canSaveDept = deptForm.branch_id && deptForm.code && deptForm.name_ar && deptForm.name_en;
+  const reorderDept = useMutation({
+    mutationFn: async ({ siblings, from, to }: { siblings: any[]; from: number; to: number }) => {
+      const arr = siblings.slice();
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      for (let i = 0; i < arr.length; i++) {
+        const { error } = await supabase.from("departments").update({ sort_order: i }).eq("id", arr[i].id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["departments"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const moveDept = (node: any, dir: -1 | 1) => {
+    const siblings = deptTree[node.parent_id ?? "root"] ?? [];
+    const idx = siblings.findIndex((x) => x.id === node.id);
+    const to = idx + dir;
+    if (to < 0 || to >= siblings.length) return;
+    reorderDept.mutate({ siblings, from: idx, to });
+  };
+
+  // Who currently holds the "direct_manager" role scoped to this department
+  // (read-only here — assigning approvers happens on a dedicated screen).
+  const { data: directManagersByDept } = useQuery({
+    queryKey: ["dept-direct-managers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("approver_scopes")
+        .select("user_id, scope_id")
+        .eq("scope_type", "department")
+        .eq("role", "direct_manager");
+      if (error) throw error;
+      const userIds = Array.from(new Set((data ?? []).map((r: any) => r.user_id)));
+      const namesById = new Map<string, string>();
+      if (userIds.length > 0) {
+        const { data: profs } = await supabase.from("profiles").select("id, display_name_ar, display_name_en, email").in("id", userIds);
+        for (const p of profs ?? []) {
+          namesById.set(p.id, (p as any).display_name_ar || (p as any).display_name_en || (p as any).email);
+        }
+      }
+      const map = new Map<string, string>();
+      for (const r of data as any[]) {
+        const name = namesById.get(r.user_id);
+        if (name) map.set(r.scope_id, name);
+      }
+      return map;
+    },
+  });
+
+  const canSaveDept = deptForm.company_id && deptForm.code && deptForm.name_ar && deptForm.name_en;
+
 
   const canSaveCompany = coForm.code && coForm.name_ar && coForm.name_en;
   const canSaveBranch = brForm.company_id && brForm.code && brForm.name_ar && brForm.name_en;
@@ -545,20 +616,20 @@ function Page() {
         <TabsContent value="departments" className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className="w-64">
-              <Select value={activeDeptBranchId} onValueChange={setDeptBranchId}>
+              <Select value={activeDeptCompanyId} onValueChange={setDeptCompanyId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t("common.selectBranch")} />
+                  <SelectValue placeholder={t("nav.companies")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {(branches as Branch[]).map((b) => (
-                    <SelectItem key={b.id} value={b.id}>
-                      {localized(b, "name")} ({b.code})
+                  {companies.map((c: Company) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {localized(c, "name")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={() => openDept()} disabled={!activeDeptBranchId}>
+            <Button onClick={() => openDept()} disabled={!activeDeptCompanyId}>
               <Plus className="h-4 w-4 me-1" />
               {t("common.new")} {t("nav.departments")}
             </Button>
@@ -569,8 +640,23 @@ function Page() {
               <p className="p-8 text-center text-muted-foreground text-sm">{t("common.noData")}</p>
             )}
             <div className="space-y-0.5">
-              {(deptTree["root"] ?? []).map((d) => (
-                <DepartmentNode key={d.id} node={d} depth={0} tree={deptTree} localized={localized} t={t} onAdd={openDept} onEdit={(n) => openDept(undefined, n)} />
+              {(deptTree["root"] ?? []).map((d, i, arr) => (
+                <DepartmentNode
+                  key={d.id}
+                  node={d}
+                  depth={0}
+                  index={i}
+                  siblingCount={arr.length}
+                  tree={deptTree}
+                  branches={companyBranches}
+                  directManagersByDept={directManagersByDept}
+                  localized={localized}
+                  t={t}
+                  onAdd={openDept}
+                  onEdit={(n) => openDept(undefined, n)}
+                  onDelete={(id) => deleteDept.mutate(id)}
+                  onMove={moveDept}
+                />
               ))}
             </div>
           </Card>
@@ -586,20 +672,19 @@ function Page() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t("common.name")} (EN)</Label>
+                <Input value={deptForm.name_en} onChange={(e) => setDeptForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" />
+              </div>
+              <div>
+                <Label>{t("common.name")} (AR)</Label>
+                <Input value={deptForm.name_ar} onChange={(e) => setDeptForm((f) => ({ ...f, name_ar: e.target.value }))} dir="rtl" />
+              </div>
+            </div>
             <div>
-              <Label>{t("common.selectBranch")}</Label>
-              <Select value={deptForm.branch_id} onValueChange={(v) => setDeptForm((f) => ({ ...f, branch_id: v, parent_id: "" }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(branches as Branch[]).map((b) => (
-                    <SelectItem key={b.id} value={b.id}>
-                      {localized(b, "name")} ({b.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>{t("common.code")}</Label>
+              <Input value={deptForm.code} onChange={(e) => setDeptForm((f) => ({ ...f, code: e.target.value }))} />
             </div>
             <div>
               <Label>{t("common.parentDepartment")}</Label>
@@ -613,7 +698,7 @@ function Page() {
                 <SelectContent>
                   <SelectItem value="__top__">{t("common.topLevel")}</SelectItem>
                   {departments
-                    .filter((d) => d.branch_id === deptForm.branch_id && d.id !== deptForm.id)
+                    .filter((d) => d.id !== deptForm.id) // can't be its own parent
                     .map((d) => (
                       <SelectItem key={d.id} value={d.id}>
                         {localized(d, "name")}
@@ -622,21 +707,36 @@ function Page() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>{t("common.code")}</Label>
-                <Input value={deptForm.code} onChange={(e) => setDeptForm((f) => ({ ...f, code: e.target.value }))} />
-              </div>
+            <div>
+              <Label>{t("nav.branches")}</Label>
+              <Select value={deptForm.branch_id || "__none__"} onValueChange={(v) => setDeptForm((f) => ({ ...f, branch_id: v === "__none__" ? "" : v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">{t("common.noBranch")}</SelectItem>
+                  {companyBranches.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {localized(b, "name")} / {b.name_en}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>{t("common.name")} (AR)</Label>
-                <Input value={deptForm.name_ar} onChange={(e) => setDeptForm((f) => ({ ...f, name_ar: e.target.value }))} dir="rtl" />
-              </div>
-              <div>
-                <Label>{t("common.name")} (EN)</Label>
-                <Input value={deptForm.name_en} onChange={(e) => setDeptForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" />
-              </div>
+
+            {/* Direct Manager — read-only here; assigned from the approvers screen */}
+            <div className="space-y-1.5 rounded-md border bg-muted/20 p-3">
+              <div className="text-xs font-semibold">{t("common.directManagerOfDepartment")}</div>
+              <p className="text-[11px] text-muted-foreground">{t("common.directManagerHint")}</p>
+              {!deptForm.id ? (
+                <p className="text-[11px] text-muted-foreground">{t("common.saveDeptFirstHint")}</p>
+              ) : (
+                <p className="text-sm font-medium">
+                  {directManagersByDept?.get(deptForm.id) ?? (
+                    <span className="text-muted-foreground font-normal">{t("common.noDirectManagerAssigned")}</span>
+                  )}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -784,23 +884,37 @@ function Field({
 function DepartmentNode({
   node,
   depth,
+  index,
+  siblingCount,
   tree,
+  branches,
+  directManagersByDept,
   localized,
   t,
   onAdd,
   onEdit,
+  onDelete,
+  onMove,
 }: {
   node: any;
   depth: number;
+  index: number;
+  siblingCount: number;
   tree: Record<string, any[]>;
+  branches: any[];
+  directManagersByDept?: Map<string, string>;
   localized: (row: any, base: string) => string;
   t: (k: string) => string;
   onAdd: (parentId?: string) => void;
   onEdit: (node: any) => void;
+  onDelete: (id: string) => void;
+  onMove: (node: any, dir: -1 | 1) => void;
 }) {
   const [open, setOpen] = useState(true);
   const children = tree[node.id] ?? [];
   const hasChildren = children.length > 0;
+  const branch = node.branch_id ? branches.find((b) => b.id === node.branch_id) : null;
+  const manager = directManagersByDept?.get(node.id);
 
   return (
     <div>
@@ -816,24 +930,61 @@ function DepartmentNode({
           {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
         </button>
 
-        <span className="flex-1 min-w-0 truncate text-sm font-medium">{localized(node, "name")}</span>
-        <span className="text-xs text-muted-foreground font-mono shrink-0">{node.code}</span>
+        <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-medium">{localized(node, "name")}</span>
+          <span className="text-xs text-muted-foreground font-mono">{node.code}</span>
+          {branch && (
+            <span className="inline-flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5 text-[10.5px] text-muted-foreground">
+              <MapPin className="h-2.5 w-2.5" />
+              {localized(branch, "name")}
+            </span>
+          )}
+          {manager && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-primary/25 bg-primary/5 px-1.5 py-0.5 text-[10.5px] text-primary">
+              {manager}
+            </span>
+          )}
+        </div>
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <Button variant="ghost" size="icon" className="h-6 w-6" disabled={index <= 0} onClick={() => onMove(node, -1)} title={t("common.moveUp")}>
+            <ChevronUp className="h-3 w-3" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6" disabled={index >= siblingCount - 1} onClick={() => onMove(node, 1)} title={t("common.moveDown")}>
+            <ChevronDown className="h-3 w-3" />
+          </Button>
           <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => onAdd(node.id)}>
             <Plus className="h-3 w-3 me-1" />
             {t("common.subDepartment")}
           </Button>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onEdit(node)}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 p-0" onClick={() => onEdit(node)}>
             <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 p-0 text-destructive" onClick={() => onDelete(node.id)}>
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
 
       {open && hasChildren && (
         <div>
-          {children.map((child) => (
-            <DepartmentNode key={child.id} node={child} depth={depth + 1} tree={tree} localized={localized} t={t} onAdd={onAdd} onEdit={onEdit} />
+          {children.map((child, i) => (
+            <DepartmentNode
+              key={child.id}
+              node={child}
+              depth={depth + 1}
+              index={i}
+              siblingCount={children.length}
+              tree={tree}
+              branches={branches}
+              directManagersByDept={directManagersByDept}
+              localized={localized}
+              t={t}
+              onAdd={onAdd}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onMove={onMove}
+            />
           ))}
         </div>
       )}
