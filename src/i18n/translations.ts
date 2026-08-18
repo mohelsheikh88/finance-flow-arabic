@@ -246,7 +246,7 @@ export const translations = {
       purchaseProcurement: "المشتريات",
       inventoryManagement: "المخزون",
       humanResources: "الموارد البشرية",
-      his: "الطبي",
+      his: "النظام الطبي",
       pharmacy: "الصيدلية",
       insurance: "التأمين",
       fleets: "الأسطول",
