@@ -14,7 +14,7 @@ function AppsLauncher() {
   return (
     <div className="min-h-full flex flex-col items-center px-6 py-10 sm:py-14">
       <div className="mb-10 sm:mb-14">
-        <BrandLogo size={48} variant="light" />
+        <BrandLogo size={84} variant="light" />
       </div>
 
       <h1 className="text-xl sm:text-2xl font-bold text-white mb-1.5 text-center">

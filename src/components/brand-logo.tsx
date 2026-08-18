@@ -32,10 +32,14 @@ export function BrandLogo({
   const enSubColor = isLight ? "text-white/50" : "text-slate-500";
 
   const isAr = locale === "ar";
+  const titleSize = Math.round(size * 0.375);
+  const subSize = Math.round(size * 0.25);
+  const gapPx = Math.max(8, Math.round(size * 0.22));
 
   return (
     <div
-      className={`flex items-center gap-3 ${className}`}
+      className={`flex items-center ${className}`}
+      style={{ gap: gapPx }}
       dir={isAr ? "rtl" : "ltr"}
     >
       <BrandMark size={size} identity={identity} />
@@ -43,17 +47,18 @@ export function BrandLogo({
         isAr ? (
           <div className="flex flex-col items-end leading-tight">
             <span
-              className={`text-[15px] font-bold tracking-tight ${titleColor}`}
+              className={`font-bold tracking-tight ${titleColor}`}
               style={{
                 fontFamily: identity.arabicFont,
+                fontSize: titleSize,
                 color: isLight ? undefined : identity.titleColor,
               }}
             >
               الحياة المالية
             </span>
             <span
-              className={`text-[10px] font-light ${subColor}`}
-              style={{ fontFamily: identity.arabicFont }}
+              className={`font-light ${subColor}`}
+              style={{ fontFamily: identity.arabicFont, fontSize: subSize }}
             >
               نظام مالي متكامل
             </span>
@@ -61,14 +66,14 @@ export function BrandLogo({
         ) : (
           <div className="flex flex-col leading-tight">
             <span
-              className={`text-[15px] font-semibold tracking-tight ${enColor}`}
-              style={{ fontFamily: identity.latinFont }}
+              className={`font-semibold tracking-tight ${enColor}`}
+              style={{ fontFamily: identity.latinFont, fontSize: titleSize }}
             >
               Al Hayat
             </span>
             <span
-              className={`text-[9px] font-bold uppercase tracking-[0.18em] ${enSubColor}`}
-              style={{ fontFamily: identity.latinFont }}
+              className={`font-bold uppercase tracking-[0.18em] ${enSubColor}`}
+              style={{ fontFamily: identity.latinFont, fontSize: Math.round(size * 0.225) }}
             >
               Financial ERP
             </span>
