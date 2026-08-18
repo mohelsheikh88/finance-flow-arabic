@@ -47,7 +47,6 @@ import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { useBranch } from "@/lib/branch-context";
 
 export type NavItem = { url: string; icon: any; title: string };
 export type NavSubgroup = { key?: string; label: string; icon: any; hue?: number; items: NavItem[] };
@@ -360,7 +359,6 @@ export function useNavGroups(): NavGroup[] {
       items: [
         { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/users", icon: Users, title: t("nav.users") },
-        { url: "/modules-management", icon: Blocks, title: t("nav.modulesManagement") },
       ],
     },
   ];
@@ -469,56 +467,16 @@ export function useModuleAccess() {
 }
 
 /**
- * Which medical sub-modules (Insurance, Pharmacy, Home Care, Ambulance,
- * Outpatient Clinics) are actually turned on at the user's currently
- * active branch. Fails open (returns undefined) while loading or when no
- * branch is selected yet, so the UI doesn't flash an empty state.
- */
-/**
- * Which modules — top-level or sub-modules, by their `key` — are turned
- * on at the user's currently active branch. Fails open (returns
- * undefined) while loading or when no branch is selected yet, so the UI
- * doesn't flash an empty state.
- */
-export function useBranchModuleAccess() {
-  const { branchId } = useBranch();
-  return useQuery({
-    queryKey: ["branch_module_access", branchId],
-    enabled: !!branchId,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("branch_module_access")
-        .select("module_key, is_enabled")
-        .eq("branch_id", branchId!);
-      return (data ?? []).filter((r: any) => r.is_enabled).map((r: any) => r.module_key as string);
-    },
-  });
-}
-
-/**
  * Nav groups filtered down to the ones this user is actually allowed to
- * open — combining two independent layers, applied uniformly to BOTH
- * top-level modules and their sub-modules (anything with a `key`):
- *  1. User/group-level module access (direct `user_module_access` UNION
- *     any user group's granted modules). No special-casing for admins —
- *     an admin with zero explicit assignments sees everything (the same
- *     fail-open default anyone gets), but the moment they configure
- *     specific access for themselves it takes effect just like for any
- *     other user. This is what makes the whole permission system
- *     actually testable from a single admin account.
- *  2. Branch-level module availability: which modules/sub-modules are
- *     enabled at the branch the user is currently working in.
+ * open, based on per-user/group module access (direct `user_module_access`
+ * UNION any user group's granted modules). Admins are never restricted by
+ * this, so the one admin account always sees everything.
  */
 export function useVisibleNavGroups(): NavGroup[] {
   const groups = useNavGroups();
   const { data: myAccess } = useModuleAccess();
-  const { branchId } = useBranch();
-  const { data: branchModules } = useBranchModuleAccess();
   const isAdmin = !!myAccess?.isAdmin;
 
-  // Per-user/group assignment (direct access or via a user group) — an
-  // admin is never restricted by this, so they can never lock themselves
-  // out through a forgotten/misconfigured group.
   const passesUserAccess = (key?: string) => {
     if (!key) return true;
     if (!myAccess) return true; // fail open while loading
@@ -527,21 +485,10 @@ export function useVisibleNavGroups(): NavGroup[] {
     return myAccess.modules.includes(key);
   };
 
-  // Branch availability (is this module turned on for the branch I'm
-  // CURRENTLY working in) — admins bypass this too, so the one admin
-  // account always sees everything; test restricted views with a
-  // separate non-admin user account instead.
-  const passesBranch = (key?: string) => {
-    if (!key) return true;
-    if (isAdmin) return true;
-    if (!branchId || branchModules === undefined) return true; // fail open
-    return branchModules.includes(key);
-  };
-
   return groups
-    .filter((g) => passesUserAccess(g.key) && passesBranch(g.key))
+    .filter((g) => passesUserAccess(g.key))
     .map((g) => {
       if (!g.subgroups) return g;
-      return { ...g, subgroups: g.subgroups.filter((sg) => passesUserAccess(sg.key) && passesBranch(sg.key)) };
+      return { ...g, subgroups: g.subgroups.filter((sg) => passesUserAccess(sg.key)) };
     });
 }
