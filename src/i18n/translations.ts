@@ -248,6 +248,7 @@ export const translations = {
       his: "نظام المعلومات الصحي (HIS)",
       pharmacy: "الصيدلية",
       insurance: "التأمين",
+      fleets: "الأسطول",
     },
     ar: {
       invoices: "فواتير العملاء",
@@ -1049,6 +1050,7 @@ export const translations = {
       his: "Hospital Information System (HIS)",
       pharmacy: "Pharmacy",
       insurance: "Insurance",
+      fleets: "Fleets",
     },
     ar: {
       invoices: "Invoices",

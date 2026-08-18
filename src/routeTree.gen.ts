@@ -30,6 +30,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDebitMemosRouteImport } from './routes/_authenticated.debit-memos'
 import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authenticated.fiscal-periods'
 import { Route as AuthenticatedFiscalPositionsRouteImport } from './routes/_authenticated.fiscal-positions'
+import { Route as AuthenticatedFleetsRouteImport } from './routes/_authenticated.fleets'
 import { Route as AuthenticatedHisRouteImport } from './routes/_authenticated.his'
 import { Route as AuthenticatedHrRouteImport } from './routes/_authenticated.hr'
 import { Route as AuthenticatedInsuranceRouteImport } from './routes/_authenticated.insurance'
@@ -177,6 +178,11 @@ const AuthenticatedFiscalPositionsRoute =
     path: '/fiscal-positions',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedFleetsRoute = AuthenticatedFleetsRouteImport.update({
+  id: '/fleets',
+  path: '/fleets',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedHisRoute = AuthenticatedHisRouteImport.update({
   id: '/his',
   path: '/his',
@@ -392,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
+  '/fleets': typeof AuthenticatedFleetsRoute
   '/his': typeof AuthenticatedHisRoute
   '/hr': typeof AuthenticatedHrRoute
   '/insurance': typeof AuthenticatedInsuranceRoute
@@ -449,6 +456,7 @@ export interface FileRoutesByTo {
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
+  '/fleets': typeof AuthenticatedFleetsRoute
   '/his': typeof AuthenticatedHisRoute
   '/hr': typeof AuthenticatedHrRoute
   '/insurance': typeof AuthenticatedInsuranceRoute
@@ -508,6 +516,7 @@ export interface FileRoutesById {
   '/_authenticated/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/_authenticated/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/_authenticated/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
+  '/_authenticated/fleets': typeof AuthenticatedFleetsRoute
   '/_authenticated/his': typeof AuthenticatedHisRoute
   '/_authenticated/hr': typeof AuthenticatedHrRoute
   '/_authenticated/insurance': typeof AuthenticatedInsuranceRoute
@@ -567,6 +576,7 @@ export interface FileRouteTypes {
     | '/debit-memos'
     | '/fiscal-periods'
     | '/fiscal-positions'
+    | '/fleets'
     | '/his'
     | '/hr'
     | '/insurance'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/debit-memos'
     | '/fiscal-periods'
     | '/fiscal-positions'
+    | '/fleets'
     | '/his'
     | '/hr'
     | '/insurance'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/_authenticated/debit-memos'
     | '/_authenticated/fiscal-periods'
     | '/_authenticated/fiscal-positions'
+    | '/_authenticated/fleets'
     | '/_authenticated/his'
     | '/_authenticated/hr'
     | '/_authenticated/insurance'
@@ -873,6 +885,13 @@ declare module '@tanstack/react-router' {
       path: '/fiscal-positions'
       fullPath: '/fiscal-positions'
       preLoaderRoute: typeof AuthenticatedFiscalPositionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/fleets': {
+      id: '/_authenticated/fleets'
+      path: '/fleets'
+      fullPath: '/fleets'
+      preLoaderRoute: typeof AuthenticatedFleetsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/his': {
@@ -1142,6 +1161,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDebitMemosRoute: typeof AuthenticatedDebitMemosRoute
   AuthenticatedFiscalPeriodsRoute: typeof AuthenticatedFiscalPeriodsRoute
   AuthenticatedFiscalPositionsRoute: typeof AuthenticatedFiscalPositionsRoute
+  AuthenticatedFleetsRoute: typeof AuthenticatedFleetsRoute
   AuthenticatedHisRoute: typeof AuthenticatedHisRoute
   AuthenticatedHrRoute: typeof AuthenticatedHrRoute
   AuthenticatedInsuranceRoute: typeof AuthenticatedInsuranceRoute
@@ -1197,6 +1217,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDebitMemosRoute: AuthenticatedDebitMemosRoute,
   AuthenticatedFiscalPeriodsRoute: AuthenticatedFiscalPeriodsRoute,
   AuthenticatedFiscalPositionsRoute: AuthenticatedFiscalPositionsRoute,
+  AuthenticatedFleetsRoute: AuthenticatedFleetsRoute,
   AuthenticatedHisRoute: AuthenticatedHisRoute,
   AuthenticatedHrRoute: AuthenticatedHrRoute,
   AuthenticatedInsuranceRoute: AuthenticatedInsuranceRoute,

@@ -27,6 +27,7 @@ import {
   Stethoscope,
   Pill,
   Umbrella,
+  Truck,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -193,6 +194,13 @@ export function useNavGroups(): NavGroup[] {
       icon: Umbrella,
       hue: 224, // trust blue — insurance / protection
       items: [{ url: "/insurance", icon: Umbrella, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "fleets",
+      label: t("nav.fleets"),
+      icon: Truck,
+      hue: 45, // amber — vehicles, transport
+      items: [{ url: "/fleets", icon: Truck, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",
