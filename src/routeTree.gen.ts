@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated.accounts'
 import { Route as AuthenticatedAmbulanceRouteImport } from './routes/_authenticated.ambulance'
+import { Route as AuthenticatedAppointmentsRouteImport } from './routes/_authenticated.appointments'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated.approvals'
 import { Route as AuthenticatedAppsRouteImport } from './routes/_authenticated.apps'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated.assets'
@@ -30,6 +31,7 @@ import { Route as AuthenticatedCurrenciesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated.customers'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedDebitMemosRouteImport } from './routes/_authenticated.debit-memos'
+import { Route as AuthenticatedEmergencyRouteImport } from './routes/_authenticated.emergency'
 import { Route as AuthenticatedFiscalPeriodsRouteImport } from './routes/_authenticated.fiscal-periods'
 import { Route as AuthenticatedFiscalPositionsRouteImport } from './routes/_authenticated.fiscal-positions'
 import { Route as AuthenticatedFleetsRouteImport } from './routes/_authenticated.fleets'
@@ -38,16 +40,22 @@ import { Route as AuthenticatedHrRouteImport } from './routes/_authenticated.hr'
 import { Route as AuthenticatedInsuranceRouteImport } from './routes/_authenticated.insurance'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
+import { Route as AuthenticatedLaboratoryRouteImport } from './routes/_authenticated.laboratory'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
+import { Route as AuthenticatedMedicalDashboardRouteImport } from './routes/_authenticated.medical-dashboard'
 import { Route as AuthenticatedModulesManagementRouteImport } from './routes/_authenticated.modules-management'
 import { Route as AuthenticatedOutpatientClinicsRouteImport } from './routes/_authenticated.outpatient-clinics'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
+import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated.patients'
 import { Route as AuthenticatedPaymentMethodsRouteImport } from './routes/_authenticated.payment-methods'
 import { Route as AuthenticatedPaymentTermsRouteImport } from './routes/_authenticated.payment-terms'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
 import { Route as AuthenticatedPharmacyRouteImport } from './routes/_authenticated.pharmacy'
+import { Route as AuthenticatedPhysicianRouteImport } from './routes/_authenticated.physician'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
+import { Route as AuthenticatedRadiologyRouteImport } from './routes/_authenticated.radiology'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
+import { Route as AuthenticatedReceptionRouteImport } from './routes/_authenticated.reception'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated.sales'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
@@ -55,6 +63,7 @@ import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedTrialBalanceRouteImport } from './routes/_authenticated.trial-balance'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
 import { Route as AuthenticatedVendorsRouteImport } from './routes/_authenticated.vendors'
+import { Route as AuthenticatedWaitingScreenRouteImport } from './routes/_authenticated.waiting-screen'
 import { Route as AuthenticatedDashboardsApRouteImport } from './routes/_authenticated.dashboards.ap'
 import { Route as AuthenticatedDashboardsArRouteImport } from './routes/_authenticated.dashboards.ar'
 import { Route as AuthenticatedDashboardsBanksRouteImport } from './routes/_authenticated.dashboards.banks'
@@ -97,6 +106,12 @@ const AuthenticatedAmbulanceRoute = AuthenticatedAmbulanceRouteImport.update({
   path: '/ambulance',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAppointmentsRoute =
+  AuthenticatedAppointmentsRouteImport.update({
+    id: '/appointments',
+    path: '/appointments',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedApprovalsRoute = AuthenticatedApprovalsRouteImport.update({
   id: '/approvals',
   path: '/approvals',
@@ -182,6 +197,11 @@ const AuthenticatedDebitMemosRoute = AuthenticatedDebitMemosRouteImport.update({
   path: '/debit-memos',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedEmergencyRoute = AuthenticatedEmergencyRouteImport.update({
+  id: '/emergency',
+  path: '/emergency',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedFiscalPeriodsRoute =
   AuthenticatedFiscalPeriodsRouteImport.update({
     id: '/fiscal-periods',
@@ -224,11 +244,22 @@ const AuthenticatedJournalsRoute = AuthenticatedJournalsRouteImport.update({
   path: '/journals',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedLaboratoryRoute = AuthenticatedLaboratoryRouteImport.update({
+  id: '/laboratory',
+  path: '/laboratory',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
   id: '/loans',
   path: '/loans',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedMedicalDashboardRoute =
+  AuthenticatedMedicalDashboardRouteImport.update({
+    id: '/medical-dashboard',
+    path: '/medical-dashboard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedModulesManagementRoute =
   AuthenticatedModulesManagementRouteImport.update({
     id: '/modules-management',
@@ -244,6 +275,11 @@ const AuthenticatedOutpatientClinicsRoute =
 const AuthenticatedPartnersRoute = AuthenticatedPartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
+  id: '/patients',
+  path: '/patients',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPaymentMethodsRoute =
@@ -268,14 +304,29 @@ const AuthenticatedPharmacyRoute = AuthenticatedPharmacyRouteImport.update({
   path: '/pharmacy',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPhysicianRoute = AuthenticatedPhysicianRouteImport.update({
+  id: '/physician',
+  path: '/physician',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPurchaseRoute = AuthenticatedPurchaseRouteImport.update({
   id: '/purchase',
   path: '/purchase',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRadiologyRoute = AuthenticatedRadiologyRouteImport.update({
+  id: '/radiology',
+  path: '/radiology',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedReceiptsRoute = AuthenticatedReceiptsRouteImport.update({
   id: '/receipts',
   path: '/receipts',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedReceptionRoute = AuthenticatedReceptionRouteImport.update({
+  id: '/reception',
+  path: '/reception',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
@@ -314,6 +365,12 @@ const AuthenticatedVendorsRoute = AuthenticatedVendorsRouteImport.update({
   path: '/vendors',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWaitingScreenRoute =
+  AuthenticatedWaitingScreenRouteImport.update({
+    id: '/waiting-screen',
+    path: '/waiting-screen',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardsApRoute =
   AuthenticatedDashboardsApRouteImport.update({
     id: '/dashboards/ap',
@@ -420,6 +477,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/ambulance': typeof AuthenticatedAmbulanceRoute
+  '/appointments': typeof AuthenticatedAppointmentsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/apps': typeof AuthenticatedAppsRoute
   '/assets': typeof AuthenticatedAssetsRoute
@@ -436,6 +494,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
+  '/emergency': typeof AuthenticatedEmergencyRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/fleets': typeof AuthenticatedFleetsRoute
@@ -444,16 +503,22 @@ export interface FileRoutesByFullPath {
   '/insurance': typeof AuthenticatedInsuranceRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
+  '/laboratory': typeof AuthenticatedLaboratoryRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/modules-management': typeof AuthenticatedModulesManagementRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/partners': typeof AuthenticatedPartnersRoute
+  '/patients': typeof AuthenticatedPatientsRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pharmacy': typeof AuthenticatedPharmacyRoute
+  '/physician': typeof AuthenticatedPhysicianRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
+  '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
+  '/reception': typeof AuthenticatedReceptionRoute
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -461,6 +526,7 @@ export interface FileRoutesByFullPath {
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/users': typeof AuthenticatedUsersRoute
   '/vendors': typeof AuthenticatedVendorsRoute
+  '/waiting-screen': typeof AuthenticatedWaitingScreenRoute
   '/dashboards/ap': typeof AuthenticatedDashboardsApRoute
   '/dashboards/ar': typeof AuthenticatedDashboardsArRoute
   '/dashboards/banks': typeof AuthenticatedDashboardsBanksRoute
@@ -484,6 +550,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/ambulance': typeof AuthenticatedAmbulanceRoute
+  '/appointments': typeof AuthenticatedAppointmentsRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/apps': typeof AuthenticatedAppsRoute
   '/assets': typeof AuthenticatedAssetsRoute
@@ -500,6 +567,7 @@ export interface FileRoutesByTo {
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
+  '/emergency': typeof AuthenticatedEmergencyRoute
   '/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/fleets': typeof AuthenticatedFleetsRoute
@@ -508,16 +576,22 @@ export interface FileRoutesByTo {
   '/insurance': typeof AuthenticatedInsuranceRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
+  '/laboratory': typeof AuthenticatedLaboratoryRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/modules-management': typeof AuthenticatedModulesManagementRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/partners': typeof AuthenticatedPartnersRoute
+  '/patients': typeof AuthenticatedPatientsRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pharmacy': typeof AuthenticatedPharmacyRoute
+  '/physician': typeof AuthenticatedPhysicianRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
+  '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
+  '/reception': typeof AuthenticatedReceptionRoute
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -525,6 +599,7 @@ export interface FileRoutesByTo {
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/users': typeof AuthenticatedUsersRoute
   '/vendors': typeof AuthenticatedVendorsRoute
+  '/waiting-screen': typeof AuthenticatedWaitingScreenRoute
   '/dashboards/ap': typeof AuthenticatedDashboardsApRoute
   '/dashboards/ar': typeof AuthenticatedDashboardsArRoute
   '/dashboards/banks': typeof AuthenticatedDashboardsBanksRoute
@@ -550,6 +625,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/ambulance': typeof AuthenticatedAmbulanceRoute
+  '/_authenticated/appointments': typeof AuthenticatedAppointmentsRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/apps': typeof AuthenticatedAppsRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
@@ -566,6 +642,7 @@ export interface FileRoutesById {
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/debit-memos': typeof AuthenticatedDebitMemosRoute
+  '/_authenticated/emergency': typeof AuthenticatedEmergencyRoute
   '/_authenticated/fiscal-periods': typeof AuthenticatedFiscalPeriodsRoute
   '/_authenticated/fiscal-positions': typeof AuthenticatedFiscalPositionsRoute
   '/_authenticated/fleets': typeof AuthenticatedFleetsRoute
@@ -574,16 +651,22 @@ export interface FileRoutesById {
   '/_authenticated/insurance': typeof AuthenticatedInsuranceRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
+  '/_authenticated/laboratory': typeof AuthenticatedLaboratoryRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
+  '/_authenticated/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/_authenticated/modules-management': typeof AuthenticatedModulesManagementRoute
   '/_authenticated/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
+  '/_authenticated/patients': typeof AuthenticatedPatientsRoute
   '/_authenticated/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/_authenticated/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/pharmacy': typeof AuthenticatedPharmacyRoute
+  '/_authenticated/physician': typeof AuthenticatedPhysicianRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
+  '/_authenticated/radiology': typeof AuthenticatedRadiologyRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
+  '/_authenticated/reception': typeof AuthenticatedReceptionRoute
   '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
@@ -591,6 +674,7 @@ export interface FileRoutesById {
   '/_authenticated/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/vendors': typeof AuthenticatedVendorsRoute
+  '/_authenticated/waiting-screen': typeof AuthenticatedWaitingScreenRoute
   '/_authenticated/dashboards/ap': typeof AuthenticatedDashboardsApRoute
   '/_authenticated/dashboards/ar': typeof AuthenticatedDashboardsArRoute
   '/_authenticated/dashboards/banks': typeof AuthenticatedDashboardsBanksRoute
@@ -616,6 +700,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/accounts'
     | '/ambulance'
+    | '/appointments'
     | '/approvals'
     | '/apps'
     | '/assets'
@@ -632,6 +717,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/debit-memos'
+    | '/emergency'
     | '/fiscal-periods'
     | '/fiscal-positions'
     | '/fleets'
@@ -640,16 +726,22 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/inventory'
     | '/journals'
+    | '/laboratory'
     | '/loans'
+    | '/medical-dashboard'
     | '/modules-management'
     | '/outpatient-clinics'
     | '/partners'
+    | '/patients'
     | '/payment-methods'
     | '/payment-terms'
     | '/payments'
     | '/pharmacy'
+    | '/physician'
     | '/purchase'
+    | '/radiology'
     | '/receipts'
+    | '/reception'
     | '/sales'
     | '/settings'
     | '/setup'
@@ -657,6 +749,7 @@ export interface FileRouteTypes {
     | '/trial-balance'
     | '/users'
     | '/vendors'
+    | '/waiting-screen'
     | '/dashboards/ap'
     | '/dashboards/ar'
     | '/dashboards/banks'
@@ -680,6 +773,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/accounts'
     | '/ambulance'
+    | '/appointments'
     | '/approvals'
     | '/apps'
     | '/assets'
@@ -696,6 +790,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/debit-memos'
+    | '/emergency'
     | '/fiscal-periods'
     | '/fiscal-positions'
     | '/fleets'
@@ -704,16 +799,22 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/inventory'
     | '/journals'
+    | '/laboratory'
     | '/loans'
+    | '/medical-dashboard'
     | '/modules-management'
     | '/outpatient-clinics'
     | '/partners'
+    | '/patients'
     | '/payment-methods'
     | '/payment-terms'
     | '/payments'
     | '/pharmacy'
+    | '/physician'
     | '/purchase'
+    | '/radiology'
     | '/receipts'
+    | '/reception'
     | '/sales'
     | '/settings'
     | '/setup'
@@ -721,6 +822,7 @@ export interface FileRouteTypes {
     | '/trial-balance'
     | '/users'
     | '/vendors'
+    | '/waiting-screen'
     | '/dashboards/ap'
     | '/dashboards/ar'
     | '/dashboards/banks'
@@ -745,6 +847,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/accounts'
     | '/_authenticated/ambulance'
+    | '/_authenticated/appointments'
     | '/_authenticated/approvals'
     | '/_authenticated/apps'
     | '/_authenticated/assets'
@@ -761,6 +864,7 @@ export interface FileRouteTypes {
     | '/_authenticated/customers'
     | '/_authenticated/dashboard'
     | '/_authenticated/debit-memos'
+    | '/_authenticated/emergency'
     | '/_authenticated/fiscal-periods'
     | '/_authenticated/fiscal-positions'
     | '/_authenticated/fleets'
@@ -769,16 +873,22 @@ export interface FileRouteTypes {
     | '/_authenticated/insurance'
     | '/_authenticated/inventory'
     | '/_authenticated/journals'
+    | '/_authenticated/laboratory'
     | '/_authenticated/loans'
+    | '/_authenticated/medical-dashboard'
     | '/_authenticated/modules-management'
     | '/_authenticated/outpatient-clinics'
     | '/_authenticated/partners'
+    | '/_authenticated/patients'
     | '/_authenticated/payment-methods'
     | '/_authenticated/payment-terms'
     | '/_authenticated/payments'
     | '/_authenticated/pharmacy'
+    | '/_authenticated/physician'
     | '/_authenticated/purchase'
+    | '/_authenticated/radiology'
     | '/_authenticated/receipts'
+    | '/_authenticated/reception'
     | '/_authenticated/sales'
     | '/_authenticated/settings'
     | '/_authenticated/setup'
@@ -786,6 +896,7 @@ export interface FileRouteTypes {
     | '/_authenticated/trial-balance'
     | '/_authenticated/users'
     | '/_authenticated/vendors'
+    | '/_authenticated/waiting-screen'
     | '/_authenticated/dashboards/ap'
     | '/_authenticated/dashboards/ar'
     | '/_authenticated/dashboards/banks'
@@ -847,6 +958,13 @@ declare module '@tanstack/react-router' {
       path: '/ambulance'
       fullPath: '/ambulance'
       preLoaderRoute: typeof AuthenticatedAmbulanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/appointments': {
+      id: '/_authenticated/appointments'
+      path: '/appointments'
+      fullPath: '/appointments'
+      preLoaderRoute: typeof AuthenticatedAppointmentsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/approvals': {
@@ -961,6 +1079,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDebitMemosRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/emergency': {
+      id: '/_authenticated/emergency'
+      path: '/emergency'
+      fullPath: '/emergency'
+      preLoaderRoute: typeof AuthenticatedEmergencyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/fiscal-periods': {
       id: '/_authenticated/fiscal-periods'
       path: '/fiscal-periods'
@@ -1017,11 +1142,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJournalsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/laboratory': {
+      id: '/_authenticated/laboratory'
+      path: '/laboratory'
+      fullPath: '/laboratory'
+      preLoaderRoute: typeof AuthenticatedLaboratoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/loans': {
       id: '/_authenticated/loans'
       path: '/loans'
       fullPath: '/loans'
       preLoaderRoute: typeof AuthenticatedLoansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/medical-dashboard': {
+      id: '/_authenticated/medical-dashboard'
+      path: '/medical-dashboard'
+      fullPath: '/medical-dashboard'
+      preLoaderRoute: typeof AuthenticatedMedicalDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/modules-management': {
@@ -1043,6 +1182,13 @@ declare module '@tanstack/react-router' {
       path: '/partners'
       fullPath: '/partners'
       preLoaderRoute: typeof AuthenticatedPartnersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/patients': {
+      id: '/_authenticated/patients'
+      path: '/patients'
+      fullPath: '/patients'
+      preLoaderRoute: typeof AuthenticatedPatientsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/payment-methods': {
@@ -1073,6 +1219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPharmacyRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/physician': {
+      id: '/_authenticated/physician'
+      path: '/physician'
+      fullPath: '/physician'
+      preLoaderRoute: typeof AuthenticatedPhysicianRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/purchase': {
       id: '/_authenticated/purchase'
       path: '/purchase'
@@ -1080,11 +1233,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchaseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/radiology': {
+      id: '/_authenticated/radiology'
+      path: '/radiology'
+      fullPath: '/radiology'
+      preLoaderRoute: typeof AuthenticatedRadiologyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/receipts': {
       id: '/_authenticated/receipts'
       path: '/receipts'
       fullPath: '/receipts'
       preLoaderRoute: typeof AuthenticatedReceiptsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reception': {
+      id: '/_authenticated/reception'
+      path: '/reception'
+      fullPath: '/reception'
+      preLoaderRoute: typeof AuthenticatedReceptionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/sales': {
@@ -1134,6 +1301,13 @@ declare module '@tanstack/react-router' {
       path: '/vendors'
       fullPath: '/vendors'
       preLoaderRoute: typeof AuthenticatedVendorsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/waiting-screen': {
+      id: '/_authenticated/waiting-screen'
+      path: '/waiting-screen'
+      fullPath: '/waiting-screen'
+      preLoaderRoute: typeof AuthenticatedWaitingScreenRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboards/ap': {
@@ -1261,6 +1435,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedAmbulanceRoute: typeof AuthenticatedAmbulanceRoute
+  AuthenticatedAppointmentsRoute: typeof AuthenticatedAppointmentsRoute
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
   AuthenticatedAppsRoute: typeof AuthenticatedAppsRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
@@ -1277,6 +1452,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDebitMemosRoute: typeof AuthenticatedDebitMemosRoute
+  AuthenticatedEmergencyRoute: typeof AuthenticatedEmergencyRoute
   AuthenticatedFiscalPeriodsRoute: typeof AuthenticatedFiscalPeriodsRoute
   AuthenticatedFiscalPositionsRoute: typeof AuthenticatedFiscalPositionsRoute
   AuthenticatedFleetsRoute: typeof AuthenticatedFleetsRoute
@@ -1285,16 +1461,22 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInsuranceRoute: typeof AuthenticatedInsuranceRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
+  AuthenticatedLaboratoryRoute: typeof AuthenticatedLaboratoryRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
+  AuthenticatedMedicalDashboardRoute: typeof AuthenticatedMedicalDashboardRoute
   AuthenticatedModulesManagementRoute: typeof AuthenticatedModulesManagementRoute
   AuthenticatedOutpatientClinicsRoute: typeof AuthenticatedOutpatientClinicsRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
+  AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRoute
   AuthenticatedPaymentMethodsRoute: typeof AuthenticatedPaymentMethodsRoute
   AuthenticatedPaymentTermsRoute: typeof AuthenticatedPaymentTermsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPharmacyRoute: typeof AuthenticatedPharmacyRoute
+  AuthenticatedPhysicianRoute: typeof AuthenticatedPhysicianRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
+  AuthenticatedRadiologyRoute: typeof AuthenticatedRadiologyRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
+  AuthenticatedReceptionRoute: typeof AuthenticatedReceptionRoute
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
@@ -1302,6 +1484,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTrialBalanceRoute: typeof AuthenticatedTrialBalanceRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedVendorsRoute: typeof AuthenticatedVendorsRoute
+  AuthenticatedWaitingScreenRoute: typeof AuthenticatedWaitingScreenRoute
   AuthenticatedDashboardsApRoute: typeof AuthenticatedDashboardsApRoute
   AuthenticatedDashboardsArRoute: typeof AuthenticatedDashboardsArRoute
   AuthenticatedDashboardsBanksRoute: typeof AuthenticatedDashboardsBanksRoute
@@ -1323,6 +1506,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedAmbulanceRoute: AuthenticatedAmbulanceRoute,
+  AuthenticatedAppointmentsRoute: AuthenticatedAppointmentsRoute,
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
   AuthenticatedAppsRoute: AuthenticatedAppsRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
@@ -1339,6 +1523,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDebitMemosRoute: AuthenticatedDebitMemosRoute,
+  AuthenticatedEmergencyRoute: AuthenticatedEmergencyRoute,
   AuthenticatedFiscalPeriodsRoute: AuthenticatedFiscalPeriodsRoute,
   AuthenticatedFiscalPositionsRoute: AuthenticatedFiscalPositionsRoute,
   AuthenticatedFleetsRoute: AuthenticatedFleetsRoute,
@@ -1347,16 +1532,22 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInsuranceRoute: AuthenticatedInsuranceRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
+  AuthenticatedLaboratoryRoute: AuthenticatedLaboratoryRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
+  AuthenticatedMedicalDashboardRoute: AuthenticatedMedicalDashboardRoute,
   AuthenticatedModulesManagementRoute: AuthenticatedModulesManagementRoute,
   AuthenticatedOutpatientClinicsRoute: AuthenticatedOutpatientClinicsRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
+  AuthenticatedPatientsRoute: AuthenticatedPatientsRoute,
   AuthenticatedPaymentMethodsRoute: AuthenticatedPaymentMethodsRoute,
   AuthenticatedPaymentTermsRoute: AuthenticatedPaymentTermsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPharmacyRoute: AuthenticatedPharmacyRoute,
+  AuthenticatedPhysicianRoute: AuthenticatedPhysicianRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
+  AuthenticatedRadiologyRoute: AuthenticatedRadiologyRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
+  AuthenticatedReceptionRoute: AuthenticatedReceptionRoute,
   AuthenticatedSalesRoute: AuthenticatedSalesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
@@ -1364,6 +1555,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTrialBalanceRoute: AuthenticatedTrialBalanceRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedVendorsRoute: AuthenticatedVendorsRoute,
+  AuthenticatedWaitingScreenRoute: AuthenticatedWaitingScreenRoute,
   AuthenticatedDashboardsApRoute: AuthenticatedDashboardsApRoute,
   AuthenticatedDashboardsArRoute: AuthenticatedDashboardsArRoute,
   AuthenticatedDashboardsBanksRoute: AuthenticatedDashboardsBanksRoute,
