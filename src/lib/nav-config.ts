@@ -329,7 +329,10 @@ export function useNavGroups(): NavGroup[] {
           label: t("nav.configuration"),
           icon: SlidersHorizontal,
           hue: 180,
-          items: [{ url: "/medical-configuration", icon: SlidersHorizontal, title: t("common.willBeBuiltLater") }],
+          items: [
+            { url: "/medical-configuration", icon: SlidersHorizontal, title: t("common.willBeBuiltLater") },
+            { url: "/medical-approvals", icon: ShieldCheck, title: t("approvals.title") },
+          ],
         },
       ],
     },

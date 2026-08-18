@@ -74,6 +74,7 @@ const DB_ROLES = [
   "accountant",
   "internal_auditor",
   "internal_audit_manager",
+  "his_admin",
 ] as const;
 
 
@@ -140,8 +141,8 @@ export function UserRolesManagement({
   const [confirmDelete, setConfirmDelete] = useState<any | null>(null);
 
   const { data: rolesRegistry = [] } = useQuery({
-    queryKey: ["roles_registry"],
-    queryFn: () => listRolesFn(),
+    queryKey: ["roles_registry", moduleScope ?? "accounting"],
+    queryFn: () => listRolesFn({ data: { moduleKey: moduleScope ?? "accounting" } }),
     enabled: !!user,
   });
 

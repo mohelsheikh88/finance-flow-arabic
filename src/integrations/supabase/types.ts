@@ -2471,6 +2471,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_system: boolean
+          module_key: string
           name_ar: string
           name_en: string
           sort_order: number
@@ -2484,6 +2485,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_system?: boolean
+          module_key: string
           name_ar: string
           name_en: string
           sort_order?: number
@@ -2497,6 +2499,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_system?: boolean
+          module_key?: string
           name_ar?: string
           name_en?: string
           sort_order?: number
@@ -2741,6 +2744,7 @@ export type Database = {
         | "internal_auditor"
         | "internal_audit_manager"
         | "direct_manager"
+        | "his_admin"
       approval_doc_type:
         | "journal_entry"
         | "invoice"
@@ -2900,6 +2904,7 @@ export const Constants = {
         "internal_auditor",
         "internal_audit_manager",
         "direct_manager",
+        "his_admin",
       ],
       approval_doc_type: [
         "journal_entry",

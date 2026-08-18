@@ -4,18 +4,21 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.sel
 
 export const listRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+  .inputValidator((i: { moduleKey: string }) => z.object({ moduleKey: z.string().min(1) }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
       .from("roles_registry")
       .select("*")
+      .eq("module_key", data.moduleKey)
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return rows ?? [];
   });
 
 const CreateSchema = z.object({
   code: z.string().min(1).max(50).regex(/^[a-z][a-z0-9_]*$/, "code must be lowercase letters/digits/underscore"),
+  moduleKey: z.string().min(1),
   name_ar: z.string().min(1).max(255),
   name_en: z.string().min(1).max(255),
   description_ar: z.string().max(500).optional().nullable(),
@@ -28,9 +31,10 @@ export const createRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => CreateSchema.parse(i))
   .handler(async ({ data, context }) => {
+    const { moduleKey, ...rest } = data;
     const { data: row, error } = await context.supabase
       .from("roles_registry")
-      .insert({ ...data, is_system: false })
+      .insert({ ...rest, module_key: moduleKey, is_system: false })
       .select()
       .single();
     if (error) throw new Error(error.message);

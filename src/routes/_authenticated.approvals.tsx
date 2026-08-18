@@ -45,8 +45,8 @@ function ApprovalsPage() {
   const listRolesFn = useServerFn(listRoles);
 
   const { data: rolesData = [] } = useQuery({
-    queryKey: ["roles_active"],
-    queryFn: () => listRolesFn(),
+    queryKey: ["roles_active", "accounting"],
+    queryFn: () => listRolesFn({ data: { moduleKey: "accounting" } }),
   });
   const activeRoles = (rolesData as any[]).filter((r) => r.is_active && r.code !== "admin");
   const roleLabel = (code: string) => {
@@ -357,7 +357,7 @@ function ApprovalsPage() {
         </TabsList>
 
         <TabsContent value="roles">
-          <RolesManagement />
+          <RolesManagement moduleKey="accounting" />
         </TabsContent>
 
         <TabsContent value="user_roles">

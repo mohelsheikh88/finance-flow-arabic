@@ -32,7 +32,7 @@ type RoleRow = {
   sort_order: number;
 };
 
-export function RolesManagement() {
+export function RolesManagement({ moduleKey }: { moduleKey: string }) {
   const { t, locale } = useI18n();
   const qc = useQueryClient();
   const listFn = useServerFn(listRoles);
@@ -42,8 +42,8 @@ export function RolesManagement() {
   const reorderFn = useServerFn(reorderRoles);
 
   const { data: roles = [], isLoading } = useQuery({
-    queryKey: ["roles_registry"],
-    queryFn: () => listFn(),
+    queryKey: ["roles_registry", moduleKey],
+    queryFn: () => listFn({ data: { moduleKey } }),
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -103,6 +103,7 @@ export function RolesManagement() {
       return createFn({
         data: {
           code,
+          moduleKey,
           name_ar: form.name_ar,
           name_en: form.name_en,
           description_ar: form.description_ar || null,
@@ -113,7 +114,7 @@ export function RolesManagement() {
       });
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["roles_registry"] });
+      qc.invalidateQueries({ queryKey: ["roles_registry", moduleKey] });
       qc.invalidateQueries({ queryKey: ["roles_active"] });
       setDialogOpen(false);
       toast.success(t("common.saved"));

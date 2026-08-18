@@ -43,6 +43,7 @@ import { Route as AuthenticatedInventoryRouteImport } from './routes/_authentica
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedLaboratoryRouteImport } from './routes/_authenticated.laboratory'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
+import { Route as AuthenticatedMedicalApprovalsRouteImport } from './routes/_authenticated.medical-approvals'
 import { Route as AuthenticatedMedicalConfigurationRouteImport } from './routes/_authenticated.medical-configuration'
 import { Route as AuthenticatedMedicalDashboardRouteImport } from './routes/_authenticated.medical-dashboard'
 import { Route as AuthenticatedOutpatientClinicsRouteImport } from './routes/_authenticated.outpatient-clinics'
@@ -261,6 +262,12 @@ const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedMedicalApprovalsRoute =
+  AuthenticatedMedicalApprovalsRouteImport.update({
+    id: '/medical-approvals',
+    path: '/medical-approvals',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedMedicalConfigurationRoute =
   AuthenticatedMedicalConfigurationRouteImport.update({
     id: '/medical-configuration',
@@ -513,6 +520,7 @@ export interface FileRoutesByFullPath {
   '/journals': typeof AuthenticatedJournalsRoute
   '/laboratory': typeof AuthenticatedLaboratoryRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/medical-approvals': typeof AuthenticatedMedicalApprovalsRoute
   '/medical-configuration': typeof AuthenticatedMedicalConfigurationRoute
   '/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
@@ -587,6 +595,7 @@ export interface FileRoutesByTo {
   '/journals': typeof AuthenticatedJournalsRoute
   '/laboratory': typeof AuthenticatedLaboratoryRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/medical-approvals': typeof AuthenticatedMedicalApprovalsRoute
   '/medical-configuration': typeof AuthenticatedMedicalConfigurationRoute
   '/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
@@ -663,6 +672,7 @@ export interface FileRoutesById {
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/laboratory': typeof AuthenticatedLaboratoryRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
+  '/_authenticated/medical-approvals': typeof AuthenticatedMedicalApprovalsRoute
   '/_authenticated/medical-configuration': typeof AuthenticatedMedicalConfigurationRoute
   '/_authenticated/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/_authenticated/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
@@ -739,6 +749,7 @@ export interface FileRouteTypes {
     | '/journals'
     | '/laboratory'
     | '/loans'
+    | '/medical-approvals'
     | '/medical-configuration'
     | '/medical-dashboard'
     | '/outpatient-clinics'
@@ -813,6 +824,7 @@ export interface FileRouteTypes {
     | '/journals'
     | '/laboratory'
     | '/loans'
+    | '/medical-approvals'
     | '/medical-configuration'
     | '/medical-dashboard'
     | '/outpatient-clinics'
@@ -888,6 +900,7 @@ export interface FileRouteTypes {
     | '/_authenticated/journals'
     | '/_authenticated/laboratory'
     | '/_authenticated/loans'
+    | '/_authenticated/medical-approvals'
     | '/_authenticated/medical-configuration'
     | '/_authenticated/medical-dashboard'
     | '/_authenticated/outpatient-clinics'
@@ -1174,6 +1187,13 @@ declare module '@tanstack/react-router' {
       path: '/loans'
       fullPath: '/loans'
       preLoaderRoute: typeof AuthenticatedLoansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/medical-approvals': {
+      id: '/_authenticated/medical-approvals'
+      path: '/medical-approvals'
+      fullPath: '/medical-approvals'
+      preLoaderRoute: typeof AuthenticatedMedicalApprovalsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/medical-configuration': {
@@ -1484,6 +1504,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLaboratoryRoute: typeof AuthenticatedLaboratoryRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
+  AuthenticatedMedicalApprovalsRoute: typeof AuthenticatedMedicalApprovalsRoute
   AuthenticatedMedicalConfigurationRoute: typeof AuthenticatedMedicalConfigurationRoute
   AuthenticatedMedicalDashboardRoute: typeof AuthenticatedMedicalDashboardRoute
   AuthenticatedOutpatientClinicsRoute: typeof AuthenticatedOutpatientClinicsRoute
@@ -1557,6 +1578,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLaboratoryRoute: AuthenticatedLaboratoryRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
+  AuthenticatedMedicalApprovalsRoute: AuthenticatedMedicalApprovalsRoute,
   AuthenticatedMedicalConfigurationRoute:
     AuthenticatedMedicalConfigurationRoute,
   AuthenticatedMedicalDashboardRoute: AuthenticatedMedicalDashboardRoute,
