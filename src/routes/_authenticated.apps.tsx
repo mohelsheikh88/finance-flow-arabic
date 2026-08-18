@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useI18n } from "@/i18n";
 import { useVisibleNavGroups, groupHomeUrl } from "@/lib/nav-config";
-import { BrandLogo } from "@/components/brand-logo";
+import { BrandMark } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/_authenticated/apps")({
   component: AppsLauncher,
@@ -13,8 +13,11 @@ function AppsLauncher() {
 
   return (
     <div className="min-h-full flex flex-col items-center px-6 py-10 sm:py-14">
-      <div className="mb-10 sm:mb-14">
-        <BrandLogo size={84} variant="light" />
+      <div className="flex items-center gap-4 sm:gap-5 mb-10 sm:mb-14" dir="ltr">
+        <BrandMark size={64} />
+        <span className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white whitespace-nowrap">
+          Al Hayat ERP
+        </span>
       </div>
 
       <h1 className="text-xl sm:text-2xl font-bold text-white mb-1.5 text-center">
