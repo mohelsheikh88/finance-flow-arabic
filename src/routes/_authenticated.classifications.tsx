@@ -51,6 +51,7 @@ type FormState = {
   normal_balance: NormalBalance;
   bucket: Bucket;
   is_active: boolean;
+  sort_order: number | "";
   notes: string;
 };
 
@@ -62,6 +63,7 @@ const empty: FormState = {
   normal_balance: "debit",
   bucket: "asset",
   is_active: true,
+  sort_order: "",
   notes: "",
 };
 
@@ -142,6 +144,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       normal_balance: r.normal_balance,
       bucket: r.bucket,
       is_active: !!r.is_active,
+      sort_order: r.sort_order ?? "",
       notes: r.notes ?? "",
     });
     setOpen(true);
@@ -160,6 +163,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           normal_balance: form.normal_balance,
           bucket: form.bucket,
           is_active: form.is_active,
+          ...(form.sort_order !== "" ? { sort_order: Number(form.sort_order) } : {}),
           notes: form.notes.trim() || null,
         },
       }),
@@ -633,6 +637,15 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               <Label>{t("common.active")}</Label>
+            </div>
+            <div>
+              <Label>{t("common.sortOrder")}</Label>
+              <Input
+                type="number"
+                value={form.sort_order}
+                onChange={(e) => setForm({ ...form, sort_order: e.target.value === "" ? "" : Number(e.target.value) })}
+                placeholder={t("common.sortOrderHint")}
+              />
             </div>
             <div className="col-span-2">
               <Label>{t("common.notes")}</Label>

@@ -56,6 +56,7 @@ const ClassificationUpsertSchema = z.object({
   normal_balance: z.enum(NORMAL_BALANCES),
   bucket: z.string().trim().min(1).max(50),
   is_active: z.boolean().optional(),
+  sort_order: z.number().int().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
 
@@ -76,6 +77,7 @@ export const upsertClassification = createServerFn({ method: "POST" })
       is_active: data.is_active ?? true,
       notes: data.notes ?? null,
     };
+    if (data.sort_order !== undefined) payload.sort_order = data.sort_order;
     if (data.id) {
       const { data: row, error } = await (context.supabase as any)
         .from("classifications")
