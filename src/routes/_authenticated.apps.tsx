@@ -27,7 +27,7 @@ function AppsLauncher() {
         {t("common.chooseModuleToStart")}
       </p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3.5 w-full max-w-xl">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 sm:gap-3.5 w-full max-w-4xl">
         {groups.map((g) => (
           <Link
             key={g.label}
