@@ -571,3 +571,17 @@ table td, table th {
   transition: transform .28s ease;
 }
 
+/* ===== Shared-element card→screen morph (Apps launcher ↔ module sub-launcher) ===== */
+/* Named elements (the clicked card + its matching destination hero) get a
+   slightly slower, eased morph so it reads as "growing into the screen"
+   rather than the browser's default snappy 250ms cross-fade. */
+::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* The rest of the page (root snapshot) just cross-fades, a bit quicker. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
+

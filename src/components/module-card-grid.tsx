@@ -7,10 +7,21 @@ export type ModuleCardData = {
   url: string;
 };
 
+/** Turns a route path into a valid, stable CSS view-transition-name. */
+export function transitionNameFor(url: string): string {
+  return "card-" + url.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 /**
  * The exact glossy/glowing square card used on the main Apps launcher.
  * Reused for any sub-launcher grid (e.g. Medical App's own modules) so
  * every "pick a module" screen in the product looks identical.
+ *
+ * Each card carries a unique `view-transition-name`, matched by the same
+ * name on the destination screen's hero header — the browser's native
+ * View Transitions API then morphs the card into the header automatically
+ * ("card grows into the screen"), with a graceful no-op fallback on
+ * browsers that don't support it yet.
  */
 export function ModuleCardGrid({ items, className = "" }: { items: ModuleCardData[]; className?: string }) {
   return (
@@ -19,7 +30,8 @@ export function ModuleCardGrid({ items, className = "" }: { items: ModuleCardDat
         <Link
           key={item.url}
           to={item.url}
-          style={{ ["--hue" as any]: item.hue }}
+          viewTransition
+          style={{ ["--hue" as any]: item.hue, viewTransitionName: transitionNameFor(item.url) }}
           className="group flex flex-col items-center justify-center gap-2 aspect-square overflow-hidden rounded-2xl p-3 sm:p-3.5
                      bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.10]
                      shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)] backdrop-blur-sm

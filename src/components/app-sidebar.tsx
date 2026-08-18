@@ -92,12 +92,12 @@ export function AppSidebar() {
           {collapsed ? (
             <div className="flex flex-col items-center gap-1">
               <SidebarMenuButton asChild tooltip={t("nav.homeScreen")} className="mx-auto">
-                <Link to="/apps" className="flex items-center justify-center">
+                <Link to="/apps" viewTransition className="flex items-center justify-center">
                   <LayoutGrid className="h-5 w-5 shrink-0" />
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuButton asChild tooltip={t("nav.back")} className="mx-auto">
-                <Link to={backUrl} className="flex items-center justify-center">
+                <Link to={backUrl} viewTransition className="flex items-center justify-center">
                   <BackIcon className="h-5 w-5 shrink-0" />
                 </Link>
               </SidebarMenuButton>
@@ -106,6 +106,7 @@ export function AppSidebar() {
             <div className="flex items-stretch gap-2 w-full">
               <Link
                 to="/apps"
+                viewTransition
                 className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
                            bg-[hsl(158,70%,45%)]/[0.12] border border-[hsl(158,70%,50%)]/25
                            text-[hsl(158,85%,72%)] hover:bg-[hsl(158,70%,45%)]/[0.20] hover:border-[hsl(158,70%,50%)]/40
@@ -117,6 +118,7 @@ export function AppSidebar() {
 
               <Link
                 to={backUrl}
+                viewTransition
                 className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
                            bg-white/[0.04] border border-white/[0.08]
                            text-sidebar-foreground/75 hover:bg-white/[0.08] hover:text-sidebar-foreground hover:border-white/[0.14]
