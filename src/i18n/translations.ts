@@ -186,7 +186,7 @@ export const translations = {
       apps: "التطبيقات",
       backToApps: "كل التطبيقات",
       dashboard: "لوحة التحكم",
-      mainDashboard: "الرئيسية",
+      mainDashboard: "لوحة التحكم الرئيسية",
       arDashboard: "لوحة الذمم المدينة",
       apDashboard: "لوحة الذمم الدائنة",
       banksDashboard: "لوحة البنوك",
