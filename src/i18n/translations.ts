@@ -908,7 +908,7 @@ export const translations = {
       parentDepartment: "Parent department",
       selectBranch: "Select branch",
       modulesManagementSubtitle: "Turn any top-level or sub-module on or off per branch",
-      sectionAccessTitle: "Section Access",
+      sectionAccessTitle: "Sub-Modules Access",
       sectionAccessSubtitle: "Choose which users can open each section. Someone with only the module itself (no sections) sees an empty icon.",
       noCandidatesForSectionAccess: "No users have this module yet. Grant them the module first from the Users page.",
       showScreens: "Show screens",
