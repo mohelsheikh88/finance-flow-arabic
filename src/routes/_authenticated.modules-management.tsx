@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Blocks, MapPin, ChevronDown } from "lucide-react";
+import { Blocks, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/modules-management")({
@@ -71,6 +71,40 @@ function Page() {
   const enabledCount = (moduleKey: string, parentKey?: string) =>
     branches.filter((b) => isEffectivelyOn(moduleKey, b.id, parentKey)).length;
 
+  // ===== Reordering — writes a fresh sort_order for every sibling at
+  // once, so the order is fully explicit and stays stable for everyone. =====
+  const reorder = useMutation({
+    mutationFn: async ({ orderedKeys, parentKey }: { orderedKeys: string[]; parentKey: string | null }) => {
+      for (let i = 0; i < orderedKeys.length; i++) {
+        const { error } = await supabase
+          .from("module_sort_order")
+          .upsert({ module_key: orderedKeys[i], parent_key: parentKey, sort_order: i }, { onConflict: "module_key" });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["module_sort_order"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const moveGroup = (index: number, dir: -1 | 1) => {
+    const to = index + dir;
+    if (to < 0 || to >= toggleableGroups.length) return;
+    const keys = toggleableGroups.map((g) => g.key!);
+    const arr = keys.slice();
+    [arr[index], arr[to]] = [arr[to], arr[index]];
+    reorder.mutate({ orderedKeys: arr, parentKey: null });
+  };
+
+  const moveSubgroup = (group: (typeof toggleableGroups)[number], index: number, dir: -1 | 1) => {
+    const subs = group.subgroups!;
+    const to = index + dir;
+    if (to < 0 || to >= subs.length) return;
+    const keys = subs.map((sg) => sg.key!);
+    const arr = keys.slice();
+    [arr[index], arr[to]] = [arr[to], arr[index]];
+    reorder.mutate({ orderedKeys: arr, parentKey: group.key! });
+  };
+
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
       <div>
@@ -82,9 +116,17 @@ function Page() {
       </div>
 
       <div className="space-y-3">
-        {toggleableGroups.map((g) => (
+        {toggleableGroups.map((g, gIndex) => (
           <Card key={g.key} className="p-4">
             <div className="flex items-center gap-3">
+              <div className="flex flex-col shrink-0">
+                <Button variant="ghost" size="icon" className="h-5 w-5" disabled={gIndex <= 0} onClick={() => moveGroup(gIndex, -1)} title={t("common.moveUp")}>
+                  <ChevronUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-5 w-5" disabled={gIndex >= toggleableGroups.length - 1} onClick={() => moveGroup(gIndex, 1)} title={t("common.moveDown")}>
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </Button>
+              </div>
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `hsl(${g.hue} 70% 45% / 0.15)` }}>
                 <g.icon className="h-[18px] w-[18px]" style={{ color: `hsl(${g.hue} 70% 40%)` }} />
               </div>
@@ -94,9 +136,17 @@ function Page() {
 
             {g.subgroups && g.subgroups.length > 0 && (
               <div className="mt-3 ms-6 ps-4 border-s space-y-1">
-                {g.subgroups.map((sg) =>
+                {g.subgroups.map((sg, sgIndex) =>
                   sg.key ? (
-                    <div key={sg.key} className="flex items-center gap-2.5 rounded-md p-2 hover:bg-accent/30 transition-colors">
+                    <div key={sg.key} className="flex items-center gap-2 rounded-md p-2 hover:bg-accent/30 transition-colors">
+                      <div className="flex flex-col shrink-0">
+                        <Button variant="ghost" size="icon" className="h-4 w-4" disabled={sgIndex <= 0} onClick={() => moveSubgroup(g, sgIndex, -1)} title={t("common.moveUp")}>
+                          <ChevronUp className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-4 w-4" disabled={sgIndex >= g.subgroups!.length - 1} onClick={() => moveSubgroup(g, sgIndex, 1)} title={t("common.moveDown")}>
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </div>
                       <sg.icon className="h-4 w-4 shrink-0" style={{ color: `hsl(${sg.hue ?? g.hue} 70% 45%)` }} />
                       <span className="flex-1 text-[13.5px] font-medium">{sg.label}</span>
                       <BranchPicker

@@ -69,8 +69,19 @@ export type NavGroup = {
  */
 export function useNavGroups(): NavGroup[] {
   const { t } = useI18n();
+  const { data: sortMap } = useQuery({
+    queryKey: ["module_sort_order"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("module_sort_order").select("module_key, sort_order");
+      if (error) throw error;
+      const map = new Map<string, number>();
+      for (const row of data as any[]) map.set(row.module_key, row.sort_order);
+      return map;
+    },
+    staleTime: 60_000,
+  });
 
-  return [
+  const groups: NavGroup[] = [
     {
       label: t("nav.mainDashboard"),
       icon: LayoutDashboard,
@@ -353,6 +364,25 @@ export function useNavGroups(): NavGroup[] {
       ],
     },
   ];
+
+  // Admin-configurable order (Modules Management screen). Anything not
+  // explicitly ordered yet keeps its original position in the list above.
+  const orderOf = (key: string | undefined, fallbackIndex: number) =>
+    key && sortMap?.has(key) ? sortMap.get(key)! : fallbackIndex;
+
+  const sortedGroups = groups
+    .map((g, i) => ({ g, i }))
+    .sort((a, b) => orderOf(a.g.key, a.i) - orderOf(b.g.key, b.i))
+    .map(({ g }) => {
+      if (!g.subgroups) return g;
+      const sortedSubgroups = g.subgroups
+        .map((sg, i) => ({ sg, i }))
+        .sort((a, b) => orderOf(a.sg.key, a.i) - orderOf(b.sg.key, b.i))
+        .map(({ sg }) => sg);
+      return { ...g, subgroups: sortedSubgroups };
+    });
+
+  return sortedGroups;
 }
 
 /**

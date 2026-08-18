@@ -700,6 +700,30 @@ export type Database = {
         }
         Relationships: []
       }
+      module_sort_order: {
+        Row: {
+          id: string
+          module_key: string
+          parent_key: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          module_key: string
+          parent_key?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          module_key?: string
+          parent_key?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           branch_id: string | null
