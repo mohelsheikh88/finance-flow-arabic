@@ -638,7 +638,7 @@ export type Database = {
           },
         ]
       }
-      branch_medical_modules: {
+      branch_module_access: {
         Row: {
           branch_id: string
           created_at: string
@@ -665,7 +665,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "branch_medical_modules_branch_id_fkey"
+            foreignKeyName: "branch_module_access_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"

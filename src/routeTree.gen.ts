@@ -21,7 +21,6 @@ import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedBankExpensesRouteImport } from './routes/_authenticated.bank-expenses'
 import { Route as AuthenticatedBankReconciliationsRouteImport } from './routes/_authenticated.bank-reconciliations'
 import { Route as AuthenticatedBanksRouteImport } from './routes/_authenticated.banks'
-import { Route as AuthenticatedBranchMedicalModulesRouteImport } from './routes/_authenticated.branch-medical-modules'
 import { Route as AuthenticatedClassificationsRouteImport } from './routes/_authenticated.classifications'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated.companies'
 import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenticated.cost-centers'
@@ -40,6 +39,7 @@ import { Route as AuthenticatedInsuranceRouteImport } from './routes/_authentica
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
+import { Route as AuthenticatedModulesManagementRouteImport } from './routes/_authenticated.modules-management'
 import { Route as AuthenticatedOutpatientClinicsRouteImport } from './routes/_authenticated.outpatient-clinics'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
 import { Route as AuthenticatedPaymentMethodsRouteImport } from './routes/_authenticated.payment-methods'
@@ -134,12 +134,6 @@ const AuthenticatedBanksRoute = AuthenticatedBanksRouteImport.update({
   path: '/banks',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedBranchMedicalModulesRoute =
-  AuthenticatedBranchMedicalModulesRouteImport.update({
-    id: '/branch-medical-modules',
-    path: '/branch-medical-modules',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedClassificationsRoute =
   AuthenticatedClassificationsRouteImport.update({
     id: '/classifications',
@@ -235,6 +229,12 @@ const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedModulesManagementRoute =
+  AuthenticatedModulesManagementRouteImport.update({
+    id: '/modules-management',
+    path: '/modules-management',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedOutpatientClinicsRoute =
   AuthenticatedOutpatientClinicsRouteImport.update({
     id: '/outpatient-clinics',
@@ -427,7 +427,6 @@ export interface FileRoutesByFullPath {
   '/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
-  '/branch-medical-modules': typeof AuthenticatedBranchMedicalModulesRoute
   '/classifications': typeof AuthenticatedClassificationsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
@@ -446,6 +445,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/modules-management': typeof AuthenticatedModulesManagementRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
@@ -491,7 +491,6 @@ export interface FileRoutesByTo {
   '/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/banks': typeof AuthenticatedBanksRoute
-  '/branch-medical-modules': typeof AuthenticatedBranchMedicalModulesRoute
   '/classifications': typeof AuthenticatedClassificationsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
@@ -510,6 +509,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/modules-management': typeof AuthenticatedModulesManagementRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
@@ -557,7 +557,6 @@ export interface FileRoutesById {
   '/_authenticated/bank-expenses': typeof AuthenticatedBankExpensesRoute
   '/_authenticated/bank-reconciliations': typeof AuthenticatedBankReconciliationsRoute
   '/_authenticated/banks': typeof AuthenticatedBanksRoute
-  '/_authenticated/branch-medical-modules': typeof AuthenticatedBranchMedicalModulesRoute
   '/_authenticated/classifications': typeof AuthenticatedClassificationsRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/cost-centers': typeof AuthenticatedCostCentersRoute
@@ -576,6 +575,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
+  '/_authenticated/modules-management': typeof AuthenticatedModulesManagementRoute
   '/_authenticated/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
   '/_authenticated/payment-methods': typeof AuthenticatedPaymentMethodsRoute
@@ -623,7 +623,6 @@ export interface FileRouteTypes {
     | '/bank-expenses'
     | '/bank-reconciliations'
     | '/banks'
-    | '/branch-medical-modules'
     | '/classifications'
     | '/companies'
     | '/cost-centers'
@@ -642,6 +641,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/journals'
     | '/loans'
+    | '/modules-management'
     | '/outpatient-clinics'
     | '/partners'
     | '/payment-methods'
@@ -687,7 +687,6 @@ export interface FileRouteTypes {
     | '/bank-expenses'
     | '/bank-reconciliations'
     | '/banks'
-    | '/branch-medical-modules'
     | '/classifications'
     | '/companies'
     | '/cost-centers'
@@ -706,6 +705,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/journals'
     | '/loans'
+    | '/modules-management'
     | '/outpatient-clinics'
     | '/partners'
     | '/payment-methods'
@@ -752,7 +752,6 @@ export interface FileRouteTypes {
     | '/_authenticated/bank-expenses'
     | '/_authenticated/bank-reconciliations'
     | '/_authenticated/banks'
-    | '/_authenticated/branch-medical-modules'
     | '/_authenticated/classifications'
     | '/_authenticated/companies'
     | '/_authenticated/cost-centers'
@@ -771,6 +770,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory'
     | '/_authenticated/journals'
     | '/_authenticated/loans'
+    | '/_authenticated/modules-management'
     | '/_authenticated/outpatient-clinics'
     | '/_authenticated/partners'
     | '/_authenticated/payment-methods'
@@ -898,13 +898,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBanksRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/branch-medical-modules': {
-      id: '/_authenticated/branch-medical-modules'
-      path: '/branch-medical-modules'
-      fullPath: '/branch-medical-modules'
-      preLoaderRoute: typeof AuthenticatedBranchMedicalModulesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/classifications': {
       id: '/_authenticated/classifications'
       path: '/classifications'
@@ -1029,6 +1022,13 @@ declare module '@tanstack/react-router' {
       path: '/loans'
       fullPath: '/loans'
       preLoaderRoute: typeof AuthenticatedLoansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/modules-management': {
+      id: '/_authenticated/modules-management'
+      path: '/modules-management'
+      fullPath: '/modules-management'
+      preLoaderRoute: typeof AuthenticatedModulesManagementRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/outpatient-clinics': {
@@ -1268,7 +1268,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBankExpensesRoute: typeof AuthenticatedBankExpensesRoute
   AuthenticatedBankReconciliationsRoute: typeof AuthenticatedBankReconciliationsRoute
   AuthenticatedBanksRoute: typeof AuthenticatedBanksRoute
-  AuthenticatedBranchMedicalModulesRoute: typeof AuthenticatedBranchMedicalModulesRoute
   AuthenticatedClassificationsRoute: typeof AuthenticatedClassificationsRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCostCentersRoute: typeof AuthenticatedCostCentersRoute
@@ -1287,6 +1286,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
+  AuthenticatedModulesManagementRoute: typeof AuthenticatedModulesManagementRoute
   AuthenticatedOutpatientClinicsRoute: typeof AuthenticatedOutpatientClinicsRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
   AuthenticatedPaymentMethodsRoute: typeof AuthenticatedPaymentMethodsRoute
@@ -1330,8 +1330,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBankExpensesRoute: AuthenticatedBankExpensesRoute,
   AuthenticatedBankReconciliationsRoute: AuthenticatedBankReconciliationsRoute,
   AuthenticatedBanksRoute: AuthenticatedBanksRoute,
-  AuthenticatedBranchMedicalModulesRoute:
-    AuthenticatedBranchMedicalModulesRoute,
   AuthenticatedClassificationsRoute: AuthenticatedClassificationsRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCostCentersRoute: AuthenticatedCostCentersRoute,
@@ -1350,6 +1348,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
+  AuthenticatedModulesManagementRoute: AuthenticatedModulesManagementRoute,
   AuthenticatedOutpatientClinicsRoute: AuthenticatedOutpatientClinicsRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
   AuthenticatedPaymentMethodsRoute: AuthenticatedPaymentMethodsRoute,

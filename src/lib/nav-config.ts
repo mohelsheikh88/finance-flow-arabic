@@ -33,6 +33,7 @@ import {
   Home,
   Ambulance,
   ClipboardPlus,
+  Blocks,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -75,6 +76,7 @@ export function useNavGroups(): NavGroup[] {
       hue: 42, // gold/amber — money, finance
       subgroups: [
         {
+          key: "reports",
           label: t("nav.reports"),
           icon: BarChart3,
           hue: 265,
@@ -88,6 +90,7 @@ export function useNavGroups(): NavGroup[] {
           ],
         },
         {
+          key: "accountsReceivable",
           label: t("nav.accountsReceivable"),
           icon: HandCoins,
           hue: 140,
@@ -100,6 +103,7 @@ export function useNavGroups(): NavGroup[] {
           ],
         },
         {
+          key: "accountsPayable",
           label: t("nav.accountsPayable"),
           icon: ShoppingCart,
           hue: 20,
@@ -112,6 +116,7 @@ export function useNavGroups(): NavGroup[] {
           ],
         },
         {
+          key: "banks",
           label: t("nav.banksGroup"),
           icon: Landmark,
           hue: 205,
@@ -125,6 +130,7 @@ export function useNavGroups(): NavGroup[] {
           ],
         },
         {
+          key: "fixedAssets",
           label: t("nav.fixedAssets"),
           icon: Briefcase,
           hue: 45,
@@ -134,6 +140,7 @@ export function useNavGroups(): NavGroup[] {
           ],
         },
         {
+          key: "loans",
           label: t("nav.loansGroup"),
           icon: CreditCard,
           hue: 330,
@@ -143,6 +150,7 @@ export function useNavGroups(): NavGroup[] {
           ],
         },
         {
+          key: "gl",
           label: t("nav.gl"),
           icon: BookOpen,
           hue: 95,
@@ -152,6 +160,7 @@ export function useNavGroups(): NavGroup[] {
           ],
         },
         {
+          key: "accountingConfiguration",
           label: t("nav.configuration"),
           icon: SlidersHorizontal,
           hue: 180,
@@ -262,7 +271,7 @@ export function useNavGroups(): NavGroup[] {
       items: [
         { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/users", icon: Users, title: t("nav.users") },
-        { url: "/branch-medical-modules", icon: Stethoscope, title: t("nav.branchMedicalModules") },
+        { url: "/modules-management", icon: Blocks, title: t("nav.modulesManagement") },
       ],
     },
   ];
@@ -340,14 +349,20 @@ export function useModuleAccess() {
  * active branch. Fails open (returns undefined) while loading or when no
  * branch is selected yet, so the UI doesn't flash an empty state.
  */
-export function useBranchMedicalModules() {
+/**
+ * Which modules — top-level or sub-modules, by their `key` — are turned
+ * on at the user's currently active branch. Fails open (returns
+ * undefined) while loading or when no branch is selected yet, so the UI
+ * doesn't flash an empty state.
+ */
+export function useBranchModuleAccess() {
   const { branchId } = useBranch();
   return useQuery({
-    queryKey: ["branch_medical_modules", branchId],
+    queryKey: ["branch_module_access", branchId],
     enabled: !!branchId,
     queryFn: async () => {
       const { data } = await supabase
-        .from("branch_medical_modules")
+        .from("branch_module_access")
         .select("module_key, is_enabled")
         .eq("branch_id", branchId!);
       return (data ?? []).filter((r: any) => r.is_enabled).map((r: any) => r.module_key as string);
@@ -357,35 +372,38 @@ export function useBranchMedicalModules() {
 
 /**
  * Nav groups filtered down to the ones this user is actually allowed to
- * open — combining two independent layers:
- *  1. User-level module access (`user_module_access` / admin role).
- *  2. Branch-level medical module availability: which of the medical
- *     sub-modules (Insurance, Pharmacy...) are enabled at the branch the
- *     user is currently working in. Admins always see every sub-module
- *     regardless of branch configuration.
+ * open — combining two independent layers, applied uniformly to BOTH
+ * top-level modules and their sub-modules (anything with a `key`):
+ *  1. User-level module access (`user_module_access` / admin role) —
+ *     only ever applies to top-level modules.
+ *  2. Branch-level module availability: which modules/sub-modules are
+ *     enabled at the branch the user is currently working in. Admins
+ *     always see everything regardless of branch configuration.
  */
 export function useVisibleNavGroups(): NavGroup[] {
   const groups = useNavGroups();
   const { data: myAccess } = useModuleAccess();
   const { branchId } = useBranch();
-  const { data: branchModules } = useBranchMedicalModules();
+  const { data: branchModules } = useBranchModuleAccess();
+  const isAdmin = !!myAccess?.isAdmin;
 
-  const moduleFiltered = groups.filter((g) => {
-    if (!g.key) return true;
-    if (!myAccess) return true;
-    if (myAccess.isAdmin) return true;
-    if (myAccess.modules.length === 0) return true;
-    return myAccess.modules.includes(g.key);
-  });
+  const passesBranch = (key?: string) => {
+    if (!key) return true;
+    if (isAdmin) return true;
+    if (!branchId || branchModules === undefined) return true; // fail open
+    return branchModules.includes(key);
+  };
 
-  if (myAccess?.isAdmin) return moduleFiltered;
-
-  return moduleFiltered.map((g) => {
-    if (!g.subgroups) return g;
-    const hasKeyedSubgroups = g.subgroups.some((sg) => sg.key);
-    if (!hasKeyedSubgroups) return g;
-    // Fail open until we actually know the branch's configuration.
-    if (!branchId || branchModules === undefined) return g;
-    return { ...g, subgroups: g.subgroups.filter((sg) => !sg.key || branchModules.includes(sg.key)) };
-  });
+  return groups
+    .filter((g) => {
+      if (!g.key) return true;
+      if (!myAccess) return true;
+      if (isAdmin) return true;
+      if (myAccess.modules.length > 0 && !myAccess.modules.includes(g.key)) return false;
+      return passesBranch(g.key);
+    })
+    .map((g) => {
+      if (!g.subgroups) return g;
+      return { ...g, subgroups: g.subgroups.filter((sg) => passesBranch(sg.key)) };
+    });
 }
