@@ -63,7 +63,13 @@ function Page() {
   });
 
   const isOn = (moduleKey: string, branchId: string) => !disabledMap?.get(moduleKey)?.has(branchId);
-  const enabledCount = (moduleKey: string) => branches.filter((b) => isOn(moduleKey, b.id)).length;
+  // A sub-module only counts as "on" for a branch when its parent module
+  // is ALSO on there — if the main module is closed at a branch, its
+  // sub-modules are naturally out of the picture for that branch too.
+  const isEffectivelyOn = (moduleKey: string, branchId: string, parentKey?: string) =>
+    isOn(moduleKey, branchId) && (!parentKey || isOn(parentKey, branchId));
+  const enabledCount = (moduleKey: string, parentKey?: string) =>
+    branches.filter((b) => isEffectivelyOn(moduleKey, b.id, parentKey)).length;
 
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
@@ -93,7 +99,17 @@ function Page() {
                     <div key={sg.key} className="flex items-center gap-2.5 rounded-md p-2 hover:bg-accent/30 transition-colors">
                       <sg.icon className="h-4 w-4 shrink-0" style={{ color: `hsl(${sg.hue ?? g.hue} 70% 45%)` }} />
                       <span className="flex-1 text-[13.5px] font-medium">{sg.label}</span>
-                      <BranchPicker moduleKey={sg.key} branches={branches} isOn={isOn} enabledCount={enabledCount(sg.key)} toggle={toggle} t={t} localized={localized} />
+                      <BranchPicker
+                        moduleKey={sg.key}
+                        parentKey={g.key}
+                        parentLabel={g.label}
+                        branches={branches}
+                        isOn={isOn}
+                        enabledCount={enabledCount(sg.key, g.key)}
+                        toggle={toggle}
+                        t={t}
+                        localized={localized}
+                      />
                     </div>
                   ) : null
                 )}
@@ -108,6 +124,8 @@ function Page() {
 
 function BranchPicker({
   moduleKey,
+  parentKey,
+  parentLabel,
   branches,
   isOn,
   enabledCount,
@@ -116,6 +134,8 @@ function BranchPicker({
   localized,
 }: {
   moduleKey: string;
+  parentKey?: string;
+  parentLabel?: string;
   branches: Branch[];
   isOn: (moduleKey: string, branchId: string) => boolean;
   enabledCount: number;
@@ -136,12 +156,24 @@ function BranchPicker({
         <p className="text-xs font-semibold text-muted-foreground px-1.5 pb-1.5">{t("common.selectBranch")}</p>
         <div className="max-h-64 overflow-y-auto space-y-0.5">
           {branches.map((b) => {
-            const checked = isOn(moduleKey, b.id);
+            const parentOn = !parentKey || isOn(parentKey, b.id);
+            const checked = isOn(moduleKey, b.id) && parentOn;
             return (
-              <label key={b.id} className="flex items-center gap-2 rounded-md px-1.5 py-1.5 cursor-pointer hover:bg-accent/40 transition-colors">
+              <label
+                key={b.id}
+                className={
+                  "flex items-center gap-2 rounded-md px-1.5 py-1.5 transition-colors " +
+                  (parentOn ? "cursor-pointer hover:bg-accent/40" : "cursor-not-allowed opacity-40")
+                }
+                title={!parentOn ? `${t("common.enableParentFirst")} (${parentLabel})` : undefined}
+              >
                 <Checkbox
                   checked={checked}
-                  onCheckedChange={(v) => toggle.mutate({ branchId: b.id, moduleKey, enabled: v === true })}
+                  disabled={!parentOn}
+                  onCheckedChange={(v) => {
+                    if (!parentOn) return;
+                    toggle.mutate({ branchId: b.id, moduleKey, enabled: v === true });
+                  }}
                 />
                 <span className="flex-1 text-[13px]">{localized(b, "name")}</span>
                 <span className="text-[10.5px] text-muted-foreground font-mono">{b.code}</span>
