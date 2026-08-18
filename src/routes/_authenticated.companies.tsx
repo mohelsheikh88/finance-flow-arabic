@@ -33,7 +33,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Building2, MapPin, Pencil } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Plus, Building2, MapPin, Pencil, Network, ChevronRight, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/companies")({
@@ -301,6 +302,84 @@ function Page() {
     return m;
   }, [branches]);
 
+  // ===== Departments (hierarchical, scoped to a branch) =====
+  const [deptBranchId, setDeptBranchId] = useState<string>("");
+  const activeDeptBranchId = deptBranchId || (branches as Branch[])[0]?.id || "";
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments", activeDeptBranchId],
+    enabled: !!activeDeptBranchId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("departments")
+        .select("*")
+        .eq("branch_id", activeDeptBranchId)
+        .order("code");
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const emptyDept = { branch_id: "", parent_id: "", code: "", name_ar: "", name_en: "", notes: "" };
+  const [deptOpen, setDeptOpen] = useState(false);
+  const [deptForm, setDeptForm] = useState<typeof emptyDept & { id?: string }>(emptyDept);
+
+  const openDept = (parentId?: string, existing?: any) => {
+    if (existing) {
+      setDeptForm({
+        id: existing.id,
+        branch_id: existing.branch_id,
+        parent_id: existing.parent_id ?? "",
+        code: existing.code ?? "",
+        name_ar: existing.name_ar ?? "",
+        name_en: existing.name_en ?? "",
+        notes: existing.notes ?? "",
+      });
+    } else {
+      setDeptForm({ ...emptyDept, branch_id: activeDeptBranchId, parent_id: parentId ?? "" });
+    }
+    setDeptOpen(true);
+  };
+
+  const deptMut = useMutation({
+    mutationFn: async () => {
+      const activeBranch = (branches as Branch[]).find((b) => b.id === deptForm.branch_id);
+      const payload = {
+        branch_id: deptForm.branch_id,
+        company_id: activeBranch?.company_id,
+        parent_id: deptForm.parent_id || null,
+        code: deptForm.code,
+        name_ar: deptForm.name_ar,
+        name_en: deptForm.name_en,
+        notes: deptForm.notes || null,
+      };
+      if (deptForm.id) {
+        const { error } = await supabase.from("departments").update(payload).eq("id", deptForm.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("departments").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success(deptForm.id ? "تم تحديث الإدارة بنجاح" : "تم إنشاء الإدارة بنجاح");
+      setDeptOpen(false);
+      qc.invalidateQueries({ queryKey: ["departments"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deptTree = useMemo(() => {
+    const byParent: Record<string, any[]> = {};
+    for (const d of departments) {
+      const key = d.parent_id ?? "root";
+      (byParent[key] ??= []).push(d);
+    }
+    return byParent;
+  }, [departments]);
+
+  const canSaveDept = deptForm.branch_id && deptForm.code && deptForm.name_ar && deptForm.name_en;
+
   const canSaveCompany = coForm.code && coForm.name_ar && coForm.name_en;
   const canSaveBranch = brForm.company_id && brForm.code && brForm.name_ar && brForm.name_en;
 
@@ -339,6 +418,10 @@ function Page() {
           <TabsTrigger value="branches">
             <MapPin className="h-4 w-4 me-2" />
             {t("nav.branches")}
+          </TabsTrigger>
+          <TabsTrigger value="departments">
+            <Network className="h-4 w-4 me-2" />
+            {t("nav.departments")}
           </TabsTrigger>
         </TabsList>
 
@@ -457,9 +540,113 @@ function Page() {
             </table>
           </Card>
         </TabsContent>
+
+        {/* DEPARTMENTS TAB */}
+        <TabsContent value="departments" className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="w-64">
+              <Select value={activeDeptBranchId} onValueChange={setDeptBranchId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.selectBranch")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(branches as Branch[]).map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {localized(b, "name")} ({b.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={() => openDept()} disabled={!activeDeptBranchId}>
+              <Plus className="h-4 w-4 me-1" />
+              {t("common.new")} {t("nav.departments")}
+            </Button>
+          </div>
+
+          <Card className="p-2">
+            {(deptTree["root"] ?? []).length === 0 && (
+              <p className="p-8 text-center text-muted-foreground text-sm">{t("common.noData")}</p>
+            )}
+            <div className="space-y-0.5">
+              {(deptTree["root"] ?? []).map((d) => (
+                <DepartmentNode key={d.id} node={d} depth={0} tree={deptTree} localized={localized} t={t} onAdd={openDept} onEdit={(n) => openDept(undefined, n)} />
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
       </Tabs>
 
-      {/* COMPANY DIALOG */}
+      {/* DEPARTMENT DIALOG */}
+      <Dialog open={deptOpen} onOpenChange={setDeptOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {deptForm.id ? t("common.edit") : t("common.new")} {deptForm.parent_id ? t("common.subDepartment") : t("nav.departments")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>{t("common.selectBranch")}</Label>
+              <Select value={deptForm.branch_id} onValueChange={(v) => setDeptForm((f) => ({ ...f, branch_id: v, parent_id: "" }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(branches as Branch[]).map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {localized(b, "name")} ({b.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>{t("common.parentDepartment")}</Label>
+              <Select
+                value={deptForm.parent_id || "__top__"}
+                onValueChange={(v) => setDeptForm((f) => ({ ...f, parent_id: v === "__top__" ? "" : v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__top__">{t("common.topLevel")}</SelectItem>
+                  {departments
+                    .filter((d) => d.branch_id === deptForm.branch_id && d.id !== deptForm.id)
+                    .map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {localized(d, "name")}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t("common.code")}</Label>
+                <Input value={deptForm.code} onChange={(e) => setDeptForm((f) => ({ ...f, code: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t("common.name")} (AR)</Label>
+                <Input value={deptForm.name_ar} onChange={(e) => setDeptForm((f) => ({ ...f, name_ar: e.target.value }))} dir="rtl" />
+              </div>
+              <div>
+                <Label>{t("common.name")} (EN)</Label>
+                <Input value={deptForm.name_en} onChange={(e) => setDeptForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeptOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={() => deptMut.mutate()} disabled={!canSaveDept || deptMut.isPending}>
+              {t("common.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={coOpen} onOpenChange={setCoOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -589,6 +776,67 @@ function Field({
         type={type ?? "text"}
         className="h-9"
       />
+    </div>
+  );
+}
+
+/** One row in the departments tree, recursively rendering its children. */
+function DepartmentNode({
+  node,
+  depth,
+  tree,
+  localized,
+  t,
+  onAdd,
+  onEdit,
+}: {
+  node: any;
+  depth: number;
+  tree: Record<string, any[]>;
+  localized: (row: any, base: string) => string;
+  t: (k: string) => string;
+  onAdd: (parentId?: string) => void;
+  onEdit: (node: any) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const children = tree[node.id] ?? [];
+  const hasChildren = children.length > 0;
+
+  return (
+    <div>
+      <div
+        className="flex items-center gap-1.5 rounded-md px-2 py-2 hover:bg-muted/40 group"
+        style={{ paddingInlineStart: `${8 + depth * 22}px` }}
+      >
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className={"h-5 w-5 flex items-center justify-center shrink-0 rounded " + (hasChildren ? "text-muted-foreground hover:bg-muted" : "opacity-0 pointer-events-none")}
+        >
+          {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+        </button>
+
+        <span className="flex-1 min-w-0 truncate text-sm font-medium">{localized(node, "name")}</span>
+        <span className="text-xs text-muted-foreground font-mono shrink-0">{node.code}</span>
+
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => onAdd(node.id)}>
+            <Plus className="h-3 w-3 me-1" />
+            {t("common.subDepartment")}
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onEdit(node)}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      {open && hasChildren && (
+        <div>
+          {children.map((child) => (
+            <DepartmentNode key={child.id} node={child} depth={depth + 1} tree={tree} localized={localized} t={t} onAdd={onAdd} onEdit={onEdit} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
