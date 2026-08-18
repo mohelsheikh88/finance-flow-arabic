@@ -42,6 +42,7 @@ import { Route as AuthenticatedInventoryRouteImport } from './routes/_authentica
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedLaboratoryRouteImport } from './routes/_authenticated.laboratory'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
+import { Route as AuthenticatedMedicalConfigurationRouteImport } from './routes/_authenticated.medical-configuration'
 import { Route as AuthenticatedMedicalDashboardRouteImport } from './routes/_authenticated.medical-dashboard'
 import { Route as AuthenticatedModulesManagementRouteImport } from './routes/_authenticated.modules-management'
 import { Route as AuthenticatedOutpatientClinicsRouteImport } from './routes/_authenticated.outpatient-clinics'
@@ -254,6 +255,12 @@ const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedMedicalConfigurationRoute =
+  AuthenticatedMedicalConfigurationRouteImport.update({
+    id: '/medical-configuration',
+    path: '/medical-configuration',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedMedicalDashboardRoute =
   AuthenticatedMedicalDashboardRouteImport.update({
     id: '/medical-dashboard',
@@ -505,6 +512,7 @@ export interface FileRoutesByFullPath {
   '/journals': typeof AuthenticatedJournalsRoute
   '/laboratory': typeof AuthenticatedLaboratoryRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/medical-configuration': typeof AuthenticatedMedicalConfigurationRoute
   '/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/modules-management': typeof AuthenticatedModulesManagementRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
@@ -578,6 +586,7 @@ export interface FileRoutesByTo {
   '/journals': typeof AuthenticatedJournalsRoute
   '/laboratory': typeof AuthenticatedLaboratoryRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/medical-configuration': typeof AuthenticatedMedicalConfigurationRoute
   '/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/modules-management': typeof AuthenticatedModulesManagementRoute
   '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
@@ -653,6 +662,7 @@ export interface FileRoutesById {
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/laboratory': typeof AuthenticatedLaboratoryRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
+  '/_authenticated/medical-configuration': typeof AuthenticatedMedicalConfigurationRoute
   '/_authenticated/medical-dashboard': typeof AuthenticatedMedicalDashboardRoute
   '/_authenticated/modules-management': typeof AuthenticatedModulesManagementRoute
   '/_authenticated/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
@@ -728,6 +738,7 @@ export interface FileRouteTypes {
     | '/journals'
     | '/laboratory'
     | '/loans'
+    | '/medical-configuration'
     | '/medical-dashboard'
     | '/modules-management'
     | '/outpatient-clinics'
@@ -801,6 +812,7 @@ export interface FileRouteTypes {
     | '/journals'
     | '/laboratory'
     | '/loans'
+    | '/medical-configuration'
     | '/medical-dashboard'
     | '/modules-management'
     | '/outpatient-clinics'
@@ -875,6 +887,7 @@ export interface FileRouteTypes {
     | '/_authenticated/journals'
     | '/_authenticated/laboratory'
     | '/_authenticated/loans'
+    | '/_authenticated/medical-configuration'
     | '/_authenticated/medical-dashboard'
     | '/_authenticated/modules-management'
     | '/_authenticated/outpatient-clinics'
@@ -1154,6 +1167,13 @@ declare module '@tanstack/react-router' {
       path: '/loans'
       fullPath: '/loans'
       preLoaderRoute: typeof AuthenticatedLoansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/medical-configuration': {
+      id: '/_authenticated/medical-configuration'
+      path: '/medical-configuration'
+      fullPath: '/medical-configuration'
+      preLoaderRoute: typeof AuthenticatedMedicalConfigurationRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/medical-dashboard': {
@@ -1463,6 +1483,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLaboratoryRoute: typeof AuthenticatedLaboratoryRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
+  AuthenticatedMedicalConfigurationRoute: typeof AuthenticatedMedicalConfigurationRoute
   AuthenticatedMedicalDashboardRoute: typeof AuthenticatedMedicalDashboardRoute
   AuthenticatedModulesManagementRoute: typeof AuthenticatedModulesManagementRoute
   AuthenticatedOutpatientClinicsRoute: typeof AuthenticatedOutpatientClinicsRoute
@@ -1534,6 +1555,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLaboratoryRoute: AuthenticatedLaboratoryRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
+  AuthenticatedMedicalConfigurationRoute:
+    AuthenticatedMedicalConfigurationRoute,
   AuthenticatedMedicalDashboardRoute: AuthenticatedMedicalDashboardRoute,
   AuthenticatedModulesManagementRoute: AuthenticatedModulesManagementRoute,
   AuthenticatedOutpatientClinicsRoute: AuthenticatedOutpatientClinicsRoute,

@@ -311,6 +311,13 @@ export function useNavGroups(): NavGroup[] {
           hue: 195,
           items: [{ url: "/radiology", icon: Scan, title: t("common.willBeBuiltLater") }],
         },
+        {
+          key: "medicalConfiguration",
+          label: t("nav.configuration"),
+          icon: SlidersHorizontal,
+          hue: 180,
+          items: [{ url: "/medical-configuration", icon: SlidersHorizontal, title: t("common.willBeBuiltLater") }],
+        },
       ],
     },
     {
