@@ -351,10 +351,18 @@ function ApprovalsPage() {
 
       <Tabs defaultValue="workflows">
         <TabsList>
-          <TabsTrigger value="workflows">{t("approvals.workflows")} ({workflows.length})</TabsTrigger>
           <TabsTrigger value="roles">{t("roles.title")}</TabsTrigger>
-          <TabsTrigger value="user_roles">{t("users.title")}</TabsTrigger>
+          <TabsTrigger value="user_roles">{t("approvals.usersRolesTab")}</TabsTrigger>
+          <TabsTrigger value="workflows">{t("approvals.workflows")} ({workflows.length})</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="roles">
+          <RolesManagement />
+        </TabsContent>
+
+        <TabsContent value="user_roles">
+          <UserRolesManagement moduleScope="accounting" rolesOnly />
+        </TabsContent>
 
         <TabsContent value="workflows" className="space-y-2">
           {workflows.length === 0 ? (
@@ -397,14 +405,6 @@ function ApprovalsPage() {
               </div>
             </Card>
           ))}
-        </TabsContent>
-
-        <TabsContent value="roles">
-          <RolesManagement />
-        </TabsContent>
-
-        <TabsContent value="user_roles">
-          <UserRolesManagement moduleScope="accounting" rolesOnly />
         </TabsContent>
       </Tabs>
 
