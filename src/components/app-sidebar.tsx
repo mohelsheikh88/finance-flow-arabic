@@ -74,12 +74,12 @@ export function AppSidebar() {
   // App, and any future one): once the user is inside a specific subgroup's
   // page, the sidebar scopes to that subgroup only, and "Back" steps up to
   // this module's own card-grid sub-launcher — not straight to /apps.
-  const isNestedApp = !!(activeGroup.subgroups && activeGroup.subgroups.length > 0 && match?.subgroup);
-  const ScopeIcon = isNestedApp ? match!.subgroup!.icon : activeGroup.icon;
-  const scopeLabel = isNestedApp ? match!.subgroup!.label : activeGroup.label;
-  const scopeItems = isNestedApp ? match!.subgroup!.items : activeGroup.items;
-  const scopeSubgroups = isNestedApp ? undefined : activeGroup.subgroups;
-  const backUrl = isNestedApp ? groupHomeUrl(activeGroup) : "/apps";
+  const isNestedApp = !!(activeGroup?.subgroups && activeGroup.subgroups.length > 0 && match?.subgroup);
+  const ScopeIcon = isNestedApp ? match!.subgroup!.icon : activeGroup?.icon;
+  const scopeLabel = isNestedApp ? match!.subgroup!.label : activeGroup?.label;
+  const scopeItems = isNestedApp ? match!.subgroup!.items : activeGroup?.items;
+  const scopeSubgroups = isNestedApp ? undefined : activeGroup?.subgroups;
+  const backUrl = isNestedApp && activeGroup ? groupHomeUrl(activeGroup) : "/apps";
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
 
 
