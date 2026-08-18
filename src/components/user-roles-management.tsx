@@ -12,6 +12,7 @@ import {
   deleteUser,
 } from "@/lib/api/users.functions";
 import { listRoles } from "@/lib/api/roles.functions";
+import { useNavGroups } from "@/lib/nav-config";
 import { useBranch } from "@/lib/branch-context";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useI18n } from "@/i18n";
@@ -75,13 +76,7 @@ const DB_ROLES = [
 ] as const;
 
 
-export const MODULES = [
-  { key: "accounting", icon: Wallet, tKey: "nav.financialAccounting" },
-  { key: "purchase", icon: ShoppingBag, tKey: "nav.purchaseProcurement" },
-  { key: "inventory", icon: Package, tKey: "nav.inventoryManagement" },
-  { key: "hr", icon: UsersRound, tKey: "nav.humanResources" },
-  { key: "settings", icon: Settings, tKey: "nav.generalSetting" },
-] as const;
+
 
 type FormState = {
   id: string | null;
@@ -116,6 +111,15 @@ export function UserRolesManagement({
   const { companyId } = useBranch();
   const { user } = useAuth();
   const qc = useQueryClient();
+
+  // Every top-level module currently in the system — single source of
+  // truth shared with the sidebar / Apps launcher / Modules Management,
+  // so this list is never stale again.
+  const navGroups = useNavGroups();
+  const moduleOptions = navGroups
+    .filter((g) => !!g.key)
+    .map((g) => ({ key: g.key!, icon: g.icon, label: g.label }));
+
   const listFn = useServerFn(listUsersWithRoles);
   const assignFn = useServerFn(assignUserRole);
   const removeFn = useServerFn(removeUserRole);
@@ -408,7 +412,7 @@ export function UserRolesManagement({
                         </span>
                       ) : (
                         mods.map((m: string) => {
-                          const def = MODULES.find((x) => x.key === m);
+                          const def = moduleOptions.find((x) => x.key === m);
                           if (!def) return null;
                           const Icon = def.icon;
                           return (
@@ -418,7 +422,7 @@ export function UserRolesManagement({
                               className="gap-1 text-[10px] border-primary/40 text-primary"
                             >
                               <Icon className="h-3 w-3" />
-                              {t(def.tKey)}
+                              {def.label}
                             </Badge>
                           );
                         })
@@ -584,7 +588,7 @@ export function UserRolesManagement({
                 {t("users.modulesHint")}
               </p>
               <div className="grid grid-cols-1 gap-2">
-                {MODULES.map((m) => {
+                {moduleOptions.map((m) => {
                   const Icon = m.icon;
                   return (
                     <label
@@ -598,7 +602,7 @@ export function UserRolesManagement({
                         }
                       />
                       <Icon className="h-4 w-4 text-primary" />
-                      {t(m.tKey)}
+                      {m.label}
                     </label>
                   );
                 })}
