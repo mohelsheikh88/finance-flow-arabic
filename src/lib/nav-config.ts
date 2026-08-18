@@ -38,9 +38,10 @@ import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { useBranch } from "@/lib/branch-context";
 
 export type NavItem = { url: string; icon: any; title: string };
-export type NavSubgroup = { label: string; icon: any; hue?: number; items: NavItem[] };
+export type NavSubgroup = { key?: string; label: string; icon: any; hue?: number; items: NavItem[] };
 export type NavGroup = {
   key?: string;
   label: string;
@@ -196,30 +197,35 @@ export function useNavGroups(): NavGroup[] {
       hue: 351, // red/rose — medical
       subgroups: [
         {
+          key: "insurance",
           label: t("nav.insurance"),
           icon: Umbrella,
           hue: 224,
           items: [{ url: "/insurance", icon: Umbrella, title: t("common.willBeBuiltLater") }],
         },
         {
+          key: "pharmacy",
           label: t("nav.pharmacy"),
           icon: Pill,
           hue: 152,
           items: [{ url: "/pharmacy", icon: Pill, title: t("common.willBeBuiltLater") }],
         },
         {
+          key: "homeCare",
           label: t("nav.homeCare"),
           icon: Home,
           hue: 130,
           items: [{ url: "/home-care", icon: Home, title: t("common.willBeBuiltLater") }],
         },
         {
+          key: "ambulance",
           label: t("nav.ambulance"),
           icon: Ambulance,
           hue: 10,
           items: [{ url: "/ambulance", icon: Ambulance, title: t("common.willBeBuiltLater") }],
         },
         {
+          key: "outpatientClinics",
           label: t("nav.outpatientClinics"),
           icon: ClipboardPlus,
           hue: 188,
@@ -256,6 +262,7 @@ export function useNavGroups(): NavGroup[] {
       items: [
         { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/users", icon: Users, title: t("nav.users") },
+        { url: "/branch-medical-modules", icon: Stethoscope, title: t("nav.branchMedicalModules") },
       ],
     },
   ];
@@ -327,16 +334,58 @@ export function useModuleAccess() {
   });
 }
 
-/** Nav groups filtered down to the ones this user is actually allowed to open. */
+/**
+ * Which medical sub-modules (Insurance, Pharmacy, Home Care, Ambulance,
+ * Outpatient Clinics) are actually turned on at the user's currently
+ * active branch. Fails open (returns undefined) while loading or when no
+ * branch is selected yet, so the UI doesn't flash an empty state.
+ */
+export function useBranchMedicalModules() {
+  const { branchId } = useBranch();
+  return useQuery({
+    queryKey: ["branch_medical_modules", branchId],
+    enabled: !!branchId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("branch_medical_modules")
+        .select("module_key, is_enabled")
+        .eq("branch_id", branchId!);
+      return (data ?? []).filter((r: any) => r.is_enabled).map((r: any) => r.module_key as string);
+    },
+  });
+}
+
+/**
+ * Nav groups filtered down to the ones this user is actually allowed to
+ * open — combining two independent layers:
+ *  1. User-level module access (`user_module_access` / admin role).
+ *  2. Branch-level medical module availability: which of the medical
+ *     sub-modules (Insurance, Pharmacy...) are enabled at the branch the
+ *     user is currently working in. Admins always see every sub-module
+ *     regardless of branch configuration.
+ */
 export function useVisibleNavGroups(): NavGroup[] {
   const groups = useNavGroups();
   const { data: myAccess } = useModuleAccess();
+  const { branchId } = useBranch();
+  const { data: branchModules } = useBranchMedicalModules();
 
-  return groups.filter((g) => {
+  const moduleFiltered = groups.filter((g) => {
     if (!g.key) return true;
     if (!myAccess) return true;
     if (myAccess.isAdmin) return true;
     if (myAccess.modules.length === 0) return true;
     return myAccess.modules.includes(g.key);
+  });
+
+  if (myAccess?.isAdmin) return moduleFiltered;
+
+  return moduleFiltered.map((g) => {
+    if (!g.subgroups) return g;
+    const hasKeyedSubgroups = g.subgroups.some((sg) => sg.key);
+    if (!hasKeyedSubgroups) return g;
+    // Fail open until we actually know the branch's configuration.
+    if (!branchId || branchModules === undefined) return g;
+    return { ...g, subgroups: g.subgroups.filter((sg) => !sg.key || branchModules.includes(sg.key)) };
   });
 }

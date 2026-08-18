@@ -638,6 +638,41 @@ export type Database = {
           },
         ]
       }
+      branch_medical_modules: {
+        Row: {
+          branch_id: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          module_key: string
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          module_key: string
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          module_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branch_medical_modules_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branches: {
         Row: {
           address_ar: string | null

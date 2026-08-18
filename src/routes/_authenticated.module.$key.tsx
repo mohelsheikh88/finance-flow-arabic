@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { LayoutGrid } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { useNavGroups } from "@/lib/nav-config";
+import { useVisibleNavGroups } from "@/lib/nav-config";
 import { ModuleCardGrid, transitionNameFor } from "@/components/module-card-grid";
 
 export const Route = createFileRoute("/_authenticated/module/$key")({
@@ -21,7 +21,7 @@ function ModuleSubLauncher() {
   const { key } = Route.useParams();
   const { t } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const groups = useNavGroups();
+  const groups = useVisibleNavGroups();
   const group = groups.find((g) => g.key === key);
   const subgroups = group?.subgroups ?? [];
   const GroupIcon = group?.icon;
