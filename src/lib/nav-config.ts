@@ -499,26 +499,28 @@ export function useBranchModuleAccess() {
  * Nav groups filtered down to the ones this user is actually allowed to
  * open — combining two independent layers, applied uniformly to BOTH
  * top-level modules and their sub-modules (anything with a `key`):
- *  1. User-level module access (`user_module_access` / admin role) —
- *     only ever applies to top-level modules.
+ *  1. User/group-level module access (direct `user_module_access` UNION
+ *     any user group's granted modules). No special-casing for admins —
+ *     an admin with zero explicit assignments sees everything (the same
+ *     fail-open default anyone gets), but the moment they configure
+ *     specific access for themselves it takes effect just like for any
+ *     other user. This is what makes the whole permission system
+ *     actually testable from a single admin account.
  *  2. Branch-level module availability: which modules/sub-modules are
- *     enabled at the branch the user is currently working in. Admins
- *     always see everything regardless of branch configuration.
+ *     enabled at the branch the user is currently working in.
  */
 export function useVisibleNavGroups(): NavGroup[] {
   const groups = useNavGroups();
   const { data: myAccess } = useModuleAccess();
   const { branchId } = useBranch();
   const { data: branchModules } = useBranchModuleAccess();
-  const isAdmin = !!myAccess?.isAdmin;
 
-  // Per-user assignment (who is allowed to use this module at all) —
-  // admins are never restricted by this.
+  // Per-user/group assignment — applies to top-level modules AND
+  // sub-modules alike (a group can grant a specific sub-module directly).
   const passesUserAccess = (key?: string) => {
     if (!key) return true;
-    if (!myAccess) return true;
-    if (isAdmin) return true;
-    if (myAccess.modules.length === 0) return true;
+    if (!myAccess) return true; // fail open while loading
+    if (myAccess.modules.length === 0) return true; // nothing configured yet = unrestricted
     return myAccess.modules.includes(key);
   };
 
@@ -536,6 +538,6 @@ export function useVisibleNavGroups(): NavGroup[] {
     .filter((g) => passesUserAccess(g.key) && passesBranch(g.key))
     .map((g) => {
       if (!g.subgroups) return g;
-      return { ...g, subgroups: g.subgroups.filter((sg) => passesBranch(sg.key)) };
+      return { ...g, subgroups: g.subgroups.filter((sg) => passesUserAccess(sg.key) && passesBranch(sg.key)) };
     });
 }
