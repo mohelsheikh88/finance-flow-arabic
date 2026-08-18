@@ -39,6 +39,7 @@ import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPaymentMethodsRouteImport } from './routes/_authenticated.payment-methods'
 import { Route as AuthenticatedPaymentTermsRouteImport } from './routes/_authenticated.payment-terms'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
+import { Route as AuthenticatedPharmacyRouteImport } from './routes/_authenticated.pharmacy'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
@@ -222,6 +223,11 @@ const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPharmacyRoute = AuthenticatedPharmacyRouteImport.update({
+  id: '/pharmacy',
+  path: '/pharmacy',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPurchaseRoute = AuthenticatedPurchaseRouteImport.update({
   id: '/purchase',
   path: '/purchase',
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -444,6 +451,7 @@ export interface FileRoutesByTo {
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -501,6 +509,7 @@ export interface FileRoutesById {
   '/_authenticated/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/_authenticated/payment-terms': typeof AuthenticatedPaymentTermsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/pharmacy': typeof AuthenticatedPharmacyRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -558,6 +567,7 @@ export interface FileRouteTypes {
     | '/payment-methods'
     | '/payment-terms'
     | '/payments'
+    | '/pharmacy'
     | '/purchase'
     | '/receipts'
     | '/settings'
@@ -613,6 +623,7 @@ export interface FileRouteTypes {
     | '/payment-methods'
     | '/payment-terms'
     | '/payments'
+    | '/pharmacy'
     | '/purchase'
     | '/receipts'
     | '/settings'
@@ -669,6 +680,7 @@ export interface FileRouteTypes {
     | '/_authenticated/payment-methods'
     | '/_authenticated/payment-terms'
     | '/_authenticated/payments'
+    | '/_authenticated/pharmacy'
     | '/_authenticated/purchase'
     | '/_authenticated/receipts'
     | '/_authenticated/settings'
@@ -914,6 +926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/pharmacy': {
+      id: '/_authenticated/pharmacy'
+      path: '/pharmacy'
+      fullPath: '/pharmacy'
+      preLoaderRoute: typeof AuthenticatedPharmacyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/purchase': {
       id: '/_authenticated/purchase'
       path: '/purchase'
@@ -1113,6 +1132,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPaymentMethodsRoute: typeof AuthenticatedPaymentMethodsRoute
   AuthenticatedPaymentTermsRoute: typeof AuthenticatedPaymentTermsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedPharmacyRoute: typeof AuthenticatedPharmacyRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -1166,6 +1186,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPaymentMethodsRoute: AuthenticatedPaymentMethodsRoute,
   AuthenticatedPaymentTermsRoute: AuthenticatedPaymentTermsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedPharmacyRoute: AuthenticatedPharmacyRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

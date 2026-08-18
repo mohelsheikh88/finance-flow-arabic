@@ -25,6 +25,7 @@ import {
   SlidersHorizontal,
   HandCoins,
   Stethoscope,
+  Pill,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -169,6 +170,12 @@ export function useNavGroups(): NavGroup[] {
       label: t("nav.his"),
       icon: Stethoscope,
       items: [{ url: "/his", icon: Stethoscope, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "pharmacy",
+      label: t("nav.pharmacy"),
+      icon: Pill,
+      items: [{ url: "/pharmacy", icon: Pill, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",
