@@ -495,21 +495,28 @@ export function useVisibleNavGroups(): NavGroup[] {
   const { data: branchModules } = useBranchModuleAccess();
   const isAdmin = !!myAccess?.isAdmin;
 
+  // Per-user assignment (who is allowed to use this module at all) —
+  // admins are never restricted by this.
+  const passesUserAccess = (key?: string) => {
+    if (!key) return true;
+    if (!myAccess) return true;
+    if (isAdmin) return true;
+    if (myAccess.modules.length === 0) return true;
+    return myAccess.modules.includes(key);
+  };
+
+  // Branch availability (is this module turned on for the branch I'm
+  // CURRENTLY working in) — applies to everyone, admins included, so
+  // switching the active branch up top always reflects what's actually
+  // configured in Modules Management.
   const passesBranch = (key?: string) => {
     if (!key) return true;
-    if (isAdmin) return true;
     if (!branchId || branchModules === undefined) return true; // fail open
     return branchModules.includes(key);
   };
 
   return groups
-    .filter((g) => {
-      if (!g.key) return true;
-      if (!myAccess) return true;
-      if (isAdmin) return true;
-      if (myAccess.modules.length > 0 && !myAccess.modules.includes(g.key)) return false;
-      return passesBranch(g.key);
-    })
+    .filter((g) => passesUserAccess(g.key) && passesBranch(g.key))
     .map((g) => {
       if (!g.subgroups) return g;
       return { ...g, subgroups: g.subgroups.filter((sg) => passesBranch(sg.key)) };
