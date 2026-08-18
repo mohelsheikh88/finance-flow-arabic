@@ -51,15 +51,15 @@ export function useNavGroups(): NavGroup[] {
 
   return [
     {
+      label: t("nav.mainDashboard"),
+      icon: LayoutDashboard,
+      items: [{ url: "/dashboard", icon: LayoutDashboard, title: t("nav.mainDashboard") }],
+    },
+    {
       key: "accounting",
       label: t("nav.financialAccounting"),
       icon: Wallet,
       subgroups: [
-        {
-          label: t("nav.dashboard"),
-          icon: LayoutDashboard,
-          items: [{ url: "/dashboard", icon: LayoutDashboard, title: t("nav.mainDashboard") }],
-        },
         {
           label: t("nav.reports"),
           icon: BarChart3,
