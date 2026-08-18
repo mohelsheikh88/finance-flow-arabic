@@ -353,7 +353,9 @@ export function useNavGroups(): NavGroup[] {
       items: [{ url: "/crm", icon: Handshake, title: t("common.willBeBuiltLater") }],
     },
     {
-      key: "settings",
+      // No `key` on purpose — General Settings must NEVER be hidden by a
+      // branch/group configuration mistake (it's where you fix those
+      // mistakes from). Always visible, exactly like Main Dashboard.
       label: t("nav.generalSetting"),
       icon: Settings,
       hue: 215, // neutral slate-blue — configuration
