@@ -13,10 +13,10 @@ function AppsLauncher() {
 
   return (
     <div className="min-h-full flex flex-col items-center px-6 py-10 sm:py-14">
-      <div className="flex items-center gap-4 sm:gap-5 mb-10 sm:mb-14" dir="ltr">
+      <div className="flex items-center gap-4 sm:gap-5 mb-10 sm:mb-14 max-w-full px-4" dir="ltr">
         <BrandMark size={64} />
-        <span className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white whitespace-nowrap">
-          Al Hayat ERP
+        <span className="text-xl sm:text-3xl font-extrabold tracking-tight text-white">
+          {t("common.appWordmark")}
         </span>
       </div>
 
