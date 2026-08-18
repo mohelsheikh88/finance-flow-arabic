@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.self";
+import { employeeIdToAuthEmail } from "@/lib/employee-auth";
 
 const APP_ROLES = [
   "admin",
@@ -33,7 +34,7 @@ export const listUsersWithRoles = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: profiles, error } = await supabase
       .from("profiles")
-      .select("id, email, display_name_ar, display_name_en, is_active")
+      .select("id, email, employee_id, display_name_ar, display_name_en, is_active")
       .order("display_name_en");
     if (error) throw new Error(error.message);
 
@@ -106,13 +107,10 @@ export const removeUserRole = createServerFn({ method: "POST" })
 // Admin user management (create / update / disable / delete) + module access
 // ---------------------------------------------------------------------------
 
-export const MODULE_KEYS = [
-  "accounting",
-  "purchase",
-  "inventory",
-  "hr",
-  "settings",
-] as const;
+// Module keys are open-ended (new modules get added regularly), so we
+// validate them as plain non-empty strings rather than a fixed enum that
+// would silently reject anything added after this list was written.
+const moduleKeySchema = z.string().min(1);
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase
@@ -141,7 +139,7 @@ export const setUserModules = createServerFn({ method: "POST" })
     z
       .object({
         userId: z.string().uuid(),
-        modules: z.array(z.enum(MODULE_KEYS)),
+        modules: z.array(moduleKeySchema),
       })
       .parse(i),
   )
@@ -171,12 +169,13 @@ export const createUser = createServerFn({ method: "POST" })
   .inputValidator((i) =>
     z
       .object({
-        email: z.string().email(),
+        employeeId: z.string().min(1),
+        contactEmail: z.string().email().nullable().optional(),
         password: z.string().min(8),
         displayNameAr: z.string().min(1),
         displayNameEn: z.string().min(1),
         roles: z.array(z.string()).default([]),
-        modules: z.array(z.enum(MODULE_KEYS)).default([]),
+        modules: z.array(moduleKeySchema).default([]),
         companyId: z.string().uuid().nullable().default(null),
       })
       .parse(i),
@@ -185,13 +184,25 @@ export const createUser = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/admin.self.server");
 
+    // Uniqueness check up front so we fail with a clear message instead of
+    // a raw Postgres unique-constraint error.
+    const { data: existing } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("employee_id", data.employeeId)
+      .maybeSingle();
+    if (existing) throw new Error("Employee ID already in use");
+
+    const authEmail = employeeIdToAuthEmail(data.employeeId);
+
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
-      email: data.email,
+      email: authEmail,
       password: data.password,
       email_confirm: true,
       user_metadata: {
         display_name_ar: data.displayNameAr,
         display_name_en: data.displayNameEn,
+        employee_id: data.employeeId,
       },
     });
     if (error) throw new Error(error.message);
@@ -202,6 +213,8 @@ export const createUser = createServerFn({ method: "POST" })
       .update({
         display_name_ar: data.displayNameAr,
         display_name_en: data.displayNameEn,
+        employee_id: data.employeeId,
+        email: data.contactEmail || authEmail,
       })
       .eq("id", newId);
 
@@ -237,6 +250,8 @@ export const updateUser = createServerFn({ method: "POST" })
         userId: z.string().uuid(),
         displayNameAr: z.string().min(1).optional(),
         displayNameEn: z.string().min(1).optional(),
+        employeeId: z.string().min(1).optional(),
+        contactEmail: z.string().email().nullable().optional(),
         password: z.string().min(8).optional().nullable(),
         isActive: z.boolean().optional(),
       })
@@ -246,16 +261,40 @@ export const updateUser = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/admin.self.server");
 
+    if (data.employeeId !== undefined) {
+      const { data: existing } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("employee_id", data.employeeId)
+        .neq("id", data.userId)
+        .maybeSingle();
+      if (existing) throw new Error("Employee ID already in use");
+    }
+
     const patch: {
       display_name_ar?: string;
       display_name_en?: string;
       is_active?: boolean;
+      employee_id?: string;
+      email?: string;
     } = {};
     if (data.displayNameAr !== undefined) patch.display_name_ar = data.displayNameAr;
     if (data.displayNameEn !== undefined) patch.display_name_en = data.displayNameEn;
     if (data.isActive !== undefined) patch.is_active = data.isActive;
+    if (data.employeeId !== undefined) patch.employee_id = data.employeeId;
+    if (data.contactEmail !== undefined) patch.email = data.contactEmail || employeeIdToAuthEmail(data.employeeId ?? "");
     if (Object.keys(patch).length) {
       const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.userId);
+      if (error) throw new Error(error.message);
+    }
+
+    // Changing the Employee ID also has to move the underlying auth
+    // identity, since that's what login is keyed on.
+    if (data.employeeId !== undefined) {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+        email: employeeIdToAuthEmail(data.employeeId),
+        email_confirm: true,
+      });
       if (error) throw new Error(error.message);
     }
 

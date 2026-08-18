@@ -80,6 +80,7 @@ const DB_ROLES = [
 
 type FormState = {
   id: string | null;
+  employeeId: string;
   email: string;
   password: string;
   nameAr: string;
@@ -91,6 +92,7 @@ type FormState = {
 
 const emptyForm: FormState = {
   id: null,
+  employeeId: "",
   email: "",
   password: "",
   nameAr: "",
@@ -183,6 +185,7 @@ export function UserRolesManagement({
     return scoped.filter(
       (u) =>
         u.email?.toLowerCase().includes(q) ||
+        u.employee_id?.toLowerCase().includes(q) ||
         u.display_name_en?.toLowerCase().includes(q) ||
         u.display_name_ar?.toLowerCase().includes(q),
     );
@@ -243,6 +246,8 @@ export function UserRolesManagement({
             displayNameAr: f.nameAr,
             displayNameEn: f.nameEn,
             isActive: f.isActive,
+            employeeId: f.employeeId || undefined,
+            contactEmail: f.email || null,
             ...(f.password ? { password: f.password } : {}),
           },
         });
@@ -263,7 +268,8 @@ export function UserRolesManagement({
       } else {
         await createFn({
           data: {
-            email: f.email,
+            employeeId: f.employeeId,
+            contactEmail: f.email || null,
             password: f.password,
             displayNameAr: f.nameAr || f.nameEn,
             displayNameEn: f.nameEn || f.nameAr,
@@ -290,7 +296,8 @@ export function UserRolesManagement({
   const openEdit = (u: any) => {
     setForm({
       id: u.id,
-      email: u.email,
+      employeeId: u.employee_id ?? "",
+      email: u.email ?? "",
       password: "",
       nameAr: u.display_name_ar ?? "",
       nameEn: u.display_name_en ?? "",
@@ -366,7 +373,14 @@ export function UserRolesManagement({
                           </Badge>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">{u.email}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+                        {u.employee_id && (
+                          <span className="font-mono">#{u.employee_id}</span>
+                        )}
+                        {u.email && !u.email.includes("@employees.alhayat.internal") && (
+                          <span>{u.email}</span>
+                        )}
+                      </div>
                     </div>
 
                     {!rolesOnly && (
@@ -510,12 +524,13 @@ export function UserRolesManagement({
           <div className="space-y-4 max-h-[65vh] overflow-y-auto pe-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{t("common.email")}</Label>
+                <Label className="text-xs">{t("users.employeeId")}</Label>
                 <Input
-                  value={form.email}
-                  disabled={!!form.id}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  value={form.employeeId}
+                  onChange={(e) => setForm((f) => ({ ...f, employeeId: e.target.value }))}
                   className="h-8 text-xs"
+                  dir="ltr"
+                  placeholder={t("users.employeeIdHint")}
                 />
               </div>
               <div className="space-y-1.5">
@@ -544,6 +559,17 @@ export function UserRolesManagement({
                   value={form.nameEn}
                   onChange={(e) => setForm((f) => ({ ...f, nameEn: e.target.value }))}
                   className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label className="text-xs">{t("users.contactEmail")}</Label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  className="h-8 text-xs"
+                  dir="ltr"
+                  placeholder={t("users.contactEmailHint")}
                 />
               </div>
             </div>
@@ -618,7 +644,7 @@ export function UserRolesManagement({
               size="sm"
               disabled={
                 saveMut.isPending ||
-                (!form.id && (!form.email || form.password.length < 8))
+                (!form.id && (!form.employeeId || form.password.length < 8))
               }
               onClick={() => saveMut.mutate(form)}
             >

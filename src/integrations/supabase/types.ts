@@ -2408,6 +2408,7 @@ export type Database = {
           display_name_ar: string | null
           display_name_en: string | null
           email: string
+          employee_id: string | null
           id: string
           is_active: boolean
           phone: string | null
@@ -2422,6 +2423,7 @@ export type Database = {
           display_name_ar?: string | null
           display_name_en?: string | null
           email: string
+          employee_id?: string | null
           id: string
           is_active?: boolean
           phone?: string | null
@@ -2436,6 +2438,7 @@ export type Database = {
           display_name_ar?: string | null
           display_name_en?: string | null
           email?: string
+          employee_id?: string | null
           id?: string
           is_active?: boolean
           phone?: string | null

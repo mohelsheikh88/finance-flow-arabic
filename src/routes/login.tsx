@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase, setRememberMe } from "@/integrations/supabase/client";
+import { employeeIdToAuthEmail, isLikelyEmail } from "@/lib/employee-auth";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ function LoginPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [remember, setRemember] = useState(true);
@@ -41,7 +42,7 @@ function LoginPage() {
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: identifier,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -51,7 +52,11 @@ function LoginPage() {
         if (error) throw error;
         toast.success(t("common.saved"));
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // Accepts either a real email (existing accounts) or an Employee
+        // ID (the normal way to log in now) — transparently mapped to the
+        // internal auth email either way.
+        const authEmail = isLikelyEmail(identifier) ? identifier : employeeIdToAuthEmail(identifier);
+        const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password });
         if (error) throw error;
       }
     } catch (e: any) {
@@ -90,8 +95,15 @@ function LoginPage() {
               </div>
             )}
             <div>
-              <Label htmlFor="email">{t("auth.email")}</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" />
+              <Label htmlFor="email">{mode === "login" ? t("auth.employeeIdOrEmail") : t("auth.email")}</Label>
+              <Input
+                id="email"
+                type={mode === "login" ? "text" : "email"}
+                required
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                dir="ltr"
+              />
             </div>
             <div>
               <Label htmlFor="password">{t("auth.password")}</Label>
