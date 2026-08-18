@@ -528,11 +528,12 @@ export function useVisibleNavGroups(): NavGroup[] {
   };
 
   // Branch availability (is this module turned on for the branch I'm
-  // CURRENTLY working in) — applies to everyone, admins included, so
-  // switching the active branch up top always reflects what's actually
-  // configured in Modules Management.
+  // CURRENTLY working in) — admins bypass this too, so the one admin
+  // account always sees everything; test restricted views with a
+  // separate non-admin user account instead.
   const passesBranch = (key?: string) => {
     if (!key) return true;
+    if (isAdmin) return true;
     if (!branchId || branchModules === undefined) return true; // fail open
     return branchModules.includes(key);
   };
