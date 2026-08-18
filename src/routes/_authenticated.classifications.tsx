@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -27,7 +27,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX, FileDown } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Search, FilterX, FileDown, FileUp, Loader2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 
@@ -274,8 +274,120 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
     XLSX.writeFile(wb, `accounts_classifications_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
+  // ===== Upload / Import =====
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  const importMut = useMutation({
+    mutationFn: (payload: any) => upsert({ data: payload }),
+  });
+
+  const normalizeStatement = (v: any): Statement | null => {
+    const s = String(v ?? "").trim().toLowerCase();
+    if (["balance_sheet", "balance sheet", "bs"].includes(s)) return "balance_sheet";
+    if (["income_statement", "income statement", "profit & loss", "profit and loss", "p&l", "pl"].includes(s)) return "income_statement";
+    return null;
+  };
+  const normalizeBalance = (v: any): NormalBalance | null => {
+    const s = String(v ?? "").trim().toLowerCase();
+    if (["debit", "dr"].includes(s)) return "debit";
+    if (["credit", "cr"].includes(s)) return "credit";
+    return null;
+  };
+  const normalizeBucket = (v: any): Bucket | null => {
+    const s = String(v ?? "").trim().toLowerCase();
+    return (BUCKETS as readonly string[]).includes(s) ? s : null;
+  };
+  const normalizeActive = (v: any) => {
+    if (v === undefined || v === null || v === "") return true;
+    const s = String(v).trim().toLowerCase();
+    return !["0", "false", "no", "inactive"].includes(s);
+  };
+
+  const handleUploadClick = () => fileInputRef.current?.click();
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file next time
+    if (!file || !companyId) return;
+
+    setImporting(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const jsonRows = XLSX.utils.sheet_to_json(sheet, { defval: "" }) as any[];
+
+      if (jsonRows.length === 0) {
+        toast.error(t("common.emptyFile"));
+        return;
+      }
+
+      const existingByCode = new Map((rows as any[]).map((r) => [String(r.code).toLowerCase(), r]));
+      let created = 0, updated = 0, failed = 0;
+      const errors: string[] = [];
+
+      for (const raw of jsonRows) {
+        const code = String(raw.code ?? "").trim();
+        const name_ar = String(raw.name_ar ?? "").trim();
+        const name_en = String(raw.name_en ?? "").trim();
+        const bucket = normalizeBucket(raw.bucket);
+        const statement = normalizeStatement(raw.statement);
+        const normal_balance = normalizeBalance(raw.normal_balance);
+
+        if (!code || !name_ar || !name_en || !bucket || !statement || !normal_balance) {
+          failed++;
+          errors.push(code || t("common.unnamed"));
+          continue;
+        }
+
+        const existing = existingByCode.get(code.toLowerCase());
+        try {
+          await importMut.mutateAsync({
+            id: existing?.id,
+            company_id: companyId,
+            code,
+            name_ar,
+            name_en,
+            statement,
+            normal_balance,
+            bucket,
+            is_active: normalizeActive(raw.is_active),
+            notes: raw.notes ? String(raw.notes) : null,
+          });
+          if (existing) updated++; else created++;
+        } catch {
+          failed++;
+          errors.push(code);
+        }
+      }
+
+      qc.invalidateQueries({ queryKey: ["classifications"] });
+      qc.invalidateQueries({ queryKey: ["account_types"] });
+
+      if (failed === 0) {
+        toast.success(`${created} ${t("common.new")}, ${updated} ${t("common.updated")}`);
+      } else {
+        toast.error(
+          `${created + updated} ${t("common.saved")}, ${failed} ${t("common.failed")}: ${errors.slice(0, 5).join(", ")}${errors.length > 5 ? "…" : ""}`
+        );
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? t("common.error"));
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className={embedded ? "space-y-4" : "p-6 space-y-4"}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
       {!embedded && (
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -285,6 +397,10 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
             <h1 className="page-title">{t("accounts.classificationsTitle")}</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleUploadClick} disabled={!companyId || importing}>
+              {importing ? <Loader2 className="h-4 w-4 me-1 animate-spin" /> : <FileUp className="h-4 w-4 me-1" />}
+              {t("common.upload")}
+            </Button>
             <Button variant="outline" onClick={handleExport} disabled={!companyId}>
               <FileDown className="h-4 w-4 me-1" />Export
             </Button>
@@ -297,6 +413,10 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
 
       {embedded && (
         <div className="flex items-center justify-end gap-2">
+          <Button variant="outline" onClick={handleUploadClick} disabled={!companyId || importing}>
+            {importing ? <Loader2 className="h-4 w-4 me-1 animate-spin" /> : <FileUp className="h-4 w-4 me-1" />}
+            {t("common.upload")}
+          </Button>
           <Button variant="outline" onClick={handleExport} disabled={!companyId}>
             <FileDown className="h-4 w-4 me-1" />Export
           </Button>
