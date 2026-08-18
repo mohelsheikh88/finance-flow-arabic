@@ -26,6 +26,7 @@ import {
   HandCoins,
   Stethoscope,
   Pill,
+  Umbrella,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -185,6 +186,13 @@ export function useNavGroups(): NavGroup[] {
       icon: Pill,
       hue: 152, // green — pharmacy cross
       items: [{ url: "/pharmacy", icon: Pill, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "insurance",
+      label: t("nav.insurance"),
+      icon: Umbrella,
+      hue: 224, // trust blue — insurance / protection
+      items: [{ url: "/insurance", icon: Umbrella, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",
