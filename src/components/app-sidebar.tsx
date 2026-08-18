@@ -78,7 +78,7 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
 
       <SidebarHeader className="overflow-visible border-b border-sidebar-border/60">
-        <div className="flex items-center gap-2 px-2 py-2.5">
+        <div className="relative flex items-center justify-center px-2 py-3.5">
           {collapsed ? (
             <SidebarMenuButton asChild tooltip={t("nav.backToApps")} className="mx-auto">
               <Link to="/apps" className="flex items-center justify-center">
@@ -87,14 +87,6 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
             </SidebarMenuButton>
           ) : (
             <>
-              <Link
-                to="/apps"
-                className="flex-1 min-w-0 flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-colors"
-              >
-                <LayoutGrid className="h-4 w-4 shrink-0" />
-                <span className="truncate">{t("nav.backToApps")}</span>
-              </Link>
-
               {onTogglePin && (
                 <Button
                   type="button"
@@ -104,15 +96,23 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   aria-label={pinned ? t("common.unpin") : t("common.pin")}
                   title={pinned ? t("common.unpin") : t("common.pin")}
                   className={
-                    "h-8 w-8 shrink-0 rounded-md transition-all " +
+                    "absolute top-2 end-2 h-7 w-7 shrink-0 rounded-md transition-all " +
                     (pinned
                       ? "bg-[hsl(263,55%,32%)]/35 text-[hsl(280,80%,75%)] ring-1 ring-[hsl(327,92%,60%)]/40 hover:bg-[hsl(263,55%,32%)]/55"
                       : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40")
                   }
                 >
-                  {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
+                  {pinned ? <Pin className="h-3.5 w-3.5" /> : <PinOff className="h-3.5 w-3.5" />}
                 </Button>
               )}
+
+              <Link
+                to="/apps"
+                className="flex flex-col items-center gap-2 rounded-2xl px-6 py-3 text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-colors"
+              >
+                <LayoutGrid className="h-8 w-8" />
+                <span className="text-sm font-bold tracking-tight">{t("nav.backToApps")}</span>
+              </Link>
             </>
           )}
         </div>
