@@ -349,7 +349,7 @@ function ApprovalsPage() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="workflows">
+      <Tabs defaultValue="roles">
         <TabsList>
           <TabsTrigger value="roles">{t("roles.title")}</TabsTrigger>
           <TabsTrigger value="user_roles">{t("approvals.usersRolesTab")}</TabsTrigger>
