@@ -40,13 +40,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
 export type NavItem = { url: string; icon: any; title: string };
-export type NavSubgroup = { label: string; icon: any; items: NavItem[] };
+export type NavSubgroup = { label: string; icon: any; hue?: number; items: NavItem[] };
 export type NavGroup = {
   key?: string;
   label: string;
   icon: any;
   /** HSL hue (0-360) used to color this module's icon on the Apps launcher — chosen to be meaningful (e.g. green for money, red for medical). */
   hue: number;
+  /** Optional explicit landing page for this module's card (e.g. a sub-launcher grid). Overrides the default "first item" behavior. */
+  homeUrl?: string;
   items?: NavItem[];
   subgroups?: NavSubgroup[];
 };
@@ -184,30 +186,36 @@ export function useNavGroups(): NavGroup[] {
       label: t("nav.his"),
       icon: Stethoscope,
       hue: 351, // red/rose — medical
+      homeUrl: "/his",
       subgroups: [
         {
           label: t("nav.insurance"),
           icon: Umbrella,
+          hue: 224,
           items: [{ url: "/insurance", icon: Umbrella, title: t("common.willBeBuiltLater") }],
         },
         {
           label: t("nav.pharmacy"),
           icon: Pill,
+          hue: 152,
           items: [{ url: "/pharmacy", icon: Pill, title: t("common.willBeBuiltLater") }],
         },
         {
           label: t("nav.homeCare"),
           icon: Home,
+          hue: 130,
           items: [{ url: "/home-care", icon: Home, title: t("common.willBeBuiltLater") }],
         },
         {
           label: t("nav.ambulance"),
           icon: Ambulance,
+          hue: 10,
           items: [{ url: "/ambulance", icon: Ambulance, title: t("common.willBeBuiltLater") }],
         },
         {
           label: t("nav.outpatientClinics"),
           icon: ClipboardPlus,
+          hue: 188,
           items: [{ url: "/outpatient-clinics", icon: ClipboardPlus, title: t("common.willBeBuiltLater") }],
         },
       ],
@@ -270,8 +278,16 @@ export function matchNavPath(groups: NavGroup[], pathname: string) {
 
 /** The first navigable URL inside a group — used as the card/back-button target. */
 export function groupHomeUrl(group: NavGroup): string {
-  return group.subgroups?.[0]?.items[0]?.url ?? group.items?.[0]?.url ?? "/apps";
+  return group.homeUrl ?? group.subgroups?.[0]?.items[0]?.url ?? group.items?.[0]?.url ?? "/apps";
 }
+
+/**
+ * Pages that render as a full-screen card grid (no sidebar) — the main
+ * Apps launcher, plus any module's own sub-launcher (e.g. Medical App).
+ * Kept as a plain path list so the layout can check it without re-deriving
+ * the whole nav tree (which needs translations / React context).
+ */
+export const LAUNCHER_PATHS = ["/apps", "/his"];
 
 /**
  * Which modules (by group.key) the current user is allowed to see.
