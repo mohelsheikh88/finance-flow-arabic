@@ -27,13 +27,13 @@ function AppsLauncher() {
         {t("common.chooseModuleToStart")}
       </p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 w-full max-w-4xl">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3.5 w-full max-w-xl">
         {groups.map((g) => (
           <Link
             key={g.label}
             to={groupHomeUrl(g)}
             style={{ ["--hue" as any]: g.hue }}
-            className="group flex flex-col items-center justify-center gap-4 aspect-square rounded-3xl p-6 sm:p-8
+            className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl p-3 sm:p-3.5
                        bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.10]
                        shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)] backdrop-blur-sm
                        transition-all duration-200 ease-out
