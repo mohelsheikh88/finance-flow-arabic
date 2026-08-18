@@ -808,7 +808,7 @@ export const translations = {
       appName: "Al Hayat Financial ERP",
       appShort: "Financial ERP",
       chooseModuleToStart: "Choose a module to get started",
-      appWordmark: "Al Hayat ERP",
+      appWordmark: "Alhayat Medical ERP",
       loading: "Loading...",
       save: "Save",
       cancel: "Cancel",
