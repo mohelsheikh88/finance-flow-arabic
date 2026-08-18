@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Home } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { useNavGroups, matchNavPath } from "@/lib/nav-config";
+import { useNavGroups, matchNavPath, groupHomeUrl } from "@/lib/nav-config";
 
 /**
  * Shows the current navigation path at the top of the screen, e.g.
@@ -31,7 +31,7 @@ export function Breadcrumbs() {
   }
 
   const { group, subgroup, item } = match;
-  const groupUrl = group.subgroups?.[0]?.items[0]?.url ?? group.items?.[0]?.url ?? "/dashboard";
+  const groupUrl = groupHomeUrl(group);
   const subgroupUrl = subgroup?.items[0]?.url ?? groupUrl;
 
   return (

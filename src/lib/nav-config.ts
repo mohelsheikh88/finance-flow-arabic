@@ -76,6 +76,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.reports"),
           icon: BarChart3,
+          hue: 265,
           items: [
             { url: "/reports/executive-summary", icon: Activity, title: t("nav.executiveSummary") },
             { url: "/reports/balance-sheet", icon: Scale, title: t("nav.balanceSheet") },
@@ -88,6 +89,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.accountsReceivable"),
           icon: HandCoins,
+          hue: 140,
           items: [
             { url: "/dashboards/ar", icon: LayoutDashboard, title: t("nav.arDashboard") },
             { url: "/invoices/customer", icon: FileText, title: t("ar.invoices") },
@@ -99,6 +101,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.accountsPayable"),
           icon: ShoppingCart,
+          hue: 20,
           items: [
             { url: "/dashboards/ap", icon: LayoutDashboard, title: t("nav.apDashboard") },
             { url: "/invoices/vendor", icon: Receipt, title: t("ap.bills") },
@@ -110,6 +113,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.banksGroup"),
           icon: Landmark,
+          hue: 205,
           items: [
             { url: "/dashboards/banks", icon: LayoutDashboard, title: t("nav.banksDashboard") },
             { url: "/banks", icon: Landmark, title: t("banksGroup.accounts") },
@@ -122,6 +126,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.fixedAssets"),
           icon: Briefcase,
+          hue: 45,
           items: [
             { url: "/dashboards/fixed-assets", icon: LayoutDashboard, title: t("nav.fixedAssetsDashboard") },
             { url: "/assets", icon: Briefcase, title: t("nav.assets") },
@@ -130,6 +135,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.loansGroup"),
           icon: CreditCard,
+          hue: 330,
           items: [
             { url: "/dashboards/loans", icon: LayoutDashboard, title: t("nav.loansDashboard") },
             { url: "/loans", icon: CreditCard, title: t("nav.loans") },
@@ -138,6 +144,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.gl"),
           icon: BookOpen,
+          hue: 95,
           items: [
             { url: "/journal-entries", icon: BookOpen, title: t("nav.journalEntries") },
             { url: "/trial-balance", icon: Calculator, title: t("nav.trialBalance") },
@@ -146,6 +153,7 @@ export function useNavGroups(): NavGroup[] {
         {
           label: t("nav.configuration"),
           icon: SlidersHorizontal,
+          hue: 180,
           items: [
             { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
             { url: "/journals", icon: BookOpen, title: t("nav.journalTypes") },
@@ -186,7 +194,6 @@ export function useNavGroups(): NavGroup[] {
       label: t("nav.his"),
       icon: Stethoscope,
       hue: 351, // red/rose — medical
-      homeUrl: "/his",
       subgroups: [
         {
           label: t("nav.insurance"),
@@ -276,18 +283,27 @@ export function matchNavPath(groups: NavGroup[], pathname: string) {
   return null;
 }
 
-/** The first navigable URL inside a group — used as the card/back-button target. */
+/**
+ * The card/back-button target for a module.
+ * - Explicit `homeUrl` always wins (rare manual override).
+ * - Any module that has `subgroups` automatically gets its own card-grid
+ *   sub-launcher at /module/{key} — same principle for every module,
+ *   present or future, so nobody has to remember to wire this up by hand.
+ * - A flat module (only `items`, no `subgroups`) just opens its first item.
+ */
 export function groupHomeUrl(group: NavGroup): string {
-  return group.homeUrl ?? group.subgroups?.[0]?.items[0]?.url ?? group.items?.[0]?.url ?? "/apps";
+  if (group.homeUrl) return group.homeUrl;
+  if (group.subgroups && group.subgroups.length > 0 && group.key) return `/module/${group.key}`;
+  return group.items?.[0]?.url ?? "/apps";
 }
 
 /**
- * Pages that render as a full-screen card grid (no sidebar) — the main
- * Apps launcher, plus any module's own sub-launcher (e.g. Medical App).
- * Kept as a plain path list so the layout can check it without re-deriving
- * the whole nav tree (which needs translations / React context).
+ * Pages that render as a full-screen card grid (no sidebar): the main Apps
+ * launcher, plus every module's own sub-launcher at /module/{key}.
  */
-export const LAUNCHER_PATHS = ["/apps", "/his"];
+export function isLauncherPath(pathname: string): boolean {
+  return pathname === "/apps" || pathname.startsWith("/module/");
+}
 
 /**
  * Which modules (by group.key) the current user is allowed to see.

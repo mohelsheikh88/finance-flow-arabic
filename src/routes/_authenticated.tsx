@@ -8,7 +8,7 @@ import { useI18n } from "@/i18n";
 import { Loader2 } from "lucide-react";
 import { DailyUpdateGate } from "@/components/daily-update-gate";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { LAUNCHER_PATHS } from "@/lib/nav-config";
+import { isLauncherPath } from "@/lib/nav-config";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -41,7 +41,7 @@ function AuthenticatedLayout() {
   const { dir, t } = useI18n();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isAppsLauncher = LAUNCHER_PATHS.includes(pathname);
+  const isAppsLauncher = isLauncherPath(pathname);
 
   const [pinned, setPinned] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;

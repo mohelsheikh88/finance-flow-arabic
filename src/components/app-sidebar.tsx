@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
-import { useVisibleNavGroups, matchNavPath } from "@/lib/nav-config";
+import { useVisibleNavGroups, matchNavPath, groupHomeUrl } from "@/lib/nav-config";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 
@@ -78,12 +78,16 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
   // launcher for several independent sub-modules (Pharmacy, Insurance...).
   // Once the user is actually inside one of those sub-modules, the sidebar
   // should scope to THAT sub-module only — not list its siblings too.
-  const isNestedApp = !!(activeGroup.homeUrl && match?.subgroup);
+  // Same principle for EVERY module that has subgroups (Accounting, Medical
+  // App, and any future one): once the user is inside a specific subgroup's
+  // page, the sidebar scopes to that subgroup only, and "Back" steps up to
+  // this module's own card-grid sub-launcher — not straight to /apps.
+  const isNestedApp = !!(activeGroup.subgroups && activeGroup.subgroups.length > 0 && match?.subgroup);
   const ScopeIcon = isNestedApp ? match!.subgroup!.icon : activeGroup.icon;
   const scopeLabel = isNestedApp ? match!.subgroup!.label : activeGroup.label;
   const scopeItems = isNestedApp ? match!.subgroup!.items : activeGroup.items;
   const scopeSubgroups = isNestedApp ? undefined : activeGroup.subgroups;
-  const backUrl = isNestedApp ? activeGroup.homeUrl! : "/apps";
+  const backUrl = isNestedApp ? groupHomeUrl(activeGroup) : "/apps";
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
 
 
