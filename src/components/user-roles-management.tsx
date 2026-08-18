@@ -7,16 +7,19 @@ import {
   removeUserRole,
   listModuleAccess,
   setUserModules,
+  listUserBranches,
+  setUserBranches,
   createUser,
   updateUser,
   deleteUser,
 } from "@/lib/api/users.functions";
+import { listBranches } from "@/lib/api/companies.functions";
 import { listRoles } from "@/lib/api/roles.functions";
 import { useNavGroups } from "@/lib/nav-config";
 import { userDisplayLabel } from "@/lib/user-display";
+import { useI18n, useLocalized } from "@/i18n";
 import { useBranch } from "@/lib/branch-context";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { useI18n } from "@/i18n";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +64,7 @@ import {
   UsersRound,
   Settings,
   ShieldCheck,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -90,6 +94,7 @@ type FormState = {
   isActive: boolean;
   roles: string[];
   modules: string[];
+  branchIds: string[];
 };
 
 const emptyForm: FormState = {
@@ -102,6 +107,7 @@ const emptyForm: FormState = {
   isActive: true,
   roles: [],
   modules: [],
+  branchIds: [],
 };
 
 export function UserRolesManagement({
@@ -112,6 +118,7 @@ export function UserRolesManagement({
   rolesOnly?: boolean;
 } = {}) {
   const { t, locale } = useI18n();
+  const localized = useLocalized();
   const { companyId } = useBranch();
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -130,6 +137,9 @@ export function UserRolesManagement({
   const listRolesFn = useServerFn(listRoles);
   const listModulesFn = useServerFn(listModuleAccess);
   const setModulesFn = useServerFn(setUserModules);
+  const listBranchesFn = useServerFn(listBranches);
+  const listUserBranchesFn = useServerFn(listUserBranches);
+  const setUserBranchesFn = useServerFn(setUserBranches);
   const createFn = useServerFn(createUser);
   const updateFn = useServerFn(updateUser);
   const deleteFn = useServerFn(deleteUser);
@@ -167,6 +177,29 @@ export function UserRolesManagement({
     }
     return m;
   }, [moduleAccess]);
+
+  // A user must be scoped to a branch to see any branch-owned data at all.
+  const { data: allBranches = [] } = useQuery({
+    queryKey: ["branches_for_user_roles"],
+    queryFn: () => listBranchesFn({ data: {} }),
+    enabled: !!user,
+  });
+
+  const { data: branchAccess = [] } = useQuery({
+    queryKey: ["user_branch_access"],
+    queryFn: () => listUserBranchesFn({ data: {} } as any),
+    enabled: !!user,
+  });
+
+  const branchesByUser = useMemo(() => {
+    const m = new Map<string, string[]>();
+    for (const r of branchAccess as any[]) {
+      const arr = m.get(r.user_id) ?? [];
+      arr.push(r.branch_id);
+      m.set(r.user_id, arr);
+    }
+    return m;
+  }, [branchAccess]);
 
   const roleLabel = (code: string) => {
     const r = (rolesRegistry as any[]).find((x) => x.code === code);
@@ -254,6 +287,7 @@ export function UserRolesManagement({
           },
         });
         await setModulesFn({ data: { userId: f.id, modules: f.modules as any } });
+        await setUserBranchesFn({ data: { userId: f.id, branchIds: f.branchIds } });
         // sync roles
         const current: string[] =
           (users as any[]).find((u) => u.id === f.id)?.roles ?? [];
@@ -268,7 +302,7 @@ export function UserRolesManagement({
           });
         }
       } else {
-        await createFn({
+        const created = await createFn({
           data: {
             employeeId: f.employeeId,
             contactEmail: f.email || null,
@@ -280,10 +314,14 @@ export function UserRolesManagement({
             companyId: companyId ?? null,
           },
         });
+        if (f.branchIds.length && (created as any)?.id) {
+          await setUserBranchesFn({ data: { userId: (created as any).id, branchIds: f.branchIds } });
+        }
       }
     },
     onSuccess: () => {
       invalidate();
+      qc.invalidateQueries({ queryKey: ["user_branch_access"] });
       setOpen(false);
       toast.success(t("common.saved"));
     },
@@ -306,6 +344,7 @@ export function UserRolesManagement({
       isActive: u.is_active !== false,
       roles: [...(u.roles ?? [])],
       modules: [...(modulesByUser.get(u.id) ?? [])],
+      branchIds: [...(branchesByUser.get(u.id) ?? [])],
     });
     setOpen(true);
   };
@@ -631,6 +670,37 @@ export function UserRolesManagement({
                     </label>
                   );
                 })}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold">
+                <MapPin className="h-3.5 w-3.5 text-primary" />
+                {t("users.branchAccess")}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {t("users.branchAccessHint")}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {(allBranches as any[]).map((b) => (
+                  <label
+                    key={b.id}
+                    className="flex items-center gap-2 rounded-md border p-2.5 text-xs cursor-pointer hover:bg-accent/40"
+                  >
+                    <Checkbox
+                      checked={form.branchIds.includes(b.id)}
+                      onCheckedChange={() =>
+                        setForm((f) => ({ ...f, branchIds: toggleIn(f.branchIds, b.id) }))
+                      }
+                    />
+                    <MapPin className="h-4 w-4 text-primary shrink-0" />
+                    <span className="truncate">{localized(b, "name")}</span>
+                    {b.is_main && <span className="text-[10px] text-muted-foreground">★</span>}
+                  </label>
+                ))}
+                {allBranches.length === 0 && (
+                  <p className="text-[11px] text-muted-foreground col-span-2">{t("common.noData")}</p>
+                )}
               </div>
             </div>
           </div>

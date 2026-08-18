@@ -134,6 +134,46 @@ export const listModuleAccess = createServerFn({ method: "POST" })
     return data ?? [];
   });
 
+export const listUserBranches = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("user_branch_access")
+      .select("user_id, branch_id");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const setUserBranches = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        branchIds: z.array(z.string().uuid()),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/admin.self.server");
+    const { error: de } = await supabaseAdmin
+      .from("user_branch_access")
+      .delete()
+      .eq("user_id", data.userId);
+    if (de) throw new Error(de.message);
+    if (data.branchIds.length) {
+      const { error: ie } = await supabaseAdmin.from("user_branch_access").insert(
+        data.branchIds.map((branchId) => ({
+          user_id: data.userId,
+          branch_id: branchId,
+        })),
+      );
+      if (ie) throw new Error(ie.message);
+    }
+    return { ok: true };
+  });
+
 export const setUserModules = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
