@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -13,8 +13,6 @@ import { isLauncherPath } from "@/lib/nav-config";
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
 });
-
-const PIN_KEY = "sidebar:pinned";
 
 function measureLabelWidth(
   groups: { text: string; size: number; weight: number; indent: number }[]
@@ -42,24 +40,6 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAppsLauncher = isLauncherPath(pathname);
-
-  const [pinned, setPinned] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    const v = window.localStorage.getItem(PIN_KEY);
-    return v === null ? true : v === "1";
-  });
-  const [hovered, setHovered] = useState(false);
-  const hoverTimer = useRef<number | null>(null);
-
-  const onTogglePin = () => {
-    setPinned((p) => {
-      const next = !p;
-      try { window.localStorage.setItem(PIN_KEY, next ? "1" : "0"); } catch {}
-      return next;
-    });
-  };
-
-  const open = pinned || hovered;
 
   // Dynamic width — auto-fit widest label across all three levels
   const sidebarWidth = useMemo(() => {
@@ -96,12 +76,6 @@ function AuthenticatedLayout() {
     if (!loading && !user) navigate({ to: "/login", replace: true });
   }, [user, loading, navigate]);
 
-  useEffect(() => {
-    return () => {
-      if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
-    };
-  }, []);
-
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -109,17 +83,6 @@ function AuthenticatedLayout() {
       </div>
     );
   }
-
-  const handleEnter = () => {
-    if (pinned) return;
-    if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
-    hoverTimer.current = window.setTimeout(() => setHovered(true), 80);
-  };
-  const handleLeave = () => {
-    if (pinned) return;
-    if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
-    hoverTimer.current = window.setTimeout(() => setHovered(false), 180);
-  };
 
   return (
     <DailyUpdateGate>
@@ -132,20 +95,13 @@ function AuthenticatedLayout() {
         </div>
       ) : (
         <SidebarProvider
-          open={open}
-          onOpenChange={(v) => { if (pinned) return; setHovered(v); }}
+          defaultOpen
           style={{
             ["--sidebar-width" as any]: `${sidebarWidth}px`,
           }}
         >
           <div className="min-h-screen flex w-full bg-app-surface" dir={dir}>
-            <div
-              onMouseEnter={handleEnter}
-              onMouseLeave={handleLeave}
-              className="contents"
-            >
-              <AppSidebar pinned={pinned} onTogglePin={onTogglePin} />
-            </div>
+            <AppSidebar />
             <div className="flex-1 flex flex-col min-w-0 relative z-10">
               <Topbar />
               <Breadcrumbs />

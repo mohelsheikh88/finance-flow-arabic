@@ -27,13 +27,10 @@ import {
   UsersRound,
   BarChart3,
   SlidersHorizontal,
-  Pin,
-
-  PinOff,
-  LogOut,
   LayoutGrid,
   ArrowLeft,
   ArrowRight,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,12 +51,7 @@ import { useVisibleNavGroups, matchNavPath, groupHomeUrl } from "@/lib/nav-confi
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 
-type AppSidebarProps = {
-  pinned?: boolean;
-  onTogglePin?: () => void;
-};
-
-export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {}) {
+export function AppSidebar() {
   const { t, locale } = useI18n();
   const { signOut } = useAuth();
   const groups = useVisibleNavGroups();
@@ -111,50 +103,29 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
               </SidebarMenuButton>
             </div>
           ) : (
-            <>
-              {onTogglePin && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={onTogglePin}
-                  aria-label={pinned ? t("common.unpin") : t("common.pin")}
-                  title={pinned ? t("common.unpin") : t("common.pin")}
-                  className={
-                    "absolute top-1.5 end-1.5 h-6 w-6 shrink-0 rounded-md transition-all z-10 " +
-                    (pinned
-                      ? "bg-[hsl(263,55%,32%)]/35 text-[hsl(280,80%,75%)] ring-1 ring-[hsl(327,92%,60%)]/40 hover:bg-[hsl(263,55%,32%)]/55"
-                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40")
-                  }
-                >
-                  {pinned ? <Pin className="h-3 w-3" /> : <PinOff className="h-3 w-3" />}
-                </Button>
-              )}
+            <div className="flex items-stretch gap-2 w-full">
+              <Link
+                to="/apps"
+                className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
+                           bg-[hsl(158,70%,45%)]/[0.12] border border-[hsl(158,70%,50%)]/25
+                           text-[hsl(158,85%,72%)] hover:bg-[hsl(158,70%,45%)]/[0.20] hover:border-[hsl(158,70%,50%)]/40
+                           transition-colors"
+              >
+                <LayoutGrid className="h-6 w-6" />
+                <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.homeScreen")}</span>
+              </Link>
 
-              <div className="flex items-stretch gap-2 w-full">
-                <Link
-                  to="/apps"
-                  className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
-                             bg-[hsl(158,70%,45%)]/[0.12] border border-[hsl(158,70%,50%)]/25
-                             text-[hsl(158,85%,72%)] hover:bg-[hsl(158,70%,45%)]/[0.20] hover:border-[hsl(158,70%,50%)]/40
-                             transition-colors"
-                >
-                  <LayoutGrid className="h-6 w-6" />
-                  <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.homeScreen")}</span>
-                </Link>
-
-                <Link
-                  to={backUrl}
-                  className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
-                             bg-white/[0.04] border border-white/[0.08]
-                             text-sidebar-foreground/75 hover:bg-white/[0.08] hover:text-sidebar-foreground hover:border-white/[0.14]
-                             transition-colors"
-                >
-                  <BackIcon className="h-6 w-6" />
-                  <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.back")}</span>
-                </Link>
-              </div>
-            </>
+              <Link
+                to={backUrl}
+                className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
+                           bg-white/[0.04] border border-white/[0.08]
+                           text-sidebar-foreground/75 hover:bg-white/[0.08] hover:text-sidebar-foreground hover:border-white/[0.14]
+                           transition-colors"
+              >
+                <BackIcon className="h-6 w-6" />
+                <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.back")}</span>
+              </Link>
+            </div>
           )}
         </div>
       </SidebarHeader>
