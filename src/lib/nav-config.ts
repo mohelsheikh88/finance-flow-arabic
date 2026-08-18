@@ -82,6 +82,7 @@ export function useNavGroups(): NavGroup[] {
 
   const groups: NavGroup[] = [
     {
+      key: "mainDashboard",
       label: t("nav.mainDashboard"),
       icon: LayoutDashboard,
       hue: 199, // sky blue — overview
