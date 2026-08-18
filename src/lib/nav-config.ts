@@ -24,6 +24,7 @@ import {
   BarChart3,
   SlidersHorizontal,
   HandCoins,
+  Stethoscope,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -162,6 +163,12 @@ export function useNavGroups(): NavGroup[] {
       label: t("nav.humanResources"),
       icon: UsersRound,
       items: [{ url: "/hr", icon: UsersRound, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "his",
+      label: t("nav.his"),
+      icon: Stethoscope,
+      items: [{ url: "/his", icon: Stethoscope, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",

@@ -245,6 +245,7 @@ export const translations = {
       purchaseProcurement: "المشتريات",
       inventoryManagement: "المخزون",
       humanResources: "الموارد البشرية",
+      his: "نظام المعلومات الصحي (HIS)",
     },
     ar: {
       invoices: "فواتير العملاء",
@@ -1043,6 +1044,7 @@ export const translations = {
       purchaseProcurement: "Purchase",
       inventoryManagement: "Inventory",
       humanResources: "Human Resources",
+      his: "Hospital Information System (HIS)",
     },
     ar: {
       invoices: "Invoices",
