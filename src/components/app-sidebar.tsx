@@ -32,6 +32,8 @@ import {
   PinOff,
   LogOut,
   LayoutGrid,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import {
   Sidebar,
@@ -72,19 +74,38 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
   const match = matchNavPath(groups, currentPath);
   const activeGroup = match?.group ?? groups[0];
 
+  // Some top-level apps (e.g. "Medical App") are themselves just a card-grid
+  // launcher for several independent sub-modules (Pharmacy, Insurance...).
+  // Once the user is actually inside one of those sub-modules, the sidebar
+  // should scope to THAT sub-module only — not list its siblings too.
+  const isNestedApp = !!(activeGroup.homeUrl && match?.subgroup);
+  const ScopeIcon = isNestedApp ? match!.subgroup!.icon : activeGroup.icon;
+  const scopeLabel = isNestedApp ? match!.subgroup!.label : activeGroup.label;
+  const scopeItems = isNestedApp ? match!.subgroup!.items : activeGroup.items;
+  const scopeSubgroups = isNestedApp ? undefined : activeGroup.subgroups;
+  const backUrl = isNestedApp ? activeGroup.homeUrl! : "/apps";
+  const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
+
 
 
   return (
     <Sidebar collapsible="icon" side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l" : "border-r"}>
 
       <SidebarHeader className="overflow-visible border-b border-sidebar-border/60">
-        <div className="relative flex items-center justify-center px-2 py-3.5">
+        <div className="relative flex items-center justify-center px-2 py-3">
           {collapsed ? (
-            <SidebarMenuButton asChild tooltip={t("nav.backToApps")} className="mx-auto">
-              <Link to="/apps" className="flex items-center justify-center">
-                <LayoutGrid className="h-5 w-5 shrink-0" />
-              </Link>
-            </SidebarMenuButton>
+            <div className="flex flex-col items-center gap-1">
+              <SidebarMenuButton asChild tooltip={t("nav.homeScreen")} className="mx-auto">
+                <Link to="/apps" className="flex items-center justify-center">
+                  <LayoutGrid className="h-5 w-5 shrink-0" />
+                </Link>
+              </SidebarMenuButton>
+              <SidebarMenuButton asChild tooltip={t("nav.back")} className="mx-auto">
+                <Link to={backUrl} className="flex items-center justify-center">
+                  <BackIcon className="h-5 w-5 shrink-0" />
+                </Link>
+              </SidebarMenuButton>
+            </div>
           ) : (
             <>
               {onTogglePin && (
@@ -96,23 +117,39 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   aria-label={pinned ? t("common.unpin") : t("common.pin")}
                   title={pinned ? t("common.unpin") : t("common.pin")}
                   className={
-                    "absolute top-2 end-2 h-7 w-7 shrink-0 rounded-md transition-all " +
+                    "absolute top-1.5 end-1.5 h-6 w-6 shrink-0 rounded-md transition-all z-10 " +
                     (pinned
                       ? "bg-[hsl(263,55%,32%)]/35 text-[hsl(280,80%,75%)] ring-1 ring-[hsl(327,92%,60%)]/40 hover:bg-[hsl(263,55%,32%)]/55"
                       : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40")
                   }
                 >
-                  {pinned ? <Pin className="h-3.5 w-3.5" /> : <PinOff className="h-3.5 w-3.5" />}
+                  {pinned ? <Pin className="h-3 w-3" /> : <PinOff className="h-3 w-3" />}
                 </Button>
               )}
 
-              <Link
-                to="/apps"
-                className="flex flex-col items-center gap-2 rounded-2xl px-6 py-3 text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-colors"
-              >
-                <LayoutGrid className="h-8 w-8" />
-                <span className="text-sm font-bold tracking-tight">{t("nav.backToApps")}</span>
-              </Link>
+              <div className="flex items-stretch gap-2 w-full">
+                <Link
+                  to="/apps"
+                  className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
+                             bg-[hsl(158,70%,45%)]/[0.12] border border-[hsl(158,70%,50%)]/25
+                             text-[hsl(158,85%,72%)] hover:bg-[hsl(158,70%,45%)]/[0.20] hover:border-[hsl(158,70%,50%)]/40
+                             transition-colors"
+                >
+                  <LayoutGrid className="h-6 w-6" />
+                  <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.homeScreen")}</span>
+                </Link>
+
+                <Link
+                  to={backUrl}
+                  className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
+                             bg-white/[0.04] border border-white/[0.08]
+                             text-sidebar-foreground/75 hover:bg-white/[0.08] hover:text-sidebar-foreground hover:border-white/[0.14]
+                             transition-colors"
+                >
+                  <BackIcon className="h-6 w-6" />
+                  <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.back")}</span>
+                </Link>
+              </div>
             </>
           )}
         </div>
@@ -125,8 +162,8 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
             <SidebarGroupContent>
               <SidebarMenu>
                 {[
-                  ...(activeGroup.items || []),
-                  ...(activeGroup.subgroups?.flatMap((sg) => sg.items) || []),
+                  ...(scopeItems || []),
+                  ...(scopeSubgroups?.flatMap((sg) => sg.items) || []),
                 ].map((item) => (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
@@ -144,15 +181,15 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
             {/* Static module header (always "open" — no need to collapse the only module shown) */}
             <div className="relative flex items-center gap-2.5 sm:gap-3 rounded-xl p-2.5 sm:p-3 mb-1.5 bg-gradient-to-br from-white/[0.09] to-white/[0.02] border border-sidebar-primary/25 shadow-sm">
               <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/30 border border-white/[0.06] shadow-inner">
-                <activeGroup.icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/80" />
+                <ScopeIcon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/80" />
               </div>
               <span className="flex-1 min-w-0 truncate text-start text-[15.5px] sm:text-[17px] font-bold tracking-tight text-white/90">
-                {activeGroup.label}
+                {scopeLabel}
               </span>
             </div>
 
             <SidebarGroupContent className="relative ms-2 ps-2 sm:ms-3 sm:ps-3 border-s border-dashed border-sidebar-border/70">
-              {activeGroup.subgroups?.map((sg) => {
+              {scopeSubgroups?.map((sg) => {
                 const subActive = sg.items.some((it) => isActive(it.url));
                 return (
                   <Collapsible key={sg.label} defaultOpen={subActive} className="group/subcollapsible relative">
@@ -198,9 +235,9 @@ export function AppSidebar({ pinned = true, onTogglePin }: AppSidebarProps = {})
                   </Collapsible>
                 );
               })}
-              {activeGroup.items && (
+              {scopeItems && (
                 <SidebarMenu>
-                  {activeGroup.items.map((item) => (
+                  {scopeItems.map((item) => (
                     <SidebarMenuItem key={item.url} className="relative">
                       <span
                         aria-hidden
