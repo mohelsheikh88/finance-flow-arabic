@@ -475,7 +475,10 @@ export function useModuleAccess() {
  * UNION any user group's granted modules). Admins are never restricted by
  * this, so the one admin account always sees everything.
  *
- * Three levels, each independently fail-open:
+ * Three levels, each fail-open ONLY once we actually know the user's
+ * access — never while it's still loading. A restricted user refreshing
+ * the page must never even briefly glimpse a module they don't have;
+ * better to render nothing for an instant than flash it and yank it away.
  *  1. Top-level module (e.g. "accounting")
  *  2. Section within it (e.g. "accountsReceivable")
  *  3. Individual screen within a section (e.g. "/invoices/customer") —
@@ -487,12 +490,13 @@ export function useModuleAccess() {
  */
 export function useVisibleNavGroups(): NavGroup[] {
   const groups = useNavGroups();
-  const { data: myAccess } = useModuleAccess();
+  const { data: myAccess, isPending } = useModuleAccess();
   const isAdmin = !!myAccess?.isAdmin;
+  const stillLoading = isPending || !myAccess;
 
   const passesUserAccess = (key?: string) => {
     if (!key) return true;
-    if (!myAccess) return true; // fail open while loading
+    if (stillLoading) return false; // fail CLOSED while loading
     if (isAdmin) return true;
     if (myAccess.modules.length === 0) return true; // nothing configured yet = unrestricted
     return myAccess.modules.includes(key);
@@ -501,7 +505,7 @@ export function useVisibleNavGroups(): NavGroup[] {
   // Screen-level check, scoped to the section it lives in — only
   // restricts if THIS section has at least one screen explicitly granted.
   const passesItemInSection = (sectionItems: NavItem[], itemUrl: string) => {
-    if (!myAccess) return true;
+    if (stillLoading) return false; // fail CLOSED while loading
     if (isAdmin) return true;
     const sectionHasExplicitGrants = sectionItems.some((it) => myAccess.modules.includes(it.url));
     if (!sectionHasExplicitGrants) return true; // fail open for this section
