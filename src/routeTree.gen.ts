@@ -40,6 +40,7 @@ import { Route as AuthenticatedInsuranceRouteImport } from './routes/_authentica
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
 import { Route as AuthenticatedJournalsRouteImport } from './routes/_authenticated.journals'
 import { Route as AuthenticatedLoansRouteImport } from './routes/_authenticated.loans'
+import { Route as AuthenticatedOutpatientClinicsRouteImport } from './routes/_authenticated.outpatient-clinics'
 import { Route as AuthenticatedPartnersRouteImport } from './routes/_authenticated.partners'
 import { Route as AuthenticatedPaymentMethodsRouteImport } from './routes/_authenticated.payment-methods'
 import { Route as AuthenticatedPaymentTermsRouteImport } from './routes/_authenticated.payment-terms'
@@ -232,6 +233,12 @@ const AuthenticatedLoansRoute = AuthenticatedLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedOutpatientClinicsRoute =
+  AuthenticatedOutpatientClinicsRouteImport.update({
+    id: '/outpatient-clinics',
+    path: '/outpatient-clinics',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPartnersRoute = AuthenticatedPartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
@@ -432,6 +439,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payment-terms': typeof AuthenticatedPaymentTermsRoute
@@ -494,6 +502,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/journals': typeof AuthenticatedJournalsRoute
   '/loans': typeof AuthenticatedLoansRoute
+  '/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/partners': typeof AuthenticatedPartnersRoute
   '/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/payment-terms': typeof AuthenticatedPaymentTermsRoute
@@ -558,6 +567,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/journals': typeof AuthenticatedJournalsRoute
   '/_authenticated/loans': typeof AuthenticatedLoansRoute
+  '/_authenticated/outpatient-clinics': typeof AuthenticatedOutpatientClinicsRoute
   '/_authenticated/partners': typeof AuthenticatedPartnersRoute
   '/_authenticated/payment-methods': typeof AuthenticatedPaymentMethodsRoute
   '/_authenticated/payment-terms': typeof AuthenticatedPaymentTermsRoute
@@ -622,6 +632,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/journals'
     | '/loans'
+    | '/outpatient-clinics'
     | '/partners'
     | '/payment-methods'
     | '/payment-terms'
@@ -684,6 +695,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/journals'
     | '/loans'
+    | '/outpatient-clinics'
     | '/partners'
     | '/payment-methods'
     | '/payment-terms'
@@ -747,6 +759,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory'
     | '/_authenticated/journals'
     | '/_authenticated/loans'
+    | '/_authenticated/outpatient-clinics'
     | '/_authenticated/partners'
     | '/_authenticated/payment-methods'
     | '/_authenticated/payment-terms'
@@ -1005,6 +1018,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLoansRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/outpatient-clinics': {
+      id: '/_authenticated/outpatient-clinics'
+      path: '/outpatient-clinics'
+      fullPath: '/outpatient-clinics'
+      preLoaderRoute: typeof AuthenticatedOutpatientClinicsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/partners': {
       id: '/_authenticated/partners'
       path: '/partners'
@@ -1247,6 +1267,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJournalsRoute: typeof AuthenticatedJournalsRoute
   AuthenticatedLoansRoute: typeof AuthenticatedLoansRoute
+  AuthenticatedOutpatientClinicsRoute: typeof AuthenticatedOutpatientClinicsRoute
   AuthenticatedPartnersRoute: typeof AuthenticatedPartnersRoute
   AuthenticatedPaymentMethodsRoute: typeof AuthenticatedPaymentMethodsRoute
   AuthenticatedPaymentTermsRoute: typeof AuthenticatedPaymentTermsRoute
@@ -1307,6 +1328,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJournalsRoute: AuthenticatedJournalsRoute,
   AuthenticatedLoansRoute: AuthenticatedLoansRoute,
+  AuthenticatedOutpatientClinicsRoute: AuthenticatedOutpatientClinicsRoute,
   AuthenticatedPartnersRoute: AuthenticatedPartnersRoute,
   AuthenticatedPaymentMethodsRoute: AuthenticatedPaymentMethodsRoute,
   AuthenticatedPaymentTermsRoute: AuthenticatedPaymentTermsRoute,

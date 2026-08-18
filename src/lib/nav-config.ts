@@ -32,6 +32,7 @@ import {
   Handshake,
   Home,
   Ambulance,
+  ClipboardPlus,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -233,6 +234,13 @@ export function useNavGroups(): NavGroup[] {
       icon: Ambulance,
       hue: 10, // urgent red-orange — emergency
       items: [{ url: "/ambulance", icon: Ambulance, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "outpatientClinics",
+      label: t("nav.outpatientClinics"),
+      icon: ClipboardPlus,
+      hue: 188, // clinical cyan — clinics
+      items: [{ url: "/outpatient-clinics", icon: ClipboardPlus, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",
