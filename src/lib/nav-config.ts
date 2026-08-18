@@ -38,6 +38,8 @@ export type NavGroup = {
   key?: string;
   label: string;
   icon: any;
+  /** HSL hue (0-360) used to color this module's icon on the Apps launcher — chosen to be meaningful (e.g. green for money, red for medical). */
+  hue: number;
   items?: NavItem[];
   subgroups?: NavSubgroup[];
 };
@@ -53,12 +55,14 @@ export function useNavGroups(): NavGroup[] {
     {
       label: t("nav.mainDashboard"),
       icon: LayoutDashboard,
+      hue: 199, // sky blue — overview
       items: [{ url: "/dashboard", icon: LayoutDashboard, title: t("nav.mainDashboard") }],
     },
     {
       key: "accounting",
       label: t("nav.financialAccounting"),
       icon: Wallet,
+      hue: 42, // gold/amber — money, finance
       subgroups: [
         {
           label: t("nav.reports"),
@@ -151,36 +155,42 @@ export function useNavGroups(): NavGroup[] {
       key: "purchase",
       label: t("nav.purchaseProcurement"),
       icon: ShoppingBag,
+      hue: 25, // orange — procurement
       items: [{ url: "/purchase", icon: ShoppingBag, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "inventory",
       label: t("nav.inventoryManagement"),
       icon: Package,
+      hue: 217, // indigo/blue — logistics, boxes
       items: [{ url: "/inventory", icon: Package, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "hr",
       label: t("nav.humanResources"),
       icon: UsersRound,
+      hue: 271, // violet — people
       items: [{ url: "/hr", icon: UsersRound, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "his",
       label: t("nav.his"),
       icon: Stethoscope,
+      hue: 351, // red/rose — medical
       items: [{ url: "/his", icon: Stethoscope, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "pharmacy",
       label: t("nav.pharmacy"),
       icon: Pill,
+      hue: 152, // green — pharmacy cross
       items: [{ url: "/pharmacy", icon: Pill, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",
       label: t("nav.generalSetting"),
       icon: Settings,
+      hue: 215, // neutral slate-blue — configuration
       items: [
         { url: "/companies", icon: Building2, title: t("nav.companiesBranches") },
         { url: "/users", icon: Users, title: t("nav.users") },
