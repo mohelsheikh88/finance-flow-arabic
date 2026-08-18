@@ -28,6 +28,8 @@ import {
   Pill,
   Umbrella,
   Truck,
+  LineChart,
+  Handshake,
 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
@@ -201,6 +203,20 @@ export function useNavGroups(): NavGroup[] {
       icon: Truck,
       hue: 45, // amber — vehicles, transport
       items: [{ url: "/fleets", icon: Truck, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "sales",
+      label: t("nav.sales"),
+      icon: LineChart,
+      hue: 175, // teal-emerald — growth
+      items: [{ url: "/sales", icon: LineChart, title: t("common.willBeBuiltLater") }],
+    },
+    {
+      key: "crm",
+      label: t("nav.crm"),
+      icon: Handshake,
+      hue: 300, // magenta — relationships
+      items: [{ url: "/crm", icon: Handshake, title: t("common.willBeBuiltLater") }],
     },
     {
       key: "settings",

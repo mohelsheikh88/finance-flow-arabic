@@ -250,6 +250,8 @@ export const translations = {
       pharmacy: "الصيدلية",
       insurance: "التأمين",
       fleets: "الأسطول",
+      sales: "المبيعات",
+      crm: "إدارة العملاء",
     },
     ar: {
       invoices: "فواتير العملاء",
@@ -1053,6 +1055,8 @@ export const translations = {
       pharmacy: "Pharmacy",
       insurance: "Insurance",
       fleets: "Fleets",
+      sales: "Sales",
+      crm: "CRM",
     },
     ar: {
       invoices: "Invoices",

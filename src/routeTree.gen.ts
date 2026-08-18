@@ -24,6 +24,7 @@ import { Route as AuthenticatedClassificationsRouteImport } from './routes/_auth
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated.companies'
 import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenticated.cost-centers'
 import { Route as AuthenticatedCreditMemosRouteImport } from './routes/_authenticated.credit-memos'
+import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated.crm'
 import { Route as AuthenticatedCurrenciesRouteImport } from './routes/_authenticated.currencies'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated.customers'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -44,6 +45,7 @@ import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPharmacyRouteImport } from './routes/_authenticated.pharmacy'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
+import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated.sales'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
 import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.taxes'
@@ -146,6 +148,11 @@ const AuthenticatedCreditMemosRoute =
     path: '/credit-memos',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCurrenciesRoute = AuthenticatedCurrenciesRouteImport.update({
   id: '/currencies',
   path: '/currencies',
@@ -248,6 +255,11 @@ const AuthenticatedPurchaseRoute = AuthenticatedPurchaseRouteImport.update({
 const AuthenticatedReceiptsRoute = AuthenticatedReceiptsRouteImport.update({
   id: '/receipts',
   path: '/receipts',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -392,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
+  '/crm': typeof AuthenticatedCrmRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -412,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
+  '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
@@ -450,6 +464,7 @@ export interface FileRoutesByTo {
   '/companies': typeof AuthenticatedCompaniesRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
+  '/crm': typeof AuthenticatedCrmRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -470,6 +485,7 @@ export interface FileRoutesByTo {
   '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
+  '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
@@ -510,6 +526,7 @@ export interface FileRoutesById {
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/cost-centers': typeof AuthenticatedCostCentersRoute
   '/_authenticated/credit-memos': typeof AuthenticatedCreditMemosRoute
+  '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/currencies': typeof AuthenticatedCurrenciesRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -530,6 +547,7 @@ export interface FileRoutesById {
   '/_authenticated/pharmacy': typeof AuthenticatedPharmacyRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
+  '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/taxes': typeof AuthenticatedTaxesRoute
@@ -570,6 +588,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/cost-centers'
     | '/credit-memos'
+    | '/crm'
     | '/currencies'
     | '/customers'
     | '/dashboard'
@@ -590,6 +609,7 @@ export interface FileRouteTypes {
     | '/pharmacy'
     | '/purchase'
     | '/receipts'
+    | '/sales'
     | '/settings'
     | '/setup'
     | '/taxes'
@@ -628,6 +648,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/cost-centers'
     | '/credit-memos'
+    | '/crm'
     | '/currencies'
     | '/customers'
     | '/dashboard'
@@ -648,6 +669,7 @@ export interface FileRouteTypes {
     | '/pharmacy'
     | '/purchase'
     | '/receipts'
+    | '/sales'
     | '/settings'
     | '/setup'
     | '/taxes'
@@ -687,6 +709,7 @@ export interface FileRouteTypes {
     | '/_authenticated/companies'
     | '/_authenticated/cost-centers'
     | '/_authenticated/credit-memos'
+    | '/_authenticated/crm'
     | '/_authenticated/currencies'
     | '/_authenticated/customers'
     | '/_authenticated/dashboard'
@@ -707,6 +730,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacy'
     | '/_authenticated/purchase'
     | '/_authenticated/receipts'
+    | '/_authenticated/sales'
     | '/_authenticated/settings'
     | '/_authenticated/setup'
     | '/_authenticated/taxes'
@@ -843,6 +867,13 @@ declare module '@tanstack/react-router' {
       path: '/credit-memos'
       fullPath: '/credit-memos'
       preLoaderRoute: typeof AuthenticatedCreditMemosRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/crm': {
+      id: '/_authenticated/crm'
+      path: '/crm'
+      fullPath: '/crm'
+      preLoaderRoute: typeof AuthenticatedCrmRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/currencies': {
@@ -983,6 +1014,13 @@ declare module '@tanstack/react-router' {
       path: '/receipts'
       fullPath: '/receipts'
       preLoaderRoute: typeof AuthenticatedReceiptsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/sales': {
+      id: '/_authenticated/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof AuthenticatedSalesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/settings': {
@@ -1155,6 +1193,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCostCentersRoute: typeof AuthenticatedCostCentersRoute
   AuthenticatedCreditMemosRoute: typeof AuthenticatedCreditMemosRoute
+  AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedCurrenciesRoute: typeof AuthenticatedCurrenciesRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -1175,6 +1214,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPharmacyRoute: typeof AuthenticatedPharmacyRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
+  AuthenticatedSalesRoute: typeof AuthenticatedSalesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedTaxesRoute: typeof AuthenticatedTaxesRoute
@@ -1211,6 +1251,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCostCentersRoute: AuthenticatedCostCentersRoute,
   AuthenticatedCreditMemosRoute: AuthenticatedCreditMemosRoute,
+  AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedCurrenciesRoute: AuthenticatedCurrenciesRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
@@ -1231,6 +1272,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPharmacyRoute: AuthenticatedPharmacyRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
+  AuthenticatedSalesRoute: AuthenticatedSalesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedTaxesRoute: AuthenticatedTaxesRoute,
