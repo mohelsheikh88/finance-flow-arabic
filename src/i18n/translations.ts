@@ -1,6 +1,8 @@
 export const translations = {
   ar: {
     common: {
+      export: "تصدير",
+      import: "استيراد",
       appName: "نظام الحياة المالي",
       appShort: "Financial ERP",
       chooseModuleToStart: "اختر موديول للبدء",
@@ -1004,6 +1006,8 @@ export const translations = {
   },
   en: {
     common: {
+      export: "Export",
+      import: "Import",
       appName: "Al Hayat Financial ERP",
       appShort: "Financial ERP",
       chooseModuleToStart: "Choose a module to get started",

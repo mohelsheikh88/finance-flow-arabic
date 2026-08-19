@@ -494,6 +494,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
 
 
 const ImportRowSchema = z.object({
+  id: z.string().uuid().optional(),
   code: z.string().trim().min(1).max(50),
   name_ar: z.string().trim().min(1).max(255),
   name_en: z.string().trim().min(1).max(255),
@@ -525,6 +526,7 @@ export const importAccounts = createServerFn({ method: "POST" })
     if (exErr) throw new Error(exErr.message);
     const codeToId = new Map<string, string>();
     (existing ?? []).forEach((r: any) => codeToId.set(r.code, r.id));
+    const existingIds = new Set<string>((existing ?? []).map((r: any) => r.id));
 
     // Load classifications for resolving account_type_code / account_type -> classification_id + bucket.
     const { data: classifications } = await context.supabase
@@ -581,7 +583,7 @@ export const importAccounts = createServerFn({ method: "POST" })
       };
 
 
-      const existingId = codeToId.get(r.code);
+      const existingId = (r.id && existingIds.has(r.id)) ? r.id : codeToId.get(r.code);
       if (existingId) {
         const { error } = await context.supabase
           .from("accounts")

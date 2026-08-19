@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Plus, Pencil, Trash2, ArrowLeft, ChevronRight, ChevronDown,
-  Folder, FolderOpen, Wallet, Search, ChevronsDownUp, ChevronsUpDown,
+  Folder, FolderOpen, Wallet, Search, ChevronsDownUp, ChevronsUpDown, FileDown, FileUp,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/cost-centers")({
@@ -207,8 +208,93 @@ export function CostCentersPage({ embedded = false }: { embedded?: boolean } = {
 
   const title = t("nav.costCenters");
 
+  // ===== Export / Import (matches by row id, falls back to code; parent linked by parent_code) =====
+  const handleExport = () => {
+    const codeById = new Map(allRows.map((r) => [r.id, r.code]));
+    const data = allRows.map((r) => ({
+      id: r.id, code: r.code, name_ar: r.name_ar, name_en: r.name_en,
+      parent_code: r.parent_id ? (codeById.get(r.parent_id) ?? "") : "",
+      is_group: r.is_group ? 1 : 0, is_active: r.is_active ? 1 : 0,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data.length ? data : [{
+      id: "", code: "", name_ar: "", name_en: "", parent_code: "", is_group: 0, is_active: 1,
+    }]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "cost_centers");
+    XLSX.writeFile(wb, `cost_centers_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f || !companyId) return;
+    setImporting(true);
+    try {
+      const buf = await f.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
+      if (!raw.length) { toast.error(t("common.emptyFile") || "Empty file"); return; }
+
+      const existingById = new Map(allRows.map((r) => [r.id, r]));
+      const existingByCode = new Map(allRows.map((r) => [String(r.code).toLowerCase(), r]));
+      // Parents may be created earlier in the same import, so track newly created codes too.
+      const codeToId = new Map(allRows.map((r) => [String(r.code).toLowerCase(), r.id]));
+
+      let created = 0, updated = 0, failed = 0;
+      const errors: string[] = [];
+
+      // Groups (potential parents) first so children can resolve parent_code.
+      const sorted = [...raw].sort((a: any, b: any) => (a.is_group ? -1 : 0) - (b.is_group ? -1 : 0));
+
+      for (const r of sorted) {
+        const code = String(r.code ?? "").trim();
+        const name_ar = String(r.name_ar ?? "").trim();
+        const name_en = String(r.name_en ?? "").trim();
+        if (!code || !name_ar || !name_en) { failed++; errors.push(code || "row"); continue; }
+
+        const parentCode = String(r.parent_code ?? "").trim();
+        const parent_id = parentCode ? (codeToId.get(parentCode.toLowerCase()) ?? null) : null;
+        if (parentCode && !parent_id) { failed++; errors.push(`${code} (parent "${parentCode}" not found)`); continue; }
+
+        const rowId = String(r.id ?? "").trim();
+        const existing = (rowId && existingById.get(rowId)) || existingByCode.get(code.toLowerCase());
+        try {
+          const saved: any = await upsert({
+            data: {
+              ...(existing ? { id: existing.id } : {}),
+              company_id: companyId,
+              code, name_ar, name_en, parent_id,
+              is_group: r.is_group === "" ? false : !["0", "false", "no"].includes(String(r.is_group).toLowerCase()),
+              is_active: r.is_active === "" ? true : !["0", "false", "no"].includes(String(r.is_active).toLowerCase()),
+            } as any,
+          });
+          codeToId.set(code.toLowerCase(), existing?.id ?? saved?.id);
+          if (existing) updated++; else created++;
+        } catch {
+          failed++; errors.push(code);
+        }
+      }
+
+      qc.invalidateQueries({ queryKey: ["cost_centers"] });
+      if (failed === 0) {
+        toast.success(`${created} ${t("common.new") || "new"}, ${updated} ${t("common.updated") || "updated"}`);
+      } else {
+        toast.error(`${created + updated} ${t("common.saved")}, ${failed} ${t("common.failed") || "failed"}: ${errors.slice(0, 5).join(", ")}`);
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? t("common.error"));
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className={embedded ? "space-y-4" : "p-6 space-y-4"}>
+      <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
       {!embedded && (
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -257,6 +343,12 @@ export function CostCentersPage({ embedded = false }: { embedded?: boolean } = {
           </Button>
           <Button variant="outline" size="sm" onClick={collapseAll} disabled={!tree.length}>
             <ChevronsDownUp className="h-4 w-4 me-1" />{t("common.collapseAll") || "Collapse all"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!companyId}>
+            <FileDown className="h-4 w-4 me-1" />{t("common.export")}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={!companyId || importing}>
+            <FileUp className="h-4 w-4 me-1" />{t("common.import")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => openNew(null, true)} disabled={!companyId}>
             <Folder className="h-4 w-4 me-1" />{t("common.newGroup") || "New group"}

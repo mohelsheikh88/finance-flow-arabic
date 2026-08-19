@@ -397,6 +397,7 @@ function ChartOfAccountsPanel() {
         (tp ? clsById.get(tp.classification_id) : null);
 
       return {
+        id: a.id,
         code: a.code,
         name_ar: a.name_ar,
         name_en: a.name_en,
@@ -409,7 +410,7 @@ function ChartOfAccountsPanel() {
       };
     });
     const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{
-      code: "", name_ar: "", name_en: "",
+      id: "", code: "", name_ar: "", name_en: "",
       classification_code: "", classification_name: "",
       is_group: 0, is_active: 1, is_reconcilable: 0, notes: "",
     }]);
@@ -432,7 +433,7 @@ function ChartOfAccountsPanel() {
 
       // ----- Schema validation -----
       const EXPECTED = [
-        "code", "name_ar", "name_en", "classification_code", "classification_name",
+        "id", "code", "name_ar", "name_en", "classification_code", "classification_name",
         "is_group", "is_active", "is_reconcilable", "notes",
       ];
       const REQUIRED = ["code", "name_ar", "name_en", "classification_code"];
@@ -495,6 +496,7 @@ function ChartOfAccountsPanel() {
         const bucket = String(cls?.bucket ?? tp?.classification ?? "").trim().toLowerCase();
 
         rows.push({
+          id: String(r.id ?? "").trim() || undefined,
           code,
           name_ar,
           name_en,
@@ -532,10 +534,10 @@ function ChartOfAccountsPanel() {
       <div className="flex items-center justify-end gap-2">
         <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
         <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-          <FileUp className="h-4 w-4 me-1" />Export
+          <FileDown className="h-4 w-4 me-1" />{t("common.export")}
         </Button>
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importMut.isPending}>
-          <FileDown className="h-4 w-4 me-1" />Import
+          <FileUp className="h-4 w-4 me-1" />{t("common.import")}
         </Button>
         <Button onClick={openNew} disabled={!companyId}>
 
@@ -1558,9 +1560,107 @@ function AccountingBucketsPanel() {
 
   const canSave = !!(form.code && form.name_ar && form.name_en && companyId);
 
+  // ===== Export / Import (matches by row id, falls back to code) =====
+  const handleExport = () => {
+    const data = (buckets as any[]).map((b) => ({
+      id: b.id, code: b.code, name_ar: b.name_ar, name_en: b.name_en,
+      statement: b.statement, normal_balance: b.normal_balance,
+      sort_order: b.sort_order ?? "", is_active: b.is_active ? 1 : 0, notes: b.notes ?? "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(data.length ? data : [{
+      id: "", code: "", name_ar: "", name_en: "", statement: "", normal_balance: "",
+      sort_order: "", is_active: 1, notes: "",
+    }]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "buckets");
+    XLSX.writeFile(wb, `accounting_buckets_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const normalizeStatement = (v: any): "balance_sheet" | "income_statement" | null => {
+    const s = String(v ?? "").trim().toLowerCase();
+    if (["balance_sheet", "balance sheet", "bs"].includes(s)) return "balance_sheet";
+    if (["income_statement", "income statement", "p&l", "pl"].includes(s)) return "income_statement";
+    return null;
+  };
+  const normalizeBalance = (v: any): "debit" | "credit" | null => {
+    const s = String(v ?? "").trim().toLowerCase();
+    if (["debit", "dr"].includes(s)) return "debit";
+    if (["credit", "cr"].includes(s)) return "credit";
+    return null;
+  };
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f || !companyId) return;
+    setImporting(true);
+    try {
+      const buf = await f.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
+      if (!raw.length) { toast.error(t("common.emptyFile") || "Empty file"); return; }
+
+      const existingById = new Map((buckets as any[]).map((b) => [b.id, b]));
+      const existingByCode = new Map((buckets as any[]).map((b) => [String(b.code).toLowerCase(), b]));
+      let created = 0, updated = 0, failed = 0;
+      const errors: string[] = [];
+
+      for (const r of raw) {
+        const code = String(r.code ?? "").trim();
+        const name_ar = String(r.name_ar ?? "").trim();
+        const name_en = String(r.name_en ?? "").trim();
+        const statement = normalizeStatement(r.statement);
+        const normal_balance = normalizeBalance(r.normal_balance);
+        if (!code || !name_ar || !name_en || !statement || !normal_balance) {
+          failed++; errors.push(code || "row");
+          continue;
+        }
+        const rowId = String(r.id ?? "").trim();
+        const existing = (rowId && existingById.get(rowId)) || existingByCode.get(code.toLowerCase());
+        try {
+          await upsert({
+            data: {
+              ...(existing ? { id: existing.id } : {}),
+              company_id: companyId,
+              code, name_ar, name_en, statement, normal_balance,
+              sort_order: Number(r.sort_order) || 0,
+              is_active: r.is_active === "" ? true : !["0", "false", "no"].includes(String(r.is_active).toLowerCase()),
+              notes: r.notes ? String(r.notes) : null,
+            } as any,
+          });
+          if (existing) updated++; else created++;
+        } catch {
+          failed++; errors.push(code);
+        }
+      }
+
+      qc.invalidateQueries({ queryKey: ["accounting_buckets"] });
+      qc.invalidateQueries({ queryKey: ["classifications"] });
+      if (failed === 0) {
+        toast.success(`${created} ${t("common.new") || "new"}, ${updated} ${t("common.updated") || "updated"}`);
+      } else {
+        toast.error(`${created + updated} ${t("common.saved")}, ${failed} ${t("common.failed") || "failed"}: ${errors.slice(0, 5).join(", ")}`);
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? t("common.error"));
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+      <div className="flex items-center justify-end gap-2">
+        <Button variant="outline" onClick={handleExport} disabled={!companyId}>
+          <FileDown className="h-4 w-4 me-1" />{t("common.export")}
+        </Button>
+        <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={!companyId || importing}>
+          <FileUp className="h-4 w-4 me-1" />{t("common.import")}
+        </Button>
         <Button
           onClick={() => {
             openNew();

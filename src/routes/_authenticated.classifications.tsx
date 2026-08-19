@@ -259,6 +259,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
 
   const handleExport = () => {
     const data = (filteredRows as any[]).map((r) => ({
+      id: r.id,
       code: r.code,
       name_ar: r.name_ar,
       name_en: r.name_en,
@@ -270,7 +271,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       notes: r.notes ?? "",
     }));
     const ws = XLSX.utils.json_to_sheet(data.length ? data : [{
-      code: "", name_ar: "", name_en: "", bucket: "", statement: "",
+      id: "", code: "", name_ar: "", name_en: "", bucket: "", statement: "",
       normal_balance: "", is_active: 1, sort_order: "", notes: "",
     }]);
     const wb = XLSX.utils.book_new();
@@ -328,6 +329,7 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
       }
 
       const existingByCode = new Map((rows as any[]).map((r) => [String(r.code).toLowerCase(), r]));
+      const existingById = new Map((rows as any[]).map((r) => [r.id, r]));
       let created = 0, updated = 0, failed = 0;
       const errors: string[] = [];
 
@@ -345,7 +347,8 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           continue;
         }
 
-        const existing = existingByCode.get(code.toLowerCase());
+        const rowId = String(raw.id ?? "").trim();
+        const existing = (rowId && existingById.get(rowId)) || existingByCode.get(code.toLowerCase());
         try {
           await importMut.mutateAsync({
             id: existing?.id,
@@ -403,10 +406,10 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleUploadClick} disabled={!companyId || importing}>
               {importing ? <Loader2 className="h-4 w-4 me-1 animate-spin" /> : <FileUp className="h-4 w-4 me-1" />}
-              {t("common.upload")}
+              {t("common.import")}
             </Button>
             <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-              <FileDown className="h-4 w-4 me-1" />Export
+              <FileDown className="h-4 w-4 me-1" />{t("common.export")}
             </Button>
             <Button onClick={openNew} disabled={!companyId}>
               <Plus className="h-4 w-4 me-1" />{t("common.new")}
@@ -419,10 +422,10 @@ export function ClassificationsPage({ embedded = false }: { embedded?: boolean }
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" onClick={handleUploadClick} disabled={!companyId || importing}>
             {importing ? <Loader2 className="h-4 w-4 me-1 animate-spin" /> : <FileUp className="h-4 w-4 me-1" />}
-            {t("common.upload")}
+            {t("common.import")}
           </Button>
           <Button variant="outline" onClick={handleExport} disabled={!companyId}>
-            <FileDown className="h-4 w-4 me-1" />Export
+            <FileDown className="h-4 w-4 me-1" />{t("common.export")}
           </Button>
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 me-1" />{t("common.new")}
