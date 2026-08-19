@@ -186,7 +186,7 @@ export function useNavGroups(): NavGroup[] {
           icon: SlidersHorizontal,
           hue: 180,
           items: [
-            { url: "/partners", icon: Users, title: t("partners.title") },
+            { url: "/partners", icon: Users, title: t("partners.pageTitle") },
             { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
             { url: "/journals", icon: BookOpen, title: t("nav.journalTypes") },
             { url: "/currencies", icon: Coins, title: t("nav.currencies") },
