@@ -19,9 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AccountCombobox } from "@/components/account-combobox";
@@ -38,6 +37,8 @@ export const Route = createFileRoute("/_authenticated/partners")({
 
 const DOC_TYPES = ["cr", "vat", "national_address", "contract", "other"] as const;
 type DocType = (typeof DOC_TYPES)[number];
+type ContactRow = { id?: string; name: string; email: string; mobile: string };
+const emptyContact = (): ContactRow => ({ name: "", email: "", mobile: "" });
 
 type FormState = {
   id?: string;
@@ -46,6 +47,7 @@ type FormState = {
   is_customer: boolean; is_vendor: boolean;
   receivable_account_id: string | null; payable_account_id: string | null;
   credit_limit: number;
+  contacts: ContactRow[];
 };
 
 const emptyForm: FormState = {
@@ -54,6 +56,7 @@ const emptyForm: FormState = {
   is_customer: true, is_vendor: false,
   receivable_account_id: null, payable_account_id: null,
   credit_limit: 0,
+  contacts: [emptyContact()],
 };
 
 function PartnersPage() {
@@ -68,11 +71,15 @@ function PartnersPage() {
   const accFn = useServerFn(listAccounts);
   const typesFn = useServerFn(listCustomerTypes);
   const groupsFn = useServerFn(listVendorGroups);
+  const contactsFn = useServerFn(listPartnerContacts);
+  const saveContactsFn = useServerFn(savePartnerContacts);
 
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [typesOpen, setTypesOpen] = useState(false);
+  const [groupsOpen, setGroupsOpen] = useState(false);
 
   const { data: partners = [] } = useQuery({
     queryKey: ["partners", companyId],
@@ -94,17 +101,22 @@ function PartnersPage() {
     queryFn: () => groupsFn({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+  const activeTypes = (customerTypes as any[]).filter((c) => c.is_active);
+  const activeGroups = (vendorGroups as any[]).filter((g) => g.is_active);
 
-  const [typesOpen, setTypesOpen] = useState(false);
-  const [groupsOpen, setGroupsOpen] = useState(false);
-
-  const receivableAccounts = (accounts as any[]).filter((a) => !a.is_group && a.account_type === "asset");
-  const payableAccounts = (accounts as any[]).filter((a) => !a.is_group && a.account_type === "liability");
+  // Precise Receivable/Payable flags from the Chart of Accounts, same as the Customers screen.
+  const arAccounts = (accounts as any[]).filter((a) => a.is_active && !a.is_group && a.is_receivable);
+  const apAccounts = (accounts as any[]).filter((a) => a.is_active && !a.is_group && a.is_payable);
 
   const filtered = (partners as any[]).filter((p) =>
     !q || p.code.includes(q) || p.name_ar?.includes(q) || p.name_en?.toLowerCase().includes(q.toLowerCase())
   );
 
+  const accountLabel = (id?: string | null) => {
+    if (!id) return "—";
+    const a = (accounts as any[]).find((x) => x.id === id);
+    return a ? `${a.code} — ${localized(a, "name")}` : "—";
+  };
   const typeLabel = (id?: string | null) => {
     if (!id) return "—";
     const ct = (customerTypes as any[]).find((c) => c.id === id);
@@ -121,32 +133,48 @@ function PartnersPage() {
     return c ? localized(c, "name") : code;
   };
 
-  const computeNextCode = (): string => {
-    const nums = (partners as any[]).map((p) => {
-      const m = String(p.code ?? "").match(/^(\d+)$/);
-      return m ? parseInt(m[1], 10) : 0;
-    });
+  // Same "prefix-####" sequential code pattern as Customers, driven by
+  // whichever category (Customer Type or Vendor Group) the user picks.
+  const computeNextCode = (prefix: string, scopeField: "customer_type_id" | "vendor_group_id", scopeId: string): string => {
+    const re = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-(\\d+)$`);
+    const nums = (partners as any[])
+      .filter((p) => p[scopeField] === scopeId)
+      .map((p) => {
+        const m = String(p.code ?? "").match(re);
+        return m ? parseInt(m[1], 10) : 0;
+      });
     const next = (nums.length ? Math.max(...nums) : 0) + 1;
-    return String(next).padStart(5, "0");
+    return `${prefix}-${String(next).padStart(4, "0")}`;
   };
 
-  const openCreate = () => { setForm({ ...emptyForm, code: computeNextCode() }); setOpen(true); };
-  const openEdit = (p: any) => {
+  const isEdit = !!form.id;
+  const openCreate = () => { setForm({ ...emptyForm, contacts: [emptyContact()] }); setOpen(true); };
+  const openEdit = async (p: any) => {
+    let contacts: ContactRow[] = [];
+    try {
+      const rows: any[] = await contactsFn({ data: { partnerId: p.id } });
+      contacts = rows.length ? rows.map((c) => ({ id: c.id, name: c.name ?? "", email: c.email ?? "", mobile: c.mobile ?? "" })) : [emptyContact()];
+    } catch {
+      contacts = [emptyContact()];
+    }
     setForm({
       id: p.id, code: p.code, name_ar: p.name_ar, name_en: p.name_en, vat_number: p.vat_number ?? "",
       customer_type_id: p.customer_type_id, vendor_group_id: p.vendor_group_id, country: p.country, address_ar: p.address_ar ?? "",
       is_customer: p.is_customer, is_vendor: p.is_vendor,
       receivable_account_id: p.receivable_account_id, payable_account_id: p.payable_account_id,
       credit_limit: Number(p.credit_limit ?? 0),
+      contacts,
     });
     setOpen(true);
   };
 
   const saveMut = useMutation({
     mutationFn: async () => {
+      const primary = form.contacts[0] ?? emptyContact();
       const payload = {
         code: form.code, name_ar: form.name_ar, name_en: form.name_en,
         vat_number: form.vat_number || null,
+        email: primary.email || null, phone: primary.mobile || null,
         customer_type_id: form.customer_type_id,
         vendor_group_id: form.vendor_group_id,
         country: form.country,
@@ -156,16 +184,25 @@ function PartnersPage() {
         payable_account_id: form.is_vendor ? form.payable_account_id : null,
         credit_limit: Number(form.credit_limit) || 0,
       };
+      let partnerId = form.id;
       if (form.id) {
         await update({ data: { id: form.id, ...payload } as any });
-        return form.id;
+      } else {
+        const row = await create({ data: { ...payload, company_id: companyId! } as any });
+        partnerId = (row as any)?.id;
       }
-      const row = await create({ data: { ...payload, company_id: companyId! } as any });
-      return (row as any)?.id as string;
+      if (partnerId) {
+        const cleaned = form.contacts
+          .filter((c) => (c.name || c.email || c.mobile).trim().length > 0)
+          .map((c) => ({ ...(c.id ? { id: c.id } : {}), name: c.name.trim() || "—", email: c.email.trim() || null, mobile: c.mobile.trim() || null }));
+        await saveContactsFn({ data: { partnerId, contacts: cleaned } });
+      }
+      return partnerId as string;
     },
     onSuccess: (id) => {
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["partners"] });
+      // Stay open in edit mode so Bank Accounts / Attachments (which need an id) unlock immediately.
       setForm((f) => ({ ...f, id }));
     },
     onError: (e: Error) => toast.error(e.message),
@@ -181,12 +218,15 @@ function PartnersPage() {
     onError: (e: Error) => { toast.error(e.message); setDeleteId(null); },
   });
 
-  const canSave = form.code.trim() && form.name_ar.trim() && form.name_en.trim() && (form.is_customer || form.is_vendor);
+  const canSave = form.code && form.name_ar && form.name_en && (form.is_customer || form.is_vendor);
 
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="page-title">{t("partners.title")}</h1>
+        <div>
+          <h1 className="page-title">{t("partners.title")}</h1>
+          <p className="text-sm text-muted-foreground">{(partners as any[]).length} {t("partners.title")}</p>
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setTypesOpen(true)}>
             <Settings2 className="h-4 w-4 me-1" />
@@ -196,7 +236,162 @@ function PartnersPage() {
             <Settings2 className="h-4 w-4 me-1" />
             {t("partners.manageVendorGroups")}
           </Button>
-          <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(emptyForm); }}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>{t("partners.title")} — {isEdit ? t("common.edit") : t("common.add")}</DialogTitle></DialogHeader>
+              <div className="grid grid-cols-2 gap-3">
+                {/* 1. Code */}
+                <div>
+                  <Label>{t("common.code")} *</Label>
+                  <Input
+                    value={form.code}
+                    onChange={(e) => setForm({ ...form, code: e.target.value })}
+                    readOnly={!isEdit && !!(form.customer_type_id || form.vendor_group_id)}
+                    className={!isEdit && !!(form.customer_type_id || form.vendor_group_id) ? "bg-muted" : undefined}
+                  />
+                </div>
+                {/* 2. Customer / Vendor toggle */}
+                <div className="flex items-center gap-4 pt-6">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Switch checked={form.is_customer} onCheckedChange={(v) => setForm({ ...form, is_customer: v })} />
+                    {t("partners.isCustomer")}
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Switch checked={form.is_vendor} onCheckedChange={(v) => setForm({ ...form, is_vendor: v })} />
+                    {t("partners.isVendor")}
+                  </label>
+                </div>
+
+                {/* 3. Name (Ar) - 4. Name (En) */}
+                <div><Label>{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                <div><Label>{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+
+                {/* 5. Customer Type (if customer) */}
+                {form.is_customer && (
+                  <div>
+                    <Label>{t("customers.customerType")}</Label>
+                    <Select
+                      value={form.customer_type_id ?? "__none__"}
+                      onValueChange={(v) => {
+                        const newTypeId = v === "__none__" ? null : v;
+                        const ct = newTypeId ? activeTypes.find((x) => x.id === newTypeId) : null;
+                        setForm((prev) => ({
+                          ...prev,
+                          customer_type_id: newTypeId,
+                          code: !prev.id && newTypeId ? computeNextCode(String(ct?.code ?? ""), "customer_type_id", newTypeId) : (!newTypeId && !prev.id ? "" : prev.code),
+                          receivable_account_id: ct?.receivable_account_id ? ct.receivable_account_id : prev.receivable_account_id,
+                        }));
+                      }}
+                    >
+                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">— {t("common.none")} —</SelectItem>
+                        {activeTypes.map((ct) => <SelectItem key={ct.id} value={ct.id}>{ct.code} — {localized(ct, "name")}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {/* 6. AR Account (readonly, derived) */}
+                {form.is_customer && (
+                  <div>
+                    <Label>{t("customers.receivableAccount")}</Label>
+                    <Input readOnly className="bg-muted" value={accountLabel(form.receivable_account_id)} placeholder={t("customers.defaultFromJournal")} />
+                  </div>
+                )}
+
+                {/* 7. Vendor Group (if vendor) */}
+                {form.is_vendor && (
+                  <div>
+                    <Label>{t("partners.vendorGroup")}</Label>
+                    <Select
+                      value={form.vendor_group_id ?? "__none__"}
+                      onValueChange={(v) => {
+                        const newGroupId = v === "__none__" ? null : v;
+                        const g = newGroupId ? activeGroups.find((x) => x.id === newGroupId) : null;
+                        setForm((prev) => ({
+                          ...prev,
+                          vendor_group_id: newGroupId,
+                          code: !prev.id && newGroupId ? computeNextCode(String(g?.code ?? ""), "vendor_group_id", newGroupId) : (!newGroupId && !prev.id ? "" : prev.code),
+                          payable_account_id: g?.payable_account_id ? g.payable_account_id : prev.payable_account_id,
+                        }));
+                      }}
+                    >
+                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">— {t("common.none")} —</SelectItem>
+                        {activeGroups.map((g) => <SelectItem key={g.id} value={g.id}>{g.code} — {localized(g, "name")}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {/* 8. AP Account (readonly, derived) */}
+                {form.is_vendor && (
+                  <div>
+                    <Label>{t("partners.payableAccount")}</Label>
+                    <Input readOnly className="bg-muted" value={accountLabel(form.payable_account_id)} placeholder={t("customers.defaultFromJournal")} />
+                  </div>
+                )}
+
+                {/* 9. VAT - 10. Country */}
+                <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
+                <div>
+                  <Label>{t("partners.country")}</Label>
+                  <Select value={form.country ?? "__none__"} onValueChange={(v) => setForm({ ...form, country: v === "__none__" ? null : v })}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      <SelectItem value="__none__">—</SelectItem>
+                      {COUNTRIES.map((c) => <SelectItem key={c.code} value={c.code}>{localized(c, "name")}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* 11. National Address */}
+                <div className="col-span-2"><Label>{t("customers.nationalAddress")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
+
+                {/* 12-14. Contacts (Name, Email, Phone) — repeatable */}
+                <div className="col-span-2 space-y-2 pt-2 border-t">
+                  <div className="flex items-center justify-between">
+                    <Label>{t("customers.contacts")}</Label>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setForm({ ...form, contacts: [...form.contacts, emptyContact()] })}>
+                      <Plus className="h-3.5 w-3.5 me-1" />{t("customers.addContact")}
+                    </Button>
+                  </div>
+                  {form.contacts.map((c, idx) => (
+                    <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+                      <div>{idx === 0 && <Label className="text-xs">{t("customers.contactName")}</Label>}<Input value={c.name} onChange={(e) => { const next = [...form.contacts]; next[idx] = { ...c, name: e.target.value }; setForm({ ...form, contacts: next }); }} /></div>
+                      <div>{idx === 0 && <Label className="text-xs">{t("common.email")}</Label>}<Input dir="ltr" type="email" value={c.email} onChange={(e) => { const next = [...form.contacts]; next[idx] = { ...c, email: e.target.value }; setForm({ ...form, contacts: next }); }} /></div>
+                      <div>{idx === 0 && <Label className="text-xs">{t("common.phone")}</Label>}<Input dir="ltr" value={c.mobile} onChange={(e) => { const next = [...form.contacts]; next[idx] = { ...c, mobile: e.target.value }; setForm({ ...form, contacts: next }); }} /></div>
+                      <Button type="button" size="icon" variant="ghost" className="h-9 w-9 text-destructive" disabled={form.contacts.length === 1} onClick={() => { const next = form.contacts.filter((_, i) => i !== idx); setForm({ ...form, contacts: next.length ? next : [emptyContact()] }); }}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bank Accounts — same repeatable pattern, Partners-specific addition */}
+                <div className="col-span-2 pt-2 border-t">
+                  <Label className="mb-2 block">{t("partners.tabBankAccounts")}</Label>
+                  {form.id ? <PartnerBankAccounts partnerId={form.id} /> : <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>}
+                </div>
+
+                {/* Credit Limit */}
+                <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
+
+                {/* Attachments */}
+                <div className="col-span-2 pt-2 border-t">
+                  <Label className="mb-2 block">{t("customers.attachments")}</Label>
+                  {form.id ? <PartnerAttachments partnerId={form.id} /> : <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
+                <Button onClick={() => saveMut.mutate()} disabled={!canSave || saveMut.isPending}>{t("common.save")}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -212,7 +407,7 @@ function PartnersPage() {
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium">{t("partners.partnerType")}</th>
-              <th className="text-start p-3 font-medium">{t("partners.partnerCategoryType")}</th>
+              <th className="text-start p-3 font-medium">{t("common.status")}</th>
               <th className="text-start p-3 font-medium">{t("partners.country")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
               <th className="text-center p-3 font-medium">{t("common.actions")}</th>
@@ -247,108 +442,6 @@ function PartnersPage() {
         </table>
       </Card>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{t("partners.title")}</DialogTitle></DialogHeader>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>{t("common.nameAr")}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} dir="rtl" /></div>
-            <div><Label>{t("common.nameEn")}</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-            <div><Label>{t("common.code")}</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
-            <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
-            {form.is_customer && (
-              <div>
-                <Label>{t("customers.customerType")}</Label>
-                <Select value={form.customer_type_id ?? "__none__"} onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">—</SelectItem>
-                    {(customerTypes as any[]).map((c) => <SelectItem key={c.id} value={c.id}>{c.code} — {localized(c, "name")}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {form.is_vendor && (
-              <div>
-                <Label>{t("partners.vendorGroup")}</Label>
-                <Select value={form.vendor_group_id ?? "__none__"} onValueChange={(v) => setForm({ ...form, vendor_group_id: v === "__none__" ? null : v })}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">—</SelectItem>
-                    {(vendorGroups as any[]).map((c) => <SelectItem key={c.id} value={c.id}>{c.code} — {localized(c, "name")}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div>
-              <Label>{t("partners.country")}</Label>
-              <Select value={form.country ?? "__none__"} onValueChange={(v) => setForm({ ...form, country: v === "__none__" ? null : v })}>
-                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                <SelectContent className="max-h-72">
-                  <SelectItem value="__none__">—</SelectItem>
-                  {COUNTRIES.map((c) => <SelectItem key={c.code} value={c.code}>{localized(c, "name")}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="col-span-2"><Label>{t("customers.nationalAddress")}</Label><Input value={form.address_ar} onChange={(e) => setForm({ ...form, address_ar: e.target.value })} /></div>
-          </div>
-
-          <Tabs defaultValue="accounting" className="mt-2">
-            <TabsList>
-              <TabsTrigger value="accounting">{t("partners.tabAccounting")}</TabsTrigger>
-              <TabsTrigger value="contacts">{t("customers.contacts")}</TabsTrigger>
-              <TabsTrigger value="bank">{t("partners.tabBankAccounts")}</TabsTrigger>
-              <TabsTrigger value="attachments">{t("customers.attachments")}</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="accounting" className="mt-4 space-y-4">
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <Switch checked={form.is_customer} onCheckedChange={(v) => setForm({ ...form, is_customer: v })} />
-                  {t("partners.isCustomer")}
-                </label>
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <Switch checked={form.is_vendor} onCheckedChange={(v) => setForm({ ...form, is_vendor: v })} />
-                  {t("partners.isVendor")}
-                </label>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {form.is_customer && (
-                  <div>
-                    <Label>{t("customers.receivableAccountShort")}</Label>
-                    <AccountCombobox accounts={receivableAccounts} value={form.receivable_account_id} onChange={(v) => setForm({ ...form, receivable_account_id: v })} />
-                  </div>
-                )}
-                {form.is_vendor && (
-                  <div>
-                    <Label>{t("partners.payableAccount")}</Label>
-                    <AccountCombobox accounts={payableAccounts} value={form.payable_account_id} onChange={(v) => setForm({ ...form, payable_account_id: v })} />
-                  </div>
-                )}
-                <div><Label>{t("partners.creditLimit")}</Label><Input type="number" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })} /></div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="contacts" className="mt-4">
-              {form.id ? <PartnerContacts partnerId={form.id} /> : <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>}
-            </TabsContent>
-
-            <TabsContent value="bank" className="mt-4">
-              {form.id ? <PartnerBankAccounts partnerId={form.id} /> : <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>}
-            </TabsContent>
-
-            <TabsContent value="attachments" className="mt-4">
-              {form.id ? <PartnerAttachments partnerId={form.id} /> : <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>}
-            </TabsContent>
-          </Tabs>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
-            <Button onClick={() => saveMut.mutate()} disabled={!canSave || saveMut.isPending}>{t("common.save")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle><AlertDialogDescription>{t("common.deleteWarning")}</AlertDialogDescription></AlertDialogHeader>
@@ -357,22 +450,10 @@ function PartnersPage() {
       </AlertDialog>
 
       {typesOpen && (
-        <CustomerTypesDialog
-          open={typesOpen}
-          onClose={() => setTypesOpen(false)}
-          types={customerTypes as any[]}
-          arAccounts={receivableAccounts}
-          companyId={companyId!}
-        />
+        <CustomerTypesDialog open={typesOpen} onClose={() => setTypesOpen(false)} types={customerTypes as any[]} arAccounts={arAccounts} companyId={companyId!} />
       )}
       {groupsOpen && (
-        <VendorGroupsDialog
-          open={groupsOpen}
-          onClose={() => setGroupsOpen(false)}
-          groups={vendorGroups as any[]}
-          apAccounts={payableAccounts}
-          companyId={companyId!}
-        />
+        <VendorGroupsDialog open={groupsOpen} onClose={() => setGroupsOpen(false)} groups={vendorGroups as any[]} apAccounts={apAccounts} companyId={companyId!} />
       )}
     </div>
   );
@@ -564,60 +645,7 @@ function VendorGroupsDialog({
   );
 }
 
-function PartnerContacts({ partnerId }: { partnerId: string }) {
-  const { t } = useI18n();
-  const qc = useQueryClient();
-  const listFn = useServerFn(listPartnerContacts);
-  const saveFn = useServerFn(savePartnerContacts);
-  const { data: contacts = [] } = useQuery({
-    queryKey: ["partner_contacts", partnerId],
-    queryFn: () => listFn({ data: { partnerId } }),
-  });
-
-  type Row = { id?: string; name: string; email: string; mobile: string };
-  const [rows, setRows] = useState<Row[] | null>(null);
-  const effective: Row[] = rows ?? (contacts as any[]).map((c) => ({ id: c.id, name: c.name ?? "", email: c.email ?? "", mobile: c.mobile ?? "" }));
-  const list = effective.length ? effective : [{ name: "", email: "", mobile: "" }];
-
-  const saveMut = useMutation({
-    mutationFn: () => saveFn({
-      data: {
-        partnerId,
-        contacts: list
-          .filter((c) => (c.name || c.email || c.mobile).trim().length > 0)
-          .map((c) => ({ ...(c.id ? { id: c.id } : {}), name: c.name.trim() || "—", email: c.email.trim() || null, mobile: c.mobile.trim() || null })),
-      },
-    }),
-    onSuccess: () => { toast.success(t("common.saved")); qc.invalidateQueries({ queryKey: ["partner_contacts", partnerId] }); setRows(null); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const update = (idx: number, patch: Partial<Row>) => setRows(list.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label className="text-xs font-semibold">{t("customers.contacts")}</Label>
-        <Button type="button" size="sm" variant="outline" onClick={() => setRows([...list, { name: "", email: "", mobile: "" }])}>
-          <Plus className="h-3.5 w-3.5 me-1" />{t("customers.addContact")}
-        </Button>
-      </div>
-      {list.map((c, idx) => (
-        <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
-          <div>{idx === 0 && <Label className="text-xs">{t("customers.contactName")}</Label>}<Input value={c.name} onChange={(e) => update(idx, { name: e.target.value })} /></div>
-          <div>{idx === 0 && <Label className="text-xs">{t("common.email")}</Label>}<Input dir="ltr" type="email" value={c.email} onChange={(e) => update(idx, { email: e.target.value })} /></div>
-          <div>{idx === 0 && <Label className="text-xs">{t("common.phone")}</Label>}<Input dir="ltr" value={c.mobile} onChange={(e) => update(idx, { mobile: e.target.value })} /></div>
-          <Button type="button" size="icon" variant="ghost" className="h-9 w-9 text-destructive" disabled={list.length === 1} onClick={() => setRows(list.filter((_, i) => i !== idx))}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
-      <div className="flex justify-end pt-1">
-        <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>{t("common.save")}</Button>
-      </div>
-    </div>
-  );
-}
+/* ============================== Bank Accounts ============================== */
 
 function PartnerBankAccounts({ partnerId }: { partnerId: string }) {
   const { t } = useI18n();
@@ -697,7 +725,6 @@ function PartnerBankAccounts({ partnerId }: { partnerId: string }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-xs font-semibold">{t("partners.tabBankAccounts")}</Label>
         <Button type="button" size="sm" variant="outline" onClick={() => setRows([...list, empty()])}>
           <Plus className="h-3.5 w-3.5 me-1" />{t("partners.addBankAccount")}
         </Button>
@@ -747,6 +774,8 @@ function PartnerBankAccounts({ partnerId }: { partnerId: string }) {
     </div>
   );
 }
+
+/* ============================== Attachments ============================== */
 
 function PartnerAttachments({ partnerId }: { partnerId: string }) {
   const { t } = useI18n();
@@ -807,7 +836,6 @@ function PartnerAttachments({ partnerId }: { partnerId: string }) {
     <div className="space-y-2">
       <div className="flex items-end gap-2">
         <div className="flex-1">
-          <Label className="text-xs">{t("customers.attachments")}</Label>
           <Select value={docType} onValueChange={(v) => setDocType(v as DocType)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
