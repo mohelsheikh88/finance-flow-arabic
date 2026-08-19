@@ -2399,6 +2399,198 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_categories: {
+        Row: {
+          id: string
+          company_id: string
+          parent_id: string | null
+          code: string
+          name_ar: string
+          name_en: string
+          is_group: boolean
+          sort_order: number
+          is_active: boolean
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          parent_id?: string | null
+          code: string
+          name_ar: string
+          name_en: string
+          is_group?: boolean
+          sort_order?: number
+          is_active?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          parent_id?: string | null
+          code?: string
+          name_ar?: string
+          name_en?: string
+          is_group?: boolean
+          sort_order?: number
+          is_active?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      uom_categories: {
+        Row: {
+          id: string
+          company_id: string
+          name_ar: string
+          name_en: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          name_ar: string
+          name_en: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          name_ar?: string
+          name_en?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      units_of_measure: {
+        Row: {
+          id: string
+          company_id: string
+          uom_category_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          factor: number
+          is_reference: boolean
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          uom_category_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          factor?: number
+          is_reference?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          uom_category_id?: string
+          code?: string
+          name_ar?: string
+          name_en?: string
+          factor?: number
+          is_reference?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          id: string
+          company_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          category_id: string | null
+          product_type: string
+          purchase_uom_id: string | null
+          cost_price: number
+          currency_code: string
+          expense_account_id: string | null
+          requires_batch_tracking: boolean
+          requires_expiry_tracking: boolean
+          requires_cold_chain: boolean
+          is_controlled_substance: boolean
+          requires_prescription: boolean
+          regulatory_number: string | null
+          reorder_point: number | null
+          is_active: boolean
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          category_id?: string | null
+          product_type?: string
+          purchase_uom_id?: string | null
+          cost_price?: number
+          currency_code?: string
+          expense_account_id?: string | null
+          requires_batch_tracking?: boolean
+          requires_expiry_tracking?: boolean
+          requires_cold_chain?: boolean
+          is_controlled_substance?: boolean
+          requires_prescription?: boolean
+          regulatory_number?: string | null
+          reorder_point?: number | null
+          is_active?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          code?: string
+          name_ar?: string
+          name_en?: string
+          category_id?: string | null
+          product_type?: string
+          purchase_uom_id?: string | null
+          cost_price?: number
+          currency_code?: string
+          expense_account_id?: string | null
+          requires_batch_tracking?: boolean
+          requires_expiry_tracking?: boolean
+          requires_cold_chain?: boolean
+          is_controlled_substance?: boolean
+          requires_prescription?: boolean
+          regulatory_number?: string | null
+          reorder_point?: number | null
+          is_active?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -23,6 +23,8 @@ import {
   UsersRound,
   BarChart3,
   SlidersHorizontal,
+  Tags,
+  Ruler,
   HandCoins,
   Stethoscope,
   Pill,
@@ -204,7 +206,18 @@ export function useNavGroups(): NavGroup[] {
       label: t("nav.purchaseProcurement"),
       icon: ShoppingBag,
       hue: 25, // orange — procurement
-      items: [{ url: "/purchase", icon: ShoppingBag, title: t("common.willBeBuiltLater") }],
+      subgroups: [
+        {
+          key: "purchaseConfiguration",
+          label: t("nav.configuration"),
+          icon: SlidersHorizontal,
+          hue: 25,
+          items: [
+            { url: "/product-management", icon: Tags, title: t("nav.productManagement") },
+            { url: "/units-of-measure", icon: Ruler, title: t("nav.unitsOfMeasure") },
+          ],
+        },
+      ],
     },
     {
       key: "inventory",

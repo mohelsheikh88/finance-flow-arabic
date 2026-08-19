@@ -54,6 +54,7 @@ import { Route as AuthenticatedPaymentTermsRouteImport } from './routes/_authent
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
 import { Route as AuthenticatedPharmacyRouteImport } from './routes/_authenticated.pharmacy'
 import { Route as AuthenticatedPhysicianRouteImport } from './routes/_authenticated.physician'
+import { Route as AuthenticatedProductManagementRouteImport } from './routes/_authenticated.product-management'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
 import { Route as AuthenticatedRadiologyRouteImport } from './routes/_authenticated.radiology'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
@@ -63,6 +64,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
 import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.taxes'
 import { Route as AuthenticatedTrialBalanceRouteImport } from './routes/_authenticated.trial-balance'
+import { Route as AuthenticatedUnitsOfMeasureRouteImport } from './routes/_authenticated.units-of-measure'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
 import { Route as AuthenticatedVendorsRouteImport } from './routes/_authenticated.vendors'
 import { Route as AuthenticatedWaitingScreenRouteImport } from './routes/_authenticated.waiting-screen'
@@ -322,6 +324,12 @@ const AuthenticatedPhysicianRoute = AuthenticatedPhysicianRouteImport.update({
   path: '/physician',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedProductManagementRoute =
+  AuthenticatedProductManagementRouteImport.update({
+    id: '/product-management',
+    path: '/product-management',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPurchaseRoute = AuthenticatedPurchaseRouteImport.update({
   id: '/purchase',
   path: '/purchase',
@@ -366,6 +374,12 @@ const AuthenticatedTrialBalanceRoute =
   AuthenticatedTrialBalanceRouteImport.update({
     id: '/trial-balance',
     path: '/trial-balance',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedUnitsOfMeasureRoute =
+  AuthenticatedUnitsOfMeasureRouteImport.update({
+    id: '/units-of-measure',
+    path: '/units-of-measure',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
@@ -525,6 +539,7 @@ export interface FileRoutesByFullPath {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/physician': typeof AuthenticatedPhysicianRoute
+  '/product-management': typeof AuthenticatedProductManagementRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
@@ -534,6 +549,7 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
+  '/units-of-measure': typeof AuthenticatedUnitsOfMeasureRoute
   '/users': typeof AuthenticatedUsersRoute
   '/vendors': typeof AuthenticatedVendorsRoute
   '/waiting-screen': typeof AuthenticatedWaitingScreenRoute
@@ -599,6 +615,7 @@ export interface FileRoutesByTo {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/physician': typeof AuthenticatedPhysicianRoute
+  '/product-management': typeof AuthenticatedProductManagementRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
@@ -608,6 +625,7 @@ export interface FileRoutesByTo {
   '/setup': typeof AuthenticatedSetupRoute
   '/taxes': typeof AuthenticatedTaxesRoute
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
+  '/units-of-measure': typeof AuthenticatedUnitsOfMeasureRoute
   '/users': typeof AuthenticatedUsersRoute
   '/vendors': typeof AuthenticatedVendorsRoute
   '/waiting-screen': typeof AuthenticatedWaitingScreenRoute
@@ -675,6 +693,7 @@ export interface FileRoutesById {
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/pharmacy': typeof AuthenticatedPharmacyRoute
   '/_authenticated/physician': typeof AuthenticatedPhysicianRoute
+  '/_authenticated/product-management': typeof AuthenticatedProductManagementRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
   '/_authenticated/radiology': typeof AuthenticatedRadiologyRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
@@ -684,6 +703,7 @@ export interface FileRoutesById {
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/taxes': typeof AuthenticatedTaxesRoute
   '/_authenticated/trial-balance': typeof AuthenticatedTrialBalanceRoute
+  '/_authenticated/units-of-measure': typeof AuthenticatedUnitsOfMeasureRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/vendors': typeof AuthenticatedVendorsRoute
   '/_authenticated/waiting-screen': typeof AuthenticatedWaitingScreenRoute
@@ -751,6 +771,7 @@ export interface FileRouteTypes {
     | '/payments'
     | '/pharmacy'
     | '/physician'
+    | '/product-management'
     | '/purchase'
     | '/radiology'
     | '/receipts'
@@ -760,6 +781,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/taxes'
     | '/trial-balance'
+    | '/units-of-measure'
     | '/users'
     | '/vendors'
     | '/waiting-screen'
@@ -825,6 +847,7 @@ export interface FileRouteTypes {
     | '/payments'
     | '/pharmacy'
     | '/physician'
+    | '/product-management'
     | '/purchase'
     | '/radiology'
     | '/receipts'
@@ -834,6 +857,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/taxes'
     | '/trial-balance'
+    | '/units-of-measure'
     | '/users'
     | '/vendors'
     | '/waiting-screen'
@@ -900,6 +924,7 @@ export interface FileRouteTypes {
     | '/_authenticated/payments'
     | '/_authenticated/pharmacy'
     | '/_authenticated/physician'
+    | '/_authenticated/product-management'
     | '/_authenticated/purchase'
     | '/_authenticated/radiology'
     | '/_authenticated/receipts'
@@ -909,6 +934,7 @@ export interface FileRouteTypes {
     | '/_authenticated/setup'
     | '/_authenticated/taxes'
     | '/_authenticated/trial-balance'
+    | '/_authenticated/units-of-measure'
     | '/_authenticated/users'
     | '/_authenticated/vendors'
     | '/_authenticated/waiting-screen'
@@ -1254,6 +1280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPhysicianRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/product-management': {
+      id: '/_authenticated/product-management'
+      path: '/product-management'
+      fullPath: '/product-management'
+      preLoaderRoute: typeof AuthenticatedProductManagementRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/purchase': {
       id: '/_authenticated/purchase'
       path: '/purchase'
@@ -1315,6 +1348,13 @@ declare module '@tanstack/react-router' {
       path: '/trial-balance'
       fullPath: '/trial-balance'
       preLoaderRoute: typeof AuthenticatedTrialBalanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/units-of-measure': {
+      id: '/_authenticated/units-of-measure'
+      path: '/units-of-measure'
+      fullPath: '/units-of-measure'
+      preLoaderRoute: typeof AuthenticatedUnitsOfMeasureRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/users': {
@@ -1496,6 +1536,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPharmacyRoute: typeof AuthenticatedPharmacyRoute
   AuthenticatedPhysicianRoute: typeof AuthenticatedPhysicianRoute
+  AuthenticatedProductManagementRoute: typeof AuthenticatedProductManagementRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
   AuthenticatedRadiologyRoute: typeof AuthenticatedRadiologyRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
@@ -1505,6 +1546,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedTaxesRoute: typeof AuthenticatedTaxesRoute
   AuthenticatedTrialBalanceRoute: typeof AuthenticatedTrialBalanceRoute
+  AuthenticatedUnitsOfMeasureRoute: typeof AuthenticatedUnitsOfMeasureRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedVendorsRoute: typeof AuthenticatedVendorsRoute
   AuthenticatedWaitingScreenRoute: typeof AuthenticatedWaitingScreenRoute
@@ -1570,6 +1612,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPharmacyRoute: AuthenticatedPharmacyRoute,
   AuthenticatedPhysicianRoute: AuthenticatedPhysicianRoute,
+  AuthenticatedProductManagementRoute: AuthenticatedProductManagementRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
   AuthenticatedRadiologyRoute: AuthenticatedRadiologyRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
@@ -1579,6 +1622,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedTaxesRoute: AuthenticatedTaxesRoute,
   AuthenticatedTrialBalanceRoute: AuthenticatedTrialBalanceRoute,
+  AuthenticatedUnitsOfMeasureRoute: AuthenticatedUnitsOfMeasureRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedVendorsRoute: AuthenticatedVendorsRoute,
   AuthenticatedWaitingScreenRoute: AuthenticatedWaitingScreenRoute,
