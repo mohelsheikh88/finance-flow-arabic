@@ -352,7 +352,7 @@ function Page() {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-4xl max-h-[88vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{form.id ? t("common.edit") : t("purchase.newOrder")} — {t("nav.purchaseOrders")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
