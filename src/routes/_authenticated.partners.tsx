@@ -186,7 +186,7 @@ function PartnersPage() {
               <th className="text-start p-3 font-medium">{t("common.code")}</th>
               <th className="text-start p-3 font-medium">{t("common.name")}</th>
               <th className="text-start p-3 font-medium">{t("partners.partnerType")}</th>
-              <th className="text-start p-3 font-medium">{t("customers.customerType")}</th>
+              <th className="text-start p-3 font-medium">{t("partners.partnerCategoryType")}</th>
               <th className="text-start p-3 font-medium">{t("partners.country")}</th>
               <th className="text-start p-3 font-medium font-mono">{t("partners.vatNumber")}</th>
               <th className="text-center p-3 font-medium">{t("common.actions")}</th>
@@ -227,7 +227,7 @@ function PartnersPage() {
             <div><Label>{t("common.code")}</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
             <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
             <div>
-              <Label>{t("customers.customerType")}</Label>
+              <Label>{t("partners.partnerCategoryType")}</Label>
               <Select value={form.customer_type_id ?? "__none__"} onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}>
                 <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
