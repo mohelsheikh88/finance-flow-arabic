@@ -209,7 +209,10 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
             <div>
               <p className="text-xs font-semibold text-muted-foreground mb-2">{t("purchase.generalInfo")}</p>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>{t("common.code")}</Label><Input value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} dir="ltr" /></div>
+                <div><Label>{t("purchase.internalCode")}</Label><Input value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} dir="ltr" /></div>
+                <div><Label>{t("purchase.regulatoryNumber")}</Label><Input value={form.regulatory_number} onChange={(e) => setForm((f) => ({ ...f, regulatory_number: e.target.value }))} dir="ltr" /></div>
+                <div><Label>{t("common.name")} (AR)</Label><Input value={form.name_ar} onChange={(e) => setForm((f) => ({ ...f, name_ar: e.target.value }))} dir="rtl" /></div>
+                <div><Label>{t("common.name")} (EN)</Label><Input value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" /></div>
                 <div>
                   <Label>{t("purchase.productType")}</Label>
                   <Select value={form.product_type} onValueChange={(v: any) => setForm((f) => ({ ...f, product_type: v }))}>
@@ -221,8 +224,6 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label>{t("common.name")} (AR)</Label><Input value={form.name_ar} onChange={(e) => setForm((f) => ({ ...f, name_ar: e.target.value }))} dir="rtl" /></div>
-                <div><Label>{t("common.name")} (EN)</Label><Input value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" /></div>
                 <div>
                   <Label>{t("purchase.category")}</Label>
                   <Select value={form.category_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, category_id: v === "__none__" ? null : v }))}>
@@ -290,7 +291,6 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                   <Switch checked={form.requires_prescription} onCheckedChange={(v) => setForm((f) => ({ ...f, requires_prescription: v }))} />
                   {t("purchase.prescription")}
                 </label>
-                <div><Label>{t("purchase.regulatoryNumber")}</Label><Input value={form.regulatory_number} onChange={(e) => setForm((f) => ({ ...f, regulatory_number: e.target.value }))} dir="ltr" /></div>
               </div>
             </div>
 
