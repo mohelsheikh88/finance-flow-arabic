@@ -459,16 +459,20 @@ function PartnerTypesTab() {
   const apAccounts = (accounts as any[]).filter((a) => a.is_active && !a.is_group && a.is_payable);
 
   return (
-    <div className="space-y-8">
-      <section className="space-y-3">
+    <Tabs defaultValue="customer">
+      <TabsList>
+        <TabsTrigger value="customer">{t("customers.customerType")}</TabsTrigger>
+        <TabsTrigger value="vendor">{t("partners.vendorGroup")}</TabsTrigger>
+      </TabsList>
+      <TabsContent value="customer" className="mt-4 space-y-3">
         <h2 className="text-sm font-semibold">{t("customers.manageTypes")}</h2>
         <CustomerTypesPanel arAccounts={arAccounts} companyId={companyId!} />
-      </section>
-      <section className="space-y-3">
+      </TabsContent>
+      <TabsContent value="vendor" className="mt-4 space-y-3">
         <h2 className="text-sm font-semibold">{t("partners.manageVendorGroups")}</h2>
         <VendorTypesPanel apAccounts={apAccounts} companyId={companyId!} />
-      </section>
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }
 
