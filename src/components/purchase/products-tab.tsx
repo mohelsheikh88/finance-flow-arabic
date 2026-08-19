@@ -27,8 +27,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Plus, Pencil, Trash2, ShieldAlert, Snowflake, Boxes, Barcode, FileDown, FileUp,
+  ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
@@ -97,6 +99,28 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
     );
   }, [products, mode]);
 
+  // ===== Pagination =====
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil((visibleProducts as any[]).length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedProducts = useMemo(
+    () => (visibleProducts as any[]).slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [visibleProducts, currentPage],
+  );
+
+  // ===== Row selection (select all spans every page, not just the current one) =====
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const allIds = (visibleProducts as any[]).map((p) => p.id);
+  const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
+  const someSelected = selectedIds.size > 0 && !allSelected;
+  const toggleSelectAll = () => setSelectedIds(allSelected ? new Set() : new Set(allIds));
+  const toggleSelectOne = (id: string) => setSelectedIds((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
   const empty = {
     id: undefined as string | undefined, code: "", name_ar: "", name_en: "",
     category_id: null as string | null, product_type_id: null as string | null,
@@ -164,7 +188,8 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
   const accountByCode = new Map((accounts as any[]).map((a: any) => [String(a.code).toLowerCase(), a]));
 
   const handleExport = () => {
-    const data = (products as any[]).map((p) => {
+    const source = selectedIds.size > 0 ? (products as any[]).filter((p) => selectedIds.has(p.id)) : (products as any[]);
+    const data = source.map((p) => {
       const pt = (productTypes as any[]).find((x) => x.id === p.product_type_id);
       return {
         id: p.id,
@@ -291,14 +316,26 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
     <div className="space-y-3">
       <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileSelected} />
       {mode === "all" && (
-        <div className="flex justify-end gap-2">
-          <Button size="sm" variant="outline" onClick={handleExport} disabled={!companyId}>
-            <FileDown className="h-4 w-4 me-1" />{t("common.export") || "Export"}
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleUploadClick} disabled={!companyId || importing}>
-            <FileUp className="h-4 w-4 me-1" />{importing ? "…" : (t("common.import") || "Import")}
-          </Button>
-          <Button size="sm" onClick={openNew} disabled={!companyId}><Plus className="h-4 w-4 me-1" />{t("purchase.newProduct")}</Button>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {selectedIds.size > 0
+              ? `${selectedIds.size} ${t("common.selected") || "selected"}`
+              : `${(visibleProducts as any[]).length} ${t("purchase.products")}`}
+            {selectedIds.size > 0 && (
+              <Button variant="link" size="sm" className="h-auto p-0 ms-2" onClick={() => setSelectedIds(new Set())}>
+                {t("common.clearSelection") || "Clear"}
+              </Button>
+            )}
+          </p>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={handleExport} disabled={!companyId}>
+              <FileDown className="h-4 w-4 me-1" />{t("common.export")}{selectedIds.size > 0 ? ` (${selectedIds.size})` : ""}
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleUploadClick} disabled={!companyId || importing}>
+              <FileUp className="h-4 w-4 me-1" />{importing ? "…" : t("common.import")}
+            </Button>
+            <Button size="sm" onClick={openNew} disabled={!companyId}><Plus className="h-4 w-4 me-1" />{t("purchase.newProduct")}</Button>
+          </div>
         </div>
       )}
 
@@ -310,6 +347,15 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
         <table className="w-full text-sm">
           <thead className="bg-muted/40">
             <tr className="text-start">
+              {mode === "all" && (
+                <th className="p-2.5 w-10 text-center">
+                  <Checkbox
+                    checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                    onCheckedChange={toggleSelectAll}
+                    aria-label={t("common.selectAll") || "Select all"}
+                  />
+                </th>
+              )}
               <th className="p-2.5 text-start">{t("common.code")}</th>
               <th className="p-2.5 text-start">{t("common.name")}</th>
               <th className="p-2.5 text-start">{t("purchase.category")}</th>
@@ -328,12 +374,17 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={8} className="p-6 text-center text-muted-foreground">{t("common.loading")}</td></tr>
-            ) : visibleProducts.length === 0 ? (
-              <tr><td colSpan={8} className="p-6 text-center text-muted-foreground">{t("common.noData")}</td></tr>
+              <tr><td colSpan={9} className="p-6 text-center text-muted-foreground">{t("common.loading")}</td></tr>
+            ) : pagedProducts.length === 0 ? (
+              <tr><td colSpan={9} className="p-6 text-center text-muted-foreground">{t("common.noData")}</td></tr>
             ) : (
-              (visibleProducts as any[]).map((p) => (
+              (pagedProducts as any[]).map((p) => (
                 <tr key={p.id} className="border-t hover:bg-muted/20">
+                  {mode === "all" && (
+                    <td className="p-2.5 text-center">
+                      <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelectOne(p.id)} aria-label={t("common.select") || "Select"} />
+                    </td>
+                  )}
                   <td className="p-2.5 font-mono text-xs">{p.code}</td>
                   <td className="p-2.5">{localized(p, "name")}</td>
                   <td className="p-2.5 text-muted-foreground">{catName(p.category_id)}</td>
@@ -370,6 +421,31 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
           </tbody>
         </table>
       </Card>
+
+      {(visibleProducts as any[]).length > 0 && (
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <p className="text-xs text-muted-foreground">
+            {t("common.showing") || "Showing"} {(currentPage - 1) * PAGE_SIZE + 1}
+            {"–"}{Math.min(currentPage * PAGE_SIZE, (visibleProducts as any[]).length)}
+            {" "}{t("common.of") || "of"} {(visibleProducts as any[]).length}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setPage(1)} disabled={currentPage === 1}>
+              <ChevronsLeft className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+            <span className="text-xs px-2 font-medium">{currentPage} / {totalPages}</span>
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setPage(totalPages)} disabled={currentPage === totalPages}>
+              <ChevronsRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
