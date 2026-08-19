@@ -28,8 +28,6 @@ import {
   BarChart3,
   SlidersHorizontal,
   LayoutGrid,
-  ArrowLeft,
-  ArrowRight,
   LogOut,
 } from "lucide-react";
 import {
@@ -73,9 +71,6 @@ export function AppSidebar() {
   const scopeLabel = activeGroup?.label;
   const scopeItems = activeGroup?.items;
   const scopeSubgroups = activeGroup?.subgroups;
-  const backUrl = "/apps";
-  const backLabel = t("nav.allApps");
-  const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
 
 
 
@@ -91,11 +86,14 @@ export function AppSidebar() {
                   <LayoutGrid className="h-5 w-5 shrink-0" />
                 </Link>
               </SidebarMenuButton>
-              <SidebarMenuButton asChild tooltip={backLabel} className="mx-auto">
-                <Link to={backUrl} viewTransition className="flex items-center justify-center">
-                  <BackIcon className="h-5 w-5 shrink-0" />
-                </Link>
-              </SidebarMenuButton>
+              {ScopeIcon && (
+                <div
+                  className="flex items-center justify-center h-8 w-8 mx-auto rounded-lg text-sidebar-foreground/70"
+                  title={scopeLabel}
+                >
+                  <ScopeIcon className="h-5 w-5 shrink-0" />
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-stretch gap-2 w-full">
@@ -111,17 +109,14 @@ export function AppSidebar() {
                 <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.homeScreen")}</span>
               </Link>
 
-              <Link
-                to={backUrl}
-                viewTransition
-                className="flex-1 flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5
-                           bg-white/[0.04] border border-white/[0.08]
-                           text-sidebar-foreground/75 hover:bg-white/[0.08] hover:text-sidebar-foreground hover:border-white/[0.14]
-                           transition-colors"
+              {/* Current module indicator — where you are, not a navigation control */}
+              <div
+                className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-2.5
+                           bg-white/[0.04] border border-white/[0.08] text-sidebar-foreground/75"
               >
-                <BackIcon className="h-6 w-6" />
-                <span className="text-[11.5px] font-bold tracking-tight leading-none truncate max-w-full px-1">{backLabel}</span>
-              </Link>
+                {ScopeIcon && <ScopeIcon className="h-6 w-6" />}
+                <span className="text-[11.5px] font-bold tracking-tight leading-none truncate max-w-full px-1">{scopeLabel}</span>
+              </div>
             </div>
           )}
         </div>
