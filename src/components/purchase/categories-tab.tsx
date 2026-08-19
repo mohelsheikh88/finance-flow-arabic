@@ -65,13 +65,14 @@ export function CategoriesTab() {
     id: undefined as string | undefined, parent_id: null as string | null, code: "", name_ar: "", name_en: "",
     is_group: false, is_active: true, notes: "",
     stock_input_account_id: null as string | null, stock_output_account_id: null as string | null,
+    costing_method: "fifo" as "standard" | "fifo" | "avco",
   };
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const openNew = (parentId?: string | null) => { setForm({ ...empty, parent_id: parentId ?? null }); setOpen(true); };
-  const openEdit = (row: any) => { setForm({ id: row.id, parent_id: row.parent_id, code: row.code, name_ar: row.name_ar, name_en: row.name_en, is_group: row.is_group, is_active: row.is_active, notes: row.notes ?? "", stock_input_account_id: row.stock_input_account_id ?? null, stock_output_account_id: row.stock_output_account_id ?? null }); setOpen(true); };
+  const openEdit = (row: any) => { setForm({ id: row.id, parent_id: row.parent_id, code: row.code, name_ar: row.name_ar, name_en: row.name_en, is_group: row.is_group, is_active: row.is_active, notes: row.notes ?? "", stock_input_account_id: row.stock_input_account_id ?? null, stock_output_account_id: row.stock_output_account_id ?? null, costing_method: row.costing_method ?? "fifo" }); setOpen(true); };
 
   const saveMut = useMutation({
     mutationFn: () => upsertFn({ data: { ...form, company_id: companyId!, notes: form.notes || null } }),
@@ -134,6 +135,17 @@ export function CategoriesTab() {
               <div><Label>{t("common.name")} (EN)</Label><Input value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" /></div>
             </div>
             <div><Label>{t("common.notes")}</Label><Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} rows={2} /></div>
+            <div>
+              <Label>{t("purchase.costingMethod")}</Label>
+              <Select value={form.costing_method} onValueChange={(v: any) => setForm((f) => ({ ...f, costing_method: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">{t("purchase.costingStandard")}</SelectItem>
+                  <SelectItem value="fifo">{t("purchase.costingFifo")}</SelectItem>
+                  <SelectItem value="avco">{t("purchase.costingAvco")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("purchase.stockInputAccount")}</Label>

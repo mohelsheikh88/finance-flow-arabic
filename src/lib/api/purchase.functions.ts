@@ -31,6 +31,7 @@ const PurchaseCategorySchema = z.object({
   notes: z.string().max(2000).nullable().optional(),
   stock_input_account_id: z.string().uuid().nullable().optional(),
   stock_output_account_id: z.string().uuid().nullable().optional(),
+  costing_method: z.enum(["standard", "fifo", "avco"]).default("fifo"),
 });
 
 export const upsertPurchaseCategory = createServerFn({ method: "POST" })

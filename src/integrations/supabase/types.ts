@@ -2575,6 +2575,7 @@ export type Database = {
           notes: string | null
           stock_input_account_id: string | null
           stock_output_account_id: string | null
+          costing_method: string
           created_at: string
           updated_at: string
         }
@@ -2591,6 +2592,7 @@ export type Database = {
           notes?: string | null
           stock_input_account_id?: string | null
           stock_output_account_id?: string | null
+          costing_method?: string
           created_at?: string
           updated_at?: string
         }
@@ -2607,6 +2609,7 @@ export type Database = {
           notes?: string | null
           stock_input_account_id?: string | null
           stock_output_account_id?: string | null
+          costing_method?: string
           created_at?: string
           updated_at?: string
         }
