@@ -208,12 +208,16 @@ export function useNavGroups(): NavGroup[] {
       hue: 25, // orange — procurement
       subgroups: [
         {
-          key: "purchaseDashboard",
-          label: t("nav.purchaseDashboard"),
-          icon: LayoutDashboard,
+          key: "purchaseReports",
+          label: t("nav.purchaseReports"),
+          icon: BarChart3,
           hue: 25,
           items: [
             { url: "/dashboards/purchase", icon: LayoutDashboard, title: t("nav.purchaseDashboard") },
+            { url: "/reports/purchase-orders", icon: FileText, title: t("purchase.reportOrders") },
+            { url: "/reports/purchase-vendor-spend", icon: Users, title: t("purchase.reportVendorSpend") },
+            { url: "/reports/purchase-products", icon: Tags, title: t("purchase.reportProductSpend") },
+            { url: "/reports/purchase-category-spend", icon: BarChart3, title: t("purchase.reportCategorySpend") },
           ],
         },
         {

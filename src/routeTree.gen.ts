@@ -85,6 +85,10 @@ import { Route as AuthenticatedReportsBalanceSheetRouteImport } from './routes/_
 import { Route as AuthenticatedReportsCashFlowRouteImport } from './routes/_authenticated.reports.cash-flow'
 import { Route as AuthenticatedReportsExecutiveSummaryRouteImport } from './routes/_authenticated.reports.executive-summary'
 import { Route as AuthenticatedReportsIncomeStatementRouteImport } from './routes/_authenticated.reports.income-statement'
+import { Route as AuthenticatedReportsPurchaseCategorySpendRouteImport } from './routes/_authenticated.reports.purchase-category-spend'
+import { Route as AuthenticatedReportsPurchaseOrdersRouteImport } from './routes/_authenticated.reports.purchase-orders'
+import { Route as AuthenticatedReportsPurchaseProductsRouteImport } from './routes/_authenticated.reports.purchase-products'
+import { Route as AuthenticatedReportsPurchaseVendorSpendRouteImport } from './routes/_authenticated.reports.purchase-vendor-spend'
 import { Route as AuthenticatedReportsVatRouteImport } from './routes/_authenticated.reports.vat'
 import { Route as ApiPublicHooksPostDepreciationRouteImport } from './routes/api/public/hooks/post-depreciation'
 
@@ -504,6 +508,30 @@ const AuthenticatedReportsIncomeStatementRoute =
     path: '/reports/income-statement',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedReportsPurchaseCategorySpendRoute =
+  AuthenticatedReportsPurchaseCategorySpendRouteImport.update({
+    id: '/reports/purchase-category-spend',
+    path: '/reports/purchase-category-spend',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsPurchaseOrdersRoute =
+  AuthenticatedReportsPurchaseOrdersRouteImport.update({
+    id: '/reports/purchase-orders',
+    path: '/reports/purchase-orders',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsPurchaseProductsRoute =
+  AuthenticatedReportsPurchaseProductsRouteImport.update({
+    id: '/reports/purchase-products',
+    path: '/reports/purchase-products',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsPurchaseVendorSpendRoute =
+  AuthenticatedReportsPurchaseVendorSpendRouteImport.update({
+    id: '/reports/purchase-vendor-spend',
+    path: '/reports/purchase-vendor-spend',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedReportsVatRoute = AuthenticatedReportsVatRouteImport.update({
   id: '/reports/vat',
   path: '/reports/vat',
@@ -591,6 +619,10 @@ export interface FileRoutesByFullPath {
   '/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
   '/reports/executive-summary': typeof AuthenticatedReportsExecutiveSummaryRoute
   '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/reports/purchase-category-spend': typeof AuthenticatedReportsPurchaseCategorySpendRoute
+  '/reports/purchase-orders': typeof AuthenticatedReportsPurchaseOrdersRoute
+  '/reports/purchase-products': typeof AuthenticatedReportsPurchaseProductsRoute
+  '/reports/purchase-vendor-spend': typeof AuthenticatedReportsPurchaseVendorSpendRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
   '/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
   '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
@@ -670,6 +702,10 @@ export interface FileRoutesByTo {
   '/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
   '/reports/executive-summary': typeof AuthenticatedReportsExecutiveSummaryRoute
   '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/reports/purchase-category-spend': typeof AuthenticatedReportsPurchaseCategorySpendRoute
+  '/reports/purchase-orders': typeof AuthenticatedReportsPurchaseOrdersRoute
+  '/reports/purchase-products': typeof AuthenticatedReportsPurchaseProductsRoute
+  '/reports/purchase-vendor-spend': typeof AuthenticatedReportsPurchaseVendorSpendRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
   '/journal-entries': typeof AuthenticatedJournalEntriesIndexRoute
   '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
@@ -751,6 +787,10 @@ export interface FileRoutesById {
   '/_authenticated/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
   '/_authenticated/reports/executive-summary': typeof AuthenticatedReportsExecutiveSummaryRoute
   '/_authenticated/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/_authenticated/reports/purchase-category-spend': typeof AuthenticatedReportsPurchaseCategorySpendRoute
+  '/_authenticated/reports/purchase-orders': typeof AuthenticatedReportsPurchaseOrdersRoute
+  '/_authenticated/reports/purchase-products': typeof AuthenticatedReportsPurchaseProductsRoute
+  '/_authenticated/reports/purchase-vendor-spend': typeof AuthenticatedReportsPurchaseVendorSpendRoute
   '/_authenticated/reports/vat': typeof AuthenticatedReportsVatRoute
   '/_authenticated/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
   '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
@@ -832,6 +872,10 @@ export interface FileRouteTypes {
     | '/reports/cash-flow'
     | '/reports/executive-summary'
     | '/reports/income-statement'
+    | '/reports/purchase-category-spend'
+    | '/reports/purchase-orders'
+    | '/reports/purchase-products'
+    | '/reports/purchase-vendor-spend'
     | '/reports/vat'
     | '/journal-entries/'
     | '/api/public/hooks/post-depreciation'
@@ -911,6 +955,10 @@ export interface FileRouteTypes {
     | '/reports/cash-flow'
     | '/reports/executive-summary'
     | '/reports/income-statement'
+    | '/reports/purchase-category-spend'
+    | '/reports/purchase-orders'
+    | '/reports/purchase-products'
+    | '/reports/purchase-vendor-spend'
     | '/reports/vat'
     | '/journal-entries'
     | '/api/public/hooks/post-depreciation'
@@ -991,6 +1039,10 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/cash-flow'
     | '/_authenticated/reports/executive-summary'
     | '/_authenticated/reports/income-statement'
+    | '/_authenticated/reports/purchase-category-spend'
+    | '/_authenticated/reports/purchase-orders'
+    | '/_authenticated/reports/purchase-products'
+    | '/_authenticated/reports/purchase-vendor-spend'
     | '/_authenticated/reports/vat'
     | '/_authenticated/journal-entries/'
     | '/api/public/hooks/post-depreciation'
@@ -1537,6 +1589,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsIncomeStatementRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/reports/purchase-category-spend': {
+      id: '/_authenticated/reports/purchase-category-spend'
+      path: '/reports/purchase-category-spend'
+      fullPath: '/reports/purchase-category-spend'
+      preLoaderRoute: typeof AuthenticatedReportsPurchaseCategorySpendRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/purchase-orders': {
+      id: '/_authenticated/reports/purchase-orders'
+      path: '/reports/purchase-orders'
+      fullPath: '/reports/purchase-orders'
+      preLoaderRoute: typeof AuthenticatedReportsPurchaseOrdersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/purchase-products': {
+      id: '/_authenticated/reports/purchase-products'
+      path: '/reports/purchase-products'
+      fullPath: '/reports/purchase-products'
+      preLoaderRoute: typeof AuthenticatedReportsPurchaseProductsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/purchase-vendor-spend': {
+      id: '/_authenticated/reports/purchase-vendor-spend'
+      path: '/reports/purchase-vendor-spend'
+      fullPath: '/reports/purchase-vendor-spend'
+      preLoaderRoute: typeof AuthenticatedReportsPurchaseVendorSpendRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/reports/vat': {
       id: '/_authenticated/reports/vat'
       path: '/reports/vat'
@@ -1627,6 +1707,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReportsCashFlowRoute: typeof AuthenticatedReportsCashFlowRoute
   AuthenticatedReportsExecutiveSummaryRoute: typeof AuthenticatedReportsExecutiveSummaryRoute
   AuthenticatedReportsIncomeStatementRoute: typeof AuthenticatedReportsIncomeStatementRoute
+  AuthenticatedReportsPurchaseCategorySpendRoute: typeof AuthenticatedReportsPurchaseCategorySpendRoute
+  AuthenticatedReportsPurchaseOrdersRoute: typeof AuthenticatedReportsPurchaseOrdersRoute
+  AuthenticatedReportsPurchaseProductsRoute: typeof AuthenticatedReportsPurchaseProductsRoute
+  AuthenticatedReportsPurchaseVendorSpendRoute: typeof AuthenticatedReportsPurchaseVendorSpendRoute
   AuthenticatedReportsVatRoute: typeof AuthenticatedReportsVatRoute
   AuthenticatedJournalEntriesIndexRoute: typeof AuthenticatedJournalEntriesIndexRoute
 }
@@ -1709,6 +1793,14 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedReportsExecutiveSummaryRoute,
   AuthenticatedReportsIncomeStatementRoute:
     AuthenticatedReportsIncomeStatementRoute,
+  AuthenticatedReportsPurchaseCategorySpendRoute:
+    AuthenticatedReportsPurchaseCategorySpendRoute,
+  AuthenticatedReportsPurchaseOrdersRoute:
+    AuthenticatedReportsPurchaseOrdersRoute,
+  AuthenticatedReportsPurchaseProductsRoute:
+    AuthenticatedReportsPurchaseProductsRoute,
+  AuthenticatedReportsPurchaseVendorSpendRoute:
+    AuthenticatedReportsPurchaseVendorSpendRoute,
   AuthenticatedReportsVatRoute: AuthenticatedReportsVatRoute,
   AuthenticatedJournalEntriesIndexRoute: AuthenticatedJournalEntriesIndexRoute,
 }

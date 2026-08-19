@@ -526,6 +526,196 @@ export const deletePurchaseOrder = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ================= Purchase Reports =================
+
+export const getPurchaseOrderReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; dateFrom?: string | null; dateTo?: string | null; vendorId?: string | null; status?: string | null }) =>
+    z.object({
+      companyId: z.string().uuid(),
+      dateFrom: z.string().nullable().optional(),
+      dateTo: z.string().nullable().optional(),
+      vendorId: z.string().uuid().nullable().optional(),
+      status: z.string().nullable().optional(),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    let q = sb.from("purchase_orders").select("*").eq("company_id", data.companyId);
+    if (data.dateFrom) q = q.gte("order_date", data.dateFrom);
+    if (data.dateTo) q = q.lte("order_date", data.dateTo);
+    if (data.vendorId) q = q.eq("vendor_id", data.vendorId);
+    if (data.status) q = q.eq("status", data.status);
+    const { data: orders, error } = await q.order("order_date", { ascending: false });
+    if (error) throw new Error(error.message);
+
+    const vendorIds = [...new Set((orders ?? []).map((o: any) => o.vendor_id))];
+    const { data: vendors } = vendorIds.length
+      ? await sb.from("partners").select("id, code, name_ar, name_en").in("id", vendorIds)
+      : { data: [] as any[] };
+    const vendorById = new Map<string, any>((vendors ?? []).map((v: any) => [v.id, v]));
+
+    const rows = (orders ?? []).map((o: any) => ({
+      ...o,
+      vendor_code: vendorById.get(o.vendor_id)?.code ?? "",
+      vendor_name_ar: vendorById.get(o.vendor_id)?.name_ar ?? "—",
+      vendor_name_en: vendorById.get(o.vendor_id)?.name_en ?? "—",
+    }));
+    const totals = rows.reduce((acc: any, o: any) => {
+      acc.subtotal += Number(o.subtotal || 0);
+      acc.tax += Number(o.tax_total || 0);
+      acc.total += Number(o.total || 0);
+      return acc;
+    }, { subtotal: 0, tax: 0, total: 0 });
+
+    return { rows, totals, count: rows.length };
+  });
+
+export const getVendorSpendReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; dateFrom?: string | null; dateTo?: string | null }) =>
+    z.object({ companyId: z.string().uuid(), dateFrom: z.string().nullable().optional(), dateTo: z.string().nullable().optional() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    let q = sb.from("purchase_orders").select("vendor_id, order_date, status, total").eq("company_id", data.companyId);
+    if (data.dateFrom) q = q.gte("order_date", data.dateFrom);
+    if (data.dateTo) q = q.lte("order_date", data.dateTo);
+    const { data: orders, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const vendorIds = [...new Set((orders ?? []).map((o: any) => o.vendor_id))];
+    const { data: vendors } = vendorIds.length
+      ? await sb.from("partners").select("id, code, name_ar, name_en, vendor_group_id").in("id", vendorIds)
+      : { data: [] as any[] };
+    const vendorById = new Map<string, any>((vendors ?? []).map((v: any) => [v.id, v]));
+
+    const agg = new Map<string, { count: number; total: number; cancelled: number; first: string; last: string }>();
+    for (const o of orders ?? []) {
+      const e = agg.get(o.vendor_id) ?? { count: 0, total: 0, cancelled: 0, first: o.order_date, last: o.order_date };
+      e.count += 1;
+      if (o.status !== "cancelled") e.total += Number(o.total || 0);
+      if (o.status === "cancelled") e.cancelled += 1;
+      if (o.order_date < e.first) e.first = o.order_date;
+      if (o.order_date > e.last) e.last = o.order_date;
+      agg.set(o.vendor_id, e);
+    }
+    const rows = [...agg.entries()].map(([vendorId, e]) => {
+      const v = vendorById.get(vendorId);
+      return {
+        vendor_id: vendorId, vendor_code: v?.code ?? "", vendor_name_ar: v?.name_ar ?? "—", vendor_name_en: v?.name_en ?? "—",
+        order_count: e.count, cancelled_count: e.cancelled, total_spend: Math.round(e.total * 100) / 100,
+        avg_order: Math.round((e.total / Math.max(1, e.count - e.cancelled)) * 100) / 100,
+        first_order: e.first, last_order: e.last,
+      };
+    }).sort((a, b) => b.total_spend - a.total_spend);
+
+    return rows;
+  });
+
+export const getProductSpendReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; dateFrom?: string | null; dateTo?: string | null }) =>
+    z.object({ companyId: z.string().uuid(), dateFrom: z.string().nullable().optional(), dateTo: z.string().nullable().optional() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    let orderQ = sb.from("purchase_orders").select("id, order_date").eq("company_id", data.companyId);
+    if (data.dateFrom) orderQ = orderQ.gte("order_date", data.dateFrom);
+    if (data.dateTo) orderQ = orderQ.lte("order_date", data.dateTo);
+    const { data: orders, error: oErr } = await orderQ;
+    if (oErr) throw new Error(oErr.message);
+    const orderDateById = new Map<string, string>((orders ?? []).map((o: any) => [o.id, o.order_date]));
+    const orderIds = (orders ?? []).map((o: any) => o.id);
+    if (!orderIds.length) return [];
+
+    const { data: lines, error: lErr } = await sb
+      .from("purchase_order_lines")
+      .select("purchase_order_id, product_id, quantity, unit_price, line_total")
+      .in("purchase_order_id", orderIds);
+    if (lErr) throw new Error(lErr.message);
+
+    const productIds = [...new Set((lines ?? []).map((l: any) => l.product_id).filter(Boolean))];
+    const { data: products } = productIds.length
+      ? await sb.from("products").select("id, code, name_ar, name_en, category_id").in("id", productIds)
+      : { data: [] as any[] };
+    const productById = new Map<string, any>((products ?? []).map((p: any) => [p.id, p]));
+
+    const agg = new Map<string, { qty: number; spend: number; orders: Set<string>; last: string }>();
+    for (const l of lines ?? []) {
+      if (!l.product_id) continue;
+      const e = agg.get(l.product_id) ?? { qty: 0, spend: 0, orders: new Set<string>(), last: orderDateById.get(l.purchase_order_id) ?? "" };
+      e.qty += Number(l.quantity || 0);
+      e.spend += Number(l.line_total || 0);
+      e.orders.add(l.purchase_order_id);
+      const d = orderDateById.get(l.purchase_order_id) ?? "";
+      if (d > e.last) e.last = d;
+      agg.set(l.product_id, e);
+    }
+
+    return [...agg.entries()].map(([productId, e]) => {
+      const p = productById.get(productId);
+      return {
+        product_id: productId, code: p?.code ?? "", name_ar: p?.name_ar ?? "—", name_en: p?.name_en ?? "—",
+        total_qty: Math.round(e.qty * 100) / 100, total_spend: Math.round(e.spend * 100) / 100,
+        avg_unit_price: Math.round((e.spend / Math.max(0.0001, e.qty)) * 100) / 100,
+        order_count: e.orders.size, last_purchase: e.last,
+      };
+    }).sort((a, b) => b.total_spend - a.total_spend);
+  });
+
+export const getCategorySpendReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string; dateFrom?: string | null; dateTo?: string | null }) =>
+    z.object({ companyId: z.string().uuid(), dateFrom: z.string().nullable().optional(), dateTo: z.string().nullable().optional() }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    let orderQ = sb.from("purchase_orders").select("id, order_date").eq("company_id", data.companyId);
+    if (data.dateFrom) orderQ = orderQ.gte("order_date", data.dateFrom);
+    if (data.dateTo) orderQ = orderQ.lte("order_date", data.dateTo);
+    const { data: orders, error: oErr } = await orderQ;
+    if (oErr) throw new Error(oErr.message);
+    const orderIds = (orders ?? []).map((o: any) => o.id);
+    if (!orderIds.length) return [];
+
+    const { data: lines, error: lErr } = await sb
+      .from("purchase_order_lines")
+      .select("purchase_order_id, product_id, line_total")
+      .in("purchase_order_id", orderIds);
+    if (lErr) throw new Error(lErr.message);
+
+    const productIds = [...new Set((lines ?? []).map((l: any) => l.product_id).filter(Boolean))];
+    const { data: products } = productIds.length
+      ? await sb.from("products").select("id, category_id").in("id", productIds)
+      : { data: [] as any[] };
+    const catByProduct = new Map<string, string | null>((products ?? []).map((p: any) => [p.id, p.category_id]));
+
+    const { data: categories } = await sb.from("purchase_categories").select("id, name_ar, name_en").eq("company_id", data.companyId);
+    const catById = new Map<string, any>((categories ?? []).map((c: any) => [c.id, c]));
+
+    const agg = new Map<string, { spend: number; lineCount: number; products: Set<string> }>();
+    let grandTotal = 0;
+    for (const l of lines ?? []) {
+      const catId = catByProduct.get(l.product_id) ?? "__none__";
+      const e = agg.get(catId) ?? { spend: 0, lineCount: 0, products: new Set<string>() };
+      e.spend += Number(l.line_total || 0);
+      e.lineCount += 1;
+      if (l.product_id) e.products.add(l.product_id);
+      agg.set(catId, e);
+      grandTotal += Number(l.line_total || 0);
+    }
+
+    return [...agg.entries()].map(([catId, e]) => {
+      const c = catById.get(catId);
+      return {
+        category_id: catId, name_ar: c?.name_ar ?? "بدون تصنيف", name_en: c?.name_en ?? "Uncategorized",
+        total_spend: Math.round(e.spend * 100) / 100, product_count: e.products.size, line_count: e.lineCount,
+        pct: grandTotal ? Math.round((e.spend / grandTotal) * 1000) / 10 : 0,
+      };
+    }).sort((a, b) => b.total_spend - a.total_spend);
+  });
+
 // ================= Purchase Dashboard =================
 
 export const getPurchaseDashboardStats = createServerFn({ method: "GET" })
