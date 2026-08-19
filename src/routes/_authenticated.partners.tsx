@@ -64,7 +64,7 @@ function PartnersPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-2">
         <Users className="h-5 w-5 text-primary" />
-        <h1 className="page-title">{t("partners.title")}</h1>
+        <h1 className="page-title">{t("partners.pageTitle")}</h1>
       </div>
 
       <Tabs defaultValue="list">

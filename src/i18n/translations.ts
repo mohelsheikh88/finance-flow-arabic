@@ -559,6 +559,7 @@ export const translations = {
 
     partners: {
       title: "العملاء والموردين",
+      pageTitle: "إدارة الشركاء",
       isCustomer: "عميل",
       isVendor: "مورد",
       vatNumber: "الرقم الضريبي",
@@ -1529,6 +1530,7 @@ export const translations = {
 
     partners: {
       title: "Partners",
+      pageTitle: "Partners Management",
       isCustomer: "Customer",
       isVendor: "Vendor",
       vatNumber: "VAT Number",
