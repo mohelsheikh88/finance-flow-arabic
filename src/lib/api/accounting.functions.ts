@@ -648,6 +648,12 @@ export const createPartner = createServerFn({ method: "POST" })
     if (!data.is_customer && !data.is_vendor) {
       throw new Error("Partner must be at least a customer or a vendor");
     }
+    if (data.is_customer && !data.customer_type_id) {
+      throw new Error("Customer Type is required for customers");
+    }
+    if (data.is_vendor && !data.vendor_group_id) {
+      throw new Error("Vendor Type is required for vendors");
+    }
     const { data: row, error } = await context.supabase
       .from("partners")
       .insert(data)
@@ -666,6 +672,12 @@ export const updatePartner = createServerFn({ method: "POST" })
   .inputValidator((i) => UpdatePartnerSchema.parse(i))
   .handler(async ({ data, context }) => {
     const { id, ...patch } = data;
+    if (patch.is_customer && !patch.customer_type_id) {
+      throw new Error("Customer Type is required for customers");
+    }
+    if (patch.is_vendor && !patch.vendor_group_id) {
+      throw new Error("Vendor Type is required for vendors");
+    }
     const { data: row, error } = await context.supabase
       .from("partners")
       .update(patch)

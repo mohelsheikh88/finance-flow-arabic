@@ -236,7 +236,12 @@ function PartnersListTab() {
     onError: (e: Error) => { toast.error(e.message); setDeleteId(null); },
   });
 
-  const canSave = form.code && form.name_ar && form.name_en && (form.is_customer || form.is_vendor);
+  const canSave = !!(
+    form.code && form.name_ar && form.name_en &&
+    (form.is_customer || form.is_vendor) &&
+    (!form.is_customer || form.customer_type_id) &&
+    (!form.is_vendor || form.vendor_group_id)
+  );
 
   return (
     <div className="space-y-4">
@@ -274,7 +279,7 @@ function PartnersListTab() {
 
               {form.is_customer && (
                 <div>
-                  <Label>{t("customers.customerType")}</Label>
+                  <Label>{t("customers.customerType")} *</Label>
                   <Select
                     value={form.customer_type_id ?? "__none__"}
                     onValueChange={(v) => {
@@ -305,7 +310,7 @@ function PartnersListTab() {
 
               {form.is_vendor && (
                 <div>
-                  <Label>{t("partners.vendorGroup")}</Label>
+                  <Label>{t("partners.vendorGroup")} *</Label>
                   <Select
                     value={form.vendor_group_id ?? "__none__"}
                     onValueChange={(v) => {
