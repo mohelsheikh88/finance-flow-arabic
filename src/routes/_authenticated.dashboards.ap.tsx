@@ -78,7 +78,7 @@ function ApDashboard() {
         { to: "/invoices/vendor", label: t("ap.bills") },
         { to: "/debit-memos", label: t("ap.debitMemo") },
         { to: "/payments", label: t("ap.payments") },
-        { to: "/vendors", label: t("ap.vendors") },
+        { to: "/partners", label: t("ap.vendors") },
         { to: "/reports/aging", label: t("nav.aging") },
       ]} />
 

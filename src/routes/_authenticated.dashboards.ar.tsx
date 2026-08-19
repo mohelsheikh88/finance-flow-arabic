@@ -80,7 +80,7 @@ function ArDashboard() {
         { to: "/invoices/customer", label: t("ar.invoices") },
         { to: "/credit-memos", label: t("ar.creditMemo") },
         { to: "/receipts", label: t("ar.receipts") },
-        { to: "/customers", label: t("ar.customers") },
+        { to: "/partners", label: t("ar.customers") },
         { to: "/reports/aging", label: t("nav.aging") },
       ]} />
 

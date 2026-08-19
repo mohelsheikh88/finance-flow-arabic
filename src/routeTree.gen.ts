@@ -30,7 +30,6 @@ import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCreditMemosRouteImport } from './routes/_authenticated.credit-memos'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated.crm'
 import { Route as AuthenticatedCurrenciesRouteImport } from './routes/_authenticated.currencies'
-import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated.customers'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedDebitMemosRouteImport } from './routes/_authenticated.debit-memos'
 import { Route as AuthenticatedEmergencyRouteImport } from './routes/_authenticated.emergency'
@@ -69,7 +68,6 @@ import { Route as AuthenticatedTaxesRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedTrialBalanceRouteImport } from './routes/_authenticated.trial-balance'
 import { Route as AuthenticatedUnitsOfMeasureRouteImport } from './routes/_authenticated.units-of-measure'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
-import { Route as AuthenticatedVendorsRouteImport } from './routes/_authenticated.vendors'
 import { Route as AuthenticatedWaitingScreenRouteImport } from './routes/_authenticated.waiting-screen'
 import { Route as AuthenticatedDashboardsApRouteImport } from './routes/_authenticated.dashboards.ap'
 import { Route as AuthenticatedDashboardsArRouteImport } from './routes/_authenticated.dashboards.ar'
@@ -198,11 +196,6 @@ const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
 const AuthenticatedCurrenciesRoute = AuthenticatedCurrenciesRouteImport.update({
   id: '/currencies',
   path: '/currencies',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
-  id: '/customers',
-  path: '/customers',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -407,11 +400,6 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedVendorsRoute = AuthenticatedVendorsRouteImport.update({
-  id: '/vendors',
-  path: '/vendors',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedWaitingScreenRoute =
   AuthenticatedWaitingScreenRouteImport.update({
     id: '/waiting-screen',
@@ -535,7 +523,6 @@ export interface FileRoutesByFullPath {
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
-  '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/emergency': typeof AuthenticatedEmergencyRoute
@@ -574,7 +561,6 @@ export interface FileRoutesByFullPath {
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/units-of-measure': typeof AuthenticatedUnitsOfMeasureRoute
   '/users': typeof AuthenticatedUsersRoute
-  '/vendors': typeof AuthenticatedVendorsRoute
   '/waiting-screen': typeof AuthenticatedWaitingScreenRoute
   '/dashboards/ap': typeof AuthenticatedDashboardsApRoute
   '/dashboards/ar': typeof AuthenticatedDashboardsArRoute
@@ -614,7 +600,6 @@ export interface FileRoutesByTo {
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/crm': typeof AuthenticatedCrmRoute
   '/currencies': typeof AuthenticatedCurrenciesRoute
-  '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/emergency': typeof AuthenticatedEmergencyRoute
@@ -653,7 +638,6 @@ export interface FileRoutesByTo {
   '/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/units-of-measure': typeof AuthenticatedUnitsOfMeasureRoute
   '/users': typeof AuthenticatedUsersRoute
-  '/vendors': typeof AuthenticatedVendorsRoute
   '/waiting-screen': typeof AuthenticatedWaitingScreenRoute
   '/dashboards/ap': typeof AuthenticatedDashboardsApRoute
   '/dashboards/ar': typeof AuthenticatedDashboardsArRoute
@@ -695,7 +679,6 @@ export interface FileRoutesById {
   '/_authenticated/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/currencies': typeof AuthenticatedCurrenciesRoute
-  '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/debit-memos': typeof AuthenticatedDebitMemosRoute
   '/_authenticated/emergency': typeof AuthenticatedEmergencyRoute
@@ -734,7 +717,6 @@ export interface FileRoutesById {
   '/_authenticated/trial-balance': typeof AuthenticatedTrialBalanceRoute
   '/_authenticated/units-of-measure': typeof AuthenticatedUnitsOfMeasureRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
-  '/_authenticated/vendors': typeof AuthenticatedVendorsRoute
   '/_authenticated/waiting-screen': typeof AuthenticatedWaitingScreenRoute
   '/_authenticated/dashboards/ap': typeof AuthenticatedDashboardsApRoute
   '/_authenticated/dashboards/ar': typeof AuthenticatedDashboardsArRoute
@@ -776,7 +758,6 @@ export interface FileRouteTypes {
     | '/credit-memos'
     | '/crm'
     | '/currencies'
-    | '/customers'
     | '/dashboard'
     | '/debit-memos'
     | '/emergency'
@@ -815,7 +796,6 @@ export interface FileRouteTypes {
     | '/trial-balance'
     | '/units-of-measure'
     | '/users'
-    | '/vendors'
     | '/waiting-screen'
     | '/dashboards/ap'
     | '/dashboards/ar'
@@ -855,7 +835,6 @@ export interface FileRouteTypes {
     | '/credit-memos'
     | '/crm'
     | '/currencies'
-    | '/customers'
     | '/dashboard'
     | '/debit-memos'
     | '/emergency'
@@ -894,7 +873,6 @@ export interface FileRouteTypes {
     | '/trial-balance'
     | '/units-of-measure'
     | '/users'
-    | '/vendors'
     | '/waiting-screen'
     | '/dashboards/ap'
     | '/dashboards/ar'
@@ -935,7 +913,6 @@ export interface FileRouteTypes {
     | '/_authenticated/credit-memos'
     | '/_authenticated/crm'
     | '/_authenticated/currencies'
-    | '/_authenticated/customers'
     | '/_authenticated/dashboard'
     | '/_authenticated/debit-memos'
     | '/_authenticated/emergency'
@@ -974,7 +951,6 @@ export interface FileRouteTypes {
     | '/_authenticated/trial-balance'
     | '/_authenticated/units-of-measure'
     | '/_authenticated/users'
-    | '/_authenticated/vendors'
     | '/_authenticated/waiting-screen'
     | '/_authenticated/dashboards/ap'
     | '/_authenticated/dashboards/ar'
@@ -1148,13 +1124,6 @@ declare module '@tanstack/react-router' {
       path: '/currencies'
       fullPath: '/currencies'
       preLoaderRoute: typeof AuthenticatedCurrenciesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/customers': {
-      id: '/_authenticated/customers'
-      path: '/customers'
-      fullPath: '/customers'
-      preLoaderRoute: typeof AuthenticatedCustomersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -1423,13 +1392,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/vendors': {
-      id: '/_authenticated/vendors'
-      path: '/vendors'
-      fullPath: '/vendors'
-      preLoaderRoute: typeof AuthenticatedVendorsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/waiting-screen': {
       id: '/_authenticated/waiting-screen'
       path: '/waiting-screen'
@@ -1571,7 +1533,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCreditMemosRoute: typeof AuthenticatedCreditMemosRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedCurrenciesRoute: typeof AuthenticatedCurrenciesRoute
-  AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDebitMemosRoute: typeof AuthenticatedDebitMemosRoute
   AuthenticatedEmergencyRoute: typeof AuthenticatedEmergencyRoute
@@ -1610,7 +1571,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTrialBalanceRoute: typeof AuthenticatedTrialBalanceRoute
   AuthenticatedUnitsOfMeasureRoute: typeof AuthenticatedUnitsOfMeasureRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
-  AuthenticatedVendorsRoute: typeof AuthenticatedVendorsRoute
   AuthenticatedWaitingScreenRoute: typeof AuthenticatedWaitingScreenRoute
   AuthenticatedDashboardsApRoute: typeof AuthenticatedDashboardsApRoute
   AuthenticatedDashboardsArRoute: typeof AuthenticatedDashboardsArRoute
@@ -1649,7 +1609,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCreditMemosRoute: AuthenticatedCreditMemosRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedCurrenciesRoute: AuthenticatedCurrenciesRoute,
-  AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDebitMemosRoute: AuthenticatedDebitMemosRoute,
   AuthenticatedEmergencyRoute: AuthenticatedEmergencyRoute,
@@ -1689,7 +1648,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTrialBalanceRoute: AuthenticatedTrialBalanceRoute,
   AuthenticatedUnitsOfMeasureRoute: AuthenticatedUnitsOfMeasureRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
-  AuthenticatedVendorsRoute: AuthenticatedVendorsRoute,
   AuthenticatedWaitingScreenRoute: AuthenticatedWaitingScreenRoute,
   AuthenticatedDashboardsApRoute: AuthenticatedDashboardsApRoute,
   AuthenticatedDashboardsArRoute: AuthenticatedDashboardsArRoute,

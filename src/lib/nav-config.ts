@@ -122,7 +122,6 @@ export function useNavGroups(): NavGroup[] {
             { url: "/invoices/customer", icon: FileText, title: t("ar.invoices") },
             { url: "/credit-memos", icon: Receipt, title: t("ar.creditMemo") },
             { url: "/receipts", icon: Wallet, title: t("ar.receipts") },
-            { url: "/customers", icon: Users, title: t("ar.customers") },
           ],
         },
         {
@@ -135,7 +134,6 @@ export function useNavGroups(): NavGroup[] {
             { url: "/invoices/vendor", icon: Receipt, title: t("ap.bills") },
             { url: "/debit-memos", icon: FileText, title: t("ap.debitMemo") },
             { url: "/payments", icon: Wallet, title: t("ap.payments") },
-            { url: "/partners", icon: Users, title: t("ap.vendors") },
           ],
         },
         {
@@ -188,6 +186,7 @@ export function useNavGroups(): NavGroup[] {
           icon: SlidersHorizontal,
           hue: 180,
           items: [
+            { url: "/partners", icon: Users, title: t("partners.title") },
             { url: "/accounts", icon: BookOpen, title: t("nav.chartOfAccounts") },
             { url: "/journals", icon: BookOpen, title: t("nav.journalTypes") },
             { url: "/currencies", icon: Coins, title: t("nav.currencies") },
