@@ -80,6 +80,10 @@ export function AppSidebar() {
   const scopeItems = isNestedApp ? match!.subgroup!.items : activeGroup?.items;
   const scopeSubgroups = isNestedApp ? undefined : activeGroup?.subgroups;
   const backUrl = isNestedApp && activeGroup ? groupHomeUrl(activeGroup) : "/apps";
+  // "Back" always names its actual destination instead of a generic word —
+  // stepping out of a sub-module names the parent module; from a flat
+  // module it goes to the main launcher, same as Home Screen.
+  const backLabel = isNestedApp && activeGroup ? activeGroup.label : t("nav.allApps");
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
 
 
@@ -96,7 +100,7 @@ export function AppSidebar() {
                   <LayoutGrid className="h-5 w-5 shrink-0" />
                 </Link>
               </SidebarMenuButton>
-              <SidebarMenuButton asChild tooltip={t("nav.back")} className="mx-auto">
+              <SidebarMenuButton asChild tooltip={backLabel} className="mx-auto">
                 <Link to={backUrl} viewTransition className="flex items-center justify-center">
                   <BackIcon className="h-5 w-5 shrink-0" />
                 </Link>
@@ -125,7 +129,7 @@ export function AppSidebar() {
                            transition-colors"
               >
                 <BackIcon className="h-6 w-6" />
-                <span className="text-[11.5px] font-bold tracking-tight leading-none">{t("nav.back")}</span>
+                <span className="text-[11.5px] font-bold tracking-tight leading-none truncate max-w-full px-1">{backLabel}</span>
               </Link>
             </div>
           )}
@@ -177,7 +181,7 @@ export function AppSidebar() {
                     <SidebarGroup className="sidebar-parent p-0">
                       <SidebarGroupLabel asChild>
                         <CollapsibleTrigger
-                          className="nav-pill flex h-auto w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-sidebar-foreground/80"
+                          className="flex h-auto w-full cursor-pointer items-center gap-2 px-2 py-1.5 rounded-lg text-sidebar-foreground/80 transition-colors hover:text-sidebar-foreground"
                         >
                           <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
                           <span className="flex-1 whitespace-nowrap text-start">{sg.label}</span>
