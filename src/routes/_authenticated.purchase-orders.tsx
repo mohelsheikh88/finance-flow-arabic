@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useI18n, useLocalized } from "@/i18n";
@@ -29,8 +29,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, FileText, ArrowLeft, X } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, ArrowLeft, X, Receipt } from "lucide-react";
 import { toast } from "sonner";
+import { POBILL_STAGING_KEY } from "@/lib/po-to-bill";
 
 export const Route = createFileRoute("/_authenticated/purchase-orders")({
   component: Page,
@@ -50,6 +51,7 @@ function Page() {
   const localized = useLocalized();
   const { companyId, branchId } = useBranch();
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const listFn = useServerFn(listPurchaseOrders);
   const getFn = useServerFn(getPurchaseOrder);
@@ -244,6 +246,36 @@ function Page() {
     onError: (e: Error) => { toast.error(e.message); setDeleteId(null); },
   });
 
+  // "Create Bill" only makes sense once the order has reached the stage
+  // its own Bill Control policy requires: bill off what was ordered as
+  // soon as it's confirmed, or wait until it's actually received.
+  const canCreateBill = (o: any) =>
+    o.bill_control === "ordered" ? o.status === "confirmed" : o.status === "received";
+
+  const createBillFrom = async (id: string) => {
+    const po: any = await getFn({ data: { id } });
+    const draft = {
+      purchase_order_id: po.id,
+      vendor_id: po.vendor_id,
+      reference: po.po_number,
+      lines: (po.lines as any[]).map((l) => {
+        const netUnitPrice = Number(l.unit_price) * (1 - Number(l.discount1_pct || 0) / 100) * (1 - Number(l.discount2_pct || 0) / 100);
+        const product = (products as any[]).find((p) => p.id === l.product_id);
+        return {
+          description: l.description || (product ? localized(product, "name") : ""),
+          product_id: l.product_id,
+          account_id: product?.expense_account_id ?? null,
+          quantity: Number(l.quantity),
+          unit_price: Math.round(netUnitPrice * 10000) / 10000,
+          tax_id: l.tax_id,
+          tax_rate: Number(l.tax_rate || 0),
+        };
+      }),
+    };
+    sessionStorage.setItem(POBILL_STAGING_KEY, JSON.stringify(draft));
+    navigate({ to: "/invoices/vendor" });
+  };
+
   const canSave = !!form.vendor_id && form.lines.some((l) => l.product_id || l.description) && form.lines.every((l) => l.quantity > 0);
 
   return (
@@ -297,6 +329,17 @@ function Page() {
                   </td>
                   <td className="p-2.5">
                     <div className="flex items-center justify-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[11px] gap-1"
+                        disabled={!canCreateBill(o)}
+                        title={!canCreateBill(o) ? t("purchase.createBillDisabledHint") : undefined}
+                        onClick={() => createBillFrom(o.id)}
+                      >
+                        <Receipt className="h-3 w-3" />
+                        {t("purchase.createBill")}
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(o.id)}><Pencil className="h-3.5 w-3.5" /></Button>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(o.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>

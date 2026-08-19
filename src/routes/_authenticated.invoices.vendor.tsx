@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -23,6 +23,7 @@ import { Plus, Trash2, Check, Pencil, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { formatLockError } from "@/lib/lock-error";
 import { HistoryLog } from "@/components/history-log";
+import { POBILL_STAGING_KEY, type PoToBillDraft } from "@/lib/po-to-bill";
 
 export const Route = createFileRoute("/_authenticated/invoices/vendor")({
   component: VendorBillsPage,
@@ -89,6 +90,35 @@ function VendorBillsPage() {
   const [lines, setLines] = useState<Line[]>([
     { description: "", account_id: "", quantity: 1, unit_price: 0, tax_id: "", tax_rate: 15 },
   ]);
+
+  // Arrived here via "Create Bill" on a Purchase Order — pick up the
+  // staged draft (vendor + lines already filled) and open the dialog.
+  useEffect(() => {
+    const raw = sessionStorage.getItem(POBILL_STAGING_KEY);
+    if (!raw) return;
+    sessionStorage.removeItem(POBILL_STAGING_KEY);
+    try {
+      const draft: PoToBillDraft = JSON.parse(raw);
+      setHeader((h) => ({ ...h, partner_id: draft.vendor_id, reference: draft.reference }));
+      setLines(
+        draft.lines.map((l) => ({
+          description: l.description,
+          account_id: l.account_id ?? "",
+          quantity: l.quantity,
+          unit_price: l.unit_price,
+          tax_id: l.tax_id ?? "",
+          tax_rate: l.tax_rate,
+        })),
+      );
+      setOpen(true);
+      if (draft.lines.some((l) => !l.account_id)) {
+        toast.info(t("purchase.createBillPickAccountsHint"));
+      }
+    } catch {
+      /* ignore malformed/stale staging payload */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const computeDueDate = (dateStr: string, termId: string): string => {
     if (!dateStr || !termId) return "";
