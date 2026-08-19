@@ -145,16 +145,6 @@ export function AppSidebar() {
           </SidebarGroup>
         ) : (
           <SidebarGroup className="sidebar-grandparent mb-1.5 p-0">
-            {/* Static module header (always "open" — no need to collapse the only module shown) */}
-            <div className="relative flex items-center gap-2.5 sm:gap-3 px-1 py-2 mb-1.5">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/30 border border-white/[0.06] shadow-inner">
-                <ScopeIcon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/80" />
-              </div>
-              <span className="flex-1 min-w-0 truncate text-start text-[15.5px] sm:text-[17px] font-bold tracking-tight text-white/90">
-                {scopeLabel}
-              </span>
-            </div>
-
             <SidebarGroupContent className="relative ms-2 ps-2 sm:ms-3 sm:ps-3 border-s border-dashed border-sidebar-border/70">
               {scopeSubgroups?.map((sg) => {
                 const subActive = sg.items.some((it) => isActive(it.url));
