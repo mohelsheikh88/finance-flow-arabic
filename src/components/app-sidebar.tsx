@@ -185,9 +185,16 @@ export function AppSidebar() {
                     <SidebarGroup className="sidebar-parent p-0">
                       <SidebarGroupLabel asChild>
                         <CollapsibleTrigger
-                          className="flex h-auto w-full cursor-pointer items-center gap-2 px-2 py-1.5 rounded-lg text-sidebar-foreground/80 transition-colors hover:text-sidebar-foreground"
+                          className="flex h-auto w-full cursor-pointer items-center gap-2.5 px-2 py-1.5 rounded-lg text-sidebar-foreground/80 transition-colors hover:text-sidebar-foreground"
+                          style={{ ["--hue" as any]: sg.hue ?? activeGroup?.hue ?? 200 }}
                         >
-                          <sg.icon className="h-[16px] w-[16px] shrink-0 text-[hsl(327,80%,68%)]/90" />
+                          <div
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg
+                                       bg-gradient-to-br from-[hsl(var(--hue)_75%_58%)] to-[hsl(var(--hue)_80%_36%)]
+                                       shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),inset_0_-2px_2.5px_rgba(0,0,0,0.3),0_2px_5px_-1px_rgba(0,0,0,0.4)]"
+                          >
+                            <sg.icon className="h-[15px] w-[15px] shrink-0 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]" />
+                          </div>
                           <span className="flex-1 whitespace-nowrap text-start">{sg.label}</span>
                         </CollapsibleTrigger>
                       </SidebarGroupLabel>
