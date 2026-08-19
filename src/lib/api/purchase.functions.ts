@@ -525,3 +525,128 @@ export const deletePurchaseOrder = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ================= Purchase Dashboard =================
+
+export const getPurchaseDashboardStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+
+    const [ordersRes, vendorsRes, linesRes, categoriesRes] = await Promise.all([
+      sb.from("purchase_orders").select("id, po_number, vendor_id, order_date, status, total, currency_code, bill_control").eq("company_id", data.companyId),
+      sb.from("partners").select("id, code, name_ar, name_en").eq("company_id", data.companyId).eq("is_vendor", true),
+      sb.from("purchase_order_lines").select("purchase_order_id, product_id, line_total"),
+      sb.from("purchase_categories").select("id, name_ar, name_en"),
+    ]);
+    if (ordersRes.error) throw new Error(ordersRes.error.message);
+    if (vendorsRes.error) throw new Error(vendorsRes.error.message);
+
+    const orders: any[] = ordersRes.data ?? [];
+    const vendors: any[] = vendorsRes.data ?? [];
+    const vendorById = new Map(vendors.map((v) => [v.id, v]));
+
+    // Only lines belonging to this company's orders.
+    const orderIds = new Set(orders.map((o) => o.id));
+    const lines: any[] = (linesRes.data ?? []).filter((l: any) => orderIds.has(l.purchase_order_id));
+    const orderById = new Map(orders.map((o) => [o.id, o]));
+    const categories: any[] = categoriesRes.data ?? [];
+    const categoryById = new Map(categories.map((c) => [c.id, c]));
+
+    // Need product -> category to attribute line spend to a category.
+    const productIds = [...new Set(lines.map((l) => l.product_id).filter(Boolean))];
+    let productCategoryMap = new Map<string, string | null>();
+    if (productIds.length) {
+      const { data: prods } = await sb.from("products").select("id, category_id").in("id", productIds);
+      productCategoryMap = new Map((prods ?? []).map((p: any) => [p.id, p.category_id]));
+    }
+
+    // KPIs
+    const totalValue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+    const totalOrders = orders.length;
+    const draftCount = orders.filter((o) => o.status === "draft").length;
+    const activeVendorIds = new Set(orders.map((o) => o.vendor_id));
+    const avgOrderValue = totalOrders ? totalValue / totalOrders : 0;
+
+    // Status breakdown
+    const statusMap: Record<string, { count: number; total: number }> = {};
+    for (const o of orders) {
+      const s = o.status || "draft";
+      statusMap[s] ??= { count: 0, total: 0 };
+      statusMap[s].count += 1;
+      statusMap[s].total += Number(o.total || 0);
+    }
+    const statusBreakdown = Object.entries(statusMap).map(([status, v]) => ({ status, ...v }));
+
+    // Monthly spend trend (last 12 months, by order_date)
+    const monthMap = new Map<string, number>();
+    for (const o of orders) {
+      if (!o.order_date) continue;
+      const key = String(o.order_date).slice(0, 7); // YYYY-MM
+      monthMap.set(key, (monthMap.get(key) ?? 0) + Number(o.total || 0));
+    }
+    const now = new Date();
+    const monthlySpend: { month: string; total: number }[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      monthlySpend.push({ month: key, total: Math.round((monthMap.get(key) ?? 0) * 100) / 100 });
+    }
+
+    // Top vendors by spend
+    const vendorSpend = new Map<string, number>();
+    for (const o of orders) {
+      vendorSpend.set(o.vendor_id, (vendorSpend.get(o.vendor_id) ?? 0) + Number(o.total || 0));
+    }
+    const topVendors = [...vendorSpend.entries()]
+      .map(([vendorId, total]) => {
+        const v = vendorById.get(vendorId);
+        return { vendor_id: vendorId, name_ar: v?.name_ar ?? "—", name_en: v?.name_en ?? "—", total: Math.round(total * 100) / 100 };
+      })
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8);
+
+    // Spend by category (from line items)
+    const categorySpend = new Map<string, number>();
+    for (const l of lines) {
+      const catId = productCategoryMap.get(l.product_id) ?? "__uncategorized__";
+      categorySpend.set(catId, (categorySpend.get(catId) ?? 0) + Number(l.line_total || 0));
+    }
+    const categoryBreakdown = [...categorySpend.entries()]
+      .map(([catId, total]) => {
+        const c = categoryById.get(catId);
+        return {
+          category_id: catId,
+          name_ar: c?.name_ar ?? "بدون تصنيف", name_en: c?.name_en ?? "Uncategorized",
+          total: Math.round(total * 100) / 100,
+        };
+      })
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8);
+
+    // Recent orders
+    const recentOrders = [...orders]
+      .sort((a, b) => (b.order_date || "").localeCompare(a.order_date || ""))
+      .slice(0, 8)
+      .map((o) => ({
+        ...o,
+        vendor_name_ar: vendorById.get(o.vendor_id)?.name_ar ?? "—",
+        vendor_name_en: vendorById.get(o.vendor_id)?.name_en ?? "—",
+      }));
+
+    return {
+      kpis: {
+        totalValue: Math.round(totalValue * 100) / 100,
+        totalOrders,
+        draftCount,
+        activeVendors: activeVendorIds.size,
+        avgOrderValue: Math.round(avgOrderValue * 100) / 100,
+      },
+      statusBreakdown,
+      monthlySpend,
+      topVendors,
+      categoryBreakdown,
+      recentOrders,
+    };
+  });
