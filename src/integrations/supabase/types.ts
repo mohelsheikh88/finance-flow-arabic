@@ -2573,6 +2573,8 @@ export type Database = {
           sort_order: number
           is_active: boolean
           notes: string | null
+          stock_input_account_id: string | null
+          stock_output_account_id: string | null
           created_at: string
           updated_at: string
         }
@@ -2587,6 +2589,8 @@ export type Database = {
           sort_order?: number
           is_active?: boolean
           notes?: string | null
+          stock_input_account_id?: string | null
+          stock_output_account_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -2601,6 +2605,8 @@ export type Database = {
           sort_order?: number
           is_active?: boolean
           notes?: string | null
+          stock_input_account_id?: string | null
+          stock_output_account_id?: string | null
           created_at?: string
           updated_at?: string
         }

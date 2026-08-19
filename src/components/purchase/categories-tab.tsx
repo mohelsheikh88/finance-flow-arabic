@@ -8,6 +8,7 @@ import {
   upsertPurchaseCategory,
   deletePurchaseCategory,
 } from "@/lib/api/purchase.functions";
+import { listAccounts } from "@/lib/api/accounting.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -35,12 +37,19 @@ export function CategoriesTab() {
   const listFn = useServerFn(listPurchaseCategories);
   const upsertFn = useServerFn(upsertPurchaseCategory);
   const deleteFn = useServerFn(deletePurchaseCategory);
+  const listAccFn = useServerFn(listAccounts);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["purchase_categories", companyId],
     queryFn: () => listFn({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+  const { data: accounts = [] } = useQuery({
+    queryKey: ["accounts_for_categories", companyId],
+    queryFn: () => listAccFn({ data: { companyId: companyId! } } as any),
+    enabled: !!companyId,
+  });
+  const postableAccounts = (accounts as any[]).filter((a) => !a.is_group);
 
   const tree = useMemo(() => {
     const map: Record<string, any[]> = {};
@@ -52,13 +61,17 @@ export function CategoriesTab() {
   }, [rows]);
   const roots = tree["__root__"] ?? [];
 
-  const empty = { id: undefined as string | undefined, parent_id: null as string | null, code: "", name_ar: "", name_en: "", is_group: false, is_active: true, notes: "" };
+  const empty = {
+    id: undefined as string | undefined, parent_id: null as string | null, code: "", name_ar: "", name_en: "",
+    is_group: false, is_active: true, notes: "",
+    stock_input_account_id: null as string | null, stock_output_account_id: null as string | null,
+  };
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const openNew = (parentId?: string | null) => { setForm({ ...empty, parent_id: parentId ?? null }); setOpen(true); };
-  const openEdit = (row: any) => { setForm({ id: row.id, parent_id: row.parent_id, code: row.code, name_ar: row.name_ar, name_en: row.name_en, is_group: row.is_group, is_active: row.is_active, notes: row.notes ?? "" }); setOpen(true); };
+  const openEdit = (row: any) => { setForm({ id: row.id, parent_id: row.parent_id, code: row.code, name_ar: row.name_ar, name_en: row.name_en, is_group: row.is_group, is_active: row.is_active, notes: row.notes ?? "", stock_input_account_id: row.stock_input_account_id ?? null, stock_output_account_id: row.stock_output_account_id ?? null }); setOpen(true); };
 
   const saveMut = useMutation({
     mutationFn: () => upsertFn({ data: { ...form, company_id: companyId!, notes: form.notes || null } }),
@@ -121,6 +134,28 @@ export function CategoriesTab() {
               <div><Label>{t("common.name")} (EN)</Label><Input value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" /></div>
             </div>
             <div><Label>{t("common.notes")}</Label><Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} rows={2} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t("purchase.stockInputAccount")}</Label>
+                <Select value={form.stock_input_account_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, stock_input_account_id: v === "__none__" ? null : v }))}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">—</SelectItem>
+                    {postableAccounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>{t("purchase.stockOutputAccount")}</Label>
+                <Select value={form.stock_output_account_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, stock_output_account_id: v === "__none__" ? null : v }))}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">—</SelectItem>
+                    {postableAccounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
               <Label>{t("common.active")}</Label>

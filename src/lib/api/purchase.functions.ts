@@ -29,6 +29,8 @@ const PurchaseCategorySchema = z.object({
   sort_order: z.number().int().default(0),
   is_active: z.boolean().default(true),
   notes: z.string().max(2000).nullable().optional(),
+  stock_input_account_id: z.string().uuid().nullable().optional(),
+  stock_output_account_id: z.string().uuid().nullable().optional(),
 });
 
 export const upsertPurchaseCategory = createServerFn({ method: "POST" })
