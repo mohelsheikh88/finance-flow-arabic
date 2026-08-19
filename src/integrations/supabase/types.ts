@@ -1141,6 +1141,48 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_groups: {
+        Row: {
+          id: string
+          company_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          notes: string | null
+          is_active: boolean
+          sort_order: number
+          payable_account_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          notes?: string | null
+          is_active?: boolean
+          sort_order?: number
+          payable_account_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          code?: string
+          name_ar?: string
+          name_en?: string
+          notes?: string | null
+          is_active?: boolean
+          sort_order?: number
+          payable_account_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customer_types: {
         Row: {
           code: string
@@ -2121,6 +2163,7 @@ export type Database = {
           credit_limit: number | null
           currency_code: string | null
           customer_type_id: string | null
+          vendor_group_id: string | null
           default_purchase_tax_id: string | null
           default_sale_tax_id: string | null
           email: string | null
@@ -2150,6 +2193,7 @@ export type Database = {
           credit_limit?: number | null
           currency_code?: string | null
           customer_type_id?: string | null
+          vendor_group_id?: string | null
           default_purchase_tax_id?: string | null
           default_sale_tax_id?: string | null
           email?: string | null
@@ -2179,6 +2223,7 @@ export type Database = {
           credit_limit?: number | null
           currency_code?: string | null
           customer_type_id?: string | null
+          vendor_group_id?: string | null
           default_purchase_tax_id?: string | null
           default_sale_tax_id?: string | null
           email?: string | null

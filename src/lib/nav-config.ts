@@ -135,7 +135,7 @@ export function useNavGroups(): NavGroup[] {
             { url: "/invoices/vendor", icon: Receipt, title: t("ap.bills") },
             { url: "/debit-memos", icon: FileText, title: t("ap.debitMemo") },
             { url: "/payments", icon: Wallet, title: t("ap.payments") },
-            { url: "/vendors", icon: Users, title: t("ap.vendors") },
+            { url: "/partners", icon: Users, title: t("ap.vendors") },
           ],
         },
         {

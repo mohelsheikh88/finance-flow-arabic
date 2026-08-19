@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   createPartner, listPartners, updatePartner, deletePartner, listAccounts,
-  listCustomerTypes,
+  listCustomerTypes, upsertCustomerType, deleteCustomerType,
+  listVendorGroups, upsertVendorGroup, deleteVendorGroup,
   listPartnerContacts, savePartnerContacts,
   listPartnerAttachments, uploadPartnerAttachment, deletePartnerAttachment, getPartnerAttachmentUrl,
   listPartnerBankAccounts, savePartnerBankAccounts, uploadBankAccountIban, getBankAccountIbanUrl,
@@ -28,7 +29,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Download, Paperclip, Pencil, Plus, Search, Trash2, Upload, X } from "lucide-react";
+import { Download, Paperclip, Pencil, Plus, Search, Settings2, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/partners")({
@@ -41,7 +42,7 @@ type DocType = (typeof DOC_TYPES)[number];
 type FormState = {
   id?: string;
   code: string; name_ar: string; name_en: string; vat_number: string;
-  customer_type_id: string | null; country: string | null; address_ar: string;
+  customer_type_id: string | null; vendor_group_id: string | null; country: string | null; address_ar: string;
   is_customer: boolean; is_vendor: boolean;
   receivable_account_id: string | null; payable_account_id: string | null;
   credit_limit: number;
@@ -49,7 +50,7 @@ type FormState = {
 
 const emptyForm: FormState = {
   code: "", name_ar: "", name_en: "", vat_number: "",
-  customer_type_id: null, country: null, address_ar: "",
+  customer_type_id: null, vendor_group_id: null, country: null, address_ar: "",
   is_customer: true, is_vendor: false,
   receivable_account_id: null, payable_account_id: null,
   credit_limit: 0,
@@ -66,6 +67,7 @@ function PartnersPage() {
   const remove = useServerFn(deletePartner);
   const accFn = useServerFn(listAccounts);
   const typesFn = useServerFn(listCustomerTypes);
+  const groupsFn = useServerFn(listVendorGroups);
 
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -87,6 +89,14 @@ function PartnersPage() {
     queryFn: () => typesFn({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+  const { data: vendorGroups = [] } = useQuery({
+    queryKey: ["vendor_groups", companyId],
+    queryFn: () => groupsFn({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+
+  const [typesOpen, setTypesOpen] = useState(false);
+  const [groupsOpen, setGroupsOpen] = useState(false);
 
   const receivableAccounts = (accounts as any[]).filter((a) => !a.is_group && a.account_type === "asset");
   const payableAccounts = (accounts as any[]).filter((a) => !a.is_group && a.account_type === "liability");
@@ -99,6 +109,11 @@ function PartnersPage() {
     if (!id) return "—";
     const ct = (customerTypes as any[]).find((c) => c.id === id);
     return ct ? localized(ct, "name") : "—";
+  };
+  const groupLabel = (id?: string | null) => {
+    if (!id) return "—";
+    const g = (vendorGroups as any[]).find((c) => c.id === id);
+    return g ? localized(g, "name") : "—";
   };
   const countryLabel = (code?: string | null) => {
     if (!code) return "—";
@@ -119,7 +134,7 @@ function PartnersPage() {
   const openEdit = (p: any) => {
     setForm({
       id: p.id, code: p.code, name_ar: p.name_ar, name_en: p.name_en, vat_number: p.vat_number ?? "",
-      customer_type_id: p.customer_type_id, country: p.country, address_ar: p.address_ar ?? "",
+      customer_type_id: p.customer_type_id, vendor_group_id: p.vendor_group_id, country: p.country, address_ar: p.address_ar ?? "",
       is_customer: p.is_customer, is_vendor: p.is_vendor,
       receivable_account_id: p.receivable_account_id, payable_account_id: p.payable_account_id,
       credit_limit: Number(p.credit_limit ?? 0),
@@ -133,6 +148,7 @@ function PartnersPage() {
         code: form.code, name_ar: form.name_ar, name_en: form.name_en,
         vat_number: form.vat_number || null,
         customer_type_id: form.customer_type_id,
+        vendor_group_id: form.vendor_group_id,
         country: form.country,
         address_ar: form.address_ar || null,
         is_customer: form.is_customer, is_vendor: form.is_vendor,
@@ -171,7 +187,17 @@ function PartnersPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="page-title">{t("partners.title")}</h1>
-        <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setTypesOpen(true)}>
+            <Settings2 className="h-4 w-4 me-1" />
+            {t("customers.manageTypes")}
+          </Button>
+          <Button variant="outline" onClick={() => setGroupsOpen(true)}>
+            <Settings2 className="h-4 w-4 me-1" />
+            {t("partners.manageVendorGroups")}
+          </Button>
+          <Button onClick={openCreate}><Plus className="h-4 w-4 me-1" />{t("common.add")}</Button>
+        </div>
       </div>
 
       <div className="relative max-w-sm">
@@ -201,7 +227,11 @@ function PartnersPage() {
                   {p.is_customer && <Badge variant="outline" className="bg-info/10 text-info border-info/30">{t("partners.isCustomer")}</Badge>}
                   {p.is_vendor && <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">{t("partners.isVendor")}</Badge>}
                 </td>
-                <td className="p-3 text-muted-foreground">{typeLabel(p.customer_type_id)}</td>
+                <td className="p-3 text-muted-foreground">
+                  {[p.is_customer && typeLabel(p.customer_type_id), p.is_vendor && groupLabel(p.vendor_group_id)]
+                    .filter((v) => v && v !== "—")
+                    .join(" · ") || "—"}
+                </td>
                 <td className="p-3 text-muted-foreground">{countryLabel(p.country)}</td>
                 <td className="p-3 font-mono text-muted-foreground">{p.vat_number || "—"}</td>
                 <td className="p-3">
@@ -226,16 +256,30 @@ function PartnersPage() {
             <div><Label>{t("common.nameEn")}</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
             <div><Label>{t("common.code")}</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
             <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
-            <div>
-              <Label>{t("partners.partnerCategoryType")}</Label>
-              <Select value={form.customer_type_id ?? "__none__"} onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}>
-                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">—</SelectItem>
-                  {(customerTypes as any[]).map((c) => <SelectItem key={c.id} value={c.id}>{c.code} — {localized(c, "name")}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {form.is_customer && (
+              <div>
+                <Label>{t("customers.customerType")}</Label>
+                <Select value={form.customer_type_id ?? "__none__"} onValueChange={(v) => setForm({ ...form, customer_type_id: v === "__none__" ? null : v })}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">—</SelectItem>
+                    {(customerTypes as any[]).map((c) => <SelectItem key={c.id} value={c.id}>{c.code} — {localized(c, "name")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {form.is_vendor && (
+              <div>
+                <Label>{t("partners.vendorGroup")}</Label>
+                <Select value={form.vendor_group_id ?? "__none__"} onValueChange={(v) => setForm({ ...form, vendor_group_id: v === "__none__" ? null : v })}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">—</SelectItem>
+                    {(vendorGroups as any[]).map((c) => <SelectItem key={c.id} value={c.id}>{c.code} — {localized(c, "name")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label>{t("partners.country")}</Label>
               <Select value={form.country ?? "__none__"} onValueChange={(v) => setForm({ ...form, country: v === "__none__" ? null : v })}>
@@ -311,7 +355,212 @@ function PartnersPage() {
           <AlertDialogFooter><AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel><AlertDialogAction onClick={() => deleteMut.mutate()}>{t("common.delete")}</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {typesOpen && (
+        <CustomerTypesDialog
+          open={typesOpen}
+          onClose={() => setTypesOpen(false)}
+          types={customerTypes as any[]}
+          arAccounts={receivableAccounts}
+          companyId={companyId!}
+        />
+      )}
+      {groupsOpen && (
+        <VendorGroupsDialog
+          open={groupsOpen}
+          onClose={() => setGroupsOpen(false)}
+          groups={vendorGroups as any[]}
+          apAccounts={payableAccounts}
+          companyId={companyId!}
+        />
+      )}
     </div>
+  );
+}
+
+/* ============================== Manage Customer Types ============================== */
+
+type CTFormState = { id?: string; code: string; name_ar: string; name_en: string; notes: string; is_active: boolean; sort_order: number; receivable_account_id: string | null };
+const ctEmpty: CTFormState = { code: "", name_ar: "", name_en: "", notes: "", is_active: true, sort_order: 0, receivable_account_id: null };
+
+function CustomerTypesDialog({
+  open, onClose, types, arAccounts, companyId,
+}: { open: boolean; onClose: () => void; types: any[]; arAccounts: any[]; companyId: string }) {
+  const { t } = useI18n();
+  const localized = useLocalized();
+  const qc = useQueryClient();
+  const upsertFn = useServerFn(upsertCustomerType);
+  const removeFn = useServerFn(deleteCustomerType);
+  const [form, setForm] = useState<CTFormState>(ctEmpty);
+  const [confirmDelete, setConfirmDelete] = useState<any | null>(null);
+
+  const saveMut = useMutation({
+    mutationFn: () => upsertFn({ data: {
+      ...(form.id ? { id: form.id } : {}), company_id: companyId,
+      code: form.code.trim(), name_ar: form.name_ar.trim(), name_en: form.name_en.trim(),
+      notes: form.notes.trim() || null, is_active: form.is_active, sort_order: Number(form.sort_order) || 0,
+      receivable_account_id: form.receivable_account_id || null,
+    } as any }),
+    onSuccess: () => { toast.success(t("common.saved")); qc.invalidateQueries({ queryKey: ["customer_types"] }); setForm(ctEmpty); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => removeFn({ data: { id } }),
+    onSuccess: () => { toast.success(t("common.deleted")); qc.invalidateQueries({ queryKey: ["customer_types"] }); qc.invalidateQueries({ queryKey: ["partners"] }); setConfirmDelete(null); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const startEdit = (ct: any) => setForm({
+    id: ct.id, code: ct.code, name_ar: ct.name_ar, name_en: ct.name_en,
+    notes: ct.notes ?? "", is_active: !!ct.is_active, sort_order: ct.sort_order ?? 0,
+    receivable_account_id: ct.receivable_account_id ?? null,
+  });
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={(v) => { if (!v) { setForm(ctEmpty); onClose(); } }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle>{t("customers.manageTypes")}</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-6 gap-2 items-end p-3 rounded-md border bg-muted/30">
+            <div className="col-span-1"><Label className="text-xs">{t("common.code")} *</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
+            <div className="col-span-2"><Label className="text-xs">{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+            <div className="col-span-2"><Label className="text-xs">{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+            <div className="col-span-1 flex items-center gap-2 pb-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label className="text-xs">{t("common.active")}</Label></div>
+            <div className="col-span-6">
+              <Label className="text-xs">{t("customers.receivableAccount")}</Label>
+              <AccountCombobox accounts={arAccounts} value={form.receivable_account_id} onChange={(v) => setForm({ ...form, receivable_account_id: v })} />
+            </div>
+            <div className="col-span-6 flex justify-end gap-2">
+              {form.id && <Button variant="outline" size="sm" onClick={() => setForm(ctEmpty)}>{t("common.cancel")}</Button>}
+              <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en}>
+                <Plus className="h-4 w-4 me-1" />{form.id ? t("common.save") : t("common.add")}
+              </Button>
+            </div>
+          </div>
+          <div className="border rounded-md overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50"><tr><th className="text-start p-2">{t("common.code")}</th><th className="text-start p-2">{t("common.name")}</th><th className="text-start p-2">{t("common.status")}</th><th className="text-end p-2 w-24">{t("common.actions")}</th></tr></thead>
+              <tbody>
+                {types.map((ct) => (
+                  <tr key={ct.id} className="border-t hover:bg-muted/30">
+                    <td className="p-2 font-mono">{ct.code}</td>
+                    <td className="p-2">{localized(ct, "name")}</td>
+                    <td className="p-2">{ct.is_active ? t("common.active") : t("common.inactive")}</td>
+                    <td className="p-2 text-end">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => startEdit(ct)}><Pencil className="h-3.5 w-3.5" /></Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setConfirmDelete(ct)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {types.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => { setForm(ctEmpty); onClose(); }}>{t("common.close")}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader><AlertDialogTitle>{t("common.confirmDelete")} — {confirmDelete?.code}</AlertDialogTitle><AlertDialogDescription>{t("common.deleteWarning")}</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel><AlertDialogAction onClick={() => confirmDelete && deleteMut.mutate(confirmDelete.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t("common.delete")}</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+/* ============================== Manage Vendor Groups ============================== */
+
+type VGFormState = { id?: string; code: string; name_ar: string; name_en: string; notes: string; is_active: boolean; sort_order: number; payable_account_id: string | null };
+const vgEmpty: VGFormState = { code: "", name_ar: "", name_en: "", notes: "", is_active: true, sort_order: 0, payable_account_id: null };
+
+function VendorGroupsDialog({
+  open, onClose, groups, apAccounts, companyId,
+}: { open: boolean; onClose: () => void; groups: any[]; apAccounts: any[]; companyId: string }) {
+  const { t } = useI18n();
+  const localized = useLocalized();
+  const qc = useQueryClient();
+  const upsertFn = useServerFn(upsertVendorGroup);
+  const removeFn = useServerFn(deleteVendorGroup);
+  const [form, setForm] = useState<VGFormState>(vgEmpty);
+  const [confirmDelete, setConfirmDelete] = useState<any | null>(null);
+
+  const saveMut = useMutation({
+    mutationFn: () => upsertFn({ data: {
+      ...(form.id ? { id: form.id } : {}), company_id: companyId,
+      code: form.code.trim(), name_ar: form.name_ar.trim(), name_en: form.name_en.trim(),
+      notes: form.notes.trim() || null, is_active: form.is_active, sort_order: Number(form.sort_order) || 0,
+      payable_account_id: form.payable_account_id || null,
+    } as any }),
+    onSuccess: () => { toast.success(t("common.saved")); qc.invalidateQueries({ queryKey: ["vendor_groups"] }); setForm(vgEmpty); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => removeFn({ data: { id } }),
+    onSuccess: () => { toast.success(t("common.deleted")); qc.invalidateQueries({ queryKey: ["vendor_groups"] }); qc.invalidateQueries({ queryKey: ["partners"] }); setConfirmDelete(null); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const startEdit = (g: any) => setForm({
+    id: g.id, code: g.code, name_ar: g.name_ar, name_en: g.name_en,
+    notes: g.notes ?? "", is_active: !!g.is_active, sort_order: g.sort_order ?? 0,
+    payable_account_id: g.payable_account_id ?? null,
+  });
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={(v) => { if (!v) { setForm(vgEmpty); onClose(); } }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle>{t("partners.manageVendorGroups")}</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-6 gap-2 items-end p-3 rounded-md border bg-muted/30">
+            <div className="col-span-1"><Label className="text-xs">{t("common.code")} *</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} /></div>
+            <div className="col-span-2"><Label className="text-xs">{t("common.nameAr")} *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+            <div className="col-span-2"><Label className="text-xs">{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+            <div className="col-span-1 flex items-center gap-2 pb-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label className="text-xs">{t("common.active")}</Label></div>
+            <div className="col-span-6">
+              <Label className="text-xs">{t("partners.payableAccount")}</Label>
+              <AccountCombobox accounts={apAccounts} value={form.payable_account_id} onChange={(v) => setForm({ ...form, payable_account_id: v })} />
+            </div>
+            <div className="col-span-6 flex justify-end gap-2">
+              {form.id && <Button variant="outline" size="sm" onClick={() => setForm(vgEmpty)}>{t("common.cancel")}</Button>}
+              <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en}>
+                <Plus className="h-4 w-4 me-1" />{form.id ? t("common.save") : t("common.add")}
+              </Button>
+            </div>
+          </div>
+          <div className="border rounded-md overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50"><tr><th className="text-start p-2">{t("common.code")}</th><th className="text-start p-2">{t("common.name")}</th><th className="text-start p-2">{t("common.status")}</th><th className="text-end p-2 w-24">{t("common.actions")}</th></tr></thead>
+              <tbody>
+                {groups.map((g) => (
+                  <tr key={g.id} className="border-t hover:bg-muted/30">
+                    <td className="p-2 font-mono">{g.code}</td>
+                    <td className="p-2">{localized(g, "name")}</td>
+                    <td className="p-2">{g.is_active ? t("common.active") : t("common.inactive")}</td>
+                    <td className="p-2 text-end">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => startEdit(g)}><Pencil className="h-3.5 w-3.5" /></Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setConfirmDelete(g)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {groups.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{t("common.noData")}</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => { setForm(vgEmpty); onClose(); }}>{t("common.close")}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader><AlertDialogTitle>{t("common.confirmDelete")} — {confirmDelete?.code}</AlertDialogTitle><AlertDialogDescription>{t("common.deleteWarning")}</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel><AlertDialogAction onClick={() => confirmDelete && deleteMut.mutate(confirmDelete.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t("common.delete")}</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
