@@ -106,7 +106,16 @@ function PartnersPage() {
     return c ? localized(c, "name") : code;
   };
 
-  const openCreate = () => { setForm(emptyForm); setOpen(true); };
+  const computeNextCode = (): string => {
+    const nums = (partners as any[]).map((p) => {
+      const m = String(p.code ?? "").match(/^(\d+)$/);
+      return m ? parseInt(m[1], 10) : 0;
+    });
+    const next = (nums.length ? Math.max(...nums) : 0) + 1;
+    return String(next).padStart(5, "0");
+  };
+
+  const openCreate = () => { setForm({ ...emptyForm, code: computeNextCode() }); setOpen(true); };
   const openEdit = (p: any) => {
     setForm({
       id: p.id, code: p.code, name_ar: p.name_ar, name_en: p.name_en, vat_number: p.vat_number ?? "",
