@@ -56,6 +56,7 @@ import { Route as AuthenticatedPharmacyRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPhysicianRouteImport } from './routes/_authenticated.physician'
 import { Route as AuthenticatedProductManagementRouteImport } from './routes/_authenticated.product-management'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
+import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated.purchase-orders'
 import { Route as AuthenticatedRadiologyRouteImport } from './routes/_authenticated.radiology'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
 import { Route as AuthenticatedReceptionRouteImport } from './routes/_authenticated.reception'
@@ -335,6 +336,12 @@ const AuthenticatedPurchaseRoute = AuthenticatedPurchaseRouteImport.update({
   path: '/purchase',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPurchaseOrdersRoute =
+  AuthenticatedPurchaseOrdersRouteImport.update({
+    id: '/purchase-orders',
+    path: '/purchase-orders',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedRadiologyRoute = AuthenticatedRadiologyRouteImport.update({
   id: '/radiology',
   path: '/radiology',
@@ -541,6 +548,7 @@ export interface FileRoutesByFullPath {
   '/physician': typeof AuthenticatedPhysicianRoute
   '/product-management': typeof AuthenticatedProductManagementRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
+  '/purchase-orders': typeof AuthenticatedPurchaseOrdersRoute
   '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/reception': typeof AuthenticatedReceptionRoute
@@ -617,6 +625,7 @@ export interface FileRoutesByTo {
   '/physician': typeof AuthenticatedPhysicianRoute
   '/product-management': typeof AuthenticatedProductManagementRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
+  '/purchase-orders': typeof AuthenticatedPurchaseOrdersRoute
   '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/reception': typeof AuthenticatedReceptionRoute
@@ -695,6 +704,7 @@ export interface FileRoutesById {
   '/_authenticated/physician': typeof AuthenticatedPhysicianRoute
   '/_authenticated/product-management': typeof AuthenticatedProductManagementRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
+  '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRoute
   '/_authenticated/radiology': typeof AuthenticatedRadiologyRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
   '/_authenticated/reception': typeof AuthenticatedReceptionRoute
@@ -773,6 +783,7 @@ export interface FileRouteTypes {
     | '/physician'
     | '/product-management'
     | '/purchase'
+    | '/purchase-orders'
     | '/radiology'
     | '/receipts'
     | '/reception'
@@ -849,6 +860,7 @@ export interface FileRouteTypes {
     | '/physician'
     | '/product-management'
     | '/purchase'
+    | '/purchase-orders'
     | '/radiology'
     | '/receipts'
     | '/reception'
@@ -926,6 +938,7 @@ export interface FileRouteTypes {
     | '/_authenticated/physician'
     | '/_authenticated/product-management'
     | '/_authenticated/purchase'
+    | '/_authenticated/purchase-orders'
     | '/_authenticated/radiology'
     | '/_authenticated/receipts'
     | '/_authenticated/reception'
@@ -1294,6 +1307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchaseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/purchase-orders': {
+      id: '/_authenticated/purchase-orders'
+      path: '/purchase-orders'
+      fullPath: '/purchase-orders'
+      preLoaderRoute: typeof AuthenticatedPurchaseOrdersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/radiology': {
       id: '/_authenticated/radiology'
       path: '/radiology'
@@ -1538,6 +1558,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPhysicianRoute: typeof AuthenticatedPhysicianRoute
   AuthenticatedProductManagementRoute: typeof AuthenticatedProductManagementRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
+  AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRoute
   AuthenticatedRadiologyRoute: typeof AuthenticatedRadiologyRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
   AuthenticatedReceptionRoute: typeof AuthenticatedReceptionRoute
@@ -1614,6 +1635,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPhysicianRoute: AuthenticatedPhysicianRoute,
   AuthenticatedProductManagementRoute: AuthenticatedProductManagementRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
+  AuthenticatedPurchaseOrdersRoute: AuthenticatedPurchaseOrdersRoute,
   AuthenticatedRadiologyRoute: AuthenticatedRadiologyRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
   AuthenticatedReceptionRoute: AuthenticatedReceptionRoute,

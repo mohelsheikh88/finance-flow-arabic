@@ -251,3 +251,165 @@ export const deleteProduct = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ================= Purchase Orders =================
+
+export const listPurchaseOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("purchase_orders")
+      .select("*")
+      .eq("company_id", data.companyId)
+      .order("order_date", { ascending: false })
+      .order("po_number", { ascending: false });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const getPurchaseOrder = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: po, error: pe } = await context.supabase
+      .from("purchase_orders")
+      .select("*")
+      .eq("id", data.id)
+      .single();
+    if (pe) throw new Error(pe.message);
+    const { data: lines, error: le } = await context.supabase
+      .from("purchase_order_lines")
+      .select("*")
+      .eq("purchase_order_id", data.id)
+      .order("sort_order", { ascending: true });
+    if (le) throw new Error(le.message);
+    return { ...po, lines: lines ?? [] };
+  });
+
+const PoLineSchema = z.object({
+  id: z.string().uuid().optional(),
+  product_id: z.string().uuid().nullable().optional(),
+  description: z.string().max(500).nullable().optional(),
+  quantity: z.number().positive(),
+  uom_id: z.string().uuid().nullable().optional(),
+  unit_price: z.number().min(0),
+  tax_rate: z.number().min(0).max(100).default(0),
+});
+
+const PoUpsertSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  branch_id: z.string().uuid().nullable().optional(),
+  vendor_id: z.string().uuid(),
+  order_date: z.string(),
+  expected_delivery_date: z.string().nullable().optional(),
+  currency_code: z.string().default("SAR"),
+  payment_terms: z.string().max(255).nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  lines: z.array(PoLineSchema).min(1),
+});
+
+function computeTotals(lines: z.infer<typeof PoLineSchema>[]) {
+  let subtotal = 0;
+  let taxTotal = 0;
+  const computed = lines.map((l) => {
+    const base = l.quantity * l.unit_price;
+    const tax = base * (l.tax_rate / 100);
+    subtotal += base;
+    taxTotal += tax;
+    return { ...l, line_total: Math.round((base + tax) * 100) / 100 };
+  });
+  return { computed, subtotal: Math.round(subtotal * 100) / 100, taxTotal: Math.round(taxTotal * 100) / 100 };
+}
+
+export const upsertPurchaseOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => PoUpsertSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const { id, lines, ...header } = data;
+    const { computed, subtotal, taxTotal } = computeTotals(lines);
+    const total = Math.round((subtotal + taxTotal) * 100) / 100;
+
+    let poId: string;
+    if (id) {
+      poId = id;
+      const { error } = await context.supabase
+        .from("purchase_orders")
+        .update({ ...header, subtotal, tax_total: taxTotal, total })
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+      await context.supabase.from("purchase_order_lines").delete().eq("purchase_order_id", id);
+    } else {
+      // Sequential per-company/year numbering: PO-2026-00001
+      const yr = new Date(header.order_date).getFullYear();
+      const { count } = await context.supabase
+        .from("purchase_orders")
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", header.company_id)
+        .gte("order_date", `${yr}-01-01`)
+        .lte("order_date", `${yr}-12-31`);
+      const poNumber = `PO-${yr}-${String((count ?? 0) + 1).padStart(5, "0")}`;
+
+      const { data: created, error } = await context.supabase
+        .from("purchase_orders")
+        .insert({
+          ...header,
+          po_number: poNumber,
+          status: "draft",
+          subtotal,
+          tax_total: taxTotal,
+          total,
+          created_by: context.userId,
+        })
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      poId = created.id;
+    }
+
+    const { error: linesErr } = await context.supabase.from("purchase_order_lines").insert(
+      computed.map((l, i) => ({
+        purchase_order_id: poId,
+        product_id: l.product_id ?? null,
+        description: l.description ?? null,
+        quantity: l.quantity,
+        uom_id: l.uom_id ?? null,
+        unit_price: l.unit_price,
+        tax_rate: l.tax_rate,
+        line_total: l.line_total,
+        sort_order: i,
+      })),
+    );
+    if (linesErr) throw new Error(linesErr.message);
+
+    return { id: poId };
+  });
+
+export const updatePurchaseOrderStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string; status: string }) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["draft", "confirmed", "partially_received", "received", "cancelled"]),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("purchase_orders")
+      .update({ status: data.status })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deletePurchaseOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("purchase_orders").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

@@ -208,6 +208,15 @@ export function useNavGroups(): NavGroup[] {
       hue: 25, // orange — procurement
       subgroups: [
         {
+          key: "purchaseOrders",
+          label: t("nav.purchaseOrders"),
+          icon: FileText,
+          hue: 25,
+          items: [
+            { url: "/purchase-orders", icon: FileText, title: t("nav.purchaseOrders") },
+          ],
+        },
+        {
           key: "purchaseConfiguration",
           label: t("nav.configuration"),
           icon: SlidersHorizontal,

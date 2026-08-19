@@ -2399,6 +2399,108 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_orders: {
+        Row: {
+          id: string
+          company_id: string
+          branch_id: string | null
+          po_number: string
+          vendor_id: string
+          order_date: string
+          expected_delivery_date: string | null
+          status: string
+          currency_code: string
+          subtotal: number
+          tax_total: number
+          total: number
+          payment_terms: string | null
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          branch_id?: string | null
+          po_number: string
+          vendor_id: string
+          order_date?: string
+          expected_delivery_date?: string | null
+          status?: string
+          currency_code?: string
+          subtotal?: number
+          tax_total?: number
+          total?: number
+          payment_terms?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          branch_id?: string | null
+          po_number?: string
+          vendor_id?: string
+          order_date?: string
+          expected_delivery_date?: string | null
+          status?: string
+          currency_code?: string
+          subtotal?: number
+          tax_total?: number
+          total?: number
+          payment_terms?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      purchase_order_lines: {
+        Row: {
+          id: string
+          purchase_order_id: string
+          product_id: string | null
+          description: string | null
+          quantity: number
+          uom_id: string | null
+          unit_price: number
+          tax_rate: number
+          line_total: number
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          purchase_order_id: string
+          product_id?: string | null
+          description?: string | null
+          quantity?: number
+          uom_id?: string | null
+          unit_price?: number
+          tax_rate?: number
+          line_total?: number
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          purchase_order_id?: string
+          product_id?: string | null
+          description?: string | null
+          quantity?: number
+          uom_id?: string | null
+          unit_price?: number
+          tax_rate?: number
+          line_total?: number
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       purchase_categories: {
         Row: {
           id: string
