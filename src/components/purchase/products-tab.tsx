@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useI18n, useLocalized } from "@/i18n";
@@ -28,8 +28,9 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Plus, Pencil, Trash2, ShieldAlert, Snowflake, Boxes, Barcode,
+  Plus, Pencil, Trash2, ShieldAlert, Snowflake, Boxes, Barcode, FileDown, FileUp,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { toast } from "sonner";
 
 // GS1 "restricted circulation" prefix (200-299) is reserved for a
@@ -156,10 +157,147 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
     return pt ? localized(pt, "name") : "—";
   };
 
+  // ===== Export / Import (matches by row `id` — same id on re-import = update) =====
+  const categoryByCode = new Map((categories as any[]).filter((c) => !c.is_group).map((c) => [String(c.code).toLowerCase(), c]));
+  const typeByCode = new Map((productTypes as any[]).map((pt) => [String(pt.code).toLowerCase(), pt]));
+  const uomByCode = new Map((uoms as any[]).map((u: any) => [String(u.code).toLowerCase(), u]));
+  const accountByCode = new Map((accounts as any[]).map((a: any) => [String(a.code).toLowerCase(), a]));
+
+  const handleExport = () => {
+    const data = (products as any[]).map((p) => {
+      const pt = (productTypes as any[]).find((x) => x.id === p.product_type_id);
+      return {
+        id: p.id,
+        code: p.code,
+        name_ar: p.name_ar,
+        name_en: p.name_en,
+        category_code: (categories as any[]).find((c) => c.id === p.category_id)?.code ?? "",
+        product_type_code: pt?.code ?? "",
+        uom_code: (uoms as any[]).find((u: any) => u.id === p.purchase_uom_id)?.code ?? "",
+        expense_account_code: (accounts as any[]).find((a: any) => a.id === p.expense_account_id)?.code ?? "",
+        cost_price: p.cost_price,
+        reorder_point: p.reorder_point ?? "",
+        regulatory_number: p.regulatory_number ?? "",
+        barcode: p.barcode ?? "",
+        requires_batch_tracking: p.requires_batch_tracking ? 1 : 0,
+        requires_expiry_tracking: p.requires_expiry_tracking ? 1 : 0,
+        requires_cold_chain: p.requires_cold_chain ? 1 : 0,
+        is_controlled_substance: p.is_controlled_substance ? 1 : 0,
+        requires_prescription: p.requires_prescription ? 1 : 0,
+        is_active: p.is_active ? 1 : 0,
+        notes: p.notes ?? "",
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(data.length ? data : [{
+      id: "", code: "", name_ar: "", name_en: "", category_code: "", product_type_code: "",
+      uom_code: "", expense_account_code: "", cost_price: 0, reorder_point: "", regulatory_number: "",
+      barcode: "", requires_batch_tracking: 0, requires_expiry_tracking: 0, requires_cold_chain: 0,
+      is_controlled_substance: 0, requires_prescription: 0, is_active: 1, notes: "",
+    }]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "products");
+    XLSX.writeFile(wb, `products_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const handleUploadClick = () => fileInputRef.current?.click();
+
+  const toBool = (v: any) => !["0", "false", "no", "", undefined, null].includes(String(v).trim().toLowerCase());
+
+  const handleFileSelected = async (e: any) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !companyId) return;
+    setImporting(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const jsonRows = XLSX.utils.sheet_to_json(sheet, { defval: "" }) as any[];
+      if (jsonRows.length === 0) { toast.error(t("common.emptyFile") || "Empty file"); return; }
+
+      const existingById = new Map((products as any[]).map((p) => [p.id, p]));
+      let created = 0, updated = 0, failed = 0;
+      const errors: string[] = [];
+
+      for (const raw of jsonRows) {
+        const code = String(raw.code ?? "").trim();
+        const name_ar = String(raw.name_ar ?? "").trim();
+        const name_en = String(raw.name_en ?? "").trim();
+        const category = categoryByCode.get(String(raw.category_code ?? "").trim().toLowerCase());
+        const productType = typeByCode.get(String(raw.product_type_code ?? "").trim().toLowerCase());
+        const regulatory_number = String(raw.regulatory_number ?? "").trim();
+        const barcode = String(raw.barcode ?? "").trim();
+        const rowId = String(raw.id ?? "").trim();
+        const existing = rowId ? existingById.get(rowId) : undefined;
+
+        if (!code || !name_ar || !name_en || !category || !productType || !regulatory_number || !barcode) {
+          failed++; errors.push(code || raw.id || t("common.unnamed") || "row");
+          continue;
+        }
+
+        const uom = uomByCode.get(String(raw.uom_code ?? "").trim().toLowerCase());
+        const expenseAccount = accountByCode.get(String(raw.expense_account_code ?? "").trim().toLowerCase());
+        const reorder = String(raw.reorder_point ?? "").trim();
+
+        if (productType.tracks_inventory ? (!uom || reorder === "") : !expenseAccount) {
+          failed++; errors.push(code);
+          continue;
+        }
+
+        try {
+          await upsertFn({
+            data: {
+              ...(existing ? { id: existing.id } : {}),
+              company_id: companyId,
+              code, name_ar, name_en,
+              category_id: category.id,
+              product_type_id: productType.id,
+              purchase_uom_id: uom?.id ?? null,
+              expense_account_id: expenseAccount?.id ?? null,
+              cost_price: Number(raw.cost_price) || 0,
+              reorder_point: reorder === "" ? null : Number(reorder),
+              regulatory_number, barcode,
+              requires_batch_tracking: toBool(raw.requires_batch_tracking),
+              requires_expiry_tracking: toBool(raw.requires_expiry_tracking),
+              requires_cold_chain: toBool(raw.requires_cold_chain),
+              is_controlled_substance: toBool(raw.is_controlled_substance),
+              requires_prescription: toBool(raw.requires_prescription),
+              is_active: raw.is_active === "" ? true : toBool(raw.is_active),
+              notes: raw.notes ? String(raw.notes) : null,
+            } as any,
+          });
+          if (existing) updated++; else created++;
+        } catch {
+          failed++; errors.push(code);
+        }
+      }
+
+      qc.invalidateQueries({ queryKey: ["products"] });
+      if (failed === 0) {
+        toast.success(`${created} ${t("common.new") || "new"}, ${updated} ${t("common.updated") || "updated"}`);
+      } else {
+        toast.error(`${created + updated} ${t("common.saved")}, ${failed} ${t("common.failed") || "failed"}: ${errors.slice(0, 5).join(", ")}${errors.length > 5 ? "…" : ""}`);
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? t("common.error"));
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className="space-y-3">
+      <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileSelected} />
       {mode === "all" && (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={handleExport} disabled={!companyId}>
+            <FileDown className="h-4 w-4 me-1" />{t("common.export") || "Export"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleUploadClick} disabled={!companyId || importing}>
+            <FileUp className="h-4 w-4 me-1" />{importing ? "…" : (t("common.import") || "Import")}
+          </Button>
           <Button size="sm" onClick={openNew} disabled={!companyId}><Plus className="h-4 w-4 me-1" />{t("purchase.newProduct")}</Button>
         </div>
       )}
