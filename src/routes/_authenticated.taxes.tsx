@@ -20,6 +20,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -402,20 +403,12 @@ function TaxesPage() {
             </div>
             <div className="space-y-1.5">
               <Label>{isRtl ? "حساب الضريبة" : "Tax Account"}</Label>
-              <Select
-                value={form.account_id ?? "__none__"}
-                onValueChange={(v) => setForm({ ...form, account_id: v === "__none__" ? null : v })}
-              >
-                <SelectTrigger><SelectValue placeholder={isRtl ? "اختر حساب..." : "Select account..."} /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">{isRtl ? "بدون" : "None"}</SelectItem>
-                  {taxAccounts.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.code} — {localized(a, "name")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AccountCombobox
+                accounts={taxAccounts}
+                value={form.account_id}
+                onChange={(v) => setForm({ ...form, account_id: v })}
+                placeholder={isRtl ? "اختر حساب..." : "Select account..."}
+              />
             </div>
             <div className="col-span-2 flex items-center gap-3 pt-2">
               <Switch

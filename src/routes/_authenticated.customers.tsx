@@ -21,6 +21,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -589,20 +590,11 @@ function CustomerTypesDialog({
             </div>
             <div className="col-span-6">
               <Label className="text-xs">{t("customers.receivableAccount")}</Label>
-              <Select
-                value={form.receivable_account_id ?? "__none__"}
-                onValueChange={(v) => setForm({ ...form, receivable_account_id: v === "__none__" ? null : v })}
-              >
-                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">— {t("common.none")} —</SelectItem>
-                  {arAccounts.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.code} — {localized(a, "name")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AccountCombobox
+                accounts={arAccounts}
+                value={form.receivable_account_id}
+                onChange={(v) => setForm({ ...form, receivable_account_id: v })}
+              />
             </div>
             <div className="col-span-6 flex justify-end gap-2">
               {form.id && (

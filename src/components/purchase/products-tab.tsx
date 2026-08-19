@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -256,15 +257,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                 ) : (
                   <div>
                     <Label>{t("purchase.expenseAccount")}</Label>
-                    <Select value={form.expense_account_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, expense_account_id: v === "__none__" ? null : v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">—</SelectItem>
-                        {(accounts as any[]).filter((a) => !a.is_group).map((a) => (
-                          <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <AccountCombobox accounts={accounts as any[]} value={form.expense_account_id} onChange={(v) => setForm((f) => ({ ...f, expense_account_id: v }))} />
                   </div>
                 )}
                 <div><Label>{t("purchase.costPrice")}</Label><Input type="number" step="0.01" value={form.cost_price} onChange={(e) => setForm((f) => ({ ...f, cost_price: Number(e.target.value) }))} /></div>

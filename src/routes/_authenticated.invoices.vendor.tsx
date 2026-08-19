@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -327,12 +328,13 @@ function VendorBillsPage() {
                         <tr key={i} className="border-t">
                           <td className="p-1"><Input value={l.description} onChange={(e) => { const n = [...lines]; n[i] = { ...l, description: e.target.value }; setLines(n); }} className="h-8 text-xs" /></td>
                           <td className="p-1">
-                            <Select value={l.account_id} onValueChange={(v) => { const n = [...lines]; n[i] = { ...l, account_id: v }; setLines(n); }}>
-                              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-                              <SelectContent>
-                                {expenseAccounts.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
+                            <AccountCombobox
+                              accounts={expenseAccounts}
+                              value={l.account_id || null}
+                              onChange={(v) => { const n = [...lines]; n[i] = { ...l, account_id: v ?? "" }; setLines(n); }}
+                              allowClear={false}
+                              triggerClassName="h-8 text-xs"
+                            />
                           </td>
                           <td className="p-1"><Input type="number" value={l.quantity} onChange={(e) => { const n = [...lines]; n[i] = { ...l, quantity: Number(e.target.value) }; setLines(n); }} className="h-8 text-xs text-end font-mono" /></td>
                           <td className="p-1"><Input type="number" value={l.unit_price} onChange={(e) => { const n = [...lines]; n[i] = { ...l, unit_price: Number(e.target.value) }; setLines(n); }} className="h-8 text-xs text-end font-mono" /></td>

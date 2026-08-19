@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import {
   Dialog,
   DialogContent,
@@ -537,46 +538,22 @@ function JournalsPage() {
 
             <div className="col-span-2">
               <Label>{t("common.defaultDebitAccount")}</Label>
-              <Select
-                value={form.default_debit_account_id || NONE}
-                onValueChange={(v) =>
-                  setForm({ ...form, default_debit_account_id: v === NONE ? "" : v })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("common.select")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NONE}>{t("common.none")}</SelectItem>
-                  {leafAccounts.map((a: any) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.code} — {localized(a, "name")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AccountCombobox
+                accounts={leafAccounts}
+                value={form.default_debit_account_id || null}
+                onChange={(v) => setForm({ ...form, default_debit_account_id: v ?? "" })}
+                placeholder={t("common.select")}
+              />
             </div>
 
             <div className="col-span-2">
               <Label>{t("common.defaultCreditAccount")}</Label>
-              <Select
-                value={form.default_credit_account_id || NONE}
-                onValueChange={(v) =>
-                  setForm({ ...form, default_credit_account_id: v === NONE ? "" : v })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("common.select")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NONE}>{t("common.none")}</SelectItem>
-                  {leafAccounts.map((a: any) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.code} — {localized(a, "name")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AccountCombobox
+                accounts={leafAccounts}
+                value={form.default_credit_account_id || null}
+                onChange={(v) => setForm({ ...form, default_credit_account_id: v ?? "" })}
+                placeholder={t("common.select")}
+              />
             </div>
           </div>
 

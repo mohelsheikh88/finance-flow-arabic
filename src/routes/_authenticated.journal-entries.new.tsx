@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import { Plus, Trash2, Save, Check, Info } from "lucide-react";
 import { toast } from "sonner";
 import { formatLockError } from "@/lib/lock-error";
@@ -180,12 +181,14 @@ function NewJEPage() {
                 <tr key={i} className="border-t">
                   <td className="p-1 text-center text-muted-foreground">{i + 1}</td>
                   <td className="p-1">
-                    <Select value={l.account_id} onValueChange={(v) => updLine(i, { account_id: v })}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={t("je.account")} /></SelectTrigger>
-                      <SelectContent>
-                        {postableAccounts.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <AccountCombobox
+                      accounts={postableAccounts}
+                      value={l.account_id || null}
+                      onChange={(v) => updLine(i, { account_id: v ?? "" })}
+                      allowClear={false}
+                      placeholder={t("je.account")}
+                      triggerClassName="h-8 text-xs"
+                    />
                   </td>
                   <td className="p-1">
                     <Select value={l.partner_id ?? ""} onValueChange={(v) => updLine(i, { partner_id: v || undefined })}>

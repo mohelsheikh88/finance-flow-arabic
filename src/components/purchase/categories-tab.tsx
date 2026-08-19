@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -149,23 +150,11 @@ export function CategoriesTab() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("purchase.stockInputAccount")}</Label>
-                <Select value={form.stock_input_account_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, stock_input_account_id: v === "__none__" ? null : v }))}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">—</SelectItem>
-                    {postableAccounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <AccountCombobox accounts={postableAccounts} value={form.stock_input_account_id} onChange={(v) => setForm((f) => ({ ...f, stock_input_account_id: v }))} />
               </div>
               <div>
                 <Label>{t("purchase.stockOutputAccount")}</Label>
-                <Select value={form.stock_output_account_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, stock_output_account_id: v === "__none__" ? null : v }))}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">—</SelectItem>
-                    {postableAccounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <AccountCombobox accounts={postableAccounts} value={form.stock_output_account_id} onChange={(v) => setForm((f) => ({ ...f, stock_output_account_id: v }))} />
               </div>
             </div>
             <div className="flex items-center gap-2">

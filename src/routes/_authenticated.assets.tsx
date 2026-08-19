@@ -18,6 +18,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import { Briefcase, Plus, Eye, PlayCircle } from "lucide-react";
 
 import { toast } from "sonner";
@@ -188,22 +189,13 @@ function AssetsPage() {
                 <div><Label>{t("common.nameAr")}</Label><Input value={catForm.name_ar} onChange={(e) => setCatForm({ ...catForm, name_ar: e.target.value })} /></div>
                 <div><Label>{t("common.nameEn")}</Label><Input value={catForm.name_en} onChange={(e) => setCatForm({ ...catForm, name_en: e.target.value })} /></div>
                 <div className="col-span-2"><Label>{t("assets.assetAccount")}</Label>
-                  <Select value={catForm.asset_account_id} onValueChange={(v) => setCatForm({ ...catForm, asset_account_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{leafAccounts.filter((a) => a.account_type === "asset").map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <AccountCombobox accounts={leafAccounts.filter((a) => a.account_type === "asset")} value={catForm.asset_account_id || null} onChange={(v) => setCatForm({ ...catForm, asset_account_id: v ?? "" })} allowClear={false} />
                 </div>
                 <div className="col-span-2"><Label>{t("assets.depAccount")}</Label>
-                  <Select value={catForm.depreciation_account_id} onValueChange={(v) => setCatForm({ ...catForm, depreciation_account_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{leafAccounts.filter((a) => a.account_type === "expense").map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <AccountCombobox accounts={leafAccounts.filter((a) => a.account_type === "expense")} value={catForm.depreciation_account_id || null} onChange={(v) => setCatForm({ ...catForm, depreciation_account_id: v ?? "" })} allowClear={false} />
                 </div>
                 <div className="col-span-2"><Label>{t("assets.accAccount")}</Label>
-                  <Select value={catForm.accumulated_depreciation_account_id} onValueChange={(v) => setCatForm({ ...catForm, accumulated_depreciation_account_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{leafAccounts.filter((a) => a.account_type === "asset").map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <AccountCombobox accounts={leafAccounts.filter((a) => a.account_type === "asset")} value={catForm.accumulated_depreciation_account_id || null} onChange={(v) => setCatForm({ ...catForm, accumulated_depreciation_account_id: v ?? "" })} allowClear={false} />
                 </div>
               </div>
               <DialogFooter><Button onClick={() => createCatMut.mutate()} disabled={createCatMut.isPending}>{t("common.save")}</Button></DialogFooter>

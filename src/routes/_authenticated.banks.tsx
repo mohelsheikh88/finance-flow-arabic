@@ -14,6 +14,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AccountCombobox } from "@/components/account-combobox";
 import { Plus, Landmark } from "lucide-react";
 import { toast } from "sonner";
 
@@ -109,14 +110,7 @@ function BanksPage() {
               <div><Label>{t("common.currency")}</Label><Input dir="ltr" value={form.currency_code} onChange={(e) => setForm({ ...form, currency_code: e.target.value.toUpperCase() })} maxLength={3} /></div>
               <div>
                 <Label>{t("banks.glAccount")}</Label>
-                <Select value={form.gl_account_id} onValueChange={(v) => setForm({ ...form, gl_account_id: v })}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>
-                    {cashAccounts.map((a: any) => (
-                      <SelectItem key={a.id} value={a.id}>{a.code} — {localized(a, "name")}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AccountCombobox accounts={cashAccounts} value={form.gl_account_id || null} onChange={(v) => setForm({ ...form, gl_account_id: v ?? "" })} allowClear={false} />
               </div>
               <div>
                 <Label>{t("banks.journal")}</Label>
