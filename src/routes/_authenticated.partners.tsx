@@ -526,12 +526,12 @@ function CustomerTypesPanel({ arAccounts, companyId }: { arAccounts: any[]; comp
           <div className="col-span-2"><Label className="text-xs">{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
           <div className="col-span-1 flex items-center gap-2 pb-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label className="text-xs">{t("common.active")}</Label></div>
           <div className="col-span-6">
-            <Label className="text-xs">{t("customers.receivableAccount")}</Label>
+            <Label className="text-xs">{t("customers.receivableAccount")} *</Label>
             <AccountCombobox accounts={arAccounts} value={form.receivable_account_id} onChange={(v) => setForm({ ...form, receivable_account_id: v })} />
           </div>
           <div className="col-span-6 flex justify-end gap-2">
             {form.id && <Button variant="outline" size="sm" onClick={() => setForm(ctEmpty)}>{t("common.cancel")}</Button>}
-            <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en}>
+            <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en || !form.receivable_account_id}>
               <Plus className="h-4 w-4 me-1" />{form.id ? t("common.save") : t("common.add")}
             </Button>
           </div>
@@ -618,12 +618,12 @@ function VendorTypesPanel({ apAccounts, companyId }: { apAccounts: any[]; compan
           <div className="col-span-2"><Label className="text-xs">{t("common.nameEn")} *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
           <div className="col-span-1 flex items-center gap-2 pb-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label className="text-xs">{t("common.active")}</Label></div>
           <div className="col-span-6">
-            <Label className="text-xs">{t("partners.payableAccount")}</Label>
+            <Label className="text-xs">{t("partners.payableAccount")} *</Label>
             <AccountCombobox accounts={apAccounts} value={form.payable_account_id} onChange={(v) => setForm({ ...form, payable_account_id: v })} />
           </div>
           <div className="col-span-6 flex justify-end gap-2">
             {form.id && <Button variant="outline" size="sm" onClick={() => setForm(vgEmpty)}>{t("common.cancel")}</Button>}
-            <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en}>
+            <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.code || !form.name_ar || !form.name_en || !form.payable_account_id}>
               <Plus className="h-4 w-4 me-1" />{form.id ? t("common.save") : t("common.add")}
             </Button>
           </div>
