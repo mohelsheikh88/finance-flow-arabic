@@ -62,6 +62,20 @@ export function CategoriesTab() {
   }, [rows]);
   const roots = tree["__root__"] ?? [];
 
+  // A category can't become its own parent, nor the parent of one of its
+  // own descendants (that would create a cycle in the tree).
+  const getDescendantIds = (id: string): Set<string> => {
+    const out = new Set<string>();
+    const walk = (nodeId: string) => {
+      for (const child of tree[nodeId] ?? []) {
+        out.add(child.id);
+        walk(child.id);
+      }
+    };
+    walk(id);
+    return out;
+  };
+
   const empty = {
     id: undefined as string | undefined, parent_id: null as string | null, code: "", name_ar: "", name_en: "",
     is_group: false, is_active: true, notes: "",
@@ -124,6 +138,23 @@ export function CategoriesTab() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{form.id ? t("common.edit") : t("purchase.newCategory")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
+            <div>
+              <Label>{t("purchase.parentCategory")}</Label>
+              <Select
+                value={form.parent_id ?? "__none__"}
+                onValueChange={(v) => setForm((f) => ({ ...f, parent_id: v === "__none__" ? null : v }))}
+              >
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">{t("purchase.noParentRoot")}</SelectItem>
+                  {(rows as any[])
+                    .filter((r) => r.id !== form.id && !(form.id ? getDescendantIds(form.id).has(r.id) : false))
+                    .map((r) => (
+                      <SelectItem key={r.id} value={r.id}>{r.code} — {localized(r, "name")}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>{t("common.code")}</Label><Input value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} dir="ltr" /></div>
               <div className="flex items-center gap-2 pt-6">
