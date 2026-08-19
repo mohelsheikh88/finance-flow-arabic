@@ -252,6 +252,22 @@ export const deleteProduct = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ================= Warehouses (placeholder until Inventory owns them) =================
+
+export const listWarehouses = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("warehouses")
+      .select("*")
+      .eq("company_id", data.companyId)
+      .eq("is_active", true)
+      .order("code");
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
 // ================= Purchase Orders =================
 
 export const listPurchaseOrders = createServerFn({ method: "GET" })
@@ -306,6 +322,8 @@ const PoUpsertSchema = z.object({
   company_id: z.string().uuid(),
   branch_id: z.string().uuid().nullable().optional(),
   vendor_id: z.string().uuid(),
+  vendor_reference: z.string().max(100).nullable().optional(),
+  warehouse_id: z.string().uuid().nullable().optional(),
   order_date: z.string(),
   expected_delivery_date: z.string().nullable().optional(),
   currency_code: z.string().default("SAR"),

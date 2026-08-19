@@ -2399,6 +2399,42 @@ export type Database = {
         }
         Relationships: []
       }
+      warehouses: {
+        Row: {
+          id: string
+          company_id: string
+          branch_id: string | null
+          code: string
+          name_ar: string
+          name_en: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          branch_id?: string | null
+          code: string
+          name_ar: string
+          name_en: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          branch_id?: string | null
+          code?: string
+          name_ar?: string
+          name_en?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       purchase_orders: {
         Row: {
           id: string
@@ -2406,6 +2442,8 @@ export type Database = {
           branch_id: string | null
           po_number: string
           vendor_id: string
+          vendor_reference: string | null
+          warehouse_id: string | null
           order_date: string
           expected_delivery_date: string | null
           status: string
@@ -2426,6 +2464,8 @@ export type Database = {
           branch_id?: string | null
           po_number: string
           vendor_id: string
+          vendor_reference?: string | null
+          warehouse_id?: string | null
           order_date?: string
           expected_delivery_date?: string | null
           status?: string
@@ -2446,6 +2486,8 @@ export type Database = {
           branch_id?: string | null
           po_number?: string
           vendor_id?: string
+          vendor_reference?: string | null
+          warehouse_id?: string | null
           order_date?: string
           expected_delivery_date?: string | null
           status?: string

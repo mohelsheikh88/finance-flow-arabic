@@ -12,6 +12,7 @@ import {
   deletePurchaseOrder,
   listProducts,
   listUnitsOfMeasure,
+  listWarehouses,
 } from "@/lib/api/purchase.functions";
 import { listPartners } from "@/lib/api/accounting.functions";
 import { listTaxes } from "@/lib/api/vat.functions";
@@ -60,6 +61,7 @@ function Page() {
   const listUomFn = useServerFn(listUnitsOfMeasure);
   const listTaxesFn = useServerFn(listTaxes);
   const listTermsFn = useServerFn(listPaymentTerms);
+  const listWarehousesFn = useServerFn(listWarehouses);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["purchase_orders", companyId],
@@ -93,6 +95,11 @@ function Page() {
     queryFn: () => listTermsFn({ data: { companyId: companyId! } } as any),
     enabled: !!companyId,
   });
+  const { data: warehouses = [] } = useQuery({
+    queryKey: ["warehouses_for_po", companyId],
+    queryFn: () => listWarehousesFn({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
 
   const vendorName = (id: string) => {
     const v = vendors.find((v: any) => v.id === id);
@@ -107,6 +114,8 @@ function Page() {
   const empty = {
     id: undefined as string | undefined,
     vendor_id: "",
+    vendor_reference: "",
+    warehouse_id: null as string | null,
     order_date: new Date().toISOString().slice(0, 10),
     expected_delivery_date: "",
     payment_term_id: null as string | null,
@@ -124,6 +133,8 @@ function Page() {
     setForm({
       id: po.id,
       vendor_id: po.vendor_id,
+      vendor_reference: po.vendor_reference ?? "",
+      warehouse_id: po.warehouse_id ?? null,
       order_date: po.order_date,
       expected_delivery_date: po.expected_delivery_date ?? "",
       payment_term_id: po.payment_term_id ?? null,
@@ -186,6 +197,8 @@ function Page() {
           company_id: companyId!,
           branch_id: branchId ?? null,
           vendor_id: form.vendor_id,
+          vendor_reference: form.vendor_reference || null,
+          warehouse_id: form.warehouse_id,
           order_date: form.order_date,
           expected_delivery_date: form.expected_delivery_date || null,
           payment_term_id: form.payment_term_id,
@@ -313,6 +326,23 @@ function Page() {
               <div>
                 <Label>{t("purchase.expectedDelivery")}</Label>
                 <Input type="date" value={form.expected_delivery_date} onChange={(e) => setForm((f) => ({ ...f, expected_delivery_date: e.target.value }))} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t("purchase.vendorReference")}</Label>
+                <Input value={form.vendor_reference} onChange={(e) => setForm((f) => ({ ...f, vendor_reference: e.target.value }))} dir="ltr" />
+              </div>
+              <div>
+                <Label>{t("purchase.deliverTo")}</Label>
+                <Select value={form.warehouse_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, warehouse_id: v === "__none__" ? null : v }))}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">—</SelectItem>
+                    {(warehouses as any[]).map((w) => <SelectItem key={w.id} value={w.id}>{w.code} — {localized(w, "name")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
