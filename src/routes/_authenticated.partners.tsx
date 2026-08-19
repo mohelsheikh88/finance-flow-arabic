@@ -236,11 +236,14 @@ function PartnersListTab() {
     onError: (e: Error) => { toast.error(e.message); setDeleteId(null); },
   });
 
+  const vatError = !!form.vat_number && !/^3\d{13}3$/.test(form.vat_number);
+
   const canSave = !!(
     form.code && form.name_ar && form.name_en &&
     (form.is_customer || form.is_vendor) &&
     (!form.is_customer || form.customer_type_id) &&
-    (!form.is_vendor || form.vendor_group_id)
+    (!form.is_vendor || form.vendor_group_id) &&
+    !vatError
   );
 
   return (
@@ -339,7 +342,17 @@ function PartnersListTab() {
                 </div>
               )}
 
-              <div><Label>{t("partners.vatNumber")}</Label><Input dir="ltr" value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} /></div>
+              <div>
+                <Label>{t("partners.vatNumber")}</Label>
+                <Input
+                  dir="ltr"
+                  value={form.vat_number}
+                  maxLength={15}
+                  onChange={(e) => setForm({ ...form, vat_number: e.target.value.replace(/[^0-9]/g, "") })}
+                  className={vatError ? "border-destructive focus-visible:ring-destructive" : undefined}
+                />
+                {vatError && <p className="text-xs text-destructive mt-1">{t("partners.vatInvalid")}</p>}
+              </div>
               <div>
                 <Label>{t("partners.country")}</Label>
                 <Select value={form.country ?? "__none__"} onValueChange={(v) => setForm({ ...form, country: v === "__none__" ? null : v })}>

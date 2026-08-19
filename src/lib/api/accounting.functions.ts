@@ -629,7 +629,10 @@ const CreatePartnerSchema = z.object({
   name_en: z.string().min(1).max(255),
   is_customer: z.boolean(),
   is_vendor: z.boolean(),
-  vat_number: z.string().max(50).optional().nullable(),
+  vat_number: z.string().max(50).optional().nullable()
+    .refine((v) => !v || /^3\d{13}3$/.test(v), {
+      message: "VAT number must be 15 digits, starting and ending with 3 (Saudi ZATCA format)",
+    }),
   email: z.string().email().max(255).optional().nullable().or(z.literal("")),
   phone: z.string().max(50).optional().nullable(),
   address_ar: z.string().max(500).optional().nullable(),
@@ -654,6 +657,15 @@ export const createPartner = createServerFn({ method: "POST" })
     if (data.is_vendor && !data.vendor_group_id) {
       throw new Error("Vendor Type is required for vendors");
     }
+    if (data.vat_number) {
+      const { data: dup } = await context.supabase
+        .from("partners")
+        .select("id")
+        .eq("company_id", data.company_id)
+        .eq("vat_number", data.vat_number)
+        .maybeSingle();
+      if (dup) throw new Error("This VAT number is already used by another partner");
+    }
     const { data: row, error } = await context.supabase
       .from("partners")
       .insert(data)
@@ -677,6 +689,23 @@ export const updatePartner = createServerFn({ method: "POST" })
     }
     if (patch.is_vendor && !patch.vendor_group_id) {
       throw new Error("Vendor Type is required for vendors");
+    }
+    if (patch.vat_number) {
+      const { data: current } = await context.supabase
+        .from("partners")
+        .select("company_id")
+        .eq("id", id)
+        .single();
+      if (current) {
+        const { data: dup } = await context.supabase
+          .from("partners")
+          .select("id")
+          .eq("company_id", current.company_id)
+          .eq("vat_number", patch.vat_number)
+          .neq("id", id)
+          .maybeSingle();
+        if (dup) throw new Error("This VAT number is already used by another partner");
+      }
     }
     const { data: row, error } = await context.supabase
       .from("partners")
