@@ -163,6 +163,25 @@ export function AppSidebar() {
           </SidebarGroup>
         ) : (
           <SidebarGroup className="sidebar-grandparent mb-1.5 p-0">
+            {/* Module title — bigger font than the sub-modules below, with a 3D icon badge beside the name */}
+            <div
+              className="relative flex items-center gap-2.5 px-1 py-2 mb-2"
+              style={{ ["--hue" as any]: activeGroup?.hue ?? 200 }}
+            >
+              {ScopeIcon && (
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg
+                             bg-gradient-to-br from-[hsl(var(--hue)_75%_58%)] to-[hsl(var(--hue)_80%_36%)]
+                             shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.5),inset_0_-2.5px_3px_rgba(0,0,0,0.3),0_3px_6px_-1px_rgba(0,0,0,0.4)]"
+                >
+                  <ScopeIcon className="h-[19px] w-[19px] text-white drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.4)]" />
+                </div>
+              )}
+              <span className="flex-1 min-w-0 truncate text-start text-[19px] font-bold tracking-tight text-white/95">
+                {scopeLabel}
+              </span>
+            </div>
+
             <SidebarGroupContent className="relative ms-2 ps-2 sm:ms-3 sm:ps-3 border-s border-dashed border-sidebar-border/70">
               {scopeSubgroups?.map((sg) => {
                 const subActive = sg.items.some((it) => isActive(it.url));
