@@ -97,7 +97,17 @@ export function AppSidebar() {
             </div>
           ) : (
             <div className="flex items-stretch gap-2 w-full">
-              {/* Home Screen — now the light, glossy 3D-icon card */}
+              {/* Current module indicator — where you are, not a navigation control */}
+              <div
+                className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-2.5
+                           bg-[hsl(158,70%,45%)]/[0.12] border border-[hsl(158,70%,50%)]/25
+                           text-[hsl(158,85%,72%)]"
+              >
+                {ScopeIcon && <ScopeIcon className="h-6 w-6" />}
+                <span className="text-[11.5px] font-bold tracking-tight leading-none truncate max-w-full px-1">{scopeLabel}</span>
+              </div>
+
+              {/* Home Screen — light, glossy 3D-icon card */}
               <Link
                 to="/apps"
                 viewTransition
@@ -117,16 +127,6 @@ export function AppSidebar() {
                   {t("nav.homeScreen")}
                 </span>
               </Link>
-
-              {/* Current module indicator — where you are, not a navigation control */}
-              <div
-                className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-2.5
-                           bg-[hsl(158,70%,45%)]/[0.12] border border-[hsl(158,70%,50%)]/25
-                           text-[hsl(158,85%,72%)]"
-              >
-                {ScopeIcon && <ScopeIcon className="h-6 w-6" />}
-                <span className="text-[11.5px] font-bold tracking-tight leading-none truncate max-w-full px-1">{scopeLabel}</span>
-              </div>
             </div>
           )}
         </div>
