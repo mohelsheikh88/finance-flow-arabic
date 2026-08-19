@@ -14,6 +14,8 @@ import {
   listUnitsOfMeasure,
 } from "@/lib/api/purchase.functions";
 import { listPartners } from "@/lib/api/accounting.functions";
+import { listTaxes } from "@/lib/api/vat.functions";
+import { listPaymentTerms } from "@/lib/api/payment-terms.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +58,8 @@ function Page() {
   const listPartnersFn = useServerFn(listPartners);
   const listProductsFn = useServerFn(listProducts);
   const listUomFn = useServerFn(listUnitsOfMeasure);
+  const listTaxesFn = useServerFn(listTaxes);
+  const listTermsFn = useServerFn(listPaymentTerms);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["purchase_orders", companyId],
@@ -78,20 +82,34 @@ function Page() {
     queryFn: () => listUomFn({ data: { companyId: companyId! } }),
     enabled: !!companyId,
   });
+  const { data: allTaxes = [] } = useQuery({
+    queryKey: ["taxes_for_po", companyId],
+    queryFn: () => listTaxesFn({ data: { companyId: companyId! } } as any),
+    enabled: !!companyId,
+  });
+  const purchaseTaxes = (allTaxes as any[]).filter((t) => t.tax_type === "purchase" && t.is_active);
+  const { data: paymentTerms = [] } = useQuery({
+    queryKey: ["payment_terms_for_po", companyId],
+    queryFn: () => listTermsFn({ data: { companyId: companyId! } } as any),
+    enabled: !!companyId,
+  });
 
   const vendorName = (id: string) => {
     const v = vendors.find((v: any) => v.id === id);
     return v ? `${v.code} — ${localized(v, "name")}` : "—";
   };
 
-  type Line = { id?: string; product_id: string | null; description: string; quantity: number; uom_id: string | null; unit_price: number; tax_rate: number };
-  const emptyLine: Line = { product_id: null, description: "", quantity: 1, uom_id: null, unit_price: 0, tax_rate: 0 };
+  type Line = {
+    id?: string; product_id: string | null; description: string; quantity: number; uom_id: string | null;
+    unit_price: number; bonus: number; discount1_pct: number; discount2_pct: number; tax_id: string | null; tax_rate: number;
+  };
+  const emptyLine: Line = { product_id: null, description: "", quantity: 1, uom_id: null, unit_price: 0, bonus: 0, discount1_pct: 0, discount2_pct: 0, tax_id: null, tax_rate: 0 };
   const empty = {
     id: undefined as string | undefined,
     vendor_id: "",
     order_date: new Date().toISOString().slice(0, 10),
     expected_delivery_date: "",
-    payment_terms: "",
+    payment_term_id: null as string | null,
     notes: "",
     lines: [{ ...emptyLine }] as Line[],
   };
@@ -108,11 +126,13 @@ function Page() {
       vendor_id: po.vendor_id,
       order_date: po.order_date,
       expected_delivery_date: po.expected_delivery_date ?? "",
-      payment_terms: po.payment_terms ?? "",
+      payment_term_id: po.payment_term_id ?? null,
       notes: po.notes ?? "",
       lines: po.lines.map((l: any) => ({
         id: l.id, product_id: l.product_id, description: l.description ?? "",
-        quantity: Number(l.quantity), uom_id: l.uom_id, unit_price: Number(l.unit_price), tax_rate: Number(l.tax_rate),
+        quantity: Number(l.quantity), uom_id: l.uom_id, unit_price: Number(l.unit_price),
+        bonus: Number(l.bonus ?? 0), discount1_pct: Number(l.discount1_pct ?? 0), discount2_pct: Number(l.discount2_pct ?? 0),
+        tax_id: l.tax_id ?? null, tax_rate: Number(l.tax_rate ?? 0),
       })),
     });
     setOpen(true);
@@ -133,12 +153,26 @@ function Page() {
     });
   };
 
+  const onTaxPick = (idx: number, taxId: string) => {
+    const tx = purchaseTaxes.find((t: any) => t.id === taxId);
+    setLine(idx, { tax_id: taxId === "__none__" ? null : taxId, tax_rate: tx ? Number(tx.rate) : 0 });
+  };
+
+  const lineTotal = (l: Line) => {
+    const base = (l.quantity || 0) * (l.unit_price || 0);
+    const afterDisc1 = base * (1 - (l.discount1_pct || 0) / 100);
+    const afterDisc2 = afterDisc1 * (1 - (l.discount2_pct || 0) / 100);
+    return afterDisc2 * (1 + (l.tax_rate || 0) / 100);
+  };
+
   const totals = useMemo(() => {
     let subtotal = 0, tax = 0;
     for (const l of form.lines) {
       const base = (l.quantity || 0) * (l.unit_price || 0);
-      subtotal += base;
-      tax += base * ((l.tax_rate || 0) / 100);
+      const afterDisc1 = base * (1 - (l.discount1_pct || 0) / 100);
+      const afterDisc2 = afterDisc1 * (1 - (l.discount2_pct || 0) / 100);
+      subtotal += afterDisc2;
+      tax += afterDisc2 * ((l.tax_rate || 0) / 100);
     }
     return { subtotal, tax, total: subtotal + tax };
   }, [form.lines]);
@@ -154,7 +188,7 @@ function Page() {
           vendor_id: form.vendor_id,
           order_date: form.order_date,
           expected_delivery_date: form.expected_delivery_date || null,
-          payment_terms: form.payment_terms || null,
+          payment_term_id: form.payment_term_id,
           notes: form.notes || null,
           lines: form.lines
             .filter((l) => l.product_id || l.description)
@@ -165,7 +199,11 @@ function Page() {
               quantity: Number(l.quantity),
               uom_id: l.uom_id,
               unit_price: Number(l.unit_price),
-              tax_rate: Number(l.tax_rate),
+              bonus: Number(l.bonus) || 0,
+              discount1_pct: Number(l.discount1_pct) || 0,
+              discount2_pct: Number(l.discount2_pct) || 0,
+              tax_id: l.tax_id,
+              tax_rate: Number(l.tax_rate) || 0,
             })),
         },
       });
@@ -283,54 +321,64 @@ function Page() {
                 <Label className="text-xs font-semibold">{t("purchase.lines")}</Label>
                 <Button size="sm" variant="outline" onClick={addLine}><Plus className="h-3.5 w-3.5 me-1" />{t("purchase.addLine")}</Button>
               </div>
-              <div className="border rounded-md overflow-hidden">
-                <table className="w-full text-xs">
+              <div className="border rounded-md overflow-x-auto">
+                <table className="w-full text-xs min-w-[880px]">
                   <thead className="bg-muted/40">
                     <tr>
                       <th className="p-2 text-start">{t("purchase.product")}</th>
-                      <th className="p-2 text-start w-20">{t("purchase.qty")}</th>
-                      <th className="p-2 text-start w-28">{t("purchase.uom")}</th>
-                      <th className="p-2 text-start w-24">{t("purchase.unitPrice")}</th>
-                      <th className="p-2 text-start w-20">{t("purchase.taxPct")}</th>
+                      <th className="p-2 text-start w-16">{t("purchase.qty")}</th>
+                      <th className="p-2 text-start w-24">{t("purchase.uom")}</th>
+                      <th className="p-2 text-start w-20">{t("purchase.unitPrice")}</th>
+                      <th className="p-2 text-start w-16">{t("purchase.bonus")}</th>
+                      <th className="p-2 text-start w-16">{t("purchase.disc1")}</th>
+                      <th className="p-2 text-start w-16">{t("purchase.disc2")}</th>
+                      <th className="p-2 text-start w-28">{t("purchase.tax")}</th>
                       <th className="p-2 text-end w-24">{t("purchase.lineTotal")}</th>
                       <th className="p-2 w-8"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {form.lines.map((l, idx) => {
-                      const base = (l.quantity || 0) * (l.unit_price || 0);
-                      const lineTotal = base * (1 + (l.tax_rate || 0) / 100);
-                      return (
-                        <tr key={idx} className="border-t">
-                          <td className="p-1.5">
-                            <Select value={l.product_id ?? "__none__"} onValueChange={(v) => onProductPick(idx, v)}>
-                              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-                              <SelectContent>
-                                {(products as any[]).map((p) => <SelectItem key={p.id} value={p.id}>{p.code} — {localized(p, "name")}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          </td>
-                          <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.quantity} onChange={(e) => setLine(idx, { quantity: Number(e.target.value) })} /></td>
-                          <td className="p-1.5">
-                            <Select value={l.uom_id ?? "__none__"} onValueChange={(v) => setLine(idx, { uom_id: v === "__none__" ? null : v })}>
-                              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="__none__">—</SelectItem>
-                                {(uoms as any[]).map((u) => <SelectItem key={u.id} value={u.id}>{localized(u, "name")}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          </td>
-                          <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.unit_price} onChange={(e) => setLine(idx, { unit_price: Number(e.target.value) })} /></td>
-                          <td className="p-1.5"><Input type="number" step="0.1" className="h-8 text-xs" value={l.tax_rate} onChange={(e) => setLine(idx, { tax_rate: Number(e.target.value) })} /></td>
-                          <td className="p-1.5 text-end font-mono">{lineTotal.toFixed(2)}</td>
-                          <td className="p-1.5">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeLine(idx)} disabled={form.lines.length === 1}>
-                              <X className="h-3.5 w-3.5" />
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {form.lines.map((l, idx) => (
+                      <tr key={idx} className="border-t">
+                        <td className="p-1.5">
+                          <Select value={l.product_id ?? "__none__"} onValueChange={(v) => onProductPick(idx, v)}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+                            <SelectContent>
+                              {(products as any[]).map((p) => <SelectItem key={p.id} value={p.id}>{p.code} — {localized(p, "name")}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.quantity} onChange={(e) => setLine(idx, { quantity: Number(e.target.value) })} /></td>
+                        <td className="p-1.5">
+                          <Select value={l.uom_id ?? "__none__"} onValueChange={(v) => setLine(idx, { uom_id: v === "__none__" ? null : v })}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="__none__">—</SelectItem>
+                              {(uoms as any[]).map((u) => <SelectItem key={u.id} value={u.id}>{localized(u, "name")}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.unit_price} onChange={(e) => setLine(idx, { unit_price: Number(e.target.value) })} /></td>
+                        <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.bonus} onChange={(e) => setLine(idx, { bonus: Number(e.target.value) })} title={t("purchase.bonusHint")} /></td>
+                        <td className="p-1.5"><Input type="number" step="0.1" className="h-8 text-xs" value={l.discount1_pct} onChange={(e) => setLine(idx, { discount1_pct: Number(e.target.value) })} /></td>
+                        <td className="p-1.5"><Input type="number" step="0.1" className="h-8 text-xs" value={l.discount2_pct} onChange={(e) => setLine(idx, { discount2_pct: Number(e.target.value) })} /></td>
+                        <td className="p-1.5">
+                          <Select value={l.tax_id ?? "__none__"} onValueChange={(v) => onTaxPick(idx, v)}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="__none__">—</SelectItem>
+                              {purchaseTaxes.map((tx: any) => <SelectItem key={tx.id} value={tx.id}>{localized(tx, "name")} ({Number(tx.rate)}%)</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="p-1.5 text-end font-mono">{lineTotal(l).toFixed(2)}</td>
+                        <td className="p-1.5">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeLine(idx)} disabled={form.lines.length === 1}>
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -344,7 +392,16 @@ function Page() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>{t("purchase.paymentTerms")}</Label><Input value={form.payment_terms} onChange={(e) => setForm((f) => ({ ...f, payment_terms: e.target.value }))} /></div>
+              <div>
+                <Label>{t("purchase.paymentTerms")}</Label>
+                <Select value={form.payment_term_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, payment_term_id: v === "__none__" ? null : v }))}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">—</SelectItem>
+                    {(paymentTerms as any[]).map((pt) => <SelectItem key={pt.id} value={pt.id}>{localized(pt, "name")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label>{t("common.notes")}</Label><Textarea rows={1} value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></div>
             </div>
           </div>

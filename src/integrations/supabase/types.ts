@@ -2414,6 +2414,7 @@ export type Database = {
           tax_total: number
           total: number
           payment_terms: string | null
+          payment_term_id: string | null
           notes: string | null
           created_by: string | null
           created_at: string
@@ -2433,6 +2434,7 @@ export type Database = {
           tax_total?: number
           total?: number
           payment_terms?: string | null
+          payment_term_id?: string | null
           notes?: string | null
           created_by?: string | null
           created_at?: string
@@ -2452,6 +2454,7 @@ export type Database = {
           tax_total?: number
           total?: number
           payment_terms?: string | null
+          payment_term_id?: string | null
           notes?: string | null
           created_by?: string | null
           created_at?: string
@@ -2468,6 +2471,10 @@ export type Database = {
           quantity: number
           uom_id: string | null
           unit_price: number
+          bonus: number
+          discount1_pct: number
+          discount2_pct: number
+          tax_id: string | null
           tax_rate: number
           line_total: number
           sort_order: number
@@ -2481,6 +2488,10 @@ export type Database = {
           quantity?: number
           uom_id?: string | null
           unit_price?: number
+          bonus?: number
+          discount1_pct?: number
+          discount2_pct?: number
+          tax_id?: string | null
           tax_rate?: number
           line_total?: number
           sort_order?: number
@@ -2494,6 +2505,10 @@ export type Database = {
           quantity?: number
           uom_id?: string | null
           unit_price?: number
+          bonus?: number
+          discount1_pct?: number
+          discount2_pct?: number
+          tax_id?: string | null
           tax_rate?: number
           line_total?: number
           sort_order?: number

@@ -294,6 +294,10 @@ const PoLineSchema = z.object({
   quantity: z.number().positive(),
   uom_id: z.string().uuid().nullable().optional(),
   unit_price: z.number().min(0),
+  bonus: z.number().min(0).default(0),
+  discount1_pct: z.number().min(0).max(100).default(0),
+  discount2_pct: z.number().min(0).max(100).default(0),
+  tax_id: z.string().uuid().nullable().optional(),
   tax_rate: z.number().min(0).max(100).default(0),
 });
 
@@ -305,20 +309,25 @@ const PoUpsertSchema = z.object({
   order_date: z.string(),
   expected_delivery_date: z.string().nullable().optional(),
   currency_code: z.string().default("SAR"),
-  payment_terms: z.string().max(255).nullable().optional(),
+  payment_term_id: z.string().uuid().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
   lines: z.array(PoLineSchema).min(1),
 });
 
+// Base -> Discount 1 -> Discount 2 (cascading, each applied on what's left
+// after the previous one) -> Tax on the discounted amount. Bonus is an
+// informational free-extra-quantity note and does not affect the total.
 function computeTotals(lines: z.infer<typeof PoLineSchema>[]) {
   let subtotal = 0;
   let taxTotal = 0;
   const computed = lines.map((l) => {
     const base = l.quantity * l.unit_price;
-    const tax = base * (l.tax_rate / 100);
-    subtotal += base;
+    const afterDisc1 = base * (1 - l.discount1_pct / 100);
+    const afterDisc2 = afterDisc1 * (1 - l.discount2_pct / 100);
+    const tax = afterDisc2 * (l.tax_rate / 100);
+    subtotal += afterDisc2;
     taxTotal += tax;
-    return { ...l, line_total: Math.round((base + tax) * 100) / 100 };
+    return { ...l, line_total: Math.round((afterDisc2 + tax) * 100) / 100 };
   });
   return { computed, subtotal: Math.round(subtotal * 100) / 100, taxTotal: Math.round(taxTotal * 100) / 100 };
 }
@@ -376,6 +385,10 @@ export const upsertPurchaseOrder = createServerFn({ method: "POST" })
         quantity: l.quantity,
         uom_id: l.uom_id ?? null,
         unit_price: l.unit_price,
+        bonus: l.bonus,
+        discount1_pct: l.discount1_pct,
+        discount2_pct: l.discount2_pct,
+        tax_id: l.tax_id ?? null,
         tax_rate: l.tax_rate,
         line_total: l.line_total,
         sort_order: i,
