@@ -2402,10 +2402,6 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          can_delete: boolean
-          can_edit: boolean
-          can_read: boolean
-          can_write: boolean
           created_at: string
           default_branch_id: string | null
           default_company_id: string | null
@@ -2421,10 +2417,6 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          can_delete?: boolean
-          can_edit?: boolean
-          can_read?: boolean
-          can_write?: boolean
           created_at?: string
           default_branch_id?: string | null
           default_company_id?: string | null
@@ -2440,10 +2432,6 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          can_delete?: boolean
-          can_edit?: boolean
-          can_read?: boolean
-          can_write?: boolean
           created_at?: string
           default_branch_id?: string | null
           default_company_id?: string | null
@@ -2624,18 +2612,27 @@ export type Database = {
       user_branch_access: {
         Row: {
           branch_id: string
+          can_delete: boolean
+          can_edit: boolean
+          can_write: boolean
           granted_at: string
           id: string
           user_id: string
         }
         Insert: {
           branch_id: string
+          can_delete?: boolean
+          can_edit?: boolean
+          can_write?: boolean
           granted_at?: string
           id?: string
           user_id: string
         }
         Update: {
           branch_id?: string
+          can_delete?: boolean
+          can_edit?: boolean
+          can_write?: boolean
           granted_at?: string
           id?: string
           user_id?: string

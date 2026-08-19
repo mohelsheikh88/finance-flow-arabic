@@ -35,7 +35,7 @@ export const listUsersWithRoles = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: profiles, error } = await supabase
       .from("profiles")
-      .select("id, email, employee_id, display_name_ar, display_name_en, is_active, can_read, can_write, can_edit, can_delete")
+      .select("id, email, employee_id, display_name_ar, display_name_en, is_active")
       .order("display_name_en");
     if (error) throw new Error(error.message);
 
@@ -139,10 +139,17 @@ export const listUserBranches = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("user_branch_access")
-      .select("user_id, branch_id");
+      .select("user_id, branch_id, can_write, can_edit, can_delete");
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+const BranchPermSchema = z.object({
+  branchId: z.string().uuid(),
+  canWrite: z.boolean().default(true),
+  canEdit: z.boolean().default(true),
+  canDelete: z.boolean().default(true),
+});
 
 export const setUserBranches = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -150,7 +157,7 @@ export const setUserBranches = createServerFn({ method: "POST" })
     z
       .object({
         userId: z.string().uuid(),
-        branchIds: z.array(z.string().uuid()),
+        branches: z.array(BranchPermSchema),
       })
       .parse(i),
   )
@@ -162,11 +169,14 @@ export const setUserBranches = createServerFn({ method: "POST" })
       .delete()
       .eq("user_id", data.userId);
     if (de) throw new Error(de.message);
-    if (data.branchIds.length) {
+    if (data.branches.length) {
       const { error: ie } = await supabaseAdmin.from("user_branch_access").insert(
-        data.branchIds.map((branchId) => ({
+        data.branches.map((b) => ({
           user_id: data.userId,
-          branch_id: branchId,
+          branch_id: b.branchId,
+          can_write: b.canWrite,
+          can_edit: b.canEdit,
+          can_delete: b.canDelete,
         })),
       );
       if (ie) throw new Error(ie.message);
@@ -218,10 +228,6 @@ export const createUser = createServerFn({ method: "POST" })
         roles: z.array(z.string()).default([]),
         modules: z.array(moduleKeySchema).default([]),
         companyId: z.string().uuid().nullable().default(null),
-        canRead: z.boolean().default(true),
-        canWrite: z.boolean().default(true),
-        canEdit: z.boolean().default(true),
-        canDelete: z.boolean().default(true),
       })
       .parse(i),
   )
@@ -260,10 +266,6 @@ export const createUser = createServerFn({ method: "POST" })
         display_name_en: data.displayNameEn,
         employee_id: data.employeeId,
         email: data.contactEmail || authEmail,
-        can_read: data.canRead,
-        can_write: data.canWrite,
-        can_edit: data.canEdit,
-        can_delete: data.canDelete,
       })
       .eq("id", newId);
 
@@ -303,10 +305,6 @@ export const updateUser = createServerFn({ method: "POST" })
         contactEmail: z.string().email().nullable().optional(),
         password: z.string().min(8).optional().nullable(),
         isActive: z.boolean().optional(),
-        canRead: z.boolean().optional(),
-        canWrite: z.boolean().optional(),
-        canEdit: z.boolean().optional(),
-        canDelete: z.boolean().optional(),
       })
       .parse(i),
   )
@@ -330,20 +328,12 @@ export const updateUser = createServerFn({ method: "POST" })
       is_active?: boolean;
       employee_id?: string;
       email?: string;
-      can_read?: boolean;
-      can_write?: boolean;
-      can_edit?: boolean;
-      can_delete?: boolean;
     } = {};
     if (data.displayNameAr !== undefined) patch.display_name_ar = data.displayNameAr;
     if (data.displayNameEn !== undefined) patch.display_name_en = data.displayNameEn;
     if (data.isActive !== undefined) patch.is_active = data.isActive;
     if (data.employeeId !== undefined) patch.employee_id = data.employeeId;
     if (data.contactEmail !== undefined) patch.email = data.contactEmail || employeeIdToAuthEmail(data.employeeId ?? "");
-    if (data.canRead !== undefined) patch.can_read = data.canRead;
-    if (data.canWrite !== undefined) patch.can_write = data.canWrite;
-    if (data.canEdit !== undefined) patch.can_edit = data.canEdit;
-    if (data.canDelete !== undefined) patch.can_delete = data.canDelete;
     if (Object.keys(patch).length) {
       const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.userId);
       if (error) throw new Error(error.message);

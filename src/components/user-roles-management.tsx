@@ -84,6 +84,9 @@ const DB_ROLES = [
 
 
 
+type BranchPerm = { canWrite: boolean; canEdit: boolean; canDelete: boolean };
+const defaultBranchPerm: BranchPerm = { canWrite: true, canEdit: true, canDelete: true };
+
 type FormState = {
   id: string | null;
   employeeId: string;
@@ -94,11 +97,9 @@ type FormState = {
   isActive: boolean;
   roles: string[];
   modules: string[];
-  branchIds: string[];
-  canRead: boolean;
-  canWrite: boolean;
-  canEdit: boolean;
-  canDelete: boolean;
+  // Keyed by branch_id. A branch's presence here = Read access to it;
+  // the nested flags are the extra Write/Edit/Delete capability on top.
+  branchPerms: Record<string, BranchPerm>;
 };
 
 const emptyForm: FormState = {
@@ -111,11 +112,7 @@ const emptyForm: FormState = {
   isActive: true,
   roles: [],
   modules: [],
-  branchIds: [],
-  canRead: true,
-  canWrite: true,
-  canEdit: true,
-  canDelete: true,
+  branchPerms: {},
 };
 
 export function UserRolesManagement({
@@ -200,11 +197,15 @@ export function UserRolesManagement({
   });
 
   const branchesByUser = useMemo(() => {
-    const m = new Map<string, string[]>();
+    const m = new Map<string, Record<string, BranchPerm>>();
     for (const r of branchAccess as any[]) {
-      const arr = m.get(r.user_id) ?? [];
-      arr.push(r.branch_id);
-      m.set(r.user_id, arr);
+      const perms = m.get(r.user_id) ?? {};
+      perms[r.branch_id] = {
+        canWrite: r.can_write !== false,
+        canEdit: r.can_edit !== false,
+        canDelete: r.can_delete !== false,
+      };
+      m.set(r.user_id, perms);
     }
     return m;
   }, [branchAccess]);
@@ -282,6 +283,13 @@ export function UserRolesManagement({
 
   const saveMut = useMutation({
     mutationFn: async (f: FormState) => {
+      const branchesPayload = Object.entries(f.branchPerms).map(([branchId, p]) => ({
+        branchId,
+        canWrite: p.canWrite,
+        canEdit: p.canEdit,
+        canDelete: p.canDelete,
+      }));
+
       if (f.id) {
         await updateFn({
           data: {
@@ -291,15 +299,11 @@ export function UserRolesManagement({
             isActive: f.isActive,
             employeeId: f.employeeId || undefined,
             contactEmail: f.email || null,
-            canRead: f.canRead,
-            canWrite: f.canWrite,
-            canEdit: f.canEdit,
-            canDelete: f.canDelete,
             ...(f.password ? { password: f.password } : {}),
           },
         });
         await setModulesFn({ data: { userId: f.id, modules: f.modules as any } });
-        await setUserBranchesFn({ data: { userId: f.id, branchIds: f.branchIds } });
+        await setUserBranchesFn({ data: { userId: f.id, branches: branchesPayload } });
         // sync roles
         const current: string[] =
           (users as any[]).find((u) => u.id === f.id)?.roles ?? [];
@@ -324,14 +328,10 @@ export function UserRolesManagement({
             roles: f.roles,
             modules: f.modules as any,
             companyId: companyId ?? null,
-            canRead: f.canRead,
-            canWrite: f.canWrite,
-            canEdit: f.canEdit,
-            canDelete: f.canDelete,
           },
         });
-        if (f.branchIds.length && (created as any)?.id) {
-          await setUserBranchesFn({ data: { userId: (created as any).id, branchIds: f.branchIds } });
+        if (branchesPayload.length && (created as any)?.id) {
+          await setUserBranchesFn({ data: { userId: (created as any).id, branches: branchesPayload } });
         }
       }
     },
@@ -360,11 +360,7 @@ export function UserRolesManagement({
       isActive: u.is_active !== false,
       roles: [...(u.roles ?? [])],
       modules: [...(modulesByUser.get(u.id) ?? [])],
-      branchIds: [...(branchesByUser.get(u.id) ?? [])],
-      canRead: u.can_read !== false,
-      canWrite: u.can_write !== false,
-      canEdit: u.can_edit !== false,
-      canDelete: u.can_delete !== false,
+      branchPerms: { ...(branchesByUser.get(u.id) ?? {}) },
     });
     setOpen(true);
   };
@@ -701,48 +697,76 @@ export function UserRolesManagement({
               <p className="text-[11px] text-muted-foreground">
                 {t("users.branchAccessHint")}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {(allBranches as any[]).map((b) => (
-                  <label
-                    key={b.id}
-                    className="flex items-center gap-2 rounded-md border p-2.5 text-xs cursor-pointer hover:bg-accent/40"
-                  >
-                    <Checkbox
-                      checked={form.branchIds.includes(b.id)}
-                      onCheckedChange={() =>
-                        setForm((f) => ({ ...f, branchIds: toggleIn(f.branchIds, b.id) }))
-                      }
-                    />
-                    <MapPin className="h-4 w-4 text-primary shrink-0" />
-                    <span className="truncate">{localized(b, "name")}</span>
-                    {b.is_main && <span className="text-[10px] text-muted-foreground">★</span>}
-                  </label>
-                ))}
-                {allBranches.length === 0 && (
-                  <p className="text-[11px] text-muted-foreground col-span-2">{t("common.noData")}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                {(
-                  [
-                    { key: "canRead", label: t("users.permRead") },
-                    { key: "canWrite", label: t("users.permWrite") },
-                    { key: "canEdit", label: t("users.permEdit") },
-                    { key: "canDelete", label: t("users.permDelete") },
-                  ] as const
-                ).map((p) => (
-                  <label
-                    key={p.key}
-                    className="flex items-center gap-2 rounded-md border p-2.5 text-xs cursor-pointer hover:bg-accent/40"
-                  >
-                    <Switch
-                      checked={form[p.key]}
-                      onCheckedChange={(v) => setForm((f) => ({ ...f, [p.key]: v }))}
-                    />
-                    {p.label}
-                  </label>
-                ))}
+              <div className="border rounded-md overflow-hidden overflow-x-auto">
+                <table className="w-full text-xs min-w-[420px]">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-start p-2 font-medium"></th>
+                      <th className="text-center p-2 font-medium">{t("users.permRead")}</th>
+                      <th className="text-center p-2 font-medium">{t("users.permWrite")}</th>
+                      <th className="text-center p-2 font-medium">{t("users.permEdit")}</th>
+                      <th className="text-center p-2 font-medium">{t("users.permDelete")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(allBranches as any[]).map((b) => {
+                      const perm = form.branchPerms[b.id];
+                      const hasRead = !!perm;
+                      const setPerm = (patch: Partial<BranchPerm>) =>
+                        setForm((f) => {
+                          if (!f.branchPerms[b.id]) return f;
+                          return { ...f, branchPerms: { ...f.branchPerms, [b.id]: { ...f.branchPerms[b.id], ...patch } } };
+                        });
+                      const toggleRead = (v: boolean) =>
+                        setForm((f) => {
+                          const next = { ...f.branchPerms };
+                          if (v) next[b.id] = { ...defaultBranchPerm };
+                          else delete next[b.id];
+                          return { ...f, branchPerms: next };
+                        });
+                      return (
+                        <tr key={b.id} className="border-t">
+                          <td className="p-2">
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                              <span className="truncate">{localized(b, "name")}</span>
+                              {b.is_main && <span className="text-[10px] text-muted-foreground">★</span>}
+                            </div>
+                          </td>
+                          <td className="p-2 text-center">
+                            <Checkbox checked={hasRead} onCheckedChange={(v) => toggleRead(v === true)} />
+                          </td>
+                          <td className="p-2 text-center">
+                            <Checkbox
+                              checked={hasRead && perm.canWrite}
+                              disabled={!hasRead}
+                              onCheckedChange={(v) => setPerm({ canWrite: v === true })}
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <Checkbox
+                              checked={hasRead && perm.canEdit}
+                              disabled={!hasRead}
+                              onCheckedChange={(v) => setPerm({ canEdit: v === true })}
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <Checkbox
+                              checked={hasRead && perm.canDelete}
+                              disabled={!hasRead}
+                              onCheckedChange={(v) => setPerm({ canDelete: v === true })}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {allBranches.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-4 text-center text-muted-foreground">{t("common.noData")}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
