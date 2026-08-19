@@ -107,14 +107,14 @@ export function AppSidebar() {
                 <span className="text-[11.5px] font-bold tracking-tight leading-none truncate max-w-full px-1">{scopeLabel}</span>
               </div>
 
-              {/* Home Screen — light, glossy 3D-icon card */}
+              {/* Home Screen — dark card with a glossy 3D icon */}
               <Link
                 to="/apps"
                 viewTransition
                 className="flex-1 flex items-center gap-2 rounded-xl px-2.5 py-2.5
-                           bg-gradient-to-b from-white to-white/95 border border-black/5
-                           shadow-[0_2px_10px_-3px_rgba(0,0,0,0.25)] hover:shadow-[0_4px_14px_-3px_rgba(0,0,0,0.3)]
-                           transition-shadow"
+                           bg-white/[0.05] border border-white/[0.09]
+                           hover:bg-white/[0.09] hover:border-white/[0.15]
+                           transition-colors"
               >
                 <div
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg
@@ -123,7 +123,7 @@ export function AppSidebar() {
                 >
                   <LayoutGrid className="h-[18px] w-[18px] text-white drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.4)]" />
                 </div>
-                <span className="flex-1 min-w-0 text-[13px] font-bold text-black text-left leading-tight truncate">
+                <span className="flex-1 min-w-0 text-[13px] font-bold text-white/90 text-left leading-tight truncate">
                   {t("nav.homeScreen")}
                 </span>
               </Link>
