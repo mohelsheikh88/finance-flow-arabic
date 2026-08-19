@@ -257,7 +257,7 @@ export function useNavGroups(): NavGroup[] {
           key: "homeCare",
           label: t("nav.homeCare"),
           icon: Home,
-          hue: 130,
+          hue: 172, // HHC brand green — matches Hayat Homecare's official identity
           items: [{ url: "/home-care", icon: Home, title: t("common.willBeBuiltLater") }],
         },
         {
@@ -327,7 +327,7 @@ export function useNavGroups(): NavGroup[] {
           key: "laboratory",
           label: t("nav.laboratory"),
           icon: FlaskConical,
-          hue: 265,
+          hue: 319, // HML brand purple/pink — matches Hayat Medical Laboratories' official identity
           items: [{ url: "/laboratory", icon: FlaskConical, title: t("common.willBeBuiltLater") }],
         },
         {

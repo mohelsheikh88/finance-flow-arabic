@@ -1,120 +1,57 @@
 import { useI18n } from "@/i18n";
-import { useBrandIdentity, type BrandIdentity } from "@/lib/brand-identity";
+import { useBrandIdentity } from "@/lib/brand-identity";
 
 type Props = {
   size?: number;
   showWordmark?: boolean;
   variant?: "light" | "dark"; // light = for dark backgrounds (white text)
   className?: string;
-  /** Override active identity — used for previews in settings */
-  identity?: BrandIdentity;
 };
 
 /**
- * Al Hayat Financial ERP — bilingual brand lock-up.
- * Mark visuals come from the active brand identity (see lib/brand-identity).
+ * Hayat Medical Group — official brand lock-up. The mark and wordmark are
+ * the real assets from the company's Brand Identity Guidelines, extracted
+ * as image files (see /public/brand). Do not stretch, recolor, or rotate —
+ * per the guidelines' "Don'ts" page.
  */
 export function BrandLogo({
   size = 40,
   showWordmark = true,
   variant = "dark",
   className = "",
-  identity: identityOverride,
 }: Props) {
   const { locale } = useI18n();
-  const { identity: active } = useBrandIdentity();
-  const identity = identityOverride ?? active;
   const isLight = variant === "light";
-  const titleColor = isLight ? "text-white" : "";
-  const subColor = isLight ? "text-white/60" : "text-slate-500";
-  const dividerColor = isLight ? "bg-white/15" : "bg-slate-200";
-  const enColor = isLight ? "text-white/90" : "text-slate-500";
-  const enSubColor = isLight ? "text-white/50" : "text-slate-500";
-
   const isAr = locale === "ar";
-  const titleSize = Math.round(size * 0.375);
-  const subSize = Math.round(size * 0.25);
-  const gapPx = Math.max(8, Math.round(size * 0.22));
+
+  if (!showWordmark) {
+    return <BrandMark size={size} className={className} />;
+  }
 
   return (
-    <div
-      className={`flex items-center ${className}`}
-      style={{ gap: gapPx }}
-      dir={isAr ? "rtl" : "ltr"}
-    >
-      <BrandMark size={size} identity={identity} />
-      {showWordmark && (
-        isAr ? (
-          <div className="flex flex-col items-end leading-tight">
-            <span
-              className={`font-bold tracking-tight ${titleColor}`}
-              style={{
-                fontFamily: identity.arabicFont,
-                fontSize: titleSize,
-                color: isLight ? undefined : identity.titleColor,
-              }}
-            >
-              الحياة المالية
-            </span>
-            <span
-              className={`font-light ${subColor}`}
-              style={{ fontFamily: identity.arabicFont, fontSize: subSize }}
-            >
-              نظام مالي متكامل
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-col leading-tight">
-            <span
-              className={`font-semibold tracking-tight ${enColor}`}
-              style={{ fontFamily: identity.latinFont, fontSize: titleSize }}
-            >
-              Al Hayat
-            </span>
-            <span
-              className={`font-bold uppercase tracking-[0.18em] ${enSubColor}`}
-              style={{ fontFamily: identity.latinFont, fontSize: Math.round(size * 0.225) }}
-            >
-              Financial ERP
-            </span>
-          </div>
-        )
-      )}
+    <div className={`flex items-center ${className}`} style={{ gap: Math.max(8, Math.round(size * 0.22)) }}>
+      <img
+        src={isLight ? "/brand/hmg-horizontal-dark.png" : "/brand/hmg-horizontal-light.png"}
+        alt="Hayat Medical Group"
+        style={{ height: size, width: "auto" }}
+        className="object-contain"
+        dir="ltr"
+      />
     </div>
   );
 }
 
+type MarkProps = { size?: number; className?: string };
 
-type MarkProps = { size?: number; identity?: BrandIdentity };
-
-export function BrandMark({ size = 40, identity: identityOverride }: MarkProps) {
-  const { identity: active } = useBrandIdentity();
-  const identity = identityOverride ?? active;
+/** Just the square icon mark, no wordmark — for compact/collapsed contexts. */
+export function BrandMark({ size = 40, className = "" }: MarkProps) {
   return (
-    <div
-      className="relative shrink-0 rounded-xl flex items-center justify-center shadow-lg"
-      style={{
-        width: size,
-        height: size,
-        background: identity.markBg,
-        boxShadow: identity.markGlow,
-      }}
-      aria-label="Al Hayat Financial ERP"
-    >
-      <svg
-        viewBox="0 0 100 100"
-        width={size * 0.62}
-        height={size * 0.62}
-        fill={identity.glyphColor}
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Two ascending columns */}
-        <path d="M30 25h10v50H30zM60 25h10v50H60z" />
-        {/* Ledger bridge */}
-        <path d="M35 45h30v10H35z" />
-        {/* Ascending arc — growth / life */}
-        <path d="M70 75c-15 0-25-10-25-10l5-5s5 5 20 5z" />
-      </svg>
-    </div>
+    <img
+      src="/brand/hmg-icon.png"
+      alt="Hayat Medical Group"
+      width={size}
+      height={size}
+      className={`shrink-0 object-contain ${className}`}
+    />
   );
 }
