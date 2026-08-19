@@ -102,17 +102,33 @@ export function CategoriesTab() {
   });
 
   const moveMut = useMutation({
-    mutationFn: (payload: { id: string; sort_order: number }) => upsertFn({ data: { id: payload.id, company_id: companyId!, sort_order: payload.sort_order, code: rows.find((r: any) => r.id === payload.id)!.code, name_ar: rows.find((r: any) => r.id === payload.id)!.name_ar, name_en: rows.find((r: any) => r.id === payload.id)!.name_en, is_group: rows.find((r: any) => r.id === payload.id)!.is_group, parent_id: rows.find((r: any) => r.id === payload.id)!.parent_id } }),
+    mutationFn: (payload: { id: string; sort_order: number }) => {
+      const r = rows.find((r: any) => r.id === payload.id)!;
+      return upsertFn({
+        data: {
+          id: payload.id, company_id: companyId!, sort_order: payload.sort_order,
+          code: r.code, name_ar: r.name_ar, name_en: r.name_en, is_group: r.is_group, parent_id: r.parent_id,
+          is_active: r.is_active, notes: r.notes ?? null,
+          costing_method: r.costing_method ?? "fifo",
+          stock_input_account_id: r.stock_input_account_id ?? null,
+          stock_output_account_id: r.stock_output_account_id ?? null,
+        },
+      });
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["purchase_categories"] }),
   });
 
   const onMove = (node: any, dir: -1 | 1) => {
-    const siblings = tree[node.parent_id ?? "__root__"] ?? [];
+    const siblings = [...(tree[node.parent_id ?? "__root__"] ?? [])];
     const idx = siblings.findIndex((s) => s.id === node.id);
-    const swapWith = siblings[idx + dir];
-    if (!swapWith) return;
-    moveMut.mutate({ id: node.id, sort_order: swapWith.sort_order ?? idx + dir });
-    moveMut.mutate({ id: swapWith.id, sort_order: node.sort_order ?? idx });
+    const swapIdx = idx + dir;
+    if (swapIdx < 0 || swapIdx >= siblings.length) return;
+    // Re-sequence the WHOLE sibling group by current visual order (with the
+    // two target items swapped) instead of trusting existing sort_order —
+    // those were never individually set before (all sitting at 0), so a
+    // simple value-swap was a silent no-op.
+    [siblings[idx], siblings[swapIdx]] = [siblings[swapIdx], siblings[idx]];
+    siblings.forEach((s, i) => moveMut.mutate({ id: s.id, sort_order: i }));
   };
 
   const canSave = form.code.trim() && form.name_ar.trim() && form.name_en.trim();
