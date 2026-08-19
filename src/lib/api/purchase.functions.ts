@@ -324,6 +324,7 @@ const PoUpsertSchema = z.object({
   vendor_id: z.string().uuid(),
   vendor_reference: z.string().max(100).nullable().optional(),
   warehouse_id: z.string().uuid().nullable().optional(),
+  bill_control: z.enum(["ordered", "received"]).default("received"),
   order_date: z.string(),
   expected_delivery_date: z.string().nullable().optional(),
   currency_code: z.string().default("SAR"),

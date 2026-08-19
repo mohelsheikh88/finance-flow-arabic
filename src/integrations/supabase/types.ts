@@ -2444,6 +2444,7 @@ export type Database = {
           vendor_id: string
           vendor_reference: string | null
           warehouse_id: string | null
+          bill_control: string
           order_date: string
           expected_delivery_date: string | null
           status: string
@@ -2466,6 +2467,7 @@ export type Database = {
           vendor_id: string
           vendor_reference?: string | null
           warehouse_id?: string | null
+          bill_control?: string
           order_date?: string
           expected_delivery_date?: string | null
           status?: string
@@ -2488,6 +2490,7 @@ export type Database = {
           vendor_id?: string
           vendor_reference?: string | null
           warehouse_id?: string | null
+          bill_control?: string
           order_date?: string
           expected_delivery_date?: string | null
           status?: string

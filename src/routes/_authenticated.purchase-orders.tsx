@@ -116,6 +116,7 @@ function Page() {
     vendor_id: "",
     vendor_reference: "",
     warehouse_id: null as string | null,
+    bill_control: "received" as "ordered" | "received",
     order_date: new Date().toISOString().slice(0, 10),
     expected_delivery_date: "",
     payment_term_id: null as string | null,
@@ -135,6 +136,7 @@ function Page() {
       vendor_id: po.vendor_id,
       vendor_reference: po.vendor_reference ?? "",
       warehouse_id: po.warehouse_id ?? null,
+      bill_control: po.bill_control ?? "received",
       order_date: po.order_date,
       expected_delivery_date: po.expected_delivery_date ?? "",
       payment_term_id: po.payment_term_id ?? null,
@@ -199,6 +201,7 @@ function Page() {
           vendor_id: form.vendor_id,
           vendor_reference: form.vendor_reference || null,
           warehouse_id: form.warehouse_id,
+          bill_control: form.bill_control,
           order_date: form.order_date,
           expected_delivery_date: form.expected_delivery_date || null,
           payment_term_id: form.payment_term_id,
@@ -329,7 +332,7 @@ function Page() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>{t("purchase.vendorReference")}</Label>
                 <Input value={form.vendor_reference} onChange={(e) => setForm((f) => ({ ...f, vendor_reference: e.target.value }))} dir="ltr" />
@@ -341,6 +344,16 @@ function Page() {
                   <SelectContent>
                     <SelectItem value="__none__">—</SelectItem>
                     {(warehouses as any[]).map((w) => <SelectItem key={w.id} value={w.id}>{w.code} — {localized(w, "name")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>{t("purchase.billControl")}</Label>
+                <Select value={form.bill_control} onValueChange={(v: any) => setForm((f) => ({ ...f, bill_control: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ordered">{t("purchase.billControlOrdered")}</SelectItem>
+                    <SelectItem value="received">{t("purchase.billControlReceived")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
