@@ -223,6 +223,7 @@ export function useNavGroups(): NavGroup[] {
           hue: 25,
           items: [
             { url: "/product-categories", icon: Tags, title: t("purchase.productCategories") },
+            { url: "/product-types", icon: Tags, title: t("purchase.productTypesTitle") },
             { url: "/products", icon: Tags, title: t("purchase.products") },
             { url: "/compliance-tracking", icon: ShieldAlert, title: t("purchase.complianceTracking") },
             { url: "/units-of-measure", icon: Ruler, title: t("nav.unitsOfMeasure") },

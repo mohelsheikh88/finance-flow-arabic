@@ -4,6 +4,65 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware.sel
 
 // ================= Purchase Categories (hierarchical) =================
 
+// ================= Product Types (manageable list) =================
+
+export const listProductTypes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("product_types")
+      .select("*")
+      .eq("company_id", data.companyId)
+      .order("sort_order", { ascending: true })
+      .order("name_en", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const ProductTypeSchema = z.object({
+  id: z.string().uuid().optional(),
+  company_id: z.string().uuid(),
+  code: z.string().min(1).max(50),
+  name_ar: z.string().min(1).max(255),
+  name_en: z.string().min(1).max(255),
+  tracks_inventory: z.boolean().default(true),
+  notes: z.string().max(500).nullable().optional(),
+  is_active: z.boolean().default(true),
+  sort_order: z.number().int().min(0).default(0),
+});
+
+export const upsertProductType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => ProductTypeSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    const { id, ...patch } = data;
+    if (id) {
+      const { data: row, error } = await context.supabase.from("product_types").update(patch).eq("id", id).select().single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await context.supabase.from("product_types").insert(patch).select().single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteProductType = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { count } = await context.supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("product_type_id", data.id);
+    if (count && count > 0) {
+      throw new Error("Cannot delete a product type that's already used by products");
+    }
+    const { error } = await context.supabase.from("product_types").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const listPurchaseCategories = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(i))
@@ -215,7 +274,7 @@ const ProductSchema = z.object({
   name_ar: z.string().min(1).max(255),
   name_en: z.string().min(1).max(255),
   category_id: z.string().uuid({ message: "Category is required" }),
-  product_type: z.enum(["good", "service", "other"]).default("good"),
+  product_type_id: z.string().uuid({ message: "Product Type is required" }),
   purchase_uom_id: z.string().uuid().nullable().optional(),
   cost_price: z.number().min(0).default(0),
   currency_code: z.string().default("SAR"),
@@ -231,12 +290,6 @@ const ProductSchema = z.object({
   reorder_point: z.number().min(0).nullable().optional(),
   is_active: z.boolean().default(true),
   notes: z.string().max(2000).nullable().optional(),
-}).refine((d) => d.product_type !== "good" || !!d.purchase_uom_id, {
-  message: "Unit of Measure is required for goods", path: ["purchase_uom_id"],
-}).refine((d) => d.product_type !== "good" || d.reorder_point != null, {
-  message: "Reorder point is required for goods", path: ["reorder_point"],
-}).refine((d) => d.product_type === "good" || !!d.expense_account_id, {
-  message: "Expense account is required for services/other", path: ["expense_account_id"],
 });
 
 export const upsertProduct = createServerFn({ method: "POST" })
@@ -246,6 +299,20 @@ export const upsertProduct = createServerFn({ method: "POST" })
     const { id, ...patch } = data;
     const friendlyError = (msg: string) =>
       msg.includes("idx_products_barcode") ? "This barcode is already used by another product" : msg;
+
+    const { data: pt, error: ptErr } = await context.supabase
+      .from("product_types")
+      .select("tracks_inventory")
+      .eq("id", data.product_type_id)
+      .single();
+    if (ptErr || !pt) throw new Error("Invalid Product Type");
+    if (pt.tracks_inventory) {
+      if (!patch.purchase_uom_id) throw new Error("Unit of Measure is required for this product type");
+      if (patch.reorder_point == null) throw new Error("Reorder point is required for this product type");
+    } else if (!patch.expense_account_id) {
+      throw new Error("Expense account is required for this product type");
+    }
+
     if (id) {
       const { data: row, error } = await context.supabase.from("products").update(patch).eq("id", id).select().single();
       if (error) throw new Error(friendlyError(error.message));

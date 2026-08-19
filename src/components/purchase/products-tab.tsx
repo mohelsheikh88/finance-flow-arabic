@@ -9,6 +9,7 @@ import {
   deleteProduct,
   listPurchaseCategories,
   listUnitsOfMeasure,
+  listProductTypes,
 } from "@/lib/api/purchase.functions";
 import { listAccounts } from "@/lib/api/accounting.functions";
 import { Card } from "@/components/ui/card";
@@ -56,6 +57,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
   const listCatFn = useServerFn(listPurchaseCategories);
   const listUomFn = useServerFn(listUnitsOfMeasure);
   const listAccFn = useServerFn(listAccounts);
+  const listTypesFn = useServerFn(listProductTypes);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", companyId],
@@ -77,6 +79,12 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
     queryFn: () => listAccFn({ data: { companyId: companyId! } } as any),
     enabled: !!companyId && mode === "all",
   });
+  const { data: productTypes = [] } = useQuery({
+    queryKey: ["product_types", companyId],
+    queryFn: () => listTypesFn({ data: { companyId: companyId! } }),
+    enabled: !!companyId,
+  });
+  const activeProductTypes = (productTypes as any[]).filter((pt) => pt.is_active);
 
   const catName = (id: string | null) => (id ? localized(categories.find((c: any) => c.id === id) ?? {}, "name") || "—" : "—");
   const uomName = (id: string | null) => (id ? localized(uoms.find((u: any) => u.id === id) ?? {}, "name") || "—" : "—");
@@ -90,7 +98,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
 
   const empty = {
     id: undefined as string | undefined, code: "", name_ar: "", name_en: "",
-    category_id: null as string | null, product_type: "good" as "good" | "service" | "other",
+    category_id: null as string | null, product_type_id: null as string | null,
     purchase_uom_id: null as string | null, cost_price: 0, expense_account_id: null as string | null,
     requires_batch_tracking: false, requires_expiry_tracking: false, requires_cold_chain: false,
     is_controlled_substance: false, requires_prescription: false, regulatory_number: "", barcode: "", reorder_point: "" as any,
@@ -99,12 +107,14 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const selectedType = activeProductTypes.find((pt) => pt.id === form.product_type_id) ?? (productTypes as any[]).find((pt) => pt.id === form.product_type_id);
+  const tracksInventory = selectedType ? !!selectedType.tracks_inventory : true;
 
   const openNew = () => { setForm(empty); setOpen(true); };
   const openEdit = (p: any) => {
     setForm({
       id: p.id, code: p.code, name_ar: p.name_ar, name_en: p.name_en,
-      category_id: p.category_id, product_type: p.product_type, purchase_uom_id: p.purchase_uom_id,
+      category_id: p.category_id, product_type_id: p.product_type_id, purchase_uom_id: p.purchase_uom_id,
       cost_price: p.cost_price, expense_account_id: p.expense_account_id,
       requires_batch_tracking: p.requires_batch_tracking, requires_expiry_tracking: p.requires_expiry_tracking,
       requires_cold_chain: p.requires_cold_chain, is_controlled_substance: p.is_controlled_substance,
@@ -137,10 +147,14 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
 
   const canSave = !!(
     form.code.trim() && form.name_ar.trim() && form.name_en.trim() &&
-    form.regulatory_number.trim() && form.category_id && form.barcode.trim() &&
-    (form.product_type === "good" ? form.purchase_uom_id && String(form.reorder_point).trim() : form.expense_account_id)
+    form.regulatory_number.trim() && form.category_id && form.barcode.trim() && form.product_type_id &&
+    (tracksInventory ? form.purchase_uom_id && String(form.reorder_point).trim() : form.expense_account_id)
   );
-  const typeLabel = (v: string) => (v === "good" ? t("purchase.typeGood") : v === "service" ? t("purchase.typeService") : t("purchase.typeOther"));
+  const typeLabel = (id: string | null) => {
+    if (!id) return "—";
+    const pt = (productTypes as any[]).find((p) => p.id === id);
+    return pt ? localized(pt, "name") : "—";
+  };
 
   return (
     <div className="space-y-3">
@@ -185,7 +199,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                   <td className="p-2.5 font-mono text-xs">{p.code}</td>
                   <td className="p-2.5">{localized(p, "name")}</td>
                   <td className="p-2.5 text-muted-foreground">{catName(p.category_id)}</td>
-                  <td className="p-2.5"><Badge variant="outline" className="text-[10.5px]">{typeLabel(p.product_type)}</Badge></td>
+                  <td className="p-2.5"><Badge variant="outline" className="text-[10.5px]">{typeLabel(p.product_type_id)}</Badge></td>
                   {mode === "all" ? (
                     <>
                       <td className="p-2.5 text-muted-foreground">{uomName(p.purchase_uom_id)}</td>
@@ -232,12 +246,13 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                 <div><Label>{t("common.name")} (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" /></div>
                 <div>
                   <Label>{t("purchase.productType")} *</Label>
-                  <Select value={form.product_type} onValueChange={(v: any) => setForm((f) => ({ ...f, product_type: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select value={form.product_type_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, product_type_id: v === "__none__" ? null : v }))}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="good">{t("purchase.typeGood")}</SelectItem>
-                      <SelectItem value="service">{t("purchase.typeService")}</SelectItem>
-                      <SelectItem value="other">{t("purchase.typeOther")}</SelectItem>
+                      <SelectItem value="__none__">—</SelectItem>
+                      {activeProductTypes.map((pt) => (
+                        <SelectItem key={pt.id} value={pt.id}>{localized(pt, "name")}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -259,7 +274,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
             <div>
               <p className="text-xs font-semibold text-muted-foreground mb-2">{t("purchase.pricingUom")}</p>
               <div className="grid grid-cols-2 gap-3">
-                {form.product_type === "good" ? (
+                {tracksInventory ? (
                   <div>
                     <Label>{t("purchase.uom")} *</Label>
                     <Select value={form.purchase_uom_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, purchase_uom_id: v === "__none__" ? null : v }))}>
@@ -279,7 +294,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                   </div>
                 )}
                 <div><Label>{t("purchase.costPrice")} *</Label><Input type="number" step="0.01" value={form.cost_price} onChange={(e) => setForm((f) => ({ ...f, cost_price: Number(e.target.value) }))} /></div>
-                {form.product_type === "good" && (
+                {tracksInventory && (
                   <div><Label>{t("purchase.reorderPoint")} *</Label><Input type="number" step="0.01" value={form.reorder_point} onChange={(e) => setForm((f) => ({ ...f, reorder_point: e.target.value }))} /></div>
                 )}
                 <div>

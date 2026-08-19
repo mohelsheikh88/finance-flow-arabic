@@ -2791,6 +2791,48 @@ export type Database = {
         }
         Relationships: []
       }
+      product_types: {
+        Row: {
+          id: string
+          company_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          tracks_inventory: boolean
+          notes: string | null
+          is_active: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          code: string
+          name_ar: string
+          name_en: string
+          tracks_inventory?: boolean
+          notes?: string | null
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          code?: string
+          name_ar?: string
+          name_en?: string
+          tracks_inventory?: boolean
+          notes?: string | null
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           id: string
@@ -2800,6 +2842,7 @@ export type Database = {
           name_en: string
           category_id: string | null
           product_type: string
+          product_type_id: string | null
           purchase_uom_id: string | null
           cost_price: number
           currency_code: string
@@ -2825,6 +2868,7 @@ export type Database = {
           name_en: string
           category_id?: string | null
           product_type?: string
+          product_type_id?: string | null
           purchase_uom_id?: string | null
           cost_price?: number
           currency_code?: string
@@ -2850,6 +2894,7 @@ export type Database = {
           name_en?: string
           category_id?: string | null
           product_type?: string
+          product_type_id?: string | null
           purchase_uom_id?: string | null
           cost_price?: number
           currency_code?: string
