@@ -79,6 +79,7 @@ const DB_ROLES = [
   "internal_auditor",
   "internal_audit_manager",
   "his_admin",
+  "accounting_admin",
 ] as const;
 
 

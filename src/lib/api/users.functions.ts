@@ -12,6 +12,7 @@ const APP_ROLES = [
   "internal_auditor",
   "internal_audit_manager",
   "his_admin",
+  "accounting_admin",
 ] as const;
 
 // Company ids can be stale (e.g. coming from a previous backend). Only keep

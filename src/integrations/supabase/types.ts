@@ -2754,6 +2754,7 @@ export type Database = {
         | "internal_audit_manager"
         | "direct_manager"
         | "his_admin"
+        | "accounting_admin"
       approval_doc_type:
         | "journal_entry"
         | "invoice"
@@ -2914,6 +2915,7 @@ export const Constants = {
         "internal_audit_manager",
         "direct_manager",
         "his_admin",
+        "accounting_admin",
       ],
       approval_doc_type: [
         "journal_entry",
