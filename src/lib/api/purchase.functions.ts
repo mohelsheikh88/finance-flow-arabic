@@ -214,7 +214,7 @@ const ProductSchema = z.object({
   code: z.string().min(1).max(50),
   name_ar: z.string().min(1).max(255),
   name_en: z.string().min(1).max(255),
-  category_id: z.string().uuid().nullable().optional(),
+  category_id: z.string().uuid({ message: "Category is required" }),
   product_type: z.enum(["good", "service", "other"]).default("good"),
   purchase_uom_id: z.string().uuid().nullable().optional(),
   cost_price: z.number().min(0).default(0),
@@ -225,12 +225,18 @@ const ProductSchema = z.object({
   requires_cold_chain: z.boolean().default(false),
   is_controlled_substance: z.boolean().default(false),
   requires_prescription: z.boolean().default(false),
-  regulatory_number: z.string().max(100).nullable().optional(),
-  barcode: z.string().max(50).nullable().optional()
-    .refine((v) => !v || /^\d{8,14}$/.test(v), { message: "Barcode must be 8-14 digits" }),
+  regulatory_number: z.string().min(1, "Regulatory number is required").max(100),
+  barcode: z.string().min(1, "Barcode is required").max(50)
+    .refine((v) => /^\d{8,14}$/.test(v), { message: "Barcode must be 8-14 digits" }),
   reorder_point: z.number().min(0).nullable().optional(),
   is_active: z.boolean().default(true),
   notes: z.string().max(2000).nullable().optional(),
+}).refine((d) => d.product_type !== "good" || !!d.purchase_uom_id, {
+  message: "Unit of Measure is required for goods", path: ["purchase_uom_id"],
+}).refine((d) => d.product_type !== "good" || d.reorder_point != null, {
+  message: "Reorder point is required for goods", path: ["reorder_point"],
+}).refine((d) => d.product_type === "good" || !!d.expense_account_id, {
+  message: "Expense account is required for services/other", path: ["expense_account_id"],
 });
 
 export const upsertProduct = createServerFn({ method: "POST" })

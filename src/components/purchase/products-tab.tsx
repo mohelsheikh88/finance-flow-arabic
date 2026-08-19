@@ -135,7 +135,11 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
     onError: (e: Error) => { toast.error(e.message); setDeleteId(null); },
   });
 
-  const canSave = form.code.trim() && form.name_ar.trim() && form.name_en.trim();
+  const canSave = !!(
+    form.code.trim() && form.name_ar.trim() && form.name_en.trim() &&
+    form.regulatory_number.trim() && form.category_id && form.barcode.trim() &&
+    (form.product_type === "good" ? form.purchase_uom_id && String(form.reorder_point).trim() : form.expense_account_id)
+  );
   const typeLabel = (v: string) => (v === "good" ? t("purchase.typeGood") : v === "service" ? t("purchase.typeService") : t("purchase.typeOther"));
 
   return (
@@ -222,12 +226,12 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
             <div>
               <p className="text-xs font-semibold text-muted-foreground mb-2">{t("purchase.generalInfo")}</p>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>{t("purchase.internalCode")}</Label><Input value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} dir="ltr" /></div>
-                <div><Label>{t("purchase.regulatoryNumber")}</Label><Input value={form.regulatory_number} onChange={(e) => setForm((f) => ({ ...f, regulatory_number: e.target.value }))} dir="ltr" /></div>
-                <div><Label>{t("common.name")} (AR)</Label><Input value={form.name_ar} onChange={(e) => setForm((f) => ({ ...f, name_ar: e.target.value }))} dir="rtl" /></div>
-                <div><Label>{t("common.name")} (EN)</Label><Input value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" /></div>
+                <div><Label>{t("purchase.internalCode")} *</Label><Input value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} dir="ltr" /></div>
+                <div><Label>{t("purchase.regulatoryNumber")} *</Label><Input value={form.regulatory_number} onChange={(e) => setForm((f) => ({ ...f, regulatory_number: e.target.value }))} dir="ltr" /></div>
+                <div><Label>{t("common.name")} (AR) *</Label><Input value={form.name_ar} onChange={(e) => setForm((f) => ({ ...f, name_ar: e.target.value }))} dir="rtl" /></div>
+                <div><Label>{t("common.name")} (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} dir="ltr" /></div>
                 <div>
-                  <Label>{t("purchase.productType")}</Label>
+                  <Label>{t("purchase.productType")} *</Label>
                   <Select value={form.product_type} onValueChange={(v: any) => setForm((f) => ({ ...f, product_type: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -238,7 +242,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                   </Select>
                 </div>
                 <div>
-                  <Label>{t("purchase.category")}</Label>
+                  <Label>{t("purchase.category")} *</Label>
                   <Select value={form.category_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, category_id: v === "__none__" ? null : v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -257,7 +261,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
               <div className="grid grid-cols-2 gap-3">
                 {form.product_type === "good" ? (
                   <div>
-                    <Label>{t("purchase.uom")}</Label>
+                    <Label>{t("purchase.uom")} *</Label>
                     <Select value={form.purchase_uom_id ?? "__none__"} onValueChange={(v) => setForm((f) => ({ ...f, purchase_uom_id: v === "__none__" ? null : v }))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -270,16 +274,16 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                   </div>
                 ) : (
                   <div>
-                    <Label>{t("purchase.expenseAccount")}</Label>
+                    <Label>{t("purchase.expenseAccount")} *</Label>
                     <AccountCombobox accounts={accounts as any[]} value={form.expense_account_id} onChange={(v) => setForm((f) => ({ ...f, expense_account_id: v }))} />
                   </div>
                 )}
-                <div><Label>{t("purchase.costPrice")}</Label><Input type="number" step="0.01" value={form.cost_price} onChange={(e) => setForm((f) => ({ ...f, cost_price: Number(e.target.value) }))} /></div>
+                <div><Label>{t("purchase.costPrice")} *</Label><Input type="number" step="0.01" value={form.cost_price} onChange={(e) => setForm((f) => ({ ...f, cost_price: Number(e.target.value) }))} /></div>
                 {form.product_type === "good" && (
-                  <div><Label>{t("purchase.reorderPoint")}</Label><Input type="number" step="0.01" value={form.reorder_point} onChange={(e) => setForm((f) => ({ ...f, reorder_point: e.target.value }))} /></div>
+                  <div><Label>{t("purchase.reorderPoint")} *</Label><Input type="number" step="0.01" value={form.reorder_point} onChange={(e) => setForm((f) => ({ ...f, reorder_point: e.target.value }))} /></div>
                 )}
                 <div>
-                  <Label>{t("purchase.barcode")}</Label>
+                  <Label>{t("purchase.barcode")} *</Label>
                   <div className="flex gap-2">
                     <Input value={form.barcode} onChange={(e) => setForm((f) => ({ ...f, barcode: e.target.value.replace(/[^0-9]/g, "") }))} dir="ltr" className="flex-1" />
                     <Button type="button" variant="outline" size="icon" title={t("purchase.generateBarcode")} onClick={() => setForm((f) => ({ ...f, barcode: generateEAN13() }))}>
