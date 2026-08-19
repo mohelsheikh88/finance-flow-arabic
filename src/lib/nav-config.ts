@@ -421,16 +421,18 @@ export function matchNavPath(groups: NavGroup[], pathname: string) {
  */
 export function groupHomeUrl(group: NavGroup): string {
   if (group.homeUrl) return group.homeUrl;
-  if (group.subgroups && group.subgroups.length > 0 && group.key) return `/module/${group.key}`;
+  if (group.subgroups && group.subgroups.length > 0) return group.subgroups[0].items[0]?.url ?? "/apps";
   return group.items?.[0]?.url ?? "/apps";
 }
 
 /**
- * Pages that render as a full-screen card grid (no sidebar): the main Apps
- * launcher, plus every module's own sub-launcher at /module/{key}.
+ * Pages that render as a full-screen card grid (no sidebar): just the
+ * main Apps launcher. Every module goes straight to a real content page
+ * with the sidebar showing its full menu tree — no intermediate
+ * "pick a section" step.
  */
 export function isLauncherPath(pathname: string): boolean {
-  return pathname === "/apps" || pathname.startsWith("/module/");
+  return pathname === "/apps";
 }
 
 /**

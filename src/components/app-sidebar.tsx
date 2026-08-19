@@ -47,7 +47,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
-import { useVisibleNavGroups, matchNavPath, groupHomeUrl } from "@/lib/nav-config";
+import { useVisibleNavGroups, matchNavPath } from "@/lib/nav-config";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 
@@ -61,29 +61,20 @@ export function AppSidebar() {
   const isActive = (p: string) => currentPath === p || currentPath.startsWith(p + "/");
 
   // Odoo-style: the sidebar only ever shows the ONE module the user is
-  // currently inside. Fall back to the first visible module if, for some
-  // reason, the current path doesn't belong to any of them yet.
+  // currently inside — but ALWAYS its full tree (every subgroup and every
+  // item), regardless of which specific page within it you're on. No more
+  // narrowing down to "just this subgroup" — the whole module's menu is
+  // always one click away. Fall back to the first visible module if, for
+  // some reason, the current path doesn't belong to any of them yet.
   const match = matchNavPath(groups, currentPath);
   const activeGroup = match?.group ?? groups[0];
 
-  // Some top-level apps (e.g. "Medical App") are themselves just a card-grid
-  // launcher for several independent sub-modules (Pharmacy, Insurance...).
-  // Once the user is actually inside one of those sub-modules, the sidebar
-  // should scope to THAT sub-module only — not list its siblings too.
-  // Same principle for EVERY module that has subgroups (Accounting, Medical
-  // App, and any future one): once the user is inside a specific subgroup's
-  // page, the sidebar scopes to that subgroup only, and "Back" steps up to
-  // this module's own card-grid sub-launcher — not straight to /apps.
-  const isNestedApp = !!(activeGroup?.subgroups && activeGroup.subgroups.length > 0 && match?.subgroup);
-  const ScopeIcon = isNestedApp ? match!.subgroup!.icon : activeGroup?.icon;
-  const scopeLabel = isNestedApp ? match!.subgroup!.label : activeGroup?.label;
-  const scopeItems = isNestedApp ? match!.subgroup!.items : activeGroup?.items;
-  const scopeSubgroups = isNestedApp ? undefined : activeGroup?.subgroups;
-  const backUrl = isNestedApp && activeGroup ? groupHomeUrl(activeGroup) : "/apps";
-  // "Back" always names its actual destination instead of a generic word —
-  // stepping out of a sub-module names the parent module; from a flat
-  // module it goes to the main launcher, same as Home Screen.
-  const backLabel = isNestedApp && activeGroup ? activeGroup.label : t("nav.allApps");
+  const ScopeIcon = activeGroup?.icon;
+  const scopeLabel = activeGroup?.label;
+  const scopeItems = activeGroup?.items;
+  const scopeSubgroups = activeGroup?.subgroups;
+  const backUrl = "/apps";
+  const backLabel = t("nav.allApps");
   const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
 
 

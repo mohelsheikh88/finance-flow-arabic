@@ -33,11 +33,6 @@ export function Breadcrumbs() {
   const { group, subgroup, item } = match;
   const groupUrl = groupHomeUrl(group);
   const subgroupUrl = subgroup?.items[0]?.url ?? groupUrl;
-  // Only groups with their own sub-launcher (/module/{key}) have a real,
-  // predictable "home" to jump to — flat groups (Settings, Purchase...)
-  // don't, so linking their name would just drop you on an arbitrary
-  // sibling page. Show plain text for those instead.
-  const groupHasOwnHome = !!group.subgroups && group.subgroups.length > 0;
 
   return (
     <nav
@@ -50,13 +45,9 @@ export function Breadcrumbs() {
 
       <Chevron className="h-3 w-3 shrink-0 opacity-50" />
 
-      {groupHasOwnHome ? (
-        <Link to={groupUrl} className="hover:text-foreground transition-colors shrink-0">
-          {group.label}
-        </Link>
-      ) : (
-        <span className="shrink-0">{group.label}</span>
-      )}
+      <Link to={groupUrl} className="hover:text-foreground transition-colors shrink-0">
+        {group.label}
+      </Link>
 
       {subgroup && (
         <>

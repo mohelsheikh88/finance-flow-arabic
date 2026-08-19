@@ -75,7 +75,6 @@ import { Route as AuthenticatedInvoicesCustomerRouteImport } from './routes/_aut
 import { Route as AuthenticatedInvoicesVendorRouteImport } from './routes/_authenticated.invoices.vendor'
 import { Route as AuthenticatedJournalEntriesIndexRouteImport } from './routes/_authenticated.journal-entries.index'
 import { Route as AuthenticatedJournalEntriesNewRouteImport } from './routes/_authenticated.journal-entries.new'
-import { Route as AuthenticatedModuleKeyRouteImport } from './routes/_authenticated.module.$key'
 import { Route as AuthenticatedReportsAgingRouteImport } from './routes/_authenticated.reports.aging'
 import { Route as AuthenticatedReportsBalanceSheetRouteImport } from './routes/_authenticated.reports.balance-sheet'
 import { Route as AuthenticatedReportsCashFlowRouteImport } from './routes/_authenticated.reports.cash-flow'
@@ -439,11 +438,6 @@ const AuthenticatedJournalEntriesNewRoute =
     path: '/journal-entries/new',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedModuleKeyRoute = AuthenticatedModuleKeyRouteImport.update({
-  id: '/module/$key',
-  path: '/module/$key',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedReportsAgingRoute =
   AuthenticatedReportsAgingRouteImport.update({
     id: '/reports/aging',
@@ -551,7 +545,6 @@ export interface FileRoutesByFullPath {
   '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
-  '/module/$key': typeof AuthenticatedModuleKeyRoute
   '/reports/aging': typeof AuthenticatedReportsAgingRoute
   '/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
   '/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
@@ -626,7 +619,6 @@ export interface FileRoutesByTo {
   '/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
-  '/module/$key': typeof AuthenticatedModuleKeyRoute
   '/reports/aging': typeof AuthenticatedReportsAgingRoute
   '/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
   '/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
@@ -703,7 +695,6 @@ export interface FileRoutesById {
   '/_authenticated/invoices/customer': typeof AuthenticatedInvoicesCustomerRoute
   '/_authenticated/invoices/vendor': typeof AuthenticatedInvoicesVendorRoute
   '/_authenticated/journal-entries/new': typeof AuthenticatedJournalEntriesNewRoute
-  '/_authenticated/module/$key': typeof AuthenticatedModuleKeyRoute
   '/_authenticated/reports/aging': typeof AuthenticatedReportsAgingRoute
   '/_authenticated/reports/balance-sheet': typeof AuthenticatedReportsBalanceSheetRoute
   '/_authenticated/reports/cash-flow': typeof AuthenticatedReportsCashFlowRoute
@@ -780,7 +771,6 @@ export interface FileRouteTypes {
     | '/invoices/customer'
     | '/invoices/vendor'
     | '/journal-entries/new'
-    | '/module/$key'
     | '/reports/aging'
     | '/reports/balance-sheet'
     | '/reports/cash-flow'
@@ -855,7 +845,6 @@ export interface FileRouteTypes {
     | '/invoices/customer'
     | '/invoices/vendor'
     | '/journal-entries/new'
-    | '/module/$key'
     | '/reports/aging'
     | '/reports/balance-sheet'
     | '/reports/cash-flow'
@@ -931,7 +920,6 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices/customer'
     | '/_authenticated/invoices/vendor'
     | '/_authenticated/journal-entries/new'
-    | '/_authenticated/module/$key'
     | '/_authenticated/reports/aging'
     | '/_authenticated/reports/balance-sheet'
     | '/_authenticated/reports/cash-flow'
@@ -1413,13 +1401,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJournalEntriesNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/module/$key': {
-      id: '/_authenticated/module/$key'
-      path: '/module/$key'
-      fullPath: '/module/$key'
-      preLoaderRoute: typeof AuthenticatedModuleKeyRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/reports/aging': {
       id: '/_authenticated/reports/aging'
       path: '/reports/aging'
@@ -1535,7 +1516,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInvoicesCustomerRoute: typeof AuthenticatedInvoicesCustomerRoute
   AuthenticatedInvoicesVendorRoute: typeof AuthenticatedInvoicesVendorRoute
   AuthenticatedJournalEntriesNewRoute: typeof AuthenticatedJournalEntriesNewRoute
-  AuthenticatedModuleKeyRoute: typeof AuthenticatedModuleKeyRoute
   AuthenticatedReportsAgingRoute: typeof AuthenticatedReportsAgingRoute
   AuthenticatedReportsBalanceSheetRoute: typeof AuthenticatedReportsBalanceSheetRoute
   AuthenticatedReportsCashFlowRoute: typeof AuthenticatedReportsCashFlowRoute
@@ -1611,7 +1591,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInvoicesCustomerRoute: AuthenticatedInvoicesCustomerRoute,
   AuthenticatedInvoicesVendorRoute: AuthenticatedInvoicesVendorRoute,
   AuthenticatedJournalEntriesNewRoute: AuthenticatedJournalEntriesNewRoute,
-  AuthenticatedModuleKeyRoute: AuthenticatedModuleKeyRoute,
   AuthenticatedReportsAgingRoute: AuthenticatedReportsAgingRoute,
   AuthenticatedReportsBalanceSheetRoute: AuthenticatedReportsBalanceSheetRoute,
   AuthenticatedReportsCashFlowRoute: AuthenticatedReportsCashFlowRoute,
