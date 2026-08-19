@@ -2049,6 +2049,65 @@ export type Database = {
           },
         ]
       }
+      partner_bank_accounts: {
+        Row: {
+          id: string
+          partner_id: string
+          bank_name: string
+          account_name: string | null
+          account_number: string | null
+          iban: string | null
+          swift_code: string | null
+          currency_code: string | null
+          is_primary: boolean
+          notes: string | null
+          iban_file_path: string | null
+          iban_file_name: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          partner_id: string
+          bank_name: string
+          account_name?: string | null
+          account_number?: string | null
+          iban?: string | null
+          swift_code?: string | null
+          currency_code?: string | null
+          is_primary?: boolean
+          notes?: string | null
+          iban_file_path?: string | null
+          iban_file_name?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          partner_id?: string
+          bank_name?: string
+          account_name?: string | null
+          account_number?: string | null
+          iban?: string | null
+          swift_code?: string | null
+          currency_code?: string | null
+          is_primary?: boolean
+          notes?: string | null
+          iban_file_path?: string | null
+          iban_file_name?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_bank_accounts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           address_ar: string | null

@@ -633,6 +633,7 @@ const CreatePartnerSchema = z.object({
   email: z.string().email().max(255).optional().nullable().or(z.literal("")),
   phone: z.string().max(50).optional().nullable(),
   address_ar: z.string().max(500).optional().nullable(),
+  country: z.string().max(2).optional().nullable(),
   credit_limit: z.number().min(0).default(0),
   receivable_account_id: z.string().uuid().optional().nullable(),
   payable_account_id: z.string().uuid().optional().nullable(),
@@ -848,6 +849,136 @@ export const getPartnerAttachmentUrl = createServerFn({ method: "POST" })
       .createSignedUrl(row.file_path, 300);
     if (error) throw new Error(error.message);
     return { url: signed.signedUrl as string, fileName: row.file_name as string };
+  });
+
+// ---------------- Partner Bank Accounts ----------------
+
+export const listPartnerBankAccounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { partnerId: string }) => z.object({ partnerId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await (context.supabase as any)
+      .from("partner_bank_accounts")
+      .select("*")
+      .eq("partner_id", data.partnerId)
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const BankAccountSchema = z.object({
+  id: z.string().uuid().optional(),
+  bank_name: z.string().min(1).max(255),
+  account_name: z.string().max(255).optional().nullable(),
+  account_number: z.string().max(100).optional().nullable(),
+  iban: z.string().max(50).optional().nullable(),
+  swift_code: z.string().max(30).optional().nullable(),
+  currency_code: z.string().max(10).default("SAR"),
+  is_primary: z.boolean().default(false),
+  notes: z.string().max(500).optional().nullable(),
+});
+
+export const savePartnerBankAccounts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      partnerId: z.string().uuid(),
+      accounts: z.array(BankAccountSchema).max(20),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: existing, error: e1 } = await sb
+      .from("partner_bank_accounts")
+      .select("id")
+      .eq("partner_id", data.partnerId);
+    if (e1) throw new Error(e1.message);
+
+    const keepIds = new Set(data.accounts.filter((a) => a.id).map((a) => a.id!));
+    const toDelete = (existing ?? []).filter((r: any) => !keepIds.has(r.id)).map((r: any) => r.id);
+    if (toDelete.length > 0) {
+      // Clean up any IBAN files belonging to removed rows first.
+      const { data: removedRows } = await sb
+        .from("partner_bank_accounts")
+        .select("iban_file_path")
+        .in("id", toDelete);
+      const paths = (removedRows ?? []).map((r: any) => r.iban_file_path).filter(Boolean);
+      if (paths.length) await sb.storage.from("partner-attachments").remove(paths);
+      const { error } = await sb.from("partner_bank_accounts").delete().in("id", toDelete);
+      if (error) throw new Error(error.message);
+    }
+
+    const ids: string[] = [];
+    for (const a of data.accounts) {
+      const payload = {
+        partner_id: data.partnerId,
+        bank_name: a.bank_name,
+        account_name: a.account_name || null,
+        account_number: a.account_number || null,
+        iban: a.iban || null,
+        swift_code: a.swift_code || null,
+        currency_code: a.currency_code,
+        is_primary: a.is_primary,
+        notes: a.notes || null,
+      };
+      if (a.id) {
+        const { error } = await sb.from("partner_bank_accounts").update(payload).eq("id", a.id);
+        if (error) throw new Error(error.message);
+        ids.push(a.id);
+      } else {
+        const { data: row, error } = await sb.from("partner_bank_accounts").insert(payload).select("id").single();
+        if (error) throw new Error(error.message);
+        ids.push(row.id);
+      }
+    }
+    return { ok: true, ids };
+  });
+
+export const uploadBankAccountIban = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      bankAccountId: z.string().uuid(),
+      fileName: z.string().min(1).max(255),
+      mimeType: z.string().max(255).optional().nullable(),
+      contentBase64: z.string().min(1),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `bank-accounts/${data.bankAccountId}/${Date.now()}_${safeName}`;
+    const bytes = Uint8Array.from(atob(data.contentBase64), (c) => c.charCodeAt(0));
+    const { error: upErr } = await sb.storage
+      .from("partner-attachments")
+      .upload(path, bytes, { contentType: data.mimeType || "application/octet-stream", upsert: false });
+    if (upErr) throw new Error(upErr.message);
+
+    const { error } = await sb
+      .from("partner_bank_accounts")
+      .update({ iban_file_path: path, iban_file_name: data.fileName })
+      .eq("id", data.bankAccountId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getBankAccountIbanUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ bankAccountId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    const { data: row, error: e1 } = await sb
+      .from("partner_bank_accounts")
+      .select("iban_file_path, iban_file_name")
+      .eq("id", data.bankAccountId)
+      .single();
+    if (e1) throw new Error(e1.message);
+    if (!row?.iban_file_path) throw new Error("No file uploaded");
+    const { data: signed, error } = await sb.storage
+      .from("partner-attachments")
+      .createSignedUrl(row.iban_file_path, 300);
+    if (error) throw new Error(error.message);
+    return { url: signed.signedUrl as string, fileName: row.iban_file_name as string };
   });
 
 
