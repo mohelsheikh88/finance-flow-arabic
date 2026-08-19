@@ -25,6 +25,7 @@ import { Route as AuthenticatedBankReconciliationsRouteImport } from './routes/_
 import { Route as AuthenticatedBanksRouteImport } from './routes/_authenticated.banks'
 import { Route as AuthenticatedClassificationsRouteImport } from './routes/_authenticated.classifications'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated.companies'
+import { Route as AuthenticatedComplianceTrackingRouteImport } from './routes/_authenticated.compliance-tracking'
 import { Route as AuthenticatedCostCentersRouteImport } from './routes/_authenticated.cost-centers'
 import { Route as AuthenticatedCreditMemosRouteImport } from './routes/_authenticated.credit-memos'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated.crm'
@@ -54,7 +55,8 @@ import { Route as AuthenticatedPaymentTermsRouteImport } from './routes/_authent
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
 import { Route as AuthenticatedPharmacyRouteImport } from './routes/_authenticated.pharmacy'
 import { Route as AuthenticatedPhysicianRouteImport } from './routes/_authenticated.physician'
-import { Route as AuthenticatedProductManagementRouteImport } from './routes/_authenticated.product-management'
+import { Route as AuthenticatedProductCategoriesRouteImport } from './routes/_authenticated.product-categories'
+import { Route as AuthenticatedProductsRouteImport } from './routes/_authenticated.products'
 import { Route as AuthenticatedPurchaseRouteImport } from './routes/_authenticated.purchase'
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated.purchase-orders'
 import { Route as AuthenticatedRadiologyRouteImport } from './routes/_authenticated.radiology'
@@ -170,6 +172,12 @@ const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
   path: '/companies',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedComplianceTrackingRoute =
+  AuthenticatedComplianceTrackingRouteImport.update({
+    id: '/compliance-tracking',
+    path: '/compliance-tracking',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCostCentersRoute =
   AuthenticatedCostCentersRouteImport.update({
     id: '/cost-centers',
@@ -325,12 +333,17 @@ const AuthenticatedPhysicianRoute = AuthenticatedPhysicianRouteImport.update({
   path: '/physician',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedProductManagementRoute =
-  AuthenticatedProductManagementRouteImport.update({
-    id: '/product-management',
-    path: '/product-management',
+const AuthenticatedProductCategoriesRoute =
+  AuthenticatedProductCategoriesRouteImport.update({
+    id: '/product-categories',
+    path: '/product-categories',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedProductsRoute = AuthenticatedProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPurchaseRoute = AuthenticatedPurchaseRouteImport.update({
   id: '/purchase',
   path: '/purchase',
@@ -517,6 +530,7 @@ export interface FileRoutesByFullPath {
   '/banks': typeof AuthenticatedBanksRoute
   '/classifications': typeof AuthenticatedClassificationsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
+  '/compliance-tracking': typeof AuthenticatedComplianceTrackingRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/crm': typeof AuthenticatedCrmRoute
@@ -546,7 +560,8 @@ export interface FileRoutesByFullPath {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/physician': typeof AuthenticatedPhysicianRoute
-  '/product-management': typeof AuthenticatedProductManagementRoute
+  '/product-categories': typeof AuthenticatedProductCategoriesRoute
+  '/products': typeof AuthenticatedProductsRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRoute
   '/radiology': typeof AuthenticatedRadiologyRoute
@@ -594,6 +609,7 @@ export interface FileRoutesByTo {
   '/banks': typeof AuthenticatedBanksRoute
   '/classifications': typeof AuthenticatedClassificationsRoute
   '/companies': typeof AuthenticatedCompaniesRoute
+  '/compliance-tracking': typeof AuthenticatedComplianceTrackingRoute
   '/cost-centers': typeof AuthenticatedCostCentersRoute
   '/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/crm': typeof AuthenticatedCrmRoute
@@ -623,7 +639,8 @@ export interface FileRoutesByTo {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pharmacy': typeof AuthenticatedPharmacyRoute
   '/physician': typeof AuthenticatedPhysicianRoute
-  '/product-management': typeof AuthenticatedProductManagementRoute
+  '/product-categories': typeof AuthenticatedProductCategoriesRoute
+  '/products': typeof AuthenticatedProductsRoute
   '/purchase': typeof AuthenticatedPurchaseRoute
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRoute
   '/radiology': typeof AuthenticatedRadiologyRoute
@@ -673,6 +690,7 @@ export interface FileRoutesById {
   '/_authenticated/banks': typeof AuthenticatedBanksRoute
   '/_authenticated/classifications': typeof AuthenticatedClassificationsRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
+  '/_authenticated/compliance-tracking': typeof AuthenticatedComplianceTrackingRoute
   '/_authenticated/cost-centers': typeof AuthenticatedCostCentersRoute
   '/_authenticated/credit-memos': typeof AuthenticatedCreditMemosRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
@@ -702,7 +720,8 @@ export interface FileRoutesById {
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/pharmacy': typeof AuthenticatedPharmacyRoute
   '/_authenticated/physician': typeof AuthenticatedPhysicianRoute
-  '/_authenticated/product-management': typeof AuthenticatedProductManagementRoute
+  '/_authenticated/product-categories': typeof AuthenticatedProductCategoriesRoute
+  '/_authenticated/products': typeof AuthenticatedProductsRoute
   '/_authenticated/purchase': typeof AuthenticatedPurchaseRoute
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRoute
   '/_authenticated/radiology': typeof AuthenticatedRadiologyRoute
@@ -752,6 +771,7 @@ export interface FileRouteTypes {
     | '/banks'
     | '/classifications'
     | '/companies'
+    | '/compliance-tracking'
     | '/cost-centers'
     | '/credit-memos'
     | '/crm'
@@ -781,7 +801,8 @@ export interface FileRouteTypes {
     | '/payments'
     | '/pharmacy'
     | '/physician'
-    | '/product-management'
+    | '/product-categories'
+    | '/products'
     | '/purchase'
     | '/purchase-orders'
     | '/radiology'
@@ -829,6 +850,7 @@ export interface FileRouteTypes {
     | '/banks'
     | '/classifications'
     | '/companies'
+    | '/compliance-tracking'
     | '/cost-centers'
     | '/credit-memos'
     | '/crm'
@@ -858,7 +880,8 @@ export interface FileRouteTypes {
     | '/payments'
     | '/pharmacy'
     | '/physician'
-    | '/product-management'
+    | '/product-categories'
+    | '/products'
     | '/purchase'
     | '/purchase-orders'
     | '/radiology'
@@ -907,6 +930,7 @@ export interface FileRouteTypes {
     | '/_authenticated/banks'
     | '/_authenticated/classifications'
     | '/_authenticated/companies'
+    | '/_authenticated/compliance-tracking'
     | '/_authenticated/cost-centers'
     | '/_authenticated/credit-memos'
     | '/_authenticated/crm'
@@ -936,7 +960,8 @@ export interface FileRouteTypes {
     | '/_authenticated/payments'
     | '/_authenticated/pharmacy'
     | '/_authenticated/physician'
-    | '/_authenticated/product-management'
+    | '/_authenticated/product-categories'
+    | '/_authenticated/products'
     | '/_authenticated/purchase'
     | '/_authenticated/purchase-orders'
     | '/_authenticated/radiology'
@@ -1088,6 +1113,13 @@ declare module '@tanstack/react-router' {
       path: '/companies'
       fullPath: '/companies'
       preLoaderRoute: typeof AuthenticatedCompaniesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/compliance-tracking': {
+      id: '/_authenticated/compliance-tracking'
+      path: '/compliance-tracking'
+      fullPath: '/compliance-tracking'
+      preLoaderRoute: typeof AuthenticatedComplianceTrackingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/cost-centers': {
@@ -1293,11 +1325,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPhysicianRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/product-management': {
-      id: '/_authenticated/product-management'
-      path: '/product-management'
-      fullPath: '/product-management'
-      preLoaderRoute: typeof AuthenticatedProductManagementRouteImport
+    '/_authenticated/product-categories': {
+      id: '/_authenticated/product-categories'
+      path: '/product-categories'
+      fullPath: '/product-categories'
+      preLoaderRoute: typeof AuthenticatedProductCategoriesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/products': {
+      id: '/_authenticated/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof AuthenticatedProductsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/purchase': {
@@ -1527,6 +1566,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBanksRoute: typeof AuthenticatedBanksRoute
   AuthenticatedClassificationsRoute: typeof AuthenticatedClassificationsRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
+  AuthenticatedComplianceTrackingRoute: typeof AuthenticatedComplianceTrackingRoute
   AuthenticatedCostCentersRoute: typeof AuthenticatedCostCentersRoute
   AuthenticatedCreditMemosRoute: typeof AuthenticatedCreditMemosRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
@@ -1556,7 +1596,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPharmacyRoute: typeof AuthenticatedPharmacyRoute
   AuthenticatedPhysicianRoute: typeof AuthenticatedPhysicianRoute
-  AuthenticatedProductManagementRoute: typeof AuthenticatedProductManagementRoute
+  AuthenticatedProductCategoriesRoute: typeof AuthenticatedProductCategoriesRoute
+  AuthenticatedProductsRoute: typeof AuthenticatedProductsRoute
   AuthenticatedPurchaseRoute: typeof AuthenticatedPurchaseRoute
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRoute
   AuthenticatedRadiologyRoute: typeof AuthenticatedRadiologyRoute
@@ -1603,6 +1644,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBanksRoute: AuthenticatedBanksRoute,
   AuthenticatedClassificationsRoute: AuthenticatedClassificationsRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
+  AuthenticatedComplianceTrackingRoute: AuthenticatedComplianceTrackingRoute,
   AuthenticatedCostCentersRoute: AuthenticatedCostCentersRoute,
   AuthenticatedCreditMemosRoute: AuthenticatedCreditMemosRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
@@ -1633,7 +1675,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPharmacyRoute: AuthenticatedPharmacyRoute,
   AuthenticatedPhysicianRoute: AuthenticatedPhysicianRoute,
-  AuthenticatedProductManagementRoute: AuthenticatedProductManagementRoute,
+  AuthenticatedProductCategoriesRoute: AuthenticatedProductCategoriesRoute,
+  AuthenticatedProductsRoute: AuthenticatedProductsRoute,
   AuthenticatedPurchaseRoute: AuthenticatedPurchaseRoute,
   AuthenticatedPurchaseOrdersRoute: AuthenticatedPurchaseOrdersRoute,
   AuthenticatedRadiologyRoute: AuthenticatedRadiologyRoute,

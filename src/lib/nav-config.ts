@@ -25,6 +25,7 @@ import {
   SlidersHorizontal,
   Tags,
   Ruler,
+  ShieldAlert,
   HandCoins,
   Stethoscope,
   Pill,
@@ -222,7 +223,9 @@ export function useNavGroups(): NavGroup[] {
           icon: SlidersHorizontal,
           hue: 25,
           items: [
-            { url: "/product-management", icon: Tags, title: t("nav.productManagement") },
+            { url: "/product-categories", icon: Tags, title: t("purchase.productCategories") },
+            { url: "/products", icon: Tags, title: t("purchase.products") },
+            { url: "/compliance-tracking", icon: ShieldAlert, title: t("purchase.complianceTracking") },
             { url: "/units-of-measure", icon: Ruler, title: t("nav.unitsOfMeasure") },
           ],
         },
