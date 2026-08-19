@@ -2810,6 +2810,7 @@ export type Database = {
           is_controlled_substance: boolean
           requires_prescription: boolean
           regulatory_number: string | null
+          barcode: string | null
           reorder_point: number | null
           is_active: boolean
           notes: string | null
@@ -2834,6 +2835,7 @@ export type Database = {
           is_controlled_substance?: boolean
           requires_prescription?: boolean
           regulatory_number?: string | null
+          barcode?: string | null
           reorder_point?: number | null
           is_active?: boolean
           notes?: string | null
@@ -2858,6 +2860,7 @@ export type Database = {
           is_controlled_substance?: boolean
           requires_prescription?: boolean
           regulatory_number?: string | null
+          barcode?: string | null
           reorder_point?: number | null
           is_active?: boolean
           notes?: string | null

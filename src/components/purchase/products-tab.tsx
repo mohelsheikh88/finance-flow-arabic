@@ -27,9 +27,21 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Plus, Pencil, Trash2, ShieldAlert, Snowflake, Boxes,
+  Plus, Pencil, Trash2, ShieldAlert, Snowflake, Boxes, Barcode,
 } from "lucide-react";
 import { toast } from "sonner";
+
+// GS1 "restricted circulation" prefix (200-299) is reserved for a
+// company's own internal use, so it's safe to generate these locally
+// without registering with GS1.
+function generateEAN13(): string {
+  let body = "20";
+  for (let i = 0; i < 10; i++) body += Math.floor(Math.random() * 10);
+  let sum = 0;
+  for (let i = 0; i < 12; i++) sum += parseInt(body[i], 10) * (i % 2 === 0 ? 1 : 3);
+  const checkDigit = (10 - (sum % 10)) % 10;
+  return body + checkDigit;
+}
 
 /* ============================== Products Tab ============================== */
 
@@ -81,7 +93,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
     category_id: null as string | null, product_type: "good" as "good" | "service" | "other",
     purchase_uom_id: null as string | null, cost_price: 0, expense_account_id: null as string | null,
     requires_batch_tracking: false, requires_expiry_tracking: false, requires_cold_chain: false,
-    is_controlled_substance: false, requires_prescription: false, regulatory_number: "", reorder_point: "" as any,
+    is_controlled_substance: false, requires_prescription: false, regulatory_number: "", barcode: "", reorder_point: "" as any,
     is_active: true, notes: "",
   };
   const [open, setOpen] = useState(false);
@@ -96,7 +108,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
       cost_price: p.cost_price, expense_account_id: p.expense_account_id,
       requires_batch_tracking: p.requires_batch_tracking, requires_expiry_tracking: p.requires_expiry_tracking,
       requires_cold_chain: p.requires_cold_chain, is_controlled_substance: p.is_controlled_substance,
-      requires_prescription: p.requires_prescription, regulatory_number: p.regulatory_number ?? "",
+      requires_prescription: p.requires_prescription, regulatory_number: p.regulatory_number ?? "", barcode: p.barcode ?? "",
       reorder_point: p.reorder_point ?? "", is_active: p.is_active, notes: p.notes ?? "",
     });
     setOpen(true);
@@ -108,6 +120,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
         ...form,
         company_id: companyId!,
         regulatory_number: form.regulatory_number || null,
+        barcode: form.barcode || null,
         reorder_point: form.reorder_point === "" ? null : Number(form.reorder_point),
         notes: form.notes || null,
       },
@@ -265,6 +278,15 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
                 {form.product_type === "good" && (
                   <div><Label>{t("purchase.reorderPoint")}</Label><Input type="number" step="0.01" value={form.reorder_point} onChange={(e) => setForm((f) => ({ ...f, reorder_point: e.target.value }))} /></div>
                 )}
+                <div>
+                  <Label>{t("purchase.barcode")}</Label>
+                  <div className="flex gap-2">
+                    <Input value={form.barcode} onChange={(e) => setForm((f) => ({ ...f, barcode: e.target.value.replace(/[^0-9]/g, "") }))} dir="ltr" className="flex-1" />
+                    <Button type="button" variant="outline" size="icon" title={t("purchase.generateBarcode")} onClick={() => setForm((f) => ({ ...f, barcode: generateEAN13() }))}>
+                      <Barcode className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
 

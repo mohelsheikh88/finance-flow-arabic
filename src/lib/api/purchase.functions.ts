@@ -226,6 +226,8 @@ const ProductSchema = z.object({
   is_controlled_substance: z.boolean().default(false),
   requires_prescription: z.boolean().default(false),
   regulatory_number: z.string().max(100).nullable().optional(),
+  barcode: z.string().max(50).nullable().optional()
+    .refine((v) => !v || /^\d{8,14}$/.test(v), { message: "Barcode must be 8-14 digits" }),
   reorder_point: z.number().min(0).nullable().optional(),
   is_active: z.boolean().default(true),
   notes: z.string().max(2000).nullable().optional(),
@@ -236,13 +238,15 @@ export const upsertProduct = createServerFn({ method: "POST" })
   .inputValidator((i) => ProductSchema.parse(i))
   .handler(async ({ data, context }) => {
     const { id, ...patch } = data;
+    const friendlyError = (msg: string) =>
+      msg.includes("idx_products_barcode") ? "This barcode is already used by another product" : msg;
     if (id) {
       const { data: row, error } = await context.supabase.from("products").update(patch).eq("id", id).select().single();
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(friendlyError(error.message));
       return row;
     }
     const { data: row, error } = await context.supabase.from("products").insert(patch).select().single();
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(friendlyError(error.message));
     return row;
   });
 
