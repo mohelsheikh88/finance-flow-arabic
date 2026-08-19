@@ -129,13 +129,22 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {[
-                  ...(scopeItems || []),
-                  ...(scopeSubgroups?.flatMap((sg) => sg.items) || []),
-                ].map((item) => (
+                  ...(scopeItems || []).map((item) => ({ item, hue: activeGroup?.hue ?? 200 })),
+                  ...(scopeSubgroups?.flatMap((sg) =>
+                    sg.items.map((item) => ({ item, hue: sg.hue ?? activeGroup?.hue ?? 200 })),
+                  ) || []),
+                ].map(({ item, hue }) => (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4 shrink-0" />
+                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title} className="h-auto p-0">
+                      <Link to={item.url} className="flex items-center justify-center p-1">
+                        <div
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md
+                                     bg-gradient-to-br from-[hsl(var(--hue)_75%_58%)] to-[hsl(var(--hue)_80%_36%)]
+                                     shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),inset_0_-2px_2.5px_rgba(0,0,0,0.3),0_2px_5px_-1px_rgba(0,0,0,0.4)]"
+                          style={{ ["--hue" as any]: hue }}
+                        >
+                          <item.icon className="h-[15px] w-[15px] text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]" />
+                        </div>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
