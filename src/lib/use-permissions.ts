@@ -25,7 +25,7 @@ export function usePermissions() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_branch_access")
-        .select("can_write, can_edit, can_delete")
+        .select("can_read, can_write, can_edit, can_delete")
         .eq("user_id", user!.id)
         .eq("branch_id", branchId!)
         .maybeSingle();
@@ -37,6 +37,7 @@ export function usePermissions() {
   const loading = isPending || !branchId;
   return {
     hasAccess: loading ? true : !!data,
+    canRead: loading ? true : !!data?.can_read,
     canWrite: loading ? true : !!data?.can_write,
     canEdit: loading ? true : !!data?.can_edit,
     canDelete: loading ? true : !!data?.can_delete,

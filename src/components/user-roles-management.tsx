@@ -85,8 +85,7 @@ const DB_ROLES = [
 
 
 
-type BranchPerm = { canWrite: boolean; canEdit: boolean; canDelete: boolean };
-const defaultBranchPerm: BranchPerm = { canWrite: true, canEdit: true, canDelete: true };
+type BranchPerm = { canRead: boolean; canWrite: boolean; canEdit: boolean; canDelete: boolean };
 
 type FormState = {
   id: string | null;
@@ -202,6 +201,7 @@ export function UserRolesManagement({
     for (const r of branchAccess as any[]) {
       const perms = m.get(r.user_id) ?? {};
       perms[r.branch_id] = {
+        canRead: r.can_read !== false,
         canWrite: r.can_write !== false,
         canEdit: r.can_edit !== false,
         canDelete: r.can_delete !== false,
@@ -284,12 +284,16 @@ export function UserRolesManagement({
 
   const saveMut = useMutation({
     mutationFn: async (f: FormState) => {
-      const branchesPayload = Object.entries(f.branchPerms).map(([branchId, p]) => ({
-        branchId,
-        canWrite: p.canWrite,
-        canEdit: p.canEdit,
-        canDelete: p.canDelete,
-      }));
+      const branchesPayload = Object.entries(f.branchPerms)
+        // A branch with every permission off is the same as not having it at all.
+        .filter(([, p]) => p.canRead || p.canWrite || p.canEdit || p.canDelete)
+        .map(([branchId, p]) => ({
+          branchId,
+          canRead: p.canRead,
+          canWrite: p.canWrite,
+          canEdit: p.canEdit,
+          canDelete: p.canDelete,
+        }));
 
       if (f.id) {
         await updateFn({
@@ -711,19 +715,11 @@ export function UserRolesManagement({
                   </thead>
                   <tbody>
                     {(allBranches as any[]).map((b) => {
-                      const perm = form.branchPerms[b.id];
-                      const hasRead = !!perm;
-                      const setPerm = (patch: Partial<BranchPerm>) =>
+                      const perm: BranchPerm = form.branchPerms[b.id] ?? { canRead: false, canWrite: false, canEdit: false, canDelete: false };
+                      const togglePerm = (key: keyof BranchPerm, v: boolean) =>
                         setForm((f) => {
-                          if (!f.branchPerms[b.id]) return f;
-                          return { ...f, branchPerms: { ...f.branchPerms, [b.id]: { ...f.branchPerms[b.id], ...patch } } };
-                        });
-                      const toggleRead = (v: boolean) =>
-                        setForm((f) => {
-                          const next = { ...f.branchPerms };
-                          if (v) next[b.id] = { ...defaultBranchPerm };
-                          else delete next[b.id];
-                          return { ...f, branchPerms: next };
+                          const current = f.branchPerms[b.id] ?? { canRead: false, canWrite: false, canEdit: false, canDelete: false };
+                          return { ...f, branchPerms: { ...f.branchPerms, [b.id]: { ...current, [key]: v } } };
                         });
                       return (
                         <tr key={b.id} className="border-t">
@@ -735,28 +731,16 @@ export function UserRolesManagement({
                             </div>
                           </td>
                           <td className="p-2 text-center">
-                            <Checkbox checked={hasRead} onCheckedChange={(v) => toggleRead(v === true)} />
+                            <Checkbox checked={perm.canRead} onCheckedChange={(v) => togglePerm("canRead", v === true)} />
                           </td>
                           <td className="p-2 text-center">
-                            <Checkbox
-                              checked={hasRead && perm.canWrite}
-                              disabled={!hasRead}
-                              onCheckedChange={(v) => setPerm({ canWrite: v === true })}
-                            />
+                            <Checkbox checked={perm.canWrite} onCheckedChange={(v) => togglePerm("canWrite", v === true)} />
                           </td>
                           <td className="p-2 text-center">
-                            <Checkbox
-                              checked={hasRead && perm.canEdit}
-                              disabled={!hasRead}
-                              onCheckedChange={(v) => setPerm({ canEdit: v === true })}
-                            />
+                            <Checkbox checked={perm.canEdit} onCheckedChange={(v) => togglePerm("canEdit", v === true)} />
                           </td>
                           <td className="p-2 text-center">
-                            <Checkbox
-                              checked={hasRead && perm.canDelete}
-                              disabled={!hasRead}
-                              onCheckedChange={(v) => setPerm({ canDelete: v === true })}
-                            />
+                            <Checkbox checked={perm.canDelete} onCheckedChange={(v) => togglePerm("canDelete", v === true)} />
                           </td>
                         </tr>
                       );

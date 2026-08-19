@@ -140,13 +140,14 @@ export const listUserBranches = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("user_branch_access")
-      .select("user_id, branch_id, can_write, can_edit, can_delete");
+      .select("user_id, branch_id, can_read, can_write, can_edit, can_delete");
     if (error) throw new Error(error.message);
     return data ?? [];
   });
 
 const BranchPermSchema = z.object({
   branchId: z.string().uuid(),
+  canRead: z.boolean().default(true),
   canWrite: z.boolean().default(true),
   canEdit: z.boolean().default(true),
   canDelete: z.boolean().default(true),
@@ -175,6 +176,7 @@ export const setUserBranches = createServerFn({ method: "POST" })
         data.branches.map((b) => ({
           user_id: data.userId,
           branch_id: b.branchId,
+          can_read: b.canRead,
           can_write: b.canWrite,
           can_edit: b.canEdit,
           can_delete: b.canDelete,

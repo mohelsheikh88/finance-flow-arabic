@@ -2806,6 +2806,7 @@ export type Database = {
           branch_id: string
           can_delete: boolean
           can_edit: boolean
+          can_read: boolean
           can_write: boolean
           granted_at: string
           id: string
@@ -2815,6 +2816,7 @@ export type Database = {
           branch_id: string
           can_delete?: boolean
           can_edit?: boolean
+          can_read?: boolean
           can_write?: boolean
           granted_at?: string
           id?: string
@@ -2824,6 +2826,7 @@ export type Database = {
           branch_id?: string
           can_delete?: boolean
           can_edit?: boolean
+          can_read?: boolean
           can_write?: boolean
           granted_at?: string
           id?: string
