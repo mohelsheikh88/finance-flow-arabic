@@ -160,7 +160,7 @@ export function AppSidebar() {
         ) : (
           <SidebarGroup className="sidebar-grandparent mb-1.5 p-0">
             {/* Static module header (always "open" — no need to collapse the only module shown) */}
-            <div className="relative flex items-center gap-2.5 sm:gap-3 rounded-xl p-2.5 sm:p-3 mb-1.5 bg-gradient-to-br from-white/[0.09] to-white/[0.02] border border-sidebar-primary/25 shadow-sm">
+            <div className="relative flex items-center gap-2.5 sm:gap-3 px-1 py-2 mb-1.5">
               <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black/30 border border-white/[0.06] shadow-inner">
                 <ScopeIcon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] text-sidebar-foreground/80" />
               </div>
