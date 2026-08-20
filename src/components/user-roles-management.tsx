@@ -16,6 +16,7 @@ import {
 import { listBranches } from "@/lib/api/companies.functions";
 import { listRoles } from "@/lib/api/roles.functions";
 import { useNavGroups } from "@/lib/nav-config";
+import { UserSectionAccessDialog } from "@/components/module-section-access";
 import { userDisplayLabel } from "@/lib/user-display";
 import { useI18n, useLocalized } from "@/i18n";
 import { useBranch } from "@/lib/branch-context";
@@ -58,6 +59,7 @@ import {
   Search,
   Pencil,
   Trash2,
+  LayoutGrid,
   Wallet,
   ShoppingBag,
   Package,
@@ -135,6 +137,15 @@ export function UserRolesManagement({
   const moduleOptions = navGroups
     .filter((g) => !!g.key)
     .map((g) => ({ key: g.key!, icon: g.icon, label: g.label }));
+
+  // Sections available for the "Sub Modules" per-user dialog — only when
+  // this component is scoped to one module (rolesOnly usage) and that
+  // module has real subgroups (not a "will be built later" stub).
+  const currentModuleGroup = navGroups.find((g) => g.key === moduleScope);
+  const accessSections = (currentModuleGroup?.subgroups ?? []).filter(
+    (sg) => sg.key && sg.key !== `${moduleScope}Configuration`,
+  );
+  const [subModulesUserId, setSubModulesUserId] = useState<string | null>(null);
 
   const listFn = useServerFn(listUsersWithRoles);
   const assignFn = useServerFn(assignUserRole);
@@ -441,6 +452,18 @@ export function UserRolesManagement({
                         )}
                       </div>
                     </div>
+
+                    {rolesOnly && accessSections.length > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 gap-1.5 text-[11px] px-2"
+                        onClick={() => setSubModulesUserId(u.id)}
+                      >
+                        <LayoutGrid className="h-3 w-3" />
+                        {t("common.subModules") ?? "Sub Modules"}
+                      </Button>
+                    )}
 
                     {!rolesOnly && (
                       <div className="flex items-center gap-2">
@@ -798,6 +821,17 @@ export function UserRolesManagement({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {subModulesUserId && (
+        <UserSectionAccessDialog
+          open={!!subModulesUserId}
+          onClose={() => setSubModulesUserId(null)}
+          moduleKey={moduleScope!}
+          sections={accessSections}
+          userId={subModulesUserId}
+          userLabel={userDisplayLabel(users.find((u: any) => u.id === subModulesUserId), locale)}
+        />
+      )}
     </div>
   );
 }
