@@ -86,12 +86,15 @@ export function ModuleSectionAccessManagement({
       sectionKey,
       granted,
       parentSectionKey,
+      siblingKeys,
     }: {
       userId: string;
       sectionKey: string;
       granted: boolean;
       /** When granting a single screen, its parent section must come along too — otherwise the section-level check hides it despite the screen being explicitly allowed. */
       parentSectionKey?: string;
+      /** The other screen keys under the same parent — used to auto-revoke the parent once the LAST sibling screen is unchecked. */
+      siblingKeys?: string[];
     }) => {
       if (granted) {
         const rows = [{ user_id: userId, module_key: sectionKey }];
@@ -103,6 +106,20 @@ export function ModuleSectionAccessManagement({
       } else {
         const { error } = await supabase.from("user_module_access").delete().eq("user_id", userId).eq("module_key", sectionKey);
         if (error) throw error;
+        // If that was the last granted sibling screen, the section's
+        // auto-derived access should retract too — otherwise it would
+        // stay visible with zero screens actually reachable inside it.
+        if (parentSectionKey && siblingKeys && siblingKeys.length > 0) {
+          const { data: remaining, error: re } = await supabase
+            .from("user_module_access")
+            .select("module_key")
+            .eq("user_id", userId)
+            .in("module_key", siblingKeys);
+          if (re) throw re;
+          if (!remaining || remaining.length === 0) {
+            await supabase.from("user_module_access").delete().eq("user_id", userId).eq("module_key", parentSectionKey);
+          }
+        }
       }
     },
     onSuccess: () => {
@@ -114,6 +131,11 @@ export function ModuleSectionAccessManagement({
 
   const isGranted = (key: string, userId: string) => !!grantedMap?.get(key)?.has(userId);
   const grantedCount = (key: string) => candidates.filter((c: any) => isGranted(key, c.id)).length;
+  // A section's effective access = anyone granted on any of its screens
+  // (or, for legacy data, granted directly on the section key itself).
+  const hasEffectiveAccess = (sg: NavSubgroup, userId: string) =>
+    isGranted(sg.key!, userId) || sg.items.some((it) => isGranted(it.url, userId));
+  const effectiveGrantedCount = (sg: NavSubgroup) => candidates.filter((c: any) => hasEffectiveAccess(sg, c.id)).length;
 
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const toggleExpanded = (key: string) =>
@@ -156,15 +178,16 @@ export function ModuleSectionAccessManagement({
               </div>
               <span className="flex-1 font-medium text-sm">{sg.label}</span>
 
-              <EntityAccessPicker
-                candidates={candidates}
-                grantedCount={grantedCount(sg.key)}
-                isGranted={(userId) => isGranted(sg.key!, userId)}
-                onToggle={(userId, granted) => toggle.mutate({ userId, sectionKey: sg.key!, granted })}
-                isLocked={(userId) => sg.items.some((it) => isGranted(it.url, userId))}
-                lockedHint={t("common.sectionLockedHasScreens")}
-                locale={locale}
-              />
+              {/* Read-only: access at the section level is derived from its
+                  screens, not chosen here. Selecting only happens at the
+                  deepest (screen) level below. */}
+              <div
+                className="h-8 flex items-center gap-1.5 rounded-md border border-dashed px-2.5 text-xs text-muted-foreground"
+                title={t("common.sectionAccessDerivedHint")}
+              >
+                <Users2 className="h-3.5 w-3.5" />
+                {effectiveGrantedCount(sg)}/{candidates.length}
+              </div>
             </div>
 
             {isOpen && sg.items.length > 0 && (
@@ -177,7 +200,10 @@ export function ModuleSectionAccessManagement({
                       candidates={candidates}
                       grantedCount={grantedCount(item.url)}
                       isGranted={(userId) => isGranted(item.url, userId)}
-                      onToggle={(userId, granted) => toggle.mutate({ userId, sectionKey: item.url, granted, parentSectionKey: sg.key! })}
+                      onToggle={(userId, granted) => toggle.mutate({
+                        userId, sectionKey: item.url, granted, parentSectionKey: sg.key!,
+                        siblingKeys: sg.items.map((it) => it.url).filter((u) => u !== item.url),
+                      })}
                       locale={locale}
                       compact
                     />
