@@ -1,5 +1,12 @@
 export const translations = {
   ar: {
+    attachments: {
+      title: "المرفقات",
+      upload: "رفع ملف",
+      uploaded: "تم رفع المرفق",
+      empty: "لا توجد مرفقات بعد",
+      deleteConfirm: "حذف المرفق؟",
+    },
     common: {
       export: "تصدير",
       import: "استيراد",
@@ -7,6 +14,11 @@ export const translations = {
       clearSelection: "إلغاء التحديد",
       selectAll: "تحديد الكل",
       showing: "عرض",
+      avg: "متوسط",
+      count: "العدد",
+      from: "من",
+      to: "إلى",
+      updated: "تم التحديث",
       appName: "نظام الحياة المالي",
       appShort: "Financial ERP",
       chooseModuleToStart: "اختر موديول للبدء",
@@ -1009,6 +1021,13 @@ export const translations = {
     },
   },
   en: {
+    attachments: {
+      title: "Attachments",
+      upload: "Upload file",
+      uploaded: "Attachment uploaded",
+      empty: "No attachments yet",
+      deleteConfirm: "Delete attachment?",
+    },
     common: {
       export: "Export",
       import: "Import",
@@ -1016,6 +1035,11 @@ export const translations = {
       clearSelection: "Clear",
       selectAll: "Select all",
       showing: "Showing",
+      avg: "avg",
+      count: "Count",
+      from: "From",
+      to: "To",
+      updated: "updated",
       appName: "Al Hayat Financial ERP",
       appShort: "Financial ERP",
       chooseModuleToStart: "Choose a module to get started",
