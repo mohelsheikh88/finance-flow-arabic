@@ -30,7 +30,7 @@ type Props = {
 /**
  * Searchable product picker — type to filter by code, name (AR/EN), or
  * barcode instead of scrolling a long flat list. Used anywhere a product
- * line is added (Purchase Orders, RFQs, ...).
+ * line is added (Purchase Orders, ...).
  */
 export function ProductCombobox({
   products,

@@ -655,7 +655,7 @@ function BoxContents({ boxProductId, products, uoms }: { boxProductId: string; p
           <div>{idx === 0 && <Label className="text-xs">{t("purchase.contentProduct")}</Label>}
             <ProductCombobox products={selectableProducts} value={r.content_product_id} onChange={(id, p) => onPickContentProduct(idx, id, p)} triggerClassName="h-9 text-xs" />
           </div>
-          <div>{idx === 0 && <Label className="text-xs">{t("rfq.qty")}</Label>}<Input type="number" step="0.01" className="h-9" value={r.quantity} onChange={(e) => update(idx, { quantity: e.target.value })} /></div>
+          <div>{idx === 0 && <Label className="text-xs">{t("purchase.qty")}</Label>}<Input type="number" step="0.01" className="h-9" value={r.quantity} onChange={(e) => update(idx, { quantity: e.target.value })} /></div>
           <div>{idx === 0 && <Label className="text-xs">{t("purchase.uom")}</Label>}
             <Select value={r.uom_id ?? "__none__"} onValueChange={(v) => update(idx, { uom_id: v === "__none__" ? null : v })}>
               <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="—" /></SelectTrigger>

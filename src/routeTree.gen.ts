@@ -63,7 +63,6 @@ import { Route as AuthenticatedPurchaseUserAccessRouteImport } from './routes/_a
 import { Route as AuthenticatedRadiologyRouteImport } from './routes/_authenticated.radiology'
 import { Route as AuthenticatedReceiptsRouteImport } from './routes/_authenticated.receipts'
 import { Route as AuthenticatedReceptionRouteImport } from './routes/_authenticated.reception'
-import { Route as AuthenticatedRfqsRouteImport } from './routes/_authenticated.rfqs'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated.sales'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated.setup'
@@ -92,7 +91,6 @@ import { Route as AuthenticatedReportsPurchaseOrdersRouteImport } from './routes
 import { Route as AuthenticatedReportsPurchaseProductsRouteImport } from './routes/_authenticated.reports.purchase-products'
 import { Route as AuthenticatedReportsPurchaseVendorSpendRouteImport } from './routes/_authenticated.reports.purchase-vendor-spend'
 import { Route as AuthenticatedReportsVatRouteImport } from './routes/_authenticated.reports.vat'
-import { Route as AuthenticatedRfqsRfqIdRouteImport } from './routes/_authenticated.rfqs.$rfqId'
 import { Route as ApiPublicHooksPostDepreciationRouteImport } from './routes/api/public/hooks/post-depreciation'
 
 const IndexRoute = IndexRouteImport.update({
@@ -384,11 +382,6 @@ const AuthenticatedReceptionRoute = AuthenticatedReceptionRouteImport.update({
   path: '/reception',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedRfqsRoute = AuthenticatedRfqsRouteImport.update({
-  id: '/rfqs',
-  path: '/rfqs',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
@@ -551,11 +544,6 @@ const AuthenticatedReportsVatRoute = AuthenticatedReportsVatRouteImport.update({
   path: '/reports/vat',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedRfqsRfqIdRoute = AuthenticatedRfqsRfqIdRouteImport.update({
-  id: '/$rfqId',
-  path: '/$rfqId',
-  getParentRoute: () => AuthenticatedRfqsRoute,
-} as any)
 const ApiPublicHooksPostDepreciationRoute =
   ApiPublicHooksPostDepreciationRouteImport.update({
     id: '/api/public/hooks/post-depreciation',
@@ -617,7 +605,6 @@ export interface FileRoutesByFullPath {
   '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/reception': typeof AuthenticatedReceptionRoute
-  '/rfqs': typeof AuthenticatedRfqsRouteWithChildren
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -645,7 +632,6 @@ export interface FileRoutesByFullPath {
   '/reports/purchase-products': typeof AuthenticatedReportsPurchaseProductsRoute
   '/reports/purchase-vendor-spend': typeof AuthenticatedReportsPurchaseVendorSpendRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
-  '/rfqs/$rfqId': typeof AuthenticatedRfqsRfqIdRoute
   '/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
   '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
 }
@@ -703,7 +689,6 @@ export interface FileRoutesByTo {
   '/radiology': typeof AuthenticatedRadiologyRoute
   '/receipts': typeof AuthenticatedReceiptsRoute
   '/reception': typeof AuthenticatedReceptionRoute
-  '/rfqs': typeof AuthenticatedRfqsRouteWithChildren
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -731,7 +716,6 @@ export interface FileRoutesByTo {
   '/reports/purchase-products': typeof AuthenticatedReportsPurchaseProductsRoute
   '/reports/purchase-vendor-spend': typeof AuthenticatedReportsPurchaseVendorSpendRoute
   '/reports/vat': typeof AuthenticatedReportsVatRoute
-  '/rfqs/$rfqId': typeof AuthenticatedRfqsRfqIdRoute
   '/journal-entries': typeof AuthenticatedJournalEntriesIndexRoute
   '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
 }
@@ -791,7 +775,6 @@ export interface FileRoutesById {
   '/_authenticated/radiology': typeof AuthenticatedRadiologyRoute
   '/_authenticated/receipts': typeof AuthenticatedReceiptsRoute
   '/_authenticated/reception': typeof AuthenticatedReceptionRoute
-  '/_authenticated/rfqs': typeof AuthenticatedRfqsRouteWithChildren
   '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
@@ -819,7 +802,6 @@ export interface FileRoutesById {
   '/_authenticated/reports/purchase-products': typeof AuthenticatedReportsPurchaseProductsRoute
   '/_authenticated/reports/purchase-vendor-spend': typeof AuthenticatedReportsPurchaseVendorSpendRoute
   '/_authenticated/reports/vat': typeof AuthenticatedReportsVatRoute
-  '/_authenticated/rfqs/$rfqId': typeof AuthenticatedRfqsRfqIdRoute
   '/_authenticated/journal-entries/': typeof AuthenticatedJournalEntriesIndexRoute
   '/api/public/hooks/post-depreciation': typeof ApiPublicHooksPostDepreciationRoute
 }
@@ -879,7 +861,6 @@ export interface FileRouteTypes {
     | '/radiology'
     | '/receipts'
     | '/reception'
-    | '/rfqs'
     | '/sales'
     | '/settings'
     | '/setup'
@@ -907,7 +888,6 @@ export interface FileRouteTypes {
     | '/reports/purchase-products'
     | '/reports/purchase-vendor-spend'
     | '/reports/vat'
-    | '/rfqs/$rfqId'
     | '/journal-entries/'
     | '/api/public/hooks/post-depreciation'
   fileRoutesByTo: FileRoutesByTo
@@ -965,7 +945,6 @@ export interface FileRouteTypes {
     | '/radiology'
     | '/receipts'
     | '/reception'
-    | '/rfqs'
     | '/sales'
     | '/settings'
     | '/setup'
@@ -993,7 +972,6 @@ export interface FileRouteTypes {
     | '/reports/purchase-products'
     | '/reports/purchase-vendor-spend'
     | '/reports/vat'
-    | '/rfqs/$rfqId'
     | '/journal-entries'
     | '/api/public/hooks/post-depreciation'
   id:
@@ -1052,7 +1030,6 @@ export interface FileRouteTypes {
     | '/_authenticated/radiology'
     | '/_authenticated/receipts'
     | '/_authenticated/reception'
-    | '/_authenticated/rfqs'
     | '/_authenticated/sales'
     | '/_authenticated/settings'
     | '/_authenticated/setup'
@@ -1080,7 +1057,6 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/purchase-products'
     | '/_authenticated/reports/purchase-vendor-spend'
     | '/_authenticated/reports/vat'
-    | '/_authenticated/rfqs/$rfqId'
     | '/_authenticated/journal-entries/'
     | '/api/public/hooks/post-depreciation'
   fileRoutesById: FileRoutesById
@@ -1472,13 +1448,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReceptionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/rfqs': {
-      id: '/_authenticated/rfqs'
-      path: '/rfqs'
-      fullPath: '/rfqs'
-      preLoaderRoute: typeof AuthenticatedRfqsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/sales': {
       id: '/_authenticated/sales'
       path: '/sales'
@@ -1675,13 +1644,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsVatRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/rfqs/$rfqId': {
-      id: '/_authenticated/rfqs/$rfqId'
-      path: '/$rfqId'
-      fullPath: '/rfqs/$rfqId'
-      preLoaderRoute: typeof AuthenticatedRfqsRfqIdRouteImport
-      parentRoute: typeof AuthenticatedRfqsRoute
-    }
     '/api/public/hooks/post-depreciation': {
       id: '/api/public/hooks/post-depreciation'
       path: '/api/public/hooks/post-depreciation'
@@ -1691,17 +1653,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface AuthenticatedRfqsRouteChildren {
-  AuthenticatedRfqsRfqIdRoute: typeof AuthenticatedRfqsRfqIdRoute
-}
-
-const AuthenticatedRfqsRouteChildren: AuthenticatedRfqsRouteChildren = {
-  AuthenticatedRfqsRfqIdRoute: AuthenticatedRfqsRfqIdRoute,
-}
-
-const AuthenticatedRfqsRouteWithChildren =
-  AuthenticatedRfqsRoute._addFileChildren(AuthenticatedRfqsRouteChildren)
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountingUserAccessRoute: typeof AuthenticatedAccountingUserAccessRoute
@@ -1755,7 +1706,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRadiologyRoute: typeof AuthenticatedRadiologyRoute
   AuthenticatedReceiptsRoute: typeof AuthenticatedReceiptsRoute
   AuthenticatedReceptionRoute: typeof AuthenticatedReceptionRoute
-  AuthenticatedRfqsRoute: typeof AuthenticatedRfqsRouteWithChildren
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
@@ -1840,7 +1790,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRadiologyRoute: AuthenticatedRadiologyRoute,
   AuthenticatedReceiptsRoute: AuthenticatedReceiptsRoute,
   AuthenticatedReceptionRoute: AuthenticatedReceptionRoute,
-  AuthenticatedRfqsRoute: AuthenticatedRfqsRouteWithChildren,
   AuthenticatedSalesRoute: AuthenticatedSalesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
