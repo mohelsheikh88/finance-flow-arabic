@@ -71,6 +71,16 @@ export type NavGroup = {
  * Shared navigation tree — single source of truth used by both the
  * sidebar (app-sidebar.tsx) and the top breadcrumb trail (breadcrumbs.tsx).
  */
+// STANDING RULE: every top-level module that has real content (i.e. its own
+// subgroups, not a "will be built later" stub) MUST end its Configuration
+// subgroup with these two links:
+//   1. { url: "/approvals", ... }              — shared Hierarchical Approvals screen
+//   2. { url: "/<module>-user-access", ... }   — that module's own Sub-Modules
+//      Access + Users Roles page (copy accounting-user-access.tsx / purchase-user-access.tsx,
+//      swap moduleKey/moduleScope and the groups.find(g => g.key === "...") match).
+// Accounting and Purchase already follow this. Apply it to every future
+// module (inventory, HR, HIS, fleets, sales...) the moment it gets real
+// subgroups instead of a stub.
 export function useNavGroups(): NavGroup[] {
   const { t } = useI18n();
   const { data: sortMap } = useQuery({
@@ -250,6 +260,8 @@ export function useNavGroups(): NavGroup[] {
             { url: "/products", icon: Tags, title: t("purchase.products") },
             { url: "/compliance-tracking", icon: ShieldAlert, title: t("purchase.complianceTracking") },
             { url: "/units-of-measure", icon: Ruler, title: t("nav.unitsOfMeasure") },
+            { url: "/approvals", icon: ShieldCheck, title: t("approvals.title") },
+            { url: "/purchase-user-access", icon: UserCog, title: t("common.sectionAccessTitle") },
           ],
         },
       ],
