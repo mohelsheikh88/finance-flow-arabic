@@ -91,7 +91,7 @@ function PurchaseDashboard() {
               <LineChart data={monthlySpend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(206 20% 90%)" />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} width={70} tickFormatter={(v) => Number(v).toLocaleString()} />
+                <YAxis tick={{ fontSize: 11 }} width={70} tickFormatter={(v) => Math.round(Number(v)).toLocaleString()} />
                 <Tooltip formatter={(v: any) => formatMoney(Number(v), locale)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                 <Line type="monotone" dataKey="total" stroke="hsl(206 64% 42%)" strokeWidth={2.5} dot={{ r: 3 }} name={t("purchase.total")} />
               </LineChart>
@@ -129,7 +129,7 @@ function PurchaseDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topVendors} layout="vertical" margin={{ left: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(206 20% 90%)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => Number(v).toLocaleString()} />
+                  <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => Math.round(Number(v)).toLocaleString()} />
                   <YAxis type="category" dataKey={locale === "ar" ? "name_ar" : "name_en"} tick={{ fontSize: 11 }} width={110} />
                   <Tooltip formatter={(v: any) => formatMoney(Number(v), locale)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                   <Bar dataKey="total" radius={[0, 6, 6, 0]}>

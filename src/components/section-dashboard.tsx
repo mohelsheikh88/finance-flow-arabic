@@ -65,6 +65,6 @@ export function SectionDashboardHeader({ title, subtitle }: { title: string; sub
 
 export function formatMoney(n: number, locale: string, currency = "SAR") {
   return new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", {
-    style: "currency", currency, maximumFractionDigits: 2,
-  }).format(n);
+    style: "currency", currency, maximumFractionDigits: 0, minimumFractionDigits: 0,
+  }).format(Math.round(n));
 }
