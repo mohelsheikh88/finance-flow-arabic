@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  FileQuestion,
   Users,
   FileText,
   Receipt,
@@ -218,6 +219,15 @@ export function useNavGroups(): NavGroup[] {
             { url: "/reports/purchase-vendor-spend", icon: Users, title: t("purchase.reportVendorSpend") },
             { url: "/reports/purchase-products", icon: Tags, title: t("purchase.reportProductSpend") },
             { url: "/reports/purchase-category-spend", icon: BarChart3, title: t("purchase.reportCategorySpend") },
+          ],
+        },
+        {
+          key: "quotations",
+          label: t("nav.quotations"),
+          icon: FileQuestion,
+          hue: 25,
+          items: [
+            { url: "/rfqs", icon: FileQuestion, title: t("nav.quotations") },
           ],
         },
         {

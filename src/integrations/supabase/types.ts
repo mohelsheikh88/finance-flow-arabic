@@ -2539,6 +2539,174 @@ export type Database = {
         }
         Relationships: []
       }
+      rfqs: {
+        Row: {
+          id: string
+          company_id: string
+          rfq_number: string
+          title: string
+          request_date: string
+          needed_by_date: string | null
+          warehouse_id: string | null
+          status: string
+          notes: string | null
+          awarded_at: string | null
+          converted_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          rfq_number: string
+          title: string
+          request_date?: string
+          needed_by_date?: string | null
+          warehouse_id?: string | null
+          status?: string
+          notes?: string | null
+          awarded_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          rfq_number?: string
+          title?: string
+          request_date?: string
+          needed_by_date?: string | null
+          warehouse_id?: string | null
+          status?: string
+          notes?: string | null
+          awarded_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rfq_lines: {
+        Row: {
+          id: string
+          rfq_id: string
+          product_id: string | null
+          description: string | null
+          quantity: number
+          uom_id: string | null
+          target_price: number | null
+          notes: string | null
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          rfq_id: string
+          product_id?: string | null
+          description?: string | null
+          quantity?: number
+          uom_id?: string | null
+          target_price?: number | null
+          notes?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          rfq_id?: string
+          product_id?: string | null
+          description?: string | null
+          quantity?: number
+          uom_id?: string | null
+          target_price?: number | null
+          notes?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      rfq_vendors: {
+        Row: {
+          id: string
+          rfq_id: string
+          vendor_id: string
+          status: string
+          quote_date: string | null
+          validity_date: string | null
+          payment_term_id: string | null
+          currency_code: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          rfq_id: string
+          vendor_id: string
+          status?: string
+          quote_date?: string | null
+          validity_date?: string | null
+          payment_term_id?: string | null
+          currency_code?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          rfq_id?: string
+          vendor_id?: string
+          status?: string
+          quote_date?: string | null
+          validity_date?: string | null
+          payment_term_id?: string | null
+          currency_code?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rfq_vendor_quote_lines: {
+        Row: {
+          id: string
+          rfq_vendor_id: string
+          rfq_line_id: string
+          unit_price: number | null
+          delivery_days: number | null
+          available_qty: number | null
+          notes: string | null
+          is_awarded: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          rfq_vendor_id: string
+          rfq_line_id: string
+          unit_price?: number | null
+          delivery_days?: number | null
+          available_qty?: number | null
+          notes?: string | null
+          is_awarded?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          rfq_vendor_id?: string
+          rfq_line_id?: string
+          unit_price?: number | null
+          delivery_days?: number | null
+          available_qty?: number | null
+          notes?: string | null
+          is_awarded?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       purchase_orders: {
         Row: {
           id: string
@@ -2549,6 +2717,7 @@ export type Database = {
           vendor_reference: string | null
           warehouse_id: string | null
           bill_control: string
+          source_rfq_id: string | null
           order_date: string
           expected_delivery_date: string | null
           status: string
@@ -2572,6 +2741,7 @@ export type Database = {
           vendor_reference?: string | null
           warehouse_id?: string | null
           bill_control?: string
+          source_rfq_id?: string | null
           order_date?: string
           expected_delivery_date?: string | null
           status?: string
@@ -2595,6 +2765,7 @@ export type Database = {
           vendor_reference?: string | null
           warehouse_id?: string | null
           bill_control?: string
+          source_rfq_id?: string | null
           order_date?: string
           expected_delivery_date?: string | null
           status?: string
