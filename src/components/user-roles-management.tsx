@@ -474,34 +474,36 @@ export function UserRolesManagement({
                     )}
                   </div>
 
-                  <div className="flex items-start gap-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-                      {t("users.modules")}:
-                    </span>
-                    <div className="flex flex-wrap gap-1">
-                      {mods.length === 0 ? (
-                        <span className="text-[11px] text-muted-foreground italic">
-                          {t("users.noModules")}
-                        </span>
-                      ) : (
-                        mods.map((m: string) => {
-                          const def = moduleOptions.find((x) => x.key === m);
-                          if (!def) return null;
-                          const Icon = def.icon;
-                          return (
-                            <Badge
-                              key={m}
-                              variant="outline"
-                              className="gap-1 text-[10px] border-primary/40 text-primary"
-                            >
-                              <Icon className="h-3 w-3" />
-                              {def.label}
-                            </Badge>
-                          );
-                        })
-                      )}
+                  {!rolesOnly && (
+                    <div className="flex items-start gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                        {t("users.modules")}:
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {mods.length === 0 ? (
+                          <span className="text-[11px] text-muted-foreground italic">
+                            {t("users.noModules")}
+                          </span>
+                        ) : (
+                          mods.map((m: string) => {
+                            const def = moduleOptions.find((x) => x.key === m);
+                            if (!def) return null;
+                            const Icon = def.icon;
+                            return (
+                              <Badge
+                                key={m}
+                                variant="outline"
+                                className="gap-1 text-[10px] border-primary/40 text-primary"
+                              >
+                                <Icon className="h-3 w-3" />
+                                {def.label}
+                              </Badge>
+                            );
+                          })
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex items-start gap-2 flex-wrap">
                     <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
