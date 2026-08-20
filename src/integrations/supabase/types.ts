@@ -3004,6 +3004,39 @@ export type Database = {
         }
         Relationships: []
       }
+      product_box_contents: {
+        Row: {
+          id: string
+          box_product_id: string
+          content_product_id: string
+          quantity: number
+          uom_id: string | null
+          notes: string | null
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          box_product_id: string
+          content_product_id: string
+          quantity?: number
+          uom_id?: string | null
+          notes?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          box_product_id?: string
+          content_product_id?: string
+          quantity?: number
+          uom_id?: string | null
+          notes?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           id: string
@@ -3025,6 +3058,7 @@ export type Database = {
           requires_prescription: boolean
           regulatory_number: string | null
           barcode: string | null
+          is_box: boolean
           reorder_point: number | null
           is_active: boolean
           notes: string | null
@@ -3051,6 +3085,7 @@ export type Database = {
           requires_prescription?: boolean
           regulatory_number?: string | null
           barcode?: string | null
+          is_box?: boolean
           reorder_point?: number | null
           is_active?: boolean
           notes?: string | null
@@ -3077,6 +3112,7 @@ export type Database = {
           requires_prescription?: boolean
           regulatory_number?: string | null
           barcode?: string | null
+          is_box?: boolean
           reorder_point?: number | null
           is_active?: boolean
           notes?: string | null

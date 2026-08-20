@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ProductCombobox } from "@/components/product-combobox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -426,23 +427,33 @@ function Page() {
                   <tbody>
                     {form.lines.map((l, idx) => (
                       <tr key={idx} className="border-t">
-                        <td className="p-1.5">
-                          <Select value={l.product_id ?? "__none__"} onValueChange={(v) => onProductPick(idx, v)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-                            <SelectContent>
-                              {(products as any[]).map((p) => <SelectItem key={p.id} value={p.id}>{p.code} — {localized(p, "name")}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
+                        <td className="p-1.5 min-w-[220px]">
+                          <ProductCombobox
+                            products={products as any[]}
+                            value={l.product_id}
+                            onChange={(id) => onProductPick(idx, id ?? "")}
+                            triggerClassName="h-8 text-xs"
+                          />
                         </td>
                         <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.quantity} onChange={(e) => setLine(idx, { quantity: Number(e.target.value) })} /></td>
                         <td className="p-1.5">
-                          <Select value={l.uom_id ?? "__none__"} onValueChange={(v) => setLine(idx, { uom_id: v === "__none__" ? null : v })}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="__none__">—</SelectItem>
-                              {(uoms as any[]).map((u) => <SelectItem key={u.id} value={u.id}>{localized(u, "name")}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
+                          {l.product_id ? (
+                            <Input
+                              readOnly
+                              disabled
+                              className="h-8 text-xs bg-muted cursor-not-allowed"
+                              value={(uoms as any[]).find((u: any) => u.id === l.uom_id) ? localized((uoms as any[]).find((u: any) => u.id === l.uom_id), "name") : "—"}
+                              title={t("purchase.uomLockedHint")}
+                            />
+                          ) : (
+                            <Select value={l.uom_id ?? "__none__"} onValueChange={(v) => setLine(idx, { uom_id: v === "__none__" ? null : v })}>
+                              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="__none__">—</SelectItem>
+                                {(uoms as any[]).map((u) => <SelectItem key={u.id} value={u.id}>{localized(u, "name")}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          )}
                         </td>
                         <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.unit_price} onChange={(e) => setLine(idx, { unit_price: Number(e.target.value) })} /></td>
                         <td className="p-1.5"><Input type="number" step="0.01" className="h-8 text-xs" value={l.bonus} onChange={(e) => setLine(idx, { bonus: Number(e.target.value) })} title={t("purchase.bonusHint")} /></td>

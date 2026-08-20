@@ -10,8 +10,11 @@ import {
   listPurchaseCategories,
   listUnitsOfMeasure,
   listProductTypes,
+  listBoxContents,
+  saveBoxContents,
 } from "@/lib/api/purchase.functions";
 import { listAccounts } from "@/lib/api/accounting.functions";
+import { ProductCombobox } from "@/components/product-combobox";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +33,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Plus, Pencil, Trash2, ShieldAlert, Snowflake, Boxes, Barcode, FileDown, FileUp,
-  ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight,
+  ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, X,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
@@ -127,7 +130,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
     purchase_uom_id: null as string | null, cost_price: 0, expense_account_id: null as string | null,
     requires_batch_tracking: false, requires_expiry_tracking: false, requires_cold_chain: false,
     is_controlled_substance: false, requires_prescription: false, regulatory_number: "", barcode: "", reorder_point: "" as any,
-    is_active: true, notes: "",
+    is_active: true, is_box: false, notes: "",
   };
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
@@ -144,7 +147,7 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
       requires_batch_tracking: p.requires_batch_tracking, requires_expiry_tracking: p.requires_expiry_tracking,
       requires_cold_chain: p.requires_cold_chain, is_controlled_substance: p.is_controlled_substance,
       requires_prescription: p.requires_prescription, regulatory_number: p.regulatory_number ?? "", barcode: p.barcode ?? "",
-      reorder_point: p.reorder_point ?? "", is_active: p.is_active, notes: p.notes ?? "",
+      reorder_point: p.reorder_point ?? "", is_active: p.is_active, is_box: p.is_box ?? false, notes: p.notes ?? "",
     });
     setOpen(true);
   };
@@ -549,6 +552,28 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
               </div>
             </div>
 
+            {tracksInventory && (
+              <div>
+                <label className="flex items-center gap-2 rounded-md border p-2.5 text-sm cursor-pointer hover:bg-accent/40">
+                  <Switch checked={form.is_box} onCheckedChange={(v) => setForm((f) => ({ ...f, is_box: v }))} />
+                  <span>
+                    {t("purchase.isBoxProduct")}
+                    <span className="block text-xs text-muted-foreground font-normal">{t("purchase.isBoxHint")}</span>
+                  </span>
+                </label>
+                {form.is_box && (
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs font-semibold text-muted-foreground mb-2">{t("purchase.boxContents")}</p>
+                    {form.id ? (
+                      <BoxContents boxProductId={form.id} products={products as any[]} uoms={uoms as any[]} />
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{t("customers.saveFirstHint")}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
               <Label>{t("common.active")}</Label>
@@ -573,6 +598,84 @@ export function ProductsTab({ mode }: { mode: "all" | "compliance" }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+/* ============================== Box Contents ============================== */
+
+function BoxContents({ boxProductId, products, uoms }: { boxProductId: string; products: any[]; uoms: any[] }) {
+  const { t } = useI18n();
+  const localized = useLocalized();
+  const qc = useQueryClient();
+  const listFn = useServerFn(listBoxContents);
+  const saveFn = useServerFn(saveBoxContents);
+
+  const { data: contents = [] } = useQuery({
+    queryKey: ["box_contents", boxProductId],
+    queryFn: () => listFn({ data: { boxProductId } }),
+  });
+
+  type Row = { id?: string; content_product_id: string | null; quantity: string; uom_id: string | null };
+  const empty = (): Row => ({ content_product_id: null, quantity: "1", uom_id: null });
+  const [rows, setRows] = useState<Row[] | null>(null);
+  const effective: Row[] = rows ?? (contents as any[]).map((c) => ({
+    id: c.id, content_product_id: c.content_product_id, quantity: String(c.quantity), uom_id: c.uom_id,
+  }));
+  const list = effective.length ? effective : [empty()];
+
+  const selectableProducts = products.filter((p) => p.id !== boxProductId);
+
+  const saveMut = useMutation({
+    mutationFn: () => saveFn({
+      data: {
+        boxProductId,
+        lines: list
+          .filter((r) => r.content_product_id)
+          .map((r) => ({
+            ...(r.id ? { id: r.id } : {}),
+            content_product_id: r.content_product_id!,
+            quantity: Number(r.quantity) || 1,
+            uom_id: r.uom_id,
+          })),
+      },
+    }),
+    onSuccess: () => { toast.success(t("common.saved")); qc.invalidateQueries({ queryKey: ["box_contents", boxProductId] }); setRows(null); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const update = (idx: number, patch: Partial<Row>) => setRows(list.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  const onPickContentProduct = (idx: number, id: string | null, product: any) => update(idx, { content_product_id: id, uom_id: product?.purchase_uom_id ?? null });
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">{t("purchase.boxContentsHint")}</p>
+      {list.map((r, idx) => (
+        <div key={idx} className="grid grid-cols-[1fr_100px_140px_auto] gap-2 items-end">
+          <div>{idx === 0 && <Label className="text-xs">{t("purchase.contentProduct")}</Label>}
+            <ProductCombobox products={selectableProducts} value={r.content_product_id} onChange={(id, p) => onPickContentProduct(idx, id, p)} triggerClassName="h-9 text-xs" />
+          </div>
+          <div>{idx === 0 && <Label className="text-xs">{t("rfq.qty")}</Label>}<Input type="number" step="0.01" className="h-9" value={r.quantity} onChange={(e) => update(idx, { quantity: e.target.value })} /></div>
+          <div>{idx === 0 && <Label className="text-xs">{t("purchase.uom")}</Label>}
+            <Select value={r.uom_id ?? "__none__"} onValueChange={(v) => update(idx, { uom_id: v === "__none__" ? null : v })}>
+              <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">—</SelectItem>
+                {uoms.map((u) => <SelectItem key={u.id} value={u.id}>{localized(u, "name")}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button type="button" size="icon" variant="ghost" className="h-9 w-9 text-destructive" disabled={list.length === 1} onClick={() => setRows(list.filter((_, i) => i !== idx))}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+      <div className="flex items-center justify-between pt-1">
+        <Button type="button" size="sm" variant="outline" onClick={() => setRows([...list, empty()])}>
+          <Plus className="h-3.5 w-3.5 me-1" />{t("purchase.addBoxContent")}
+        </Button>
+        <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>{t("common.save")}</Button>
+      </div>
     </div>
   );
 }

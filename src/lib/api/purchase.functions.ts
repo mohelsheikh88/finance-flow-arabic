@@ -289,8 +289,56 @@ const ProductSchema = z.object({
     .refine((v) => /^\d{8,14}$/.test(v), { message: "Barcode must be 8-14 digits" }),
   reorder_point: z.number().min(0).nullable().optional(),
   is_active: z.boolean().default(true),
+  is_box: z.boolean().default(false),
   notes: z.string().max(2000).nullable().optional(),
 });
+
+// ================= Box Contents (what's inside a "received as box" product) =================
+
+export const listBoxContents = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { boxProductId: string }) => z.object({ boxProductId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("product_box_contents")
+      .select("*")
+      .eq("box_product_id", data.boxProductId)
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const BoxContentLineSchema = z.object({
+  id: z.string().uuid().optional(),
+  content_product_id: z.string().uuid(),
+  quantity: z.number().positive(),
+  uom_id: z.string().uuid().nullable().optional(),
+  notes: z.string().max(500).nullable().optional(),
+});
+
+export const saveBoxContents = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({ boxProductId: z.string().uuid(), lines: z.array(BoxContentLineSchema).max(200) }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as any;
+    await sb.from("product_box_contents").delete().eq("box_product_id", data.boxProductId);
+    if (data.lines.length) {
+      const { error } = await sb.from("product_box_contents").insert(
+        data.lines.map((l, i) => ({
+          box_product_id: data.boxProductId,
+          content_product_id: l.content_product_id,
+          quantity: l.quantity,
+          uom_id: l.uom_id ?? null,
+          notes: l.notes ?? null,
+          sort_order: i,
+        })),
+      );
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
 
 export const upsertProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
